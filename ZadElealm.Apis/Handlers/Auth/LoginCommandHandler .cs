@@ -27,14 +27,14 @@ namespace ZadElealm.Apis.Handlers.Auth
         {
             var user = await _userManager.FindByEmailAsync(request.LoginDto.Email);
             if (user == null)
-                return new ApiResponse(401);
+                return new ApiResponse(404, "المستخدم غير موجود");
 
             if (!user.EmailConfirmed)
-                return new ApiResponse(401, "Email not confirmed");
+                return new ApiResponse(401, "لم يتم تأكيد البريد الإلكتروني");
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, request.LoginDto.Password, false);
             if (!result.Succeeded)
-                return new ApiResponse(401);
+                return new ApiResponse(401, "كلمة المرور غير صحيحة");
 
             var userDto = await _tokenService.CreateToken(user);
             return new ApiDataResponse(200,userDto);

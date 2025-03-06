@@ -12,7 +12,7 @@ namespace ZadElealm.Apis.Extentions
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Learnify.Api", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "ZadElealm API", Version = "v1" });
                 AddSwaggerSecurityDefinition(c);
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
