@@ -1,0 +1,6 @@
+@ZadElealm.Apis_HostAddress = http://localhost:5123
+
+GET {{ZadElealm.Apis_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
