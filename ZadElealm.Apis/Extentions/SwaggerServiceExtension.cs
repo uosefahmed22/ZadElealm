@@ -1,6 +1,7 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Gen;
 using System.Reflection;
+using System.Text;
 
 namespace ZadElealm.Apis.Extentions
 {
@@ -31,28 +32,31 @@ namespace ZadElealm.Apis.Extentions
             });
 
             c.AddSecurityRequirement(new OpenApiSecurityRequirement
-        {
             {
-                new OpenApiSecurityScheme
                 {
-                    Reference = new OpenApiReference
+                    new OpenApiSecurityScheme
                     {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
-            }
-        });
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
         }
-        public static void UseInDevelopment(this IApplicationBuilder app, IWebHostEnvironment env)
+        public static void UseConfiguration(this IApplicationBuilder app, IConfiguration configuration)
         {
-            if (env.IsDevelopment())
+            app.Use();
+            app.UseUI(options =>
             {
-                app.UseDeveloperExceptionPage();
-                app.Use();
-                app.UseUI(c => c.Endpoint("/swagger/v1/swagger.json", "Learnify.Api v1"));
-            }
+                options.Endpoint("/swagger/v1/swagger.json", "API V1");
+                options.RoutePrefix = "swagger";
+
+                options.ConfigObject.AdditionalItems["persistAuthorization"] = true;
+                options.ConfigObject.AdditionalItems["defaultModelsExpandDepth"] = -1;
+            });
         }
     }
 }

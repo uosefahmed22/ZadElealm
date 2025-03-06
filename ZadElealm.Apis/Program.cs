@@ -1,4 +1,4 @@
-using ZadElealm.Apis.Extentions;
+﻿using ZadElealm.Apis.Extentions;
 using ZadElealm.Apis.Middlwares;
 
 public class Program
@@ -12,8 +12,9 @@ public class Program
 
         var app = builder.Build();
         app.UseMiddleware<RateLimitingMiddleware>();
+        app.UseMiddleware<BasicAuthMiddleware>();
         await app.ConfigureMiddlewareAsync();
-        app.UseInDevelopment(app.Environment);
+        app.UseConfiguration(app.Configuration);
         app.Run();
     }
 }
