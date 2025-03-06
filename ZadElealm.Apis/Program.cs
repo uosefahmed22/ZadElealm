@@ -12,7 +12,7 @@ public class Program
 
         var app = builder.Build();
         app.UseMiddleware<RateLimitingMiddleware>();
-        app.UseMiddleware<SwaggerBasicAuthMiddleware>();
+        //app.UseMiddleware<SwaggerBasicAuthMiddleware>();
         await app.ConfigureMiddlewareAsync();
         app.UseSwaggerConfiguration(app.Configuration);
         app.Run();
