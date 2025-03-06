@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
+using ZadElealm.Apis.Commands.Auth;
 using ZadElealm.Apis.Dtos.Auth;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models.Identity;
@@ -23,9 +26,11 @@ namespace ZadElealm.Apis.Controllers
         private readonly IMemoryCache _cache;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly IMediator _mediator;
 
         public AccountController(UserManager<AppUser> userManager,
             ITokenService tokenService,
+            IMediator mediator,
             ISendEmailService sendEmailService,
             IOtpService otpService,
             IMemoryCache cache,
@@ -35,6 +40,7 @@ namespace ZadElealm.Apis.Controllers
             _userManager = userManager;
             _tokenService = tokenService;
             _sendEmailService = sendEmailService;
+            _mediator = mediator;
             _otpService = otpService;
             _cache = cache;
             _roleManager = roleManager;
@@ -44,24 +50,16 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            var user = await _userManager.FindByEmailAsync(loginDTO.Email);
-            if (user == null)
+            try
             {
-                return Unauthorized(new ApiResponse(401));
+                var command = new LoginCommand(loginDTO);
+                var result = await _mediator.Send(command);
+                return Ok(result);
             }
-
-            if (!user.EmailConfirmed)
+            catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(new ApiResponse(401, "Email not confirmed"));
+                return Unauthorized(new ApiResponse(401, ex.Message));
             }
-
-            var result = await _signInManager.CheckPasswordSignInAsync(user, loginDTO.Password, false);
-            if (!result.Succeeded)
-            {
-                return Unauthorized(new ApiResponse(401));
-            }
-
-            return await _tokenService.CreateToken(user);
         }
 
         [HttpPost("register")]

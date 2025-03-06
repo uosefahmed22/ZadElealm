@@ -1,19 +1,11 @@
 ﻿namespace ZadElealm.Apis.Errors
 {
-    public class ApiDataResponse<T> : ApiResponse
+    public class ApiDataResponse : ApiResponse
     {
-        public T Data { get; set; }
-
-        public ApiDataResponse(int statusCode, T data, string message = null)
-            : base(statusCode, message)
+        public object Data { get; set; }
+        public ApiDataResponse(int statusCode, object data = null, string message = null) : base(statusCode, message)
         {
             Data = data;
-        }
-
-        public ApiDataResponse(int statusCode, string message = null)
-            : base(statusCode, message)
-        {
-            Data = default;
         }
     }
 }
