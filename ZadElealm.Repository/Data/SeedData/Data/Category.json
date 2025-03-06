@@ -1,0 +1,52 @@
+  [
+    {
+      "Name": "الفقه الإسلامي",
+      "Description": "علم يهتم بالأحكام الشرعية العملية المستنبطة من الأدلة التفصيلية، ويشمل دراسة العبادات والمعاملات.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "أصول الفقه",
+      "Description": "علم يبحث في القواعد والمبادئ التي يتم من خلالها استنباط الأحكام الشرعية من أدلتها.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "الفقه الحنفي",
+      "Description": "أحد المذاهب الفقهية الأربعة، ينسب إلى الإمام أبو حنيفة النعمان ويتميز بالاعتماد على الرأي والقياس.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "الفقه المالكي",
+      "Description": "ينسب إلى الإمام مالك بن أنس، ويعتمد على عمل أهل المدينة والمصالح المرسلة.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "الفقه الشافعي",
+      "Description": "مذهب ينسب إلى الإمام الشافعي، ويتميز بالجمع بين الحديث والقياس مع قواعد أصولية دقيقة.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "الفقه الحنبلي",
+      "Description": "ينسب إلى الإمام أحمد بن حنبل، ويعتمد على النصوص الشرعية مع تقديم الحديث الصحيح على القياس.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "فقه العبادات",
+      "Description": "فرع من الفقه يختص بالأحكام الشرعية المتعلقة بالصلاة، الزكاة، الصوم، والحج.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "فقه المعاملات",
+      "Description": "يتناول الأحكام الشرعية المتعلقة بالعقود والمعاملات المالية مثل البيع والإجارة.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "فقه الأسرة",
+      "Description": "يتعلق بالأحكام الشرعية للأسرة مثل الزواج والطلاق والحقوق الزوجية.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    },
+    {
+      "Name": "الاجتهاد والفتوى",
+      "Description": "يعني باجتهاد العلماء في استنباط الأحكام الشرعية وبيانها للناس عبر الفتاوى.",
+      "ImageUrl": "https://upload.wikimedia.org/wikipedia/commons/5/56/Quran2.jpg"
+    }
+  ]

@@ -1,5 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using ZadElealm.Core.Models.Identity;
 using ZadElealm.Repository.Data.Datbases;
+using ZadElealm.Repository.Data.SeedData;
 
 public static class MiddlewareExtensions
 {
@@ -18,12 +22,15 @@ public static class MiddlewareExtensions
 
         try
         {
-            var context = services.GetRequiredService<AppDbContext>();
-            await context.Database.MigrateAsync();
+            var appDbContext = services.GetRequiredService<AppDbContext>();
+            await appDbContext.Database.MigrateAsync().ConfigureAwait(false);
+            await AppDbContextSeed.SeedAsync(appDbContext, logger).ConfigureAwait(false);
+            logger.LogInformation("AppDbContext migrated and seeded successfully.");
+
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "An error occurred while migrating the database.");
+            logger.LogError(ex, $"An error occurred while applying migrations: {ex.Message}");
         }
         #endregion
 
