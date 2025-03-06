@@ -24,8 +24,4 @@
     <ProjectReference Include="..\ZadElealm.Service\ZadElealm.Service.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Quaries\Auth\" />
-  </ItemGroup>
-
 </Project>
