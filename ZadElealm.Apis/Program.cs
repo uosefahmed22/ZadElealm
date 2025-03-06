@@ -12,7 +12,7 @@ public class Program
 
         var app = builder.Build();
         app.UseMiddleware<RateLimitingMiddleware>();
-        app.UseMiddleware<BasicAuthMiddleware>();
+        //app.UseMiddleware<BasicAuthMiddleware>();
         await app.ConfigureMiddlewareAsync();
         app.UseConfiguration(app.Configuration);
         app.Run();
