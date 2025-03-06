@@ -6,7 +6,7 @@ using ZadElealm.Core.Service;
 
 namespace ZadElealm.Apis.Handlers.Auth
 {
-    public class GetCurrentUserQueryHandler : BaseCommandHandler<GetCurrentUserQuery, ApiResponse>
+    public class GetCurrentUserQueryHandler : BaseQueryHandler<GetCurrentUserQuery, ApiResponse>
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly ITokenService _tokenService;

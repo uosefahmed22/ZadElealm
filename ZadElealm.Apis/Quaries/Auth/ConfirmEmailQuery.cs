@@ -3,7 +3,7 @@ using ZadElealm.Apis.Errors;
 
 namespace ZadElealm.Apis.Quaries.Auth
 {
-    public class ConfirmEmailQuery : BaseCommand<ApiResponse>
+    public class ConfirmEmailQuery : BaseQuery<ApiResponse>
     {
         public string UserId { get; }
         public string Token { get; }  

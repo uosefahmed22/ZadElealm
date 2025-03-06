@@ -6,7 +6,7 @@ using ZadElealm.Core.Models.Identity;
 
 namespace ZadElealm.Apis.Handlers.Auth
 {
-    public class ConfirmEmailQueryHandler : BaseCommandHandler<ConfirmEmailQuery, ApiResponse>
+    public class ConfirmEmailQueryHandler : BaseQueryHandler<ConfirmEmailQuery, ApiResponse>
     {
         private readonly UserManager<AppUser> _userManager;
 
