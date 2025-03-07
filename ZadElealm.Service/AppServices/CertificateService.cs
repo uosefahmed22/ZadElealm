@@ -19,14 +19,17 @@ namespace ZadElealm.Service.AppServices
         private readonly ICertificateGeneratorService _certificateGenerator;
         private readonly UserManager<AppUser> _userManager;
 
-        public CertificateService(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, ICertificateGeneratorService certificateGenerator)
+        public CertificateService(
+            IUnitOfWork unitOfWork,
+            UserManager<AppUser> userManager,
+            ICertificateGeneratorService certificateGenerator)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _certificateGenerator = certificateGenerator;
         }
 
-        public async Task<CertificateDto> GenerateCertificate(string userId, int quizId, int score)
+        public async Task<CertificateDto> GenerateCertificate(string userId, int quizId)
         {
             try
             {
@@ -34,7 +37,7 @@ namespace ZadElealm.Service.AppServices
                 var progress = await _unitOfWork.Repository<Progress>()
                     .GetEntityWithSpecAsync(progressSpec);
 
-                if (progress == null)
+                if (progress == null || !progress.IsCompleted)
                     throw new Exception("لم يتم اجتياز الاختبار بعد");
 
                 var certificateSpec = new CertificateByUserAndQuizSpecification(userId, quizId);
@@ -45,7 +48,6 @@ namespace ZadElealm.Service.AppServices
                     throw new Exception("تم إصدار الشهادة مسبقاً");
 
                 var user = await _userManager.FindByIdAsync(userId);
-
                 var quizSpec = new QuizByIdSpecification(quizId);
                 var quiz = await _unitOfWork.Repository<Quiz>()
                     .GetEntityWithSpecAsync(quizSpec);
@@ -57,35 +59,32 @@ namespace ZadElealm.Service.AppServices
                 {
                     Name = $"شهادة اجتياز {quiz.Name}",
                     Description = $"تم منح هذه الشهادة لإتمام {quiz.Name} بنجاح",
-                    ImageUrl = "path/to/certificate/template.jpg",
                     Compliateddate = DateTime.Now,
                     UserId = userId,
                     QuizId = quizId
                 };
 
-                await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
-                await _unitOfWork.Complete();
-
                 var certificateDto = new CertificateDto
                 {
                     Name = certificate.Name,
                     Description = certificate.Description,
-                    ImageUrl = certificate.ImageUrl,
                     CompletedDate = certificate.Compliateddate,
                     UserName = user.UserName,
                     QuizName = quiz.Name
                 };
+
                 var pdfPath = await _certificateGenerator.GenerateCertificatePdf(certificateDto);
                 certificate.ImageUrl = pdfPath;
 
                 await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
                 await _unitOfWork.Complete();
 
+                certificateDto.ImageUrl = pdfPath;
                 return certificateDto;
             }
             catch (Exception ex)
             {
-                throw new Exception($"حدث خطأ أثناء إنشاء الشهادة: {ex.Message}");
+                throw new Exception($"{ex.Message}");
             }
         }
     }

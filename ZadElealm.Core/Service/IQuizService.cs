@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ZadElealm.Core.Models.ServiceDto;
+using ZadElealm.Apis.Dtos;
 
 namespace ZadElealm.Core.Service
 {
-    public interface ICertificateService
+    public interface IQuizService
     {
-        Task<CertificateDto> GenerateCertificate(string userId, int quizId);
+        Task<QuizResultDto> SubmitQuizAsync(string userId, QuizSubmissionDto submission);
     }
 }

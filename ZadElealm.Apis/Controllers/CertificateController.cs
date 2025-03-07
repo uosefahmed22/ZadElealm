@@ -1,7 +1,13 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Models.ServiceDto;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
@@ -13,27 +19,38 @@ namespace ZadElealm.Apis.Controllers
     public class CertificateController : ApiBaseController
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<AppUser> _userManager;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ICertificateService _certificateService;
 
-        public CertificateController(IUnitOfWork unitOfWork, IWebHostEnvironment webHostEnvironment, ICertificateService certificateService)
+
+        public CertificateController(IUnitOfWork unitOfWork, 
+            UserManager<AppUser> userManager,
+            IWebHostEnvironment webHostEnvironment, ICertificateService certificateService)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
             _webHostEnvironment = webHostEnvironment;
             _certificateService = certificateService;
         }
-
-        [HttpPost("generate")]
-        public async Task<ActionResult<CertificateDto>> GenerateCertificate(string userId, int quizId, int score)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("generate/{quizId}")]
+        public async Task<ActionResult<CertificateDto>> GenerateCertificate(int quizId)
         {
             try
             {
-                var certificate = await _certificateService.GenerateCertificate(userId, quizId, score);
+                var email = User.FindFirstValue(ClaimTypes.Email);
+                var user = await _userManager.FindByEmailAsync(email);
+
+                if (user == null)
+                    return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+                var certificate = await _certificateService.GenerateCertificate(user.Id, quizId);
                 return Ok(certificate);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new ApiResponse(400, ex.Message));
             }
         }
 

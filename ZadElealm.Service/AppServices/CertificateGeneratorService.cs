@@ -1,6 +1,4 @@
-﻿using DinkToPdf.Contracts;
-using DinkToPdf;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -9,70 +7,35 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models.ServiceDto;
 using ZadElealm.Core.Service;
+using QuestPDF.Infrastructure;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
 
 namespace ZadElealm.Service.AppServices
 {
     public class CertificateGeneratorService : ICertificateGeneratorService
     {
-        private readonly IWebHostEnvironment _webHostEnvironment;
-        private readonly IConfiguration _configuration;
-        private readonly IConverter _converter;
+        private readonly string _certificatesPath;
 
-        public CertificateGeneratorService(
-            IWebHostEnvironment webHostEnvironment,
-            IConfiguration configuration,
-            IConverter converter)
+        public CertificateGeneratorService()
         {
-            _webHostEnvironment = webHostEnvironment;
-            _configuration = configuration;
-            _converter = converter;
+            _certificatesPath = "../ZadElealm.Apis/wwwroot/certificates";
+
+            if (!Directory.Exists(_certificatesPath))
+                Directory.CreateDirectory(_certificatesPath);
+
+            QuestPDF.Settings.License = LicenseType.Community;
         }
 
         public async Task<string> GenerateCertificatePdf(CertificateDto certificateDto)
         {
             try
             {
-                var templatePath = Path.Combine(_webHostEnvironment.WebRootPath, "templates", "certificates", "certificate-template.html");
-                var cssPath = Path.Combine(_webHostEnvironment.WebRootPath, "templates", "certificates", "certificate-style.css");
-
-                var html = await File.ReadAllTextAsync(templatePath);
-                var css = await File.ReadAllTextAsync(cssPath);
-
-                html = html.Replace("{UserName}", certificateDto.UserName)
-                           .Replace("{QuizName}", certificateDto.QuizName)
-                           .Replace("{CompletedDate}", certificateDto.CompletedDate.ToString("dd/MM/yyyy"));
-
-                var fullHtml = html.Replace("</head>", $"<style>{css}</style></head>");
-
                 var fileName = $"certificate_{DateTime.Now.Ticks}.pdf";
-                var outputPath = Path.Combine(_webHostEnvironment.WebRootPath, "certificates", fileName);
+                var outputFilePath = Path.Combine(_certificatesPath, fileName);
 
-                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-
-                var doc = new HtmlToPdfDocument()
-                {
-                    GlobalSettings = {
-                    ColorMode = ColorMode.Color,
-                    Orientation = Orientation.Landscape,
-                    PaperSize = PaperKind.A4,
-                    Margins = new MarginSettings { Top = 10, Bottom = 10, Left = 10, Right = 10 },
-                },
-                    Objects = {
-                    new ObjectSettings {
-                        PagesCount = true,
-                        HtmlContent = fullHtml,
-                        WebSettings = {
-                            DefaultEncoding = "UTF-8",
-                            EnableIntelligentShrinking = true
-                        },
-                        HeaderSettings = { FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                        FooterSettings = { FontSize = 9, Line = true, Center = "Certificate" }
-                    }
-                }
-                };
-
-                var pdfBytes = _converter.Convert(doc);
-                await File.WriteAllBytesAsync(outputPath, pdfBytes);
+                var document = new CertificateDocument(certificateDto);
+                document.GeneratePdf(outputFilePath);
 
                 return $"/certificates/{fileName}";
             }
@@ -82,4 +45,110 @@ namespace ZadElealm.Service.AppServices
             }
         }
     }
+
+    public class CertificateDocument : IDocument
+    {
+        private CertificateDto Certificate { get; }
+
+        public CertificateDocument(CertificateDto certificate)
+        {
+            Certificate = certificate;
+        }
+
+        public void Compose(IDocumentContainer container)
+        {
+            container
+                .Page(page =>
+                {
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(2.5f, Unit.Centimetre); // زيادة الهوامش
+                    page.DefaultTextStyle(x => x.FontFamily("Arial"));
+
+                    // المحتوى الرئيسي
+                    page.Content()
+                        .Column(x =>
+                        {
+                            x.Spacing(30); // زيادة المسافة بين العناصر
+
+                            // بسملة
+                            x.Item()
+                                .AlignCenter()
+                                .Text("بسم الله الرحمن الرحيم")
+                                .FontSize(24) // زيادة حجم الخط
+                                .FontColor(Colors.Grey.Darken2);
+
+                            // عنوان الشهادة مع خط أسفله
+                            x.Item().Column(title =>
+                            {
+                                title.Item()
+                                    .AlignCenter()
+                                    .Text("شهادة إتمام")
+                                    .Bold()
+                                    .FontSize(36) // زيادة حجم الخط
+                                    .FontColor(Colors.Blue.Darken1); // تغيير اللون
+
+                                title.Item()
+                                    .LineHorizontal(1.5f) // زيادة سمك الخط
+                                    .LineColor(Colors.Blue.Darken1);
+                            });
+
+                            // المقدمة
+                            x.Item()
+                                .AlignCenter()
+                                .Text("الحمد لله رب العالمين والصلاة والسلام على أشرف المرسلين")
+                                .FontSize(22) // زيادة حجم الخط
+                                .FontColor(Colors.Grey.Darken2);
+
+                            // النص الرئيسي في سطر واحد
+                            x.Item()
+                                .AlignCenter()
+                                .Text(text =>
+                                {
+                                    text.Span(" قد أتم دراسة ")
+                                        .FontSize(22) // زيادة حجم الخط
+                                        .FontColor(Colors.Grey.Darken2);
+
+                                    text.Span(Certificate.QuizName)
+                                        .Bold()
+                                        .FontSize(22) // زيادة حجم الخط
+                                        .FontColor(Colors.Blue.Darken1); // تغيير اللون
+
+                                    text.Span(" بفضل من الله وتوفيقه")
+                                        .FontSize(22) // زيادة حجم الخط
+                                        .FontColor(Colors.Grey.Darken2);
+                                    text.Span(Certificate.UserName)
+                                        .Bold()
+                                        .FontSize(22) // زيادة حجم الخط
+                                        .FontColor(Colors.Green.Darken2); // تغيير اللون
+
+                                    text.Span(" نشهد أن الطالب الفاضل")
+                                        .FontSize(22) // زيادة حجم الخط
+                                        .FontColor(Colors.Grey.Darken2);
+
+
+                                });
+
+                            // الدعاء
+                            x.Item()
+                                .AlignCenter()
+                                .Text("نسأل الله له دوام التوفيق والنجاح في الدنيا والآخرة")
+                                .FontSize(22) // زيادة حجم الخط
+                                .FontColor(Colors.Grey.Darken2);
+
+                            // التاريخ
+                            x.Item()
+                                .AlignCenter()
+                                .Text($"في يوم: {Certificate.CompletedDate:dd/MM/yyyy}")
+                                .FontSize(22) // زيادة حجم الخط
+                                .FontColor(Colors.Grey.Darken2);
+
+                            // خط في النهاية
+                            x.Item()
+                                .LineHorizontal(1.5f) // زيادة سمك الخط
+                                .LineColor(Colors.Black);
+                        });
+                });
+        }
+    }
 }
+
