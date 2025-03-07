@@ -1,0 +1,56 @@
+﻿body {
+    font-family: Arial, sans-serif;
+    direction: rtl;
+}
+
+.certificate {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    border: 2px solid #gold;
+    background: #fff;
+}
+
+.header {
+    margin-bottom: 40px;
+}
+
+.logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+h1 {
+    color: #2c3e50;
+    font-size: 36px;
+    margin-bottom: 30px;
+}
+
+.content {
+    margin: 40px 0;
+}
+
+h2 {
+    color: #3498db;
+    font-size: 28px;
+    margin: 20px 0;
+}
+
+h3 {
+    color: #2c3e50;
+    font-size: 24px;
+    margin: 20px 0;
+}
+
+.signature {
+    margin-top: 60px;
+    text-align: left;
+}
+
+    .signature hr {
+        width: 200px;
+        border: 1px solid #000;
+    }

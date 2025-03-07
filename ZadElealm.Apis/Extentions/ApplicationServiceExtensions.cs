@@ -1,4 +1,6 @@
 ﻿using CloudinaryDotNet;
+using DinkToPdf.Contracts;
+using DinkToPdf;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -98,6 +100,8 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddSingleton<ISendEmailService, SendEmailService>();
+            services.AddSingleton(typeof(IConverter), new SynchronizedConverter(new PdfTools()));
+            services.AddScoped<ICertificateGeneratorService, CertificateGeneratorService>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
