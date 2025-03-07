@@ -13,11 +13,11 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<Category, CategoryResponseDto>();
             CreateMap<Category, CategoryWithCoursesDto>();
 
+            CreateMap<Course, CourseDto>();
             CreateMap<Course, CourseResponseWithAllDataDto>();
+
             CreateMap<Video, VideoDto>();
             CreateMap<Quiz, QuizDto>();
-
-
         }
     }
 }
