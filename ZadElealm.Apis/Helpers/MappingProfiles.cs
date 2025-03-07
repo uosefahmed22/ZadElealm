@@ -14,10 +14,8 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<Category, CategoryWithCoursesDto>();
 
             CreateMap<Course, CourseResponseWithAllDataDto>();
-            CreateMap<Video, ZadElealm.Apis.Dtos.VideoDto>();
+            CreateMap<Video, VideoDto>();
             CreateMap<Quiz, QuizDto>();
-            CreateMap<Course, CourseResponseDto>();
-            CreateMap<Video, ZadElealm.Apis.Controllers.Deketeed.VideoDto>();
 
 
         }
