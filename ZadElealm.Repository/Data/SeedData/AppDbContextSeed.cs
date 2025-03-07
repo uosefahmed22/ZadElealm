@@ -30,6 +30,37 @@ namespace ZadElealm.Repository.Data.SeedData
                         logger.LogInformation("Seeded Categories successfully.");
                     }
 
+                    //Seed Quizzes.
+                    if(!context.Quizzes.Any()) {
+                        logger.LogInformation("Seeding Quizzes...");
+                        var quizzesData = File.ReadAllText(Path.Combine(basePath, "Quiz.json"));
+                        var quizzes = JsonSerializer.Deserialize<List<Quiz>>(quizzesData);
+                        await context.Quizzes.AddRangeAsync(quizzes);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Seeded Quizzes successfully.");
+                    }
+                    //Seed Questions
+                    if (!context.Question.Any())
+                    {
+                        logger.LogInformation("Seeding Questions...");
+                        var questionsData = File.ReadAllText(Path.Combine(basePath, "Question.json"));
+                        var questions = JsonSerializer.Deserialize<List<Question>>(questionsData);
+                        await context.Question.AddRangeAsync(questions);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Seeded Questions successfully.");
+                    }
+                    //Seed Choices
+                    if (!context.Choice.Any())
+                    {
+                        logger.LogInformation("Seeding Choices...");
+                        var choicesData = File.ReadAllText(Path.Combine(basePath, "Choice.json"));
+                        var choices = JsonSerializer.Deserialize<List<Choice>>(choicesData);
+                        await context.Choice.AddRangeAsync(choices);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Seeded Choices successfully.");
+                    }
+
+
                     ///Seed Courses
                     ///if (!context.Courses.Any())
                     ///{

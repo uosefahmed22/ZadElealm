@@ -37,6 +37,8 @@ namespace ZadElealm.Repository.Data.Datbases
         public DbSet<Video> Videos { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Question> Question { get; set; }
+        public DbSet<Choice> Choice { get; set; }
 
     }
 }

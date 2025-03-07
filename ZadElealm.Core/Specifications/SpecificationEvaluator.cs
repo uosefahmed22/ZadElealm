@@ -28,6 +28,11 @@ namespace ZadElealm.Core.Specifications
                 query = query.Where(specification.Criteria);
             }
 
+            // Apply regular includes
+            query = specification.Includes.Aggregate(query, (current, include) => current.Include(include));
+
+            // Apply then includes
+            query = specification.ThenIncludes.Aggregate(query, (current, include) => include(current));
             // 4. If order by is specified apply it
             if (specification.OrderBy != null)
             {

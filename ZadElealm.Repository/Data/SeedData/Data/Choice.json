@@ -1,0 +1,254 @@
+[
+  {
+    "Text": "الشهادتان",
+    "QuestionId": 1
+  },
+  {
+    "Text": "الصلاة",
+    "QuestionId": 1
+  },
+  {
+    "Text": "الزكاة",
+    "QuestionId": 1
+  },
+  {
+    "Text": "الصوم",
+    "QuestionId": 1
+  },
+  {
+    "Text": "ركعة واحدة",
+    "QuestionId": 2
+  },
+  {
+    "Text": "ركعتان",
+    "QuestionId": 2
+  },
+  {
+    "Text": "ثلاث ركعات",
+    "QuestionId": 2
+  },
+  {
+    "Text": "أربع ركعات",
+    "QuestionId": 2
+  },
+  {
+    "Text": "شعبان",
+    "QuestionId": 3
+  },
+  {
+    "Text": "رمضان",
+    "QuestionId": 3
+  },
+  {
+    "Text": "ذو الحجة",
+    "QuestionId": 3
+  },
+  {
+    "Text": "محرم",
+    "QuestionId": 3
+  },
+  {
+    "Text": "الإنجيل",
+    "QuestionId": 4
+  },
+  {
+    "Text": "التوراة",
+    "QuestionId": 4
+  },
+  {
+    "Text": "الزبور",
+    "QuestionId": 4
+  },
+  {
+    "Text": "القرآن الكريم",
+    "QuestionId": 4
+  },
+  {
+    "Text": "عيسى عليه السلام",
+    "QuestionId": 5
+  },
+  {
+    "Text": "موسى عليه السلام",
+    "QuestionId": 5
+  },
+  {
+    "Text": "محمد ﷺ",
+    "QuestionId": 5
+  },
+  {
+    "Text": "إبراهيم عليه السلام",
+    "QuestionId": 5
+  },
+  {
+    "Text": "المسجد الأقصى",
+    "QuestionId": 6
+  },
+  {
+    "Text": "المسجد النبوي",
+    "QuestionId": 6
+  },
+  {
+    "Text": "الكعبة المشرفة",
+    "QuestionId": 6
+  },
+  {
+    "Text": "مسجد قباء",
+    "QuestionId": 6
+  },
+  {
+    "Text": "زيارة المدينة المنورة",
+    "QuestionId": 7
+  },
+  {
+    "Text": "الذهاب إلى مكة لأداء مناسك مخصوصة",
+    "QuestionId": 7
+  },
+  {
+    "Text": "صيام شهر رمضان",
+    "QuestionId": 7
+  },
+  {
+    "Text": "قراءة القرآن الكريم",
+    "QuestionId": 7
+  },
+  {
+    "Text": "مرة واحدة في العمر",
+    "QuestionId": 8
+  },
+  {
+    "Text": "مرتين في العمر",
+    "QuestionId": 8
+  },
+  {
+    "Text": "كل عام",
+    "QuestionId": 8
+  },
+  {
+    "Text": "كل خمس سنوات",
+    "QuestionId": 8
+  },
+  {
+    "Text": "الامتناع عن الطعام والشراب من الفجر حتى المغرب",
+    "QuestionId": 9
+  },
+  {
+    "Text": "الصلاة خمس مرات في اليوم",
+    "QuestionId": 9
+  },
+  {
+    "Text": "إخراج نسبة محددة من المال للمحتاجين",
+    "QuestionId": 9
+  },
+  {
+    "Text": "قراءة القرآن الكريم",
+    "QuestionId": 9
+  },
+  {
+    "Text": "إخراج نسبة محددة من المال للمحتاجين",
+    "QuestionId": 10
+  },
+  {
+    "Text": "الصيام في شهر رمضان",
+    "QuestionId": 10
+  },
+  {
+    "Text": "أداء الحج",
+    "QuestionId": 10
+  },
+  {
+    "Text": "الصلاة في المسجد",
+    "QuestionId": 10
+  },
+  {
+    "Text": "أن تعبد الله كأنك تراه",
+    "QuestionId": 11
+  },
+  {
+    "Text": "الصلاة خمس مرات في اليوم",
+    "QuestionId": 11
+  },
+  {
+    "Text": "صيام شهر رمضان",
+    "QuestionId": 11
+  },
+  {
+    "Text": "إخراج الزكاة",
+    "QuestionId": 11
+  },
+  {
+    "Text": "ليلة خير من ألف شهر تنزل فيها الملائكة",
+    "QuestionId": 12
+  },
+  {
+    "Text": "ليلة الإسراء والمعراج",
+    "QuestionId": 12
+  },
+  {
+    "Text": "ليلة النصف من شعبان",
+    "QuestionId": 12
+  },
+  {
+    "Text": "ليلة عاشوراء",
+    "QuestionId": 12
+  },
+  {
+    "Text": "الإيمان بأن كل شيء مقدر من الله",
+    "QuestionId": 13
+  },
+  {
+    "Text": "الإيمان بالملائكة",
+    "QuestionId": 13
+  },
+  {
+    "Text": "الإيمان بالكتب السماوية",
+    "QuestionId": 13
+  },
+  {
+    "Text": "الإيمان بالرسل",
+    "QuestionId": 13
+  },
+  {
+    "Text": "سورة الفاتحة",
+    "QuestionId": 14
+  },
+  {
+    "Text": "سورة البقرة",
+    "QuestionId": 14
+  },
+  {
+    "Text": "سورة الإخلاص",
+    "QuestionId": 14
+  },
+  {
+    "Text": "سورة الكوثر",
+    "QuestionId": 14
+  },
+  {
+    "Text": "113 سورة",
+    "QuestionId": 15
+  },
+  {
+    "Text": "114 سورة",
+    "QuestionId": 15
+  },
+  {
+    "Text": "115 سورة",
+    "QuestionId": 15
+  },
+  {
+    "Text": "116 سورة",
+    "QuestionId": 15
+  },
+  {
+    "Text": "البلاد التي يحكمها المسلمون وتطبق فيها الشريعة",
+    "QuestionId": 16
+  },
+  {
+    "Text": "البلاد التي لا يحكمها المسلمون ولا تطبق فيها الشريعة",
+    "QuestionId": 16
+  },
+  {
+    "Text": "البلاد التي فيها مسلمون وغير مسلمين",
+    "QuestionId": 16
+  }
+]
