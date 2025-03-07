@@ -30,6 +30,17 @@ namespace ZadElealm.Repository.Data.SeedData
                         logger.LogInformation("Seeded Categories successfully.");
                     }
 
+                    ///Seed Courses
+                    ///if (!context.Courses.Any())
+                    ///{
+                    ///    logger.LogInformation("Seeding Courses...");
+                    ///    var coursesData = File.ReadAllText(Path.Combine(basePath, "Courses.json"));
+                    ///    var courses = JsonSerializer.Deserialize<List<Course>>(coursesData);
+                    ///    await context.Courses.AddRangeAsync(courses);
+                    ///    await context.SaveChangesAsync();
+                    ///    logger.LogInformation("Seeded Courses successfully.");
+                    ///}
+
                     await transaction.CommitAsync();
                     logger.LogInformation("Database seeding completed successfully.");
                 }

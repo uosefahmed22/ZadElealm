@@ -21,5 +21,11 @@ namespace ZadElealm.Core.Models
         public ICollection<Video> Videos { get; set; }
         public ICollection<Quiz> Quizzes { get; set; }
         public ICollection<Enrollment> enrollments { get; set; }
+        public int TotalEnrolledStudents => GetTotalEnrolledStudents();
+
+        private int GetTotalEnrolledStudents()
+        {
+            return enrollments?.Count ?? 0;
+        }
     }
 }
