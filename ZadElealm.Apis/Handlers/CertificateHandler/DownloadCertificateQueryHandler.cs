@@ -28,7 +28,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
             if (certificate == null)
                 throw new Exception("الشهادة غير موجودة");
 
-            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, certificate.ImageUrl.TrimStart('/'));
+            var filePath = Path.Combine(_webHostEnvironment.WebRootPath, certificate.PdfUrl.TrimStart('/'));
 
             if (!File.Exists(filePath))
                 throw new Exception("ملف الشهادة غير موجود");
