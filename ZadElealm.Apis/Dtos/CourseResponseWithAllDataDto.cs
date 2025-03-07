@@ -14,6 +14,6 @@ namespace ZadElealm.Apis.Dtos
         public int TotalEnrolledStudents { get; set; }
         public CategoryResponseDto Category { get; set; }
         public IReadOnlyCollection<VideoDto> Videos { get; set; }
-        public IReadOnlyCollection<QuizDto> Quizzes { get; set; }
+        public IReadOnlyCollection<QuizResponseForCourseDto> Quizzes { get; set; }
     }
 }

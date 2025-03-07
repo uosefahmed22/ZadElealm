@@ -14,7 +14,7 @@ namespace ZadElealm.Core.Specifications
         {
             Includes.Add(c => c.User);
             Includes.Add(c => c.Quiz);
-            AddOrderByDescending(c => c.Compliateddate);
+            OrderByDescending = c => c.Compliateddate;
         }
     }
 }

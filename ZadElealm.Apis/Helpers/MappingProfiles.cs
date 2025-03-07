@@ -17,7 +17,12 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<Course, CourseResponseWithAllDataDto>();
 
             CreateMap<Video, VideoDto>();
-            CreateMap<Quiz, QuizDto>();
+            CreateMap<Quiz, QuizResponseForCourseDto>();
+
+            CreateMap<Quiz, QuizResponseDto>();
+            CreateMap<Question, QuestionDto>();
+            CreateMap<Choice, ChoiceDto>();
+            CreateMap<Progress, ProgressDto>();
         }
     }
 }

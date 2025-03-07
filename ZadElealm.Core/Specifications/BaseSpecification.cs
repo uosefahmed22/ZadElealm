@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Query;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -12,6 +13,8 @@ namespace ZadElealm.Core.Specifications
     {
         public Expression<Func<T, bool>> Criteria { get; set; }
         public List<Expression<Func<T, object>>> Includes { get; set; } = new List<Expression<Func<T, object>>>();
+        public List<Func<IQueryable<T>, IIncludableQueryable<T, object>>> ThenIncludes { get; set; } =
+            new List<Func<IQueryable<T>, IIncludableQueryable<T, object>>>();
 
         public Expression<Func<T, object>> OrderBy { get; set; }
         public Expression<Func<T, object>> OrderByDescending { get; set; }
@@ -22,23 +25,17 @@ namespace ZadElealm.Core.Specifications
         public BaseSpecification()
         {
         }
+
         public BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             Criteria = criteria;
         }
-        public void AddOrderBy(Expression<Func<T, object>> orderBy)
+
+        protected void AddThenInclude(Func<IQueryable<T>, IIncludableQueryable<T, object>> thenIncludeExpression)
         {
-            OrderBy = orderBy;
+            ThenIncludes.Add(thenIncludeExpression);
         }
-        public void AddOrderByDescending(Expression<Func<T, object>> orderByDesc)
-        {
-            OrderByDescending = orderByDesc;
-        }
-        public void ApplyPagination(int skip, int take)
-        {
-            Skip = skip;
-            Take = take;
-            IsPagingEnabled = true;
-        }
+
+        // ... باقي الكود
     }
 }
