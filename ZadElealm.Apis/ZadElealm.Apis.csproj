@@ -24,4 +24,8 @@
     <ProjectReference Include="..\ZadElealm.Service\ZadElealm.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\templates\" />
+  </ItemGroup>
+
 </Project>
