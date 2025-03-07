@@ -74,12 +74,12 @@ namespace ZadElealm.Service.AppServices
                 };
 
                 var pdfPath = await _certificateGenerator.GenerateCertificatePdf(certificateDto);
-                certificate.ImageUrl = pdfPath;
+                certificate.PdfUrl = pdfPath;
 
                 await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
                 await _unitOfWork.Complete();
 
-                certificateDto.ImageUrl = pdfPath;
+                certificateDto.PdfUrl = pdfPath;
                 return certificateDto;
             }
             catch (Exception ex)
