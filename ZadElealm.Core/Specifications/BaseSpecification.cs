@@ -8,7 +8,7 @@ using ZadElealm.Core.Models;
 
 namespace ZadElealm.Core.Specifications
 {
-    public class BaseSpecifications<T> : ISpecification<T> where T : BaseEntity
+    public class BaseSpecification<T> : ISpecification<T> where T : BaseEntity
     {
         public Expression<Func<T, bool>> Criteria { get; set; }
         public List<Expression<Func<T, object>>> Includes { get; set; } = new List<Expression<Func<T, object>>>();
@@ -19,10 +19,10 @@ namespace ZadElealm.Core.Specifications
         public int Skip { get; set; }
         public bool IsPagingEnabled { get; set; }
 
-        public BaseSpecifications()
+        public BaseSpecification()
         {
         }
-        public BaseSpecifications(Expression<Func<T, bool>> criteria)
+        public BaseSpecification(Expression<Func<T, bool>> criteria)
         {
             Criteria = criteria;
         }
