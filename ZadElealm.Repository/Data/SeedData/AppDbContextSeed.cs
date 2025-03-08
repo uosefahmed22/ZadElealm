@@ -39,6 +39,7 @@ namespace ZadElealm.Repository.Data.SeedData
                         await context.SaveChangesAsync();
                         logger.LogInformation("Seeded Quizzes successfully.");
                     }
+                    
                     //Seed Questions
                     if (!context.Question.Any())
                     {
@@ -49,6 +50,7 @@ namespace ZadElealm.Repository.Data.SeedData
                         await context.SaveChangesAsync();
                         logger.LogInformation("Seeded Questions successfully.");
                     }
+                   
                     //Seed Choices
                     if (!context.Choice.Any())
                     {

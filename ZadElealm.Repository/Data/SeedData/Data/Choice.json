@@ -1,254 +1,254 @@
-[
-  {
-    "Text": "الشهادتان",
-    "QuestionId": 1
-  },
-  {
-    "Text": "الصلاة",
-    "QuestionId": 1
-  },
-  {
-    "Text": "الزكاة",
-    "QuestionId": 1
-  },
-  {
-    "Text": "الصوم",
-    "QuestionId": 1
-  },
-  {
-    "Text": "ركعة واحدة",
-    "QuestionId": 2
-  },
-  {
-    "Text": "ركعتان",
-    "QuestionId": 2
-  },
-  {
-    "Text": "ثلاث ركعات",
-    "QuestionId": 2
-  },
-  {
-    "Text": "أربع ركعات",
-    "QuestionId": 2
-  },
-  {
-    "Text": "شعبان",
-    "QuestionId": 3
-  },
-  {
-    "Text": "رمضان",
-    "QuestionId": 3
-  },
-  {
-    "Text": "ذو الحجة",
-    "QuestionId": 3
-  },
-  {
-    "Text": "محرم",
-    "QuestionId": 3
-  },
-  {
-    "Text": "الإنجيل",
-    "QuestionId": 4
-  },
-  {
-    "Text": "التوراة",
-    "QuestionId": 4
-  },
-  {
-    "Text": "الزبور",
-    "QuestionId": 4
-  },
-  {
-    "Text": "القرآن الكريم",
-    "QuestionId": 4
-  },
-  {
-    "Text": "عيسى عليه السلام",
-    "QuestionId": 5
-  },
-  {
-    "Text": "موسى عليه السلام",
-    "QuestionId": 5
-  },
-  {
-    "Text": "محمد ﷺ",
-    "QuestionId": 5
-  },
-  {
-    "Text": "إبراهيم عليه السلام",
-    "QuestionId": 5
-  },
-  {
-    "Text": "المسجد الأقصى",
-    "QuestionId": 6
-  },
-  {
-    "Text": "المسجد النبوي",
-    "QuestionId": 6
-  },
-  {
-    "Text": "الكعبة المشرفة",
-    "QuestionId": 6
-  },
-  {
-    "Text": "مسجد قباء",
-    "QuestionId": 6
-  },
-  {
-    "Text": "زيارة المدينة المنورة",
-    "QuestionId": 7
-  },
-  {
-    "Text": "الذهاب إلى مكة لأداء مناسك مخصوصة",
-    "QuestionId": 7
-  },
-  {
-    "Text": "صيام شهر رمضان",
-    "QuestionId": 7
-  },
-  {
-    "Text": "قراءة القرآن الكريم",
-    "QuestionId": 7
-  },
-  {
-    "Text": "مرة واحدة في العمر",
-    "QuestionId": 8
-  },
-  {
-    "Text": "مرتين في العمر",
-    "QuestionId": 8
-  },
-  {
-    "Text": "كل عام",
-    "QuestionId": 8
-  },
-  {
-    "Text": "كل خمس سنوات",
-    "QuestionId": 8
-  },
-  {
-    "Text": "الامتناع عن الطعام والشراب من الفجر حتى المغرب",
-    "QuestionId": 9
-  },
-  {
-    "Text": "الصلاة خمس مرات في اليوم",
-    "QuestionId": 9
-  },
-  {
-    "Text": "إخراج نسبة محددة من المال للمحتاجين",
-    "QuestionId": 9
-  },
-  {
-    "Text": "قراءة القرآن الكريم",
-    "QuestionId": 9
-  },
-  {
-    "Text": "إخراج نسبة محددة من المال للمحتاجين",
-    "QuestionId": 10
-  },
-  {
-    "Text": "الصيام في شهر رمضان",
-    "QuestionId": 10
-  },
-  {
-    "Text": "أداء الحج",
-    "QuestionId": 10
-  },
-  {
-    "Text": "الصلاة في المسجد",
-    "QuestionId": 10
-  },
-  {
-    "Text": "أن تعبد الله كأنك تراه",
-    "QuestionId": 11
-  },
-  {
-    "Text": "الصلاة خمس مرات في اليوم",
-    "QuestionId": 11
-  },
-  {
-    "Text": "صيام شهر رمضان",
-    "QuestionId": 11
-  },
-  {
-    "Text": "إخراج الزكاة",
-    "QuestionId": 11
-  },
-  {
-    "Text": "ليلة خير من ألف شهر تنزل فيها الملائكة",
-    "QuestionId": 12
-  },
-  {
-    "Text": "ليلة الإسراء والمعراج",
-    "QuestionId": 12
-  },
-  {
-    "Text": "ليلة النصف من شعبان",
-    "QuestionId": 12
-  },
-  {
-    "Text": "ليلة عاشوراء",
-    "QuestionId": 12
-  },
-  {
-    "Text": "الإيمان بأن كل شيء مقدر من الله",
-    "QuestionId": 13
-  },
-  {
-    "Text": "الإيمان بالملائكة",
-    "QuestionId": 13
-  },
-  {
-    "Text": "الإيمان بالكتب السماوية",
-    "QuestionId": 13
-  },
-  {
-    "Text": "الإيمان بالرسل",
-    "QuestionId": 13
-  },
-  {
-    "Text": "سورة الفاتحة",
-    "QuestionId": 14
-  },
-  {
-    "Text": "سورة البقرة",
-    "QuestionId": 14
-  },
-  {
-    "Text": "سورة الإخلاص",
-    "QuestionId": 14
-  },
-  {
-    "Text": "سورة الكوثر",
-    "QuestionId": 14
-  },
-  {
-    "Text": "113 سورة",
-    "QuestionId": 15
-  },
-  {
-    "Text": "114 سورة",
-    "QuestionId": 15
-  },
-  {
-    "Text": "115 سورة",
-    "QuestionId": 15
-  },
-  {
-    "Text": "116 سورة",
-    "QuestionId": 15
-  },
-  {
-    "Text": "البلاد التي يحكمها المسلمون وتطبق فيها الشريعة",
-    "QuestionId": 16
-  },
-  {
-    "Text": "البلاد التي لا يحكمها المسلمون ولا تطبق فيها الشريعة",
-    "QuestionId": 16
-  },
-  {
-    "Text": "البلاد التي فيها مسلمون وغير مسلمين",
-    "QuestionId": 16
-  }
+[  
+ {  
+   "Text": "الشهادتان",  
+   "QuestionId": 64  
+ },  
+ {  
+   "Text": "الصلاة",  
+   "QuestionId": 64  
+ },  
+ {  
+   "Text": "الزكاة",  
+   "QuestionId": 64  
+ },  
+ {  
+   "Text": "الصوم",  
+   "QuestionId": 64  
+ },  
+ {  
+   "Text": "ركعة واحدة",  
+   "QuestionId": 65  
+ },  
+ {  
+   "Text": "ركعتان",  
+   "QuestionId": 65  
+ },  
+ {  
+   "Text": "ثلاث ركعات",  
+   "QuestionId": 65  
+ },  
+ {  
+   "Text": "أربع ركعات",  
+   "QuestionId": 65  
+ },  
+ {  
+   "Text": "شعبان",  
+   "QuestionId": 66  
+ },  
+ {  
+   "Text": "رمضان",  
+   "QuestionId": 66  
+ },  
+ {  
+   "Text": "ذو الحجة",  
+   "QuestionId": 66  
+ },  
+ {  
+   "Text": "محرم",  
+   "QuestionId": 66  
+ },  
+ {  
+   "Text": "الإنجيل",  
+   "QuestionId": 67  
+ },  
+ {  
+   "Text": "التوراة",  
+   "QuestionId": 67  
+ },  
+ {  
+   "Text": "الزبور",  
+   "QuestionId": 67  
+ },  
+ {  
+   "Text": "القرآن الكريم",  
+   "QuestionId": 67  
+ },  
+ {  
+   "Text": "عيسى عليه السلام",  
+   "QuestionId": 68  
+ },  
+ {  
+   "Text": "موسى عليه السلام",  
+   "QuestionId": 68  
+ },  
+ {  
+   "Text": "محمد ﷺ",  
+   "QuestionId": 68  
+ },  
+ {  
+   "Text": "إبراهيم عليه السلام",  
+   "QuestionId": 68  
+ },  
+ {  
+   "Text": "المسجد الأقصى",  
+   "QuestionId": 69  
+ },  
+ {  
+   "Text": "المسجد النبوي",  
+   "QuestionId": 69  
+ },  
+ {  
+   "Text": "الكعبة المشرفة",  
+   "QuestionId": 69  
+ },  
+ {  
+   "Text": "مسجد قباء",  
+   "QuestionId": 69  
+ },  
+ {  
+   "Text": "زيارة المدينة المنورة",  
+   "QuestionId": 70  
+ },  
+ {  
+   "Text": "الذهاب إلى مكة لأداء مناسك مخصوصة",  
+   "QuestionId": 70  
+ },  
+ {  
+   "Text": "صيام شهر رمضان",  
+   "QuestionId": 70  
+ },  
+ {  
+   "Text": "قراءة القرآن الكريم",  
+   "QuestionId": 70  
+ },  
+ {  
+   "Text": "مرة واحدة في العمر",  
+   "QuestionId": 71  
+ },  
+ {  
+   "Text": "مرتين في العمر",  
+   "QuestionId": 71  
+ },  
+ {  
+   "Text": "كل عام",  
+   "QuestionId": 71  
+ },  
+ {  
+   "Text": "كل خمس سنوات",  
+   "QuestionId": 71  
+ },  
+ {  
+   "Text": "الامتناع عن الطعام والشراب من الفجر حتى المغرب",  
+   "QuestionId": 72  
+ },  
+ {  
+   "Text": "الصلاة خمس مرات في اليوم",  
+   "QuestionId": 72  
+ },  
+ {  
+   "Text": "إخراج نسبة محددة من المال للمحتاجين",  
+   "QuestionId": 72  
+ },  
+ {  
+   "Text": "قراءة القرآن الكريم",  
+   "QuestionId": 72  
+ },  
+ {  
+   "Text": "إخراج نسبة محددة من المال للمحتاجين",  
+   "QuestionId": 73  
+ },  
+ {  
+   "Text": "الصيام في شهر رمضان",  
+   "QuestionId": 73  
+ },  
+ {  
+   "Text": "أداء الحج",  
+   "QuestionId": 73  
+ },  
+ {  
+   "Text": "الصلاة في المسجد",  
+   "QuestionId": 73  
+ },  
+ {  
+   "Text": "أن تعبد الله كأنك تراه",  
+   "QuestionId": 74  
+ },  
+ {  
+   "Text": "الصلاة خمس مرات في اليوم",  
+   "QuestionId": 74  
+ },  
+ {  
+   "Text": "صيام شهر رمضان",  
+   "QuestionId": 74  
+ },  
+ {  
+   "Text": "إخراج الزكاة",  
+   "QuestionId": 74  
+ },  
+ {  
+   "Text": "ليلة خير من ألف شهر تنزل فيها الملائكة",  
+   "QuestionId": 75  
+ },  
+ {  
+   "Text": "ليلة الإسراء والمعراج",  
+   "QuestionId": 75  
+ },  
+ {  
+   "Text": "ليلة النصف من شعبان",  
+   "QuestionId": 75  
+ },  
+ {  
+   "Text": "ليلة عاشوراء",  
+   "QuestionId": 75  
+ },  
+ {  
+   "Text": "الإيمان بأن كل شيء مقدر من الله",  
+   "QuestionId": 76  
+ },  
+ {  
+   "Text": "الإيمان بالملائكة",  
+   "QuestionId": 76  
+ },  
+ {  
+   "Text": "الإيمان بالكتب السماوية",  
+   "QuestionId": 76  
+ },  
+ {  
+   "Text": "الإيمان بالرسل",  
+   "QuestionId": 76  
+ },  
+ {  
+   "Text": "سورة الفاتحة",  
+   "QuestionId": 77  
+ },  
+ {  
+   "Text": "سورة البقرة",  
+   "QuestionId": 77  
+ },  
+ {  
+   "Text": "سورة الإخلاص",  
+   "QuestionId": 77  
+ },  
+ {  
+   "Text": "سورة الكوثر",  
+   "QuestionId": 77  
+ },  
+ {  
+   "Text": "113 سورة",  
+   "QuestionId": 78  
+ },  
+ {  
+   "Text": "114 سورة",  
+   "QuestionId": 78  
+ },  
+ {  
+   "Text": "115 سورة",  
+   "QuestionId": 78  
+ },  
+ {  
+   "Text": "116 سورة",  
+   "QuestionId": 78  
+ },  
+ {  
+   "Text": "البلاد التي يحكمها المسلمون وتطبق فيها الشريعة",  
+   "QuestionId": 79  
+ },  
+ {  
+   "Text": "البلاد التي لا يحكمها المسلمون ولا تطبق فيها الشريعة",  
+   "QuestionId": 79  
+ },  
+ {  
+   "Text": "البلاد التي فيها مسلمون وغير مسلمين",  
+   "QuestionId": 79  
+ }  
 ]

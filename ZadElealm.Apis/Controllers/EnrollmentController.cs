@@ -1,0 +1,78 @@
+﻿using AutoMapper;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
+using System.Security.Claims;
+using ZadElealm.Apis.Commands.EnrollmentCommands;
+using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Quaries.EnrollmentQuery;
+using ZadElealm.Core.Models;
+using ZadElealm.Core.Models.Identity;
+using ZadElealm.Core.Repositories;
+using ZadElealm.Core.Specifications;
+
+namespace ZadElealm.Apis.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class EnrollmentController : ApiBaseController
+    {
+        private readonly IMediator _mediator;
+        private readonly UserManager<AppUser> _userManager;
+
+        public EnrollmentController(
+            IMediator mediator,
+            UserManager<AppUser> userManager)
+        {
+            _mediator = mediator;
+            _userManager = userManager;
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("{courseId}")]
+        public async Task<ActionResult<ApiResponse>> EnrollCourse(int courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var command = new EnrollCourseCommand(courseId, userId);
+            var response = await _mediator.Send(command);
+
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpDelete("{courseId}")]
+        public async Task<ActionResult<ApiResponse>> UnenrollCourse(int courseId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var command = new UnenrollCourseCommand(courseId, userId);
+            var response = await _mediator.Send(command);
+
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpGet]
+        public async Task<ActionResult<ApiResponse>> GetEnrolledCourses()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (userId == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var query = new GetEnrolledCoursesQuery(userId);
+            var response = await _mediator.Send(query);
+
+            return StatusCode(response.StatusCode, response);
+        }
+    }
+}
