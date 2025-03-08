@@ -5,6 +5,7 @@ using ZadElealm.Apis.Quaries.QuizQuery;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
+using ZadElealm.Core.Specifications.Quiz;
 
 namespace ZadElealm.Apis.Handlers.QuizHandler
 {

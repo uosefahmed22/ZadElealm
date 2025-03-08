@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Helpers;
 using ZadElealm.Apis.Quaries.Category;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
@@ -28,29 +29,33 @@ namespace ZadElealm.Apis.Handlers.Category
         {
             try
             {
-                var cacheKey = $"category_{request.CategoryId}_with_courses";
+                var spec = new CategoryWithCoursesSpecification(request.SpecParams);
+                var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecAsync(spec);
 
-                if (_cache.TryGetValue(cacheKey, out CategoryWithCoursesDto cachedCategory))
-                    return new ApiDataResponse(200,cachedCategory);
+                if (courses == null || !courses.Any())
+                    return new ApiResponse(404, "لا توجد دورات في هذه الفئة");
 
-                var spec = new CategoryWithCoursesSpecification(request.CategoryId);
-                var category = await _unitOfWork.Repository<ZadElealm.Core.Models.Category>().GetEntityWithSpecAsync(spec);
+                var coursesDto = _mapper.Map<IReadOnlyList<CourseDto>>(courses);
 
-                if (category == null)
-                    return new ApiResponse(404, "الفئة غير موجودة");
+                var totalItems = await _unitOfWork.Repository<Core.Models.Course>()
+                    .CountAsync(spec);
 
-                var mappedCategory = _mapper.Map<CategoryWithCoursesDto>(category);
+                var metaData = MetaData.Create(
+                    totalItems,
+                    request.SpecParams.PageNumber,
+                    request.SpecParams.PageSize
+                );
 
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-                _cache.Set(cacheKey, mappedCategory, cacheOptions);
-
-                return new ApiDataResponse(200, mappedCategory);
+                return new PaginatedResponse<CourseDto>(
+                    200,
+                    coursesDto,
+                    metaData,
+                    "تم جلب الدورات بنجاح"
+                );
             }
-            catch
+            catch (Exception ex)
             {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب الفئة والدورات");
+                return new ApiResponse(500, "حدث خطأ أثناء جلب الدورات");
             }
         }
     }

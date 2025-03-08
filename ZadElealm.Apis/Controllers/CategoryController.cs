@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Helpers;
 using ZadElealm.Apis.Quaries.Category;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Core.Specifications.Course;
 
 namespace ZadElealm.Apis.Controllers
 {
@@ -28,14 +30,12 @@ namespace ZadElealm.Apis.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
-        [HttpGet("{categoryId}")]
-        public async Task<ActionResult<ApiResponse>> GetCategoryWithCourses(int categoryId)
+        [HttpGet("get-courses-by-category")]
+        public async Task<ActionResult<PaginatedResponse<CourseDto>>>GetCoursesByCategory([FromQuery] CourseSpecParams specParams)
         {
-            var query = new GetCategoryWithCoursesQuery(categoryId);
+            var query = new GetCategoryWithCoursesQuery(specParams);
             var response = await _mediator.Send(query);
             return StatusCode(response.StatusCode, response);
         }
-
-
     }
 }

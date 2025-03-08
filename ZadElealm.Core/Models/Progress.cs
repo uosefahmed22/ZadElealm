@@ -11,7 +11,6 @@ namespace ZadElealm.Core.Models
     public class Progress : BaseEntity
     {
         public int Score { get; set; }
-        public DateTime Date { get; set; } = DateTime.Now;
         public bool IsCompleted { get; set; }
         public int QuizId { get; set; }
         public Quiz Quiz { get; set; }

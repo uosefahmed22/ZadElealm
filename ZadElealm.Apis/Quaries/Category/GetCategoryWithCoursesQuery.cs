@@ -1,13 +1,15 @@
 ﻿using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Specifications.Course;
 
 namespace ZadElealm.Apis.Quaries.Category
 {
     public class GetCategoryWithCoursesQuery : BaseQuery<ApiResponse>
     {
-        public int CategoryId { get; }
-        public GetCategoryWithCoursesQuery(int categoryId)
+        public CourseSpecParams SpecParams { get; }
+
+        public GetCategoryWithCoursesQuery(CourseSpecParams specParams)
         {
-            CategoryId = categoryId;
+            SpecParams = specParams;
         }
     }
 }

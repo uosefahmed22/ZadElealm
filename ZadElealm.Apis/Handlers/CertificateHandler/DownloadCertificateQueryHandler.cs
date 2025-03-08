@@ -3,6 +3,7 @@ using ZadElealm.Apis.Handlers;
 using ZadElealm.Apis.Quaries.Certificate;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
+using ZadElealm.Core.Specifications.CertificateFolder;
 
 namespace ZadElealm.Apis.Handlers.CertificateHandler
 {

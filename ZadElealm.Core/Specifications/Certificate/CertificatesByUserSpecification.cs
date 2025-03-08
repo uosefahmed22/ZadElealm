@@ -14,7 +14,7 @@ namespace ZadElealm.Core.Specifications.Certificate
         {
             Includes.Add(c => c.User);
             Includes.Add(c => c.Quiz);
-            OrderByDescending = c => c.Compliateddate;
+            OrderByDescending = c => c.CreatedAt;
         }
     }
 }

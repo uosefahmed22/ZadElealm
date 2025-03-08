@@ -10,7 +10,6 @@ namespace ZadElealm.Core.Models
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
         public ICollection<Question> Questions { get; set; }
         public ICollection<Progress> Progresses { get; set; }
         public int CourseId { get; set; } 
