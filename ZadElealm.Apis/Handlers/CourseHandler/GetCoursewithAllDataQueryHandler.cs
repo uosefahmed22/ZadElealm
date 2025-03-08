@@ -5,6 +5,7 @@ using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.Course;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
+using ZadElealm.Core.Specifications.Course;
 
 namespace ZadElealm.Apis.Handlers.Course
 {
