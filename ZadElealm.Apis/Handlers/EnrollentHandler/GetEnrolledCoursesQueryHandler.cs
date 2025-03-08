@@ -29,11 +29,6 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
         {
             try
             {
-                var cacheKey = $"enrolled_courses_{request.UserId}";
-
-                if (_cache.TryGetValue(cacheKey, out IEnumerable<CourseDto> cachedCourses))
-                    return new ApiDataResponse(200, cachedCourses);
-
                 var spec = new EnrollmentSpecification(request.UserId);
                 var enrollments = await _unitOfWork.Repository<Enrollment>().GetAllWithSpecAsync(spec);
 
@@ -47,12 +42,6 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                     Courses = mappedCourses,
                     AllEnrolledCourses = enrollments.Count()
                 };
-
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10))
-                    .RegisterPostEvictionCallback((key, value, reason, state) =>
-                    {});
-                _cache.Set(cacheKey, mappedCourses, cacheOptions);
 
                 return new ApiDataResponse(200, response);
             }

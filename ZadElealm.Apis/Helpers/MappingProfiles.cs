@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using ZadElealm.Apis.Controllers.Deketeed;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.ServiceDto;
