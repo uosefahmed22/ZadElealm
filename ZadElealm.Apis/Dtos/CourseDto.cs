@@ -10,6 +10,7 @@ namespace ZadElealm.Apis.Dtos
         public string Author { get; set; }
         public string CourseLanguage { get; set; }
         public int CourseVideosCount { get; set; }
+        public int rating { get; set; }
         public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }

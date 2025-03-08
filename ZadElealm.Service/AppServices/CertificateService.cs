@@ -10,6 +10,8 @@ using ZadElealm.Core.Service;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
 using Microsoft.AspNetCore.Identity;
+using ZadElealm.Core.Specifications.Certificate;
+using ZadElealm.Core.Specifications.Quiz;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -59,7 +61,7 @@ namespace ZadElealm.Service.AppServices
                 {
                     Name = $"شهادة اجتياز {quiz.Name}",
                     Description = $"تم منح هذه الشهادة لإتمام {quiz.Name} بنجاح",
-                    Compliateddate = DateTime.Now,
+                    CreatedAt = DateTime.Now,
                     UserId = userId,
                     QuizId = quizId
                 };
@@ -68,7 +70,7 @@ namespace ZadElealm.Service.AppServices
                 {
                     Name = certificate.Name,
                     Description = certificate.Description,
-                    CompletedDate = certificate.Compliateddate,
+                    CompletedDate = certificate.CreatedAt,
                     UserName = user.UserName,
                     QuizName = quiz.Name
                 };

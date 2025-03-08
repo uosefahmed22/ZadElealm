@@ -35,7 +35,19 @@ namespace ZadElealm.Core.Specifications
         {
             ThenIncludes.Add(thenIncludeExpression);
         }
-
-        // ... باقي الكود
+        public void AddOrderBy(Expression<Func<T, object>> orderBy)
+        {
+            OrderBy = orderBy;
+        }
+        public void AddOrderByDescending(Expression<Func<T, object>> orderByDesc)
+        {
+            OrderByDescending = orderByDesc;
+        }
+        public void ApplyPagination(int skip, int take)
+        {
+            Skip = skip;
+            Take = take;
+            IsPagingEnabled = true;
+        }
     }
 }

@@ -4,6 +4,7 @@ using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
+using ZadElealm.Core.Specifications.Favorite;
 using ZadElealm.Repository.Repositories;
 
 namespace ZadElealm.Apis.Handlers.FavoriteHandlers

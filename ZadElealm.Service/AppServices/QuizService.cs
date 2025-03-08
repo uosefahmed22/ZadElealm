@@ -10,6 +10,7 @@ using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Specifications;
+using ZadElealm.Core.Specifications.Quiz;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -63,7 +64,7 @@ namespace ZadElealm.Service.AppServices
                     UserId = userId,
                     Score = score,
                     IsCompleted = isCompleted,
-                    Date = DateTime.Now
+                    CreatedAt = DateTime.Now
                 };
 
                 await _unitOfWork.Repository<Progress>().AddAsync(progress);
@@ -73,7 +74,7 @@ namespace ZadElealm.Service.AppServices
                 {
                     Score = score,
                     IsCompleted = isCompleted,
-                    Date = progress.Date,
+                    Date = progress.CreatedAt,
                     TotalQuestions = totalQuestions,
                     CorrectAnswers = correctAnswers
                 };
