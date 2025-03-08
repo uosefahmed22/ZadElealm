@@ -33,19 +33,19 @@ namespace ZadElealm.Service.AppServices
                     .GetEntityWithSpecAsync(new QuizWithQuestionsAndChoicesSpecification(submission.QuizId));
 
                 if (quiz == null)
-                    throw new Exception("الامتحان غير موجود");
+                    throw new Exception("Quiz not found");
 
                 var existingProgress = await _unitOfWork.Repository<Progress>()
                     .GetEntityWithSpecAsync(new ProgressByQuizAndUserSpecification(submission.QuizId, userId));
 
                 if (existingProgress != null && existingProgress.IsCompleted)
-                    throw new Exception("تم إجراء الامتحان مسبقاً");
+                    throw new Exception("Quiz already completed");
 
                 int correctAnswers = 0;
-                foreach (var answer in submission.Answers)
+                foreach (var answer in submission.StudentAnswers)
                 {
                     var question = quiz.Questions.FirstOrDefault(q => q.Id == answer.QuestionId);
-                    if (question != null && question.CorrectChoice == answer.SelectedChoice)
+                    if (question != null && question.CorrectChoice == answer.StudentChoice)
                     {
                         correctAnswers++;
                     }
@@ -53,7 +53,7 @@ namespace ZadElealm.Service.AppServices
 
                 int totalQuestions = quiz.Questions.Count;
                 if (totalQuestions == 0)
-                    throw new Exception("لا توجد أسئلة في هذا الامتحان");
+                    throw new Exception("No questions found in this quiz");
 
                 int score = (correctAnswers * 100) / totalQuestions;
                 bool isCompleted = score >= 60;
