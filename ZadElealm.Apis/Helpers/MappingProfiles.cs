@@ -27,9 +27,6 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<Question, QuestionDto>();
             CreateMap<Choice, ChoiceDto>();
             CreateMap<Progress, ProgressDto>();
-
-            CreateMap<Favorite, FavoriteDto>()
-           .ForMember(dest => dest.Course, opt => opt.MapFrom(src => src.Course));
         }
     }
 }

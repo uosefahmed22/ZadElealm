@@ -37,13 +37,19 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
                 if (!favoriteCourses.Any())
                     return new ApiResponse(200, "لا توجد دورات مفضلة");
 
-                var mappedFavorites = _mapper.Map<IReadOnlyList<FavoriteDto>>(favoriteCourses);
+                var mappedCourses = _mapper.Map<IEnumerable<CourseDto>>(favoriteCourses.Select(e => e.Course));
 
-                return new ApiDataResponse(200, mappedFavorites);
+                var response = new AllFavoriteCoursesData()
+                {
+                    Courses = mappedCourses,
+                    AllFavoriteCourses = favoriteCourses.Count()
+                };
+
+                return new ApiDataResponse(200, response);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب الدورات المفضلة");
+                return new ApiResponse(500, "حدث خطأ أثناء جلب الدورات المسجلة");
             }
         }
     }
