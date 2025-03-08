@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models;
 
-namespace ZadElealm.Core.Specifications
+namespace ZadElealm.Core.Specifications.Quiz
 {
-    public class QuizWithQuestionsAndChoicesSpecification : BaseSpecification<Quiz>
+    public class QuizWithQuestionsAndChoicesSpecification : BaseSpecification<Core.Models.Quiz>
     {
         public QuizWithQuestionsAndChoicesSpecification(int quizId)
             : base(x => x.Id == quizId)

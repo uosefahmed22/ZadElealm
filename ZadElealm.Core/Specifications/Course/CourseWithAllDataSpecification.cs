@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models;
 
-namespace ZadElealm.Core.Specifications
+namespace ZadElealm.Core.Specifications.Course
 {
-    public class CourseWithAllDataSpecification : BaseSpecification<Course>
+    public class CourseWithAllDataSpecification : BaseSpecification<Core.Models.Course>
     {
         public CourseWithAllDataSpecification(int courseId)
             : base(x => x.Id == courseId)

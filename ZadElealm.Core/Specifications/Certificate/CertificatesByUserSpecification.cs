@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models;
 
-namespace ZadElealm.Core.Specifications
+namespace ZadElealm.Core.Specifications.Certificate
 {
-    public class CertificatesByUserSpecification : BaseSpecification<Certificate>
+    public class CertificatesByUserSpecification : BaseSpecification<Core.Models.Certificate>
     {
         public CertificatesByUserSpecification(string userId)
             : base(c => c.UserId == userId)
