@@ -1,254 +1,227 @@
-[  
- {  
-   "Text": "الشهادتان",  
-   "QuestionId": 64  
- },  
- {  
-   "Text": "الصلاة",  
-   "QuestionId": 64  
- },  
- {  
-   "Text": "الزكاة",  
-   "QuestionId": 64  
- },  
- {  
-   "Text": "الصوم",  
-   "QuestionId": 64  
- },  
- {  
-   "Text": "ركعة واحدة",  
-   "QuestionId": 65  
- },  
- {  
-   "Text": "ركعتان",  
-   "QuestionId": 65  
- },  
- {  
-   "Text": "ثلاث ركعات",  
-   "QuestionId": 65  
- },  
- {  
-   "Text": "أربع ركعات",  
-   "QuestionId": 65  
- },  
- {  
-   "Text": "شعبان",  
-   "QuestionId": 66  
- },  
- {  
-   "Text": "رمضان",  
-   "QuestionId": 66  
- },  
- {  
-   "Text": "ذو الحجة",  
-   "QuestionId": 66  
- },  
- {  
-   "Text": "محرم",  
-   "QuestionId": 66  
- },  
- {  
-   "Text": "الإنجيل",  
-   "QuestionId": 67  
- },  
- {  
-   "Text": "التوراة",  
-   "QuestionId": 67  
- },  
- {  
-   "Text": "الزبور",  
-   "QuestionId": 67  
- },  
- {  
-   "Text": "القرآن الكريم",  
-   "QuestionId": 67  
- },  
- {  
-   "Text": "عيسى عليه السلام",  
-   "QuestionId": 68  
- },  
- {  
-   "Text": "موسى عليه السلام",  
-   "QuestionId": 68  
- },  
- {  
-   "Text": "محمد ﷺ",  
-   "QuestionId": 68  
- },  
- {  
-   "Text": "إبراهيم عليه السلام",  
-   "QuestionId": 68  
- },  
- {  
-   "Text": "المسجد الأقصى",  
-   "QuestionId": 69  
- },  
- {  
-   "Text": "المسجد النبوي",  
-   "QuestionId": 69  
- },  
- {  
-   "Text": "الكعبة المشرفة",  
-   "QuestionId": 69  
- },  
- {  
-   "Text": "مسجد قباء",  
-   "QuestionId": 69  
- },  
- {  
-   "Text": "زيارة المدينة المنورة",  
-   "QuestionId": 70  
- },  
- {  
-   "Text": "الذهاب إلى مكة لأداء مناسك مخصوصة",  
-   "QuestionId": 70  
- },  
- {  
-   "Text": "صيام شهر رمضان",  
-   "QuestionId": 70  
- },  
- {  
-   "Text": "قراءة القرآن الكريم",  
-   "QuestionId": 70  
- },  
- {  
-   "Text": "مرة واحدة في العمر",  
-   "QuestionId": 71  
- },  
- {  
-   "Text": "مرتين في العمر",  
-   "QuestionId": 71  
- },  
- {  
-   "Text": "كل عام",  
-   "QuestionId": 71  
- },  
- {  
-   "Text": "كل خمس سنوات",  
-   "QuestionId": 71  
- },  
- {  
-   "Text": "الامتناع عن الطعام والشراب من الفجر حتى المغرب",  
-   "QuestionId": 72  
- },  
- {  
-   "Text": "الصلاة خمس مرات في اليوم",  
-   "QuestionId": 72  
- },  
- {  
-   "Text": "إخراج نسبة محددة من المال للمحتاجين",  
-   "QuestionId": 72  
- },  
- {  
-   "Text": "قراءة القرآن الكريم",  
-   "QuestionId": 72  
- },  
- {  
-   "Text": "إخراج نسبة محددة من المال للمحتاجين",  
-   "QuestionId": 73  
- },  
- {  
-   "Text": "الصيام في شهر رمضان",  
-   "QuestionId": 73  
- },  
- {  
-   "Text": "أداء الحج",  
-   "QuestionId": 73  
- },  
- {  
-   "Text": "الصلاة في المسجد",  
-   "QuestionId": 73  
- },  
- {  
-   "Text": "أن تعبد الله كأنك تراه",  
-   "QuestionId": 74  
- },  
- {  
-   "Text": "الصلاة خمس مرات في اليوم",  
-   "QuestionId": 74  
- },  
- {  
-   "Text": "صيام شهر رمضان",  
-   "QuestionId": 74  
- },  
- {  
-   "Text": "إخراج الزكاة",  
-   "QuestionId": 74  
- },  
- {  
-   "Text": "ليلة خير من ألف شهر تنزل فيها الملائكة",  
-   "QuestionId": 75  
- },  
- {  
-   "Text": "ليلة الإسراء والمعراج",  
-   "QuestionId": 75  
- },  
- {  
-   "Text": "ليلة النصف من شعبان",  
-   "QuestionId": 75  
- },  
- {  
-   "Text": "ليلة عاشوراء",  
-   "QuestionId": 75  
- },  
- {  
-   "Text": "الإيمان بأن كل شيء مقدر من الله",  
-   "QuestionId": 76  
- },  
- {  
-   "Text": "الإيمان بالملائكة",  
-   "QuestionId": 76  
- },  
- {  
-   "Text": "الإيمان بالكتب السماوية",  
-   "QuestionId": 76  
- },  
- {  
-   "Text": "الإيمان بالرسل",  
-   "QuestionId": 76  
- },  
- {  
-   "Text": "سورة الفاتحة",  
-   "QuestionId": 77  
- },  
- {  
-   "Text": "سورة البقرة",  
-   "QuestionId": 77  
- },  
- {  
-   "Text": "سورة الإخلاص",  
-   "QuestionId": 77  
- },  
- {  
-   "Text": "سورة الكوثر",  
-   "QuestionId": 77  
- },  
- {  
-   "Text": "113 سورة",  
-   "QuestionId": 78  
- },  
- {  
-   "Text": "114 سورة",  
-   "QuestionId": 78  
- },  
- {  
-   "Text": "115 سورة",  
-   "QuestionId": 78  
- },  
- {  
-   "Text": "116 سورة",  
-   "QuestionId": 78  
- },  
- {  
-   "Text": "البلاد التي يحكمها المسلمون وتطبق فيها الشريعة",  
-   "QuestionId": 79  
- },  
- {  
-   "Text": "البلاد التي لا يحكمها المسلمون ولا تطبق فيها الشريعة",  
-   "QuestionId": 79  
- },  
- {  
-   "Text": "البلاد التي فيها مسلمون وغير مسلمين",  
-   "QuestionId": 79  
- }  
+[
+  {
+    "ChoiceId": 1,
+    "Text": "الرياض",
+    "QuestionId": 69
+  },
+  {
+    "ChoiceId": 2,
+    "Text": "جدة",
+    "QuestionId": 69
+  },
+  {
+    "ChoiceId": 3,
+    "Text": "مكة",
+    "QuestionId": 69
+  },
+  {
+    "ChoiceId": 4,
+    "Text": "أفريقيا",
+    "QuestionId": 70
+  },
+  {
+    "ChoiceId": 5,
+    "Text": "آسيا",
+    "QuestionId": 70
+  },
+  {
+    "ChoiceId": 6,
+    "Text": "أوروبا",
+    "QuestionId": 70
+  },
+  {
+    "ChoiceId": 7,
+    "Text": "إفرست",
+    "QuestionId": 71
+  },
+  {
+    "ChoiceId": 8,
+    "Text": "كي 2",
+    "QuestionId": 71
+  },
+  {
+    "ChoiceId": 9,
+    "Text": "كانشينجونغا",
+    "QuestionId": 71
+  },
+  {
+    "ChoiceId": 10,
+    "Text": "الهادئ",
+    "QuestionId": 72
+  },
+  {
+    "ChoiceId": 11,
+    "Text": "الأطلسي",
+    "QuestionId": 72
+  },
+  {
+    "ChoiceId": 12,
+    "Text": "الهندي",
+    "QuestionId": 72
+  },
+  {
+    "ChoiceId": 13,
+    "Text": "8",
+    "QuestionId": 73
+  },
+  {
+    "ChoiceId": 14,
+    "Text": "9",
+    "QuestionId": 73
+  },
+  {
+    "ChoiceId": 15,
+    "Text": "7",
+    "QuestionId": 73
+  },
+  {
+    "ChoiceId": 16,
+    "Text": "عطارد",
+    "QuestionId": 74
+  },
+  {
+    "ChoiceId": 17,
+    "Text": "الزهرة",
+    "QuestionId": 74
+  },
+  {
+    "ChoiceId": 18,
+    "Text": "الأرض",
+    "QuestionId": 74
+  },
+  {
+    "ChoiceId": 19,
+    "Text": "المشتري",
+    "QuestionId": 75
+  },
+  {
+    "ChoiceId": 20,
+    "Text": "زحل",
+    "QuestionId": 75
+  },
+  {
+    "ChoiceId": 21,
+    "Text": "أورانوس",
+    "QuestionId": 75
+  },
+  {
+    "ChoiceId": 22,
+    "Text": "أخضر",
+    "QuestionId": 76
+  },
+  {
+    "ChoiceId": 23,
+    "Text": "أصفر",
+    "QuestionId": 76
+  },
+  {
+    "ChoiceId": 24,
+    "Text": "أحمر",
+    "QuestionId": 76
+  },
+  {
+    "ChoiceId": 25,
+    "Text": "أزرق",
+    "QuestionId": 77
+  },
+  {
+    "ChoiceId": 26,
+    "Text": "أبيض",
+    "QuestionId": 77
+  },
+  {
+    "ChoiceId": 27,
+    "Text": "أسود",
+    "QuestionId": 77
+  },
+  {
+    "ChoiceId": 28,
+    "Text": "7",
+    "QuestionId": 78
+  },
+  {
+    "ChoiceId": 29,
+    "Text": "6",
+    "QuestionId": 78
+  },
+  {
+    "ChoiceId": 30,
+    "Text": "8",
+    "QuestionId": 78
+  },
+  {
+    "ChoiceId": 31,
+    "Text": "يناير",
+    "QuestionId": 79
+  },
+  {
+    "ChoiceId": 32,
+    "Text": "فبراير",
+    "QuestionId": 79
+  },
+  {
+    "ChoiceId": 33,
+    "Text": "مارس",
+    "QuestionId": 79
+  },
+  {
+    "ChoiceId": 34,
+    "Text": "ديسمبر",
+    "QuestionId": 80
+  },
+  {
+    "ChoiceId": 35,
+    "Text": "نوفمبر",
+    "QuestionId": 80
+  },
+  {
+    "ChoiceId": 36,
+    "Text": "أكتوبر",
+    "QuestionId": 80
+  },
+  {
+    "ChoiceId": 37,
+    "Text": "12",
+    "QuestionId": 81
+  },
+  {
+    "ChoiceId": 38,
+    "Text": "11",
+    "QuestionId": 81
+  },
+  {
+    "ChoiceId": 39,
+    "Text": "13",
+    "QuestionId": 81
+  },
+  {
+    "ChoiceId": 40,
+    "Text": "أمان",
+    "QuestionId": 82
+  },
+  {
+    "ChoiceId": 41,
+    "Text": "سعادة",
+    "QuestionId": 82
+  },
+  {
+    "ChoiceId": 42,
+    "Text": "طمأنينة",
+    "QuestionId": 82
+  },
+  {
+    "ChoiceId": 43,
+    "Text": "نهار",
+    "QuestionId": 83
+  },
+  {
+    "ChoiceId": 44,
+    "Text": "صباح",
+    "QuestionId": 83
+  },
+  {
+    "ChoiceId": 45,
+    "Text": "مساء",
+    "QuestionId": 83
+  }
 ]
