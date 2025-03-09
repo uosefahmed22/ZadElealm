@@ -7,6 +7,7 @@ namespace ZadElealm.Apis.Dtos
         public string Name { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
+        public decimal rating { get; set; }
         public string CourseLanguage { get; set; }
         public int CourseVideosCount { get; set; }
         public string ImageUrl { get; set; }

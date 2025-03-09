@@ -20,18 +20,21 @@ namespace ZadElealm.Apis.Controllers
     public class FavoriteController : ApiBaseController
     {
         private readonly IMediator _mediator;
+        private readonly UserManager<AppUser> _userManager;
 
-        public FavoriteController(IMediator mediator)
+        public FavoriteController(IMediator mediator,UserManager<AppUser> userManager)
         {
             _mediator = mediator;
+            _userManager = userManager;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetFavorites()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var query = new GetFavoriteCoursesQuery(userId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            var query = new GetFavoriteCoursesQuery(user.Id);
             var response = await _mediator.Send(query);
 
             return StatusCode(response.StatusCode, response);

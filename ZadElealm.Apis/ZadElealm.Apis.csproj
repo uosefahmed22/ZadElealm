@@ -26,6 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Quaries\Rating\" />
+    <Folder Include="Quaries\Review\" />
     <Folder Include="wwwroot\templates\" />
   </ItemGroup>
 
