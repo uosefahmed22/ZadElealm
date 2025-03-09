@@ -37,9 +37,10 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("{courseId}")]
         public async Task<ActionResult<ApiResponse>> EnrollCourse(int courseId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            var command = new EnrollCourseCommand(courseId, userId);
+            var command = new EnrollCourseCommand(courseId, user.Id);
             var response = await _mediator.Send(command);
 
             return StatusCode(response.StatusCode, response);
@@ -49,12 +50,13 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{courseId}")]
         public async Task<ActionResult<ApiResponse>> UnenrollCourse(int courseId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            if (userId == null)
+            if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
-            var command = new UnenrollCourseCommand(courseId, userId);
+            var command = new UnenrollCourseCommand(courseId, user.Id);
             var response = await _mediator.Send(command);
 
             return StatusCode(response.StatusCode, response);
@@ -64,12 +66,13 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetEnrolledCourses()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
 
-            if (userId == null)
+            if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
-            var query = new GetEnrolledCoursesQuery(userId);
+            var query = new GetEnrolledCoursesQuery(user.Id);
             var response = await _mediator.Send(query);
 
             return StatusCode(response.StatusCode, response);

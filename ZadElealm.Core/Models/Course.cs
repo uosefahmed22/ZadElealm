@@ -17,7 +17,7 @@ namespace ZadElealm.Core.Models
         public int CourseVideosCount { get; set; }
         public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public int rating { get; set; }
+        public decimal rating { get; set; }
         public int CategoryId { get; set; }
         public Category Category { get; set; }
         public ICollection<Video> Videos { get; set; }

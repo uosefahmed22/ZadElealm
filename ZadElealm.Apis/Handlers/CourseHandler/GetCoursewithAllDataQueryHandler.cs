@@ -29,11 +29,6 @@ namespace ZadElealm.Apis.Handlers.Course
         {
             try
             {
-                var cacheKey = $"course_{request.CourseId}_full_data";
-
-                if (_cache.TryGetValue(cacheKey, out CourseResponseWithAllDataDto cachedCourse))
-                    return new ApiDataResponse(200, cachedCourse);
-
                 var spec = new CourseWithAllDataSpecification(request.CourseId);
                 var course = await _unitOfWork.Repository<ZadElealm.Core.Models.Course>().GetEntityWithSpecAsync(spec);
 
@@ -41,11 +36,6 @@ namespace ZadElealm.Apis.Handlers.Course
                     return new ApiResponse(404, "الدورة غير موجودة");
 
                 var mappedCourse = _mapper.Map<CourseResponseWithAllDataDto>(course);
-
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(10));
-
-                _cache.Set(cacheKey, mappedCourse, cacheOptions);
 
                 return new ApiDataResponse(200,mappedCourse);
             }

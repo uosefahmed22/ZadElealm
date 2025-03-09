@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ZadElealm.Repository.Data.Datbases;
 
@@ -11,9 +12,11 @@ using ZadElealm.Repository.Data.Datbases;
 namespace ZadElealm.Repository.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250309034634_MakeRatingValueDecimal")]
+    partial class MakeRatingValueDecimal
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -296,8 +299,8 @@ namespace ZadElealm.Repository.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<decimal>("rating")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("rating")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
