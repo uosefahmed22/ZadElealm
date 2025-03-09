@@ -27,6 +27,15 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<Question, QuestionDto>();
             CreateMap<Choice, ChoiceDto>();
             CreateMap<Progress, ProgressDto>();
+
+            CreateMap<ReportDto, Report>();
+
+            CreateMap<Notification, NotificationDto>()
+           .ForMember(dest => dest.IsRead, opt =>
+               opt.MapFrom(src => src.UserNotifications
+                   .FirstOrDefault().IsRead));
+            CreateMap<Notification, NotificationsResponse>();
+
         }
     }
 }

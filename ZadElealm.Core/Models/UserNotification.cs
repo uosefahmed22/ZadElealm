@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZadElealm.Core.Models.Identity;
 
-namespace ZadElealm.Core.Models.Identity
+namespace ZadElealm.Core.Models
 {
     public class UserNotification : BaseEntity
     {

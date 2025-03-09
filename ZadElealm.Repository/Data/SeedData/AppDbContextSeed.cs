@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Models.Identity;
 using ZadElealm.Repository.Data.Datbases;
 
 namespace ZadElealm.Repository.Data.SeedData
@@ -63,17 +64,38 @@ namespace ZadElealm.Repository.Data.SeedData
                         logger.LogInformation("Seeded Choices successfully.");
                     }
 
+                    //Seed Reports
+                    if (!context.Reports.Any())
+                    {
+                        logger.LogInformation("Seeding Reports...");
+                        var reportsData = File.ReadAllText(Path.Combine(basePath, "Report.json"));
+                        var reports = JsonSerializer.Deserialize<List<Report>>(reportsData);
+                        await context.Reports.AddRangeAsync(reports);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Seeded Reports successfully.");
+                    }
 
-                    ///Seed Courses
-                    ///if (!context.Courses.Any())
-                    ///{
-                    ///    logger.LogInformation("Seeding Courses...");
-                    ///    var coursesData = File.ReadAllText(Path.Combine(basePath, "Courses.json"));
-                    ///    var courses = JsonSerializer.Deserialize<List<Course>>(coursesData);
-                    ///    await context.Courses.AddRangeAsync(courses);
-                    ///    await context.SaveChangesAsync();
-                    ///    logger.LogInformation("Seeded Courses successfully.");
-                    ///}
+                    //Seed Notifications
+                    if (!context.Notifications.Any())
+                    {
+                        logger.LogInformation("Seeding Notifications...");
+                        var notificationsData = File.ReadAllText(Path.Combine(basePath, "Notification.json"));
+                        var notifications = JsonSerializer.Deserialize<List<Notification>>(notificationsData);
+                        await context.Notifications.AddRangeAsync(notifications);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Seeded Notifications successfully.");
+                    }
+
+                    //Seed UserNotifications
+                    if (!context.Notifications.Any())
+                    {
+                        logger.LogInformation("Seeding UserNotifications...");
+                        var userNotificationsData = File.ReadAllText(Path.Combine(basePath, "UserNotification.json"));
+                        var userNotifications = JsonSerializer.Deserialize<List<UserNotification>>(userNotificationsData);
+                        await context.UserNotifications.AddRangeAsync(userNotifications);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Seeded UserNotifications successfully.");
+                    }
 
                     await transaction.CommitAsync();
                     logger.LogInformation("Database seeding completed successfully.");
