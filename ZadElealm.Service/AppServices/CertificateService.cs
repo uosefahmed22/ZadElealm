@@ -15,6 +15,7 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using ZadElealm.Core.Specifications.CertificateFolder;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Specifications;
 
 
 namespace ZadElealm.Service.AppServices
@@ -35,25 +36,35 @@ namespace ZadElealm.Service.AppServices
             _configuration = configuration;
         }
 
-        public async Task<Core.Models.Certificate> GenerateAndSaveCertificate(string userId, int quizId)
+        public async Task<Certificate> GenerateAndSaveCertificate(string userId, int quizId)
         {
             try
             {
                 var user = await _userManager.FindByIdAsync(userId);
-                var quiz = await _unitOfWork.Repository<Core.Models.Quiz>().GetByIdAsync(quizId);
+                var quiz = await _unitOfWork.Repository<Quiz>().GetByIdAsync(quizId);
 
                 if (user == null || quiz == null)
-                    throw new Exception("User or Quiz not found");
+                    throw new Exception("المستخدم أو الاختبار غير موجود");
 
+                var progressSpec = new ProgressWithUserDataAndQuiz(userId, quizId);
+                var progress = await _unitOfWork.Repository<Progress>().GetEntityWithSpecAsync(progressSpec);
+
+                if (progress == null)
+                    throw new Exception("لم يتم العثور على محاولة للاختبار");
+
+                if (!progress.IsCompleted)
+                    throw new Exception("لم يتم إكمال الاختبار بعد");
+
+               
                 var (filePath, fileName) = GeneratePdfCertificate(userId, quizId, user, quiz);
 
                 var baseUrl = _configuration["BaseUrl"];
                 var pdfUrl = $"{baseUrl}/certificates/{fileName}";
 
-                var certificate = new Core.Models.Certificate
+                var certificate = new Certificate
                 {
                     Name = $"Certificate_{user.DisplayName}_{quiz.Name}",
-                    Description = $"Certificate for completing {quiz.Name}",
+                    Description = $"Certificate for completing {quiz.Name} with score {progress.Score}",  // Added score to description
                     PdfUrl = pdfUrl,
                     UserId = userId,
                     QuizId = quizId,
@@ -64,10 +75,9 @@ namespace ZadElealm.Service.AppServices
             }
             catch (Exception ex)
             {
-                throw new Exception($"Certificate generation failed: {ex.Message}");
+                throw new Exception($"فشل في إنشاء الشهادة: {ex.Message}");
             }
         }
-
         private (string filePath, string fileName) GeneratePdfCertificate(string userId, int quizId, AppUser user, Quiz quiz)
         {
             // Initialize QuestPDF

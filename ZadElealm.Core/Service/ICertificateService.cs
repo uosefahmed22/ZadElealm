@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZadElealm.Core.Models;
 
 namespace ZadElealm.Core.Service
 {
     public interface ICertificateService
     {
-        Task<Core.Models.Certificate> GenerateAndSaveCertificate(string userId, int quizId);
+        Task<Certificate> GenerateAndSaveCertificate(string userId, int quizId);
     }
 }

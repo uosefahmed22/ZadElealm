@@ -13,6 +13,11 @@ public class Program
 
         builder.Services.ConfigureApplicationServices(builder.Configuration);
         builder.Services.AddSwaggerService();
+        builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    });
         QuestPDF.Settings.License = LicenseType.Community;
         var app = builder.Build();
         app.UseMiddleware<RateLimitingMiddleware>();
