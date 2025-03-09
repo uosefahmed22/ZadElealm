@@ -32,7 +32,7 @@ namespace ZadElealm.Apis.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> AddReview([FromBody] AddReviewRequest request)
+        public async Task<ActionResult<ApiResponse>> AddReview([FromBody] ReviewDto request)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);

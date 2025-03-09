@@ -16,6 +16,7 @@ namespace ZadElealm.Core.Specifications.Course
             Includes.Add(x => x.Videos.OrderBy(v => v.OrderInCourse));
             Includes.Add(x => x.Quizzes.OrderBy(q => q.CreatedAt));
             Includes.Add(x => x.enrollments);
+            Includes.Add(x => x.Review);
         }
     }
 }

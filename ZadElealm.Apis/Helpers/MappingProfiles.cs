@@ -30,10 +30,9 @@ namespace ZadElealm.Apis.Helpers
 
             CreateMap<ReportDto, Report>();
 
-            CreateMap<Notification, NotificationDto>()
-           .ForMember(dest => dest.IsRead, opt =>
-               opt.MapFrom(src => src.UserNotifications
-                   .FirstOrDefault().IsRead));
+            CreateMap<ReviewDto, Review>();
+
+            CreateMap<Notification, NotificationDto>();
             CreateMap<Notification, NotificationsResponse>();
 
         }

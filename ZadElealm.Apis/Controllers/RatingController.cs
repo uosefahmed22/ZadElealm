@@ -31,7 +31,7 @@ namespace ZadElealm.Apis.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> AddRating([FromBody] AddRatingRequest request)
+        public async Task<ActionResult<ApiResponse>> AddRating([FromBody] RatingDto request)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
