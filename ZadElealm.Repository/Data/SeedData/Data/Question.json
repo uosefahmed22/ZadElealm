@@ -3,7 +3,7 @@
     "QuestionId": 1,
     "Text": "ما هي عاصمة السعودية؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 1
   },
   {
     "QuestionId": 2,
@@ -15,67 +15,67 @@
     "QuestionId": 3,
     "Text": "ما هو أعلى جبل في العالم؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 3
   },
   {
     "QuestionId": 4,
     "Text": "ما هو أكبر محيط في العالم؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 4
   },
   {
     "QuestionId": 5,
     "Text": "كم عدد كواكب المجموعة الشمسية؟",
     "ImageUrl": null,
-    "QuizId": 3
+    "QuizId": 5
   },
   {
     "QuestionId": 6,
     "Text": "ما هو أقرب كوكب إلى الشمس؟",
     "ImageUrl": null,
-    "QuizId": 3
+    "QuizId": 6
   },
   {
     "QuestionId": 7,
     "Text": "ما هو أكبر كوكب في المجموعة الشمسية؟",
     "ImageUrl": null,
-    "QuizId": 4
+    "QuizId": 7
   },
   {
     "QuestionId": 8,
     "Text": "ما هو لون العشب؟",
     "ImageUrl": null,
-    "QuizId": 4
+    "QuizId": 8
   },
   {
     "QuestionId": 9,
     "Text": "ما هو لون السماء؟",
     "ImageUrl": null,
-    "QuizId": 5
+    "QuizId": 9
   },
   {
     "QuestionId": 10,
     "Text": "كم عدد أيام الأسبوع؟",
     "ImageUrl": null,
-    "QuizId": 5
+    "QuizId": 10
   },
   {
     "QuestionId": 11,
     "Text": "ما هو أول شهر في السنة؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 11
   },
   {
     "QuestionId": 12,
     "Text": "ما هو آخر شهر في السنة؟",
     "ImageUrl": null,
-    "QuizId": 3
+    "QuizId": 12
   },
   {
     "QuestionId": 13,
     "Text": "كم عدد شهور السنة؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 1
   },
   {
     "QuestionId": 14,

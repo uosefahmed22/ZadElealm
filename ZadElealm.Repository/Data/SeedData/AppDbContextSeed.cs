@@ -31,7 +31,8 @@ namespace ZadElealm.Repository.Data.SeedData
                     }
 
                     //Seed Quizzes.
-                    if(!context.Quizzes.Any()) {
+                    if (!context.Quizzes.Any())
+                    {
                         logger.LogInformation("Seeding Quizzes...");
                         var quizzesData = File.ReadAllText(Path.Combine(basePath, "Quiz.json"));
                         var quizzes = JsonSerializer.Deserialize<List<Quiz>>(quizzesData);
@@ -39,8 +40,8 @@ namespace ZadElealm.Repository.Data.SeedData
                         await context.SaveChangesAsync();
                         logger.LogInformation("Seeded Quizzes successfully.");
                     }
-                    
-                    //Seed Questions
+
+                    ////Seed Questions
                     if (!context.Question.Any())
                     {
                         logger.LogInformation("Seeding Questions...");
@@ -50,7 +51,7 @@ namespace ZadElealm.Repository.Data.SeedData
                         await context.SaveChangesAsync();
                         logger.LogInformation("Seeded Questions successfully.");
                     }
-                   
+
                     //Seed Choices
                     if (!context.Choice.Any())
                     {
