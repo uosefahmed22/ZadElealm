@@ -17,7 +17,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
         {
             try
             {
-                var certificate = await _certificateService.GenerateCertificate(request.UserId, request.QuizId);
+                var certificate = await _certificateService.GenerateAndSaveCertificate(request.UserId, request.QuizId);
                 return new ApiDataResponse(200,certificate);
             }
             catch (Exception ex)

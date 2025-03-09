@@ -98,7 +98,6 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddSingleton<ISendEmailService, SendEmailService>();
-            services.AddScoped<ICertificateGeneratorService, CertificateGeneratorService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IQuizService, QuizService>();
 
