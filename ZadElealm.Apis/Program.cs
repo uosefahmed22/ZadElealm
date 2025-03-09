@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http.Json;
+using QuestPDF.Infrastructure;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ZadElealm.Apis.Extentions;
@@ -12,7 +13,7 @@ public class Program
 
         builder.Services.ConfigureApplicationServices(builder.Configuration);
         builder.Services.AddSwaggerService();
-
+        QuestPDF.Settings.License = LicenseType.Community;
         var app = builder.Build();
         app.UseMiddleware<RateLimitingMiddleware>();
         //app.UseMiddleware<SwaggerBasicAuthMiddleware>();

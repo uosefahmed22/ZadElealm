@@ -11,6 +11,7 @@ public static class MiddlewareExtensions
     {
         app.UseStatusCodePagesWithRedirects("/errors/{0}");
         app.UseCors("Open");
+        app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();
         app.UseAuthorization();
