@@ -21,10 +21,12 @@ namespace ZadElealm.Apis.Controllers
     public class AccountController : ApiBaseController
     {
         private readonly IMediator _mediator;
+        private readonly UserManager<AppUser> _userManager;
 
-        public AccountController(IMediator mediator)
+        public AccountController(IMediator mediator,UserManager<AppUser> userManager)
         {
             _mediator = mediator;
+            _userManager = userManager;
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
@@ -54,8 +56,9 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("current-user")]
         public async Task<ActionResult<ApiResponse>> GetCurrentUser()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var query = new GetCurrentUserQuery(userId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            var query = new GetCurrentUserQuery(user.Id);
             var response = await _mediator.Send(query);
 
             return StatusCode(response.StatusCode, response);
