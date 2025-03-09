@@ -13,8 +13,8 @@ namespace ZadElealm.Core.Models
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public string? ImageUrl { get; set; }
         public NotificationType Type { get; set; }
+        public string? ImageUrl { get; set; }
         public ICollection<UserNotification> UserNotifications { get; set; }
     }
 }
