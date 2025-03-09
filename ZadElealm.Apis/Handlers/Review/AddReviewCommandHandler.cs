@@ -56,8 +56,6 @@ namespace ZadElealm.Apis.Handlers.Review
                 await _unitOfWork.Repository<Core.Models.Review>().AddAsync(review);
                 await _unitOfWork.Complete();
 
-                _cache.Remove($"course_reviews_{request.CourseId}");
-
                 return new ApiResponse(200, "تم إضافة المراجعة بنجاح");
             }
             catch (Exception)

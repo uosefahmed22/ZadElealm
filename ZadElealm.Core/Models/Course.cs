@@ -23,6 +23,7 @@ namespace ZadElealm.Core.Models
         public ICollection<Video> Videos { get; set; }
         public ICollection<Quiz> Quizzes { get; set; }
         public ICollection<Enrollment> enrollments { get; set; }
+        public ICollection<Review> Review { get; set; }
         public int TotalEnrolledStudents => enrollments?.Count ?? 0;
     }
 }

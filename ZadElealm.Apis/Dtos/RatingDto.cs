@@ -2,7 +2,7 @@
 
 namespace ZadElealm.Apis.Dtos
 {
-    public class AddRatingRequest
+    public class RatingDto
     {
         [Required]
         [Range(1, 5)]
