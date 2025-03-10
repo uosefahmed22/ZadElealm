@@ -1,0 +1,24 @@
+﻿/* Custom styles for the user table */
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #343a40;
+    color: #fff;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.btn-outline-success {
+    transition: background-color 0.3s ease;
+}
+
+    .btn-outline-success:hover {
+        background-color: #28a745;
+        color: #fff;
+    }
