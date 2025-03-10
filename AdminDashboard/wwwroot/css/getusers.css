@@ -1,24 +1,49 @@
-﻿/* Custom styles for the user table */
-.table th, .table td {
-    vertical-align: middle;
+﻿body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.table thead th {
-    background-color: #343a40;
+h1, h2 {
+    color: #3C6255;
+}
+
+.table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.custom-thead {
+    background-color: #3C6255;
     color: #fff;
 }
+
+.table-hover tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+.btn-custom {
+    background-color: #3C6255;
+    border-color: #3C6255;
+    color: #fff;
+}
+
+    .btn-custom:hover {
+        background-color: #35594A;
+        border-color: #35594A;
+    }
+
+.btn-outline-success {
+    border-color: #3C6255;
+    color: #3C6255;
+}
+
+    .btn-outline-success:hover {
+        background-color: #3C6255;
+        color: #fff;
+    }
 
 .alert-warning {
     background-color: #fff3cd;
     border-color: #ffeeba;
     color: #856404;
 }
-
-.btn-outline-success {
-    transition: background-color 0.3s ease;
-}
-
-    .btn-outline-success:hover {
-        background-color: #28a745;
-        color: #fff;
-    }
