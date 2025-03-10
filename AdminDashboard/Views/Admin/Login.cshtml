@@ -18,6 +18,16 @@
                 <img src="logo.png" alt="Logo" class="mb-3" style="width: 100px;">
                 <h3>تسجيل الدخول</h3>
             </div>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <p>@modelError.ErrorMessage</p>
+                    }
+                </div>
+            }
             <form method="post" asp-action="Login">
                 <div class="form-group">
                     <label for="email">البريد الإلكتروني</label>

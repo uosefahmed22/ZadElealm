@@ -1,0 +1,31 @@
+﻿body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.form-container {
+    width: 500px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+h2 {
+    color: #3C6255;
+}
+
+.btn-custom {
+    background-color: #3C6255;
+    border-color: #3C6255;
+    color: #fff;
+}
+
+    .btn-custom:hover {
+        background-color: #35594A;
+        border-color: #35594A;
+    }
+
+.invalid-feedback {
+    color: red;
+}
