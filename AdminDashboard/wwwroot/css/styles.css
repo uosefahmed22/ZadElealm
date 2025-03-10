@@ -23407,3 +23407,17 @@ body {
   font-size: 0.75rem;
   border-radius: 0.25rem !important;
 }
+.dropdown-menu {
+    background-color: #3C6255;
+    min-width: 200px; /* تأكد من أن العرض كافٍ للنص */
+}
+
+.dropdown-item {
+    color: #000;
+    white-space: nowrap; /* لمنع النص من الانقطاع */
+}
+
+    .dropdown-item:hover {
+        background-color: #35594A; /* لون الخلفية عند التمرير */
+        color: #fff; /* لون النص عند التمرير */
+    }

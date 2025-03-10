@@ -1,0 +1,57 @@
+﻿body {
+    background-color: #3C6255;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    min-height: 100vh;
+}
+
+.card {
+    width: 762px;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    padding: 40px;
+}
+
+.text-center h3 {
+    font-weight: bold;
+    color: #3C6255;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #3C6255;
+}
+
+.form-control {
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.btn-dark {
+    background-color: #3C6255;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+    .btn-dark:hover {
+        background-color: #35594A;
+    }
+
+a {
+    color: #3C6255;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
