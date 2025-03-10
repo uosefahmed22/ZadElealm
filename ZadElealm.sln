@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35825.156 d17.13
+VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZadElealm.Apis", "ZadElealm.Apis\ZadElealm.Apis.csproj", "{8FB66D13-5C31-4BC7-B3CE-D623034D6A6F}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZadElealm.Repository", "ZadElealm.Repository\ZadElealm.Repository.csproj", "{907000CF-D633-4599-B452-5DF4D6A78AA8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZadElealm.Service", "ZadElealm.Service\ZadElealm.Service.csproj", "{C63BD199-1227-4347-BF70-0ED4E356E61D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminDashboard", "AdminDashboard\AdminDashboard.csproj", "{9F8E73AC-EB97-428B-B041-D755ACEA9C58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C63BD199-1227-4347-BF70-0ED4E356E61D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C63BD199-1227-4347-BF70-0ED4E356E61D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C63BD199-1227-4347-BF70-0ED4E356E61D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F8E73AC-EB97-428B-B041-D755ACEA9C58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F8E73AC-EB97-428B-B041-D755ACEA9C58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F8E73AC-EB97-428B-B041-D755ACEA9C58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F8E73AC-EB97-428B-B041-D755ACEA9C58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

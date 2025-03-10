@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Principal;
 using System.Text;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Helpers;
@@ -17,7 +15,7 @@ using ZadElealm.Repository.Repositories;
 using ZadElealm.Service.AppServices;
 using ZadElealm.Service.IdentityService;
 
-namespace ZadElealm.Apis.Extentions
+namespace AdminDashboard.Extentions
 {
     public static class ApplicationServiceExtensions
     {
