@@ -30,7 +30,7 @@ namespace AdminDashboard.Extentions
             ConfigureValidationErrorHandling(services);
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddMemoryCache();
-
+            services.AddHttpClient();
             var cloudName = configuration["CloudinarySetting:CloudName"];
             var apiKey = configuration["CloudinarySetting:ApiKey"];
             var apiSecret = configuration["CloudinarySetting:ApiSecret"];
