@@ -20,22 +20,27 @@
             </a>
             <h2 class="text-center my-4">إضافة مستخدم جديد</h2>
             <form method="post" asp-action="AddAdmin" class="needs-validation" novalidate>
+                <div asp-validation-summary="All" class="text-danger"></div>
+
                 <div class="form-group">
-                    <div class="form-group">
-                        <label for="DisplayName"> الاسم بالكامل</label>
-                        <input type="text" class="form-control" id="displayname" name="DisplayName" placeholder="ادخل الاسم بالكامل" required>
-                        <div class="invalid-feedback">يرجى إدخال الاسم بالكامل.</div>
-                    </div>
+                    <label for="DisplayName"> الاسم بالكامل</label>
+                    <input type="text" class="form-control" id="displayname" name="DisplayName" asp-for="DisplayName" placeholder="ادخل الاسم بالكامل" required>
+                    <div class="invalid-feedback">يرجى إدخال الاسم بالكامل.</div>
+                    <!-- Validation Message for DisplayName -->
+                    <span asp-validation-for="DisplayName" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label for="email">البريد الإلكتروني</label>
-                    <input type="email" class="form-control" id="email" name="Email" placeholder="ادخل البريد الإلكتروني" required>
+                    <input type="email" class="form-control" id="email" name="Email" asp-for="Email" placeholder="ادخل البريد الإلكتروني" required>
                     <div class="invalid-feedback">يرجى إدخال بريد إلكتروني صحيح.</div>
+                    <!-- Validation Message for Email -->
+                    <span asp-validation-for="Email" class="text-danger"></span>
                 </div>
                 <div class="form-group">
                     <label for="password">الرقم السري</label>
-                    <input type="password" class="form-control" id="password" name="Password" placeholder="ادخل الرقم السري" required>
+                    <input type="password" class="form-control" id="password" name="Password" asp-for="Password" placeholder="ادخل الرقم السري" required>
                     <div class="invalid-feedback">يرجى إدخال الرقم السري.</div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
                 <button type="submit" class="btn btn-custom btn-block">إضافة</button>
             </form>
