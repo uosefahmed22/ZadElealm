@@ -1,16 +1,29 @@
-﻿body {
+﻿/* General Styles */
+body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Header Styles */
 h1 {
-    margin-top: 20px;
     font-size: 2.5rem;
-    color: #007bff;
+    color: #ffc107; /* Updated color for text-warning */
 }
 
 hr {
     border-top: 2px solid #007bff;
 }
+
+/* Button Styles */
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #1e7e34;
+    }
 
 /* Table Styles */
 .table {
@@ -30,25 +43,6 @@ hr {
     margin-top: 20px;
 }
 
-/* Button Styles */
-.btn-outline-warning {
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-    .btn-outline-warning:hover {
-        background-color: #ffc107;
-        color: #fff;
-    }
-
-.btn-outline-danger {
-    transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-    .btn-outline-danger:hover {
-        background-color: #dc3545;
-        color: #fff;
-    }
-
 /* Alert Styles */
 .alert-warning {
     background-color: #fff3cd;
@@ -59,10 +53,4 @@ hr {
 .alert h2 {
     font-size: 1.75rem;
     color: #856404;
-}
-
-/* Image Styles */
-.img-thumbnail {
-    max-width: 100px;
-    height: auto;
 }
