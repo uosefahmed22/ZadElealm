@@ -1,9 +1,10 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using AdminDashboard.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AdminDashboard.Controllers;
-
+[Authorize(Roles = "Admin")]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
