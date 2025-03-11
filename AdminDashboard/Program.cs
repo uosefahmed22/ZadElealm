@@ -1,4 +1,5 @@
 using AdminDashboard.Extentions;
+using Microsoft.AspNetCore.CookiePolicy;
 
 public class Program
 {
@@ -10,16 +11,22 @@ public class Program
         builder.Services.ConfigureApplicationServices(builder.Configuration);
 
         var app = builder.Build();
-        if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
+        if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
         }
-
-        app.UseCors(builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
-
+        else
+        {
+            app.UseExceptionHandler("/Home/Error");
+            app.UseHsts();
+        }
+        app.UseHsts();
+        app.UseCookiePolicy(new CookiePolicyOptions
+        {
+            Secure = CookieSecurePolicy.Always,
+            HttpOnly = HttpOnlyPolicy.Always,
+            MinimumSameSitePolicy = SameSiteMode.Strict
+        });
         app.UseHttpsRedirection();
         app.UseStaticFiles();
 

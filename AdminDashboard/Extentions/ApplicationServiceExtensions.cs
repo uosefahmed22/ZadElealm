@@ -45,12 +45,12 @@ namespace AdminDashboard.Extentions
         {
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {
-                options.SignIn.RequireConfirmedAccount = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = true;
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 6;
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 8;
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
@@ -58,16 +58,18 @@ namespace AdminDashboard.Extentions
             services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
+                options.MinimumSameSitePolicy = SameSiteMode.Strict;
             });
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
             .AddCookie(options =>
             {
                 options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
                 options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
-                options.LoginPath = "/Identity/Account/Login";
-                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.LoginPath = "/Admin/Login";
+                options.AccessDeniedPath = "/Admin/AccessDenied";
                 options.SlidingExpiration = true;
             });
 
@@ -84,11 +86,11 @@ namespace AdminDashboard.Extentions
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("Open", builder =>
+                options.AddPolicy("Restricted", builder =>
                 {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
+                    builder.WithOrigins() 
+                           .WithMethods("GET", "POST")
+                           .WithHeaders("Content-Type", "Authorization");
                 });
             });
         }
