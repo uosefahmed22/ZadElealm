@@ -81,5 +81,34 @@ namespace AdminDashboard.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        public async Task<IActionResult> Delete(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                ModelState.AddModelError("Name", "User not found!");
+                return View("Index", await _userManager.Users.ToListAsync());
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            if (roles.Contains("Admin"))
+            {
+                ModelState.AddModelError("Name", "Cannot delete a user with the Admin role!");
+                return View("Index", await _userManager.Users.ToListAsync());
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View("Index", await _userManager.Users.ToListAsync());
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

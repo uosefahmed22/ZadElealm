@@ -10,8 +10,8 @@
 <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>Users List</h2>
-        <a class="btn btn-custom" asp-action="AddAdmin" asp-controller="Admin"/>
-            <i class="fas fa-user-plus" ></i> Add Admin
+        <a class="btn btn-custom" asp-action="AddAdmin" asp-controller="Admin">
+            <i class="fas fa-user-plus"></i> Add Admin
         </a>
     </div>
 
@@ -43,8 +43,18 @@
                         <td>@user.IsDeleted</td>
                         <td>@string.Join(", ", user.Roles.ToList())</td>
                         <td>
-                            <a class="btn btn-outline-success btn-sm" asp-action="Edit" asp-route-id="@user.Id">
+                            @{
+                                var isAdmin = user.Roles.Contains("Admin");
+                            }
+                            <a class="btn btn-outline-success btn-sm @(isAdmin ? "disabled" : "")"
+                               asp-action="Edit" asp-route-id="@user.Id"
+                               aria-disabled="@(isAdmin)">
                                 <i class="fas fa-pen"></i> Edit
+                            </a>
+                            <a class="btn btn-outline-danger btn-sm @(isAdmin ? "disabled" : "")"
+                               asp-action="Delete" asp-route-id="@user.Id"
+                               aria-disabled="@(isAdmin)">
+                                <i class="fas fa-trash-alt"></i> Delete
                             </a>
                         </td>
                     </tr>
