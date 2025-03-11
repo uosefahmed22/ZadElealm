@@ -16,15 +16,15 @@ namespace AdminDashboard.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            var roles =await _roleManager.Roles.ToListAsync();
+            var roles = await _roleManager.Roles.ToListAsync();
             return View(roles);
         }
         [HttpPost]
-        public async Task<IActionResult> Create(RoleFormViewModel model) 
+        public async Task<IActionResult> Create(RoleFormViewModel model)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                var roleExists =await _roleManager.RoleExistsAsync(model.Name);
+                var roleExists = await _roleManager.RoleExistsAsync(model.Name);
                 if (!roleExists)
                 {
                     await _roleManager.CreateAsync(new IdentityRole(model.Name));
@@ -42,10 +42,17 @@ namespace AdminDashboard.Controllers
         public async Task<IActionResult> Delete(string id)
         {
             var role = await _roleManager.FindByIdAsync(id);
+            if (role != null && (role.Name == "Admin" || role.Name == "User"))
+            {
+                ModelState.AddModelError("Name", "Cannot delete this role!");
+                return View("Index", await _roleManager.Roles.ToListAsync());
+            }
+
             if (role != null)
             {
                 await _roleManager.DeleteAsync(role);
             }
+
             return RedirectToAction(nameof(Index));
         }
 
