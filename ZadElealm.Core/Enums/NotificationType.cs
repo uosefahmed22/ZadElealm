@@ -8,12 +8,12 @@ namespace ZadElealm.Core.Enums
 {
     public enum NotificationType
     {
+        Enrollment,
+        Certificate,
         System,
         Cousre,
         Quiz,
         Report,
-        Progress,
-        Enrollment,
-        Certificate
+        Progress
     }
 }
