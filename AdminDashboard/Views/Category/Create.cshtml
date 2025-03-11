@@ -1,0 +1,61 @@
+﻿@{
+    Layout = null;
+}
+@model CreateCategoryDto
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Category</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="~/css/CreateCategory.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container-fluid d-flex justify-content-center align-items-center vh-100">
+        <div class="form-container">
+            <a href="@Url.Action("Index", "Category")" class="btn btn-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+            <h2 class="text-center my-4">Add New Category</h2>
+            <form method="post" asp-action="Create" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="form-group">
+                    <label asp-for="Name"></label>
+                    <input asp-for="Name" class="form-control" required />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description"></label>
+                    <textarea asp-for="Description" class="form-control" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label for="ImageFile">Upload Image</label>
+                    <input type="file" asp-for="ImageUrl" class="form-control-file" required />
+                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-custom btn-block">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                var validation = Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+</body>
+</html>

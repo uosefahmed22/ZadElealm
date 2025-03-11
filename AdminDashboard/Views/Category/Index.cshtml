@@ -4,8 +4,10 @@
     ViewData["Title"] = "Categories";
 }
 
-<h1 class="mt-2 display-4 text-center text-warning
-">All Categories</h1>
+<div class="d-flex justify-content-between align-items-center mt-2">
+    <h1 class="display-4 text-warning">All Categories</h1>
+    <a asp-action="Create" asp-controller="Category" class="btn btn-dark">Add Category</a>
+</div>
 <hr class="my-4 bg-primary" />
 
 <link href="~/css/categories.css" rel="stylesheet" />
@@ -34,8 +36,8 @@
                             <img src="@item.ImageUrl" alt="@item.Name" class="img-thumbnail" style="max-width: 100px;" />
                         </td>
                         <td class="text-center">
-                            <a class="btn btn-sm btn-outline-warning mr-2" asp-action="Update" asp-route-id="@item.Id">
-                                <i class="fas fa-edit"></i> Update
+                            <a class="btn btn-sm btn-outline-warning mr-2" asp-action="Edit" asp-route-id="@item.Id">
+                                <i class="fas fa-edit"></i> Edit
                             </a>
                             <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">
                                 <i class="fas fa-trash-alt"></i> Delete

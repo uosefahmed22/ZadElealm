@@ -10,8 +10,11 @@ namespace ZadElealm.Apis.Helpers
     {
         public MappingProfiles()
         {
-            CreateMap<Category, CategoryResponseDto>();
+            CreateMap<Category, CategoryResponseDto>().ReverseMap();
             CreateMap<Category, CategoryWithCoursesDto>();
+            CreateMap<CreateCategoryDto, Category>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl.FileName))
+                .ReverseMap();
 
             CreateMap<Certificate, CertificateDto>()
            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.DisplayName))
