@@ -10,6 +10,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.Auth;
+using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Dtos.Auth;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.Auth;
@@ -22,11 +23,13 @@ namespace ZadElealm.Apis.Controllers
     {
         private readonly IMediator _mediator;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IImageService _imageService;
 
-        public AccountController(IMediator mediator,UserManager<AppUser> userManager)
+        public AccountController(IMediator mediator,UserManager<AppUser> userManager,IImageService imageService)
         {
             _mediator = mediator;
             _userManager = userManager;
+            _imageService = imageService;
         }
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
@@ -78,6 +81,65 @@ namespace ZadElealm.Apis.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("update-profile")]
+        public async Task<ActionResult<ApiResponse>> UploadImage(IFormFile file)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "User not found"));
+
+            try
+            {
+                if (file == null)
+                {
+                    if (!string.IsNullOrEmpty(user.ImageUrl))
+                    {
+                        await _imageService.DeleteImageAsync(user.ImageUrl);
+                        user.ImageUrl = null;
+                        await _userManager.UpdateAsync(user);
+                    }
+                    return Ok(new ApiResponse(200, "Profile image removed successfully"));
+                }
+
+                if (!string.IsNullOrEmpty(user.ImageUrl))
+                {
+                    await _imageService.DeleteImageAsync(user.ImageUrl);
+                }
+
+                var imageUrl = await _imageService.UploadImageAsync(file);
+                user.ImageUrl = imageUrl;
+                await _userManager.UpdateAsync(user);
+
+                return Ok(new ApiResponse(200, "Image uploaded successfully"));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(500, "An error occurred while processing the image"));
+            }
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("get-User-Profile")]
+        public async Task<ActionResult<ApiResponse>> GetUserProfile()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "User not found"));
+            var userDTO = new UserProfileDTO
+            {
+                Email = email,
+                ImageUrl = user.ImageUrl,
+                UserName = user.UserName,
+                PhoneNumber = user.PhoneNumber,
+                DisplayName = user.DisplayName
+            };
+            return Ok(new ApiDataResponse(200, userDTO));
+        }
+
         [HttpPost("forget-password")]
         public async Task<ActionResult<ApiResponse>> ForgetPassword(string email)
         {
@@ -95,7 +157,7 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
-
+              
         [HttpPost("reset-password")]
         public async Task<ActionResult<ApiResponse>> ResetPassword(ResetPasswordDTO resetPasswordDTO)
         {
