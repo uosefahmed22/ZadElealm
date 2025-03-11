@@ -11,6 +11,8 @@ using ZadElealm.Core.Service;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Quiz;
+using ZadElealm.Core.Enums;
+using ZadElealm.Core.Models.ServiceDto;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -18,11 +20,13 @@ namespace ZadElealm.Service.AppServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly INotificationService _notificationService;
 
-        public QuizService(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        public QuizService(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _notificationService = notificationService;
         }
 
         public async Task<QuizResultDto> SubmitQuizAsync(string userId, QuizSubmissionDto submission)
@@ -69,6 +73,17 @@ namespace ZadElealm.Service.AppServices
 
                 await _unitOfWork.Repository<Progress>().AddAsync(progress);
                 await _unitOfWork.Complete();
+
+                if (isCompleted)
+                {
+                    await _notificationService.SendNotificationAsync(new NotificationServiceDto
+                    {
+                        UserId = userId,
+                        Type = NotificationType.Certificate,
+                        Title = "مبارك على اجتيازك!",
+                        Description = "الحمد لله، لقد اجتزت الامتحان بنجاح! نسأل الله أن يبارك لك في علمك وعملك، وأن يجعلك من النافعين لدينك وأمتك. يمكنك الآن استلام شهادتك من قسم الشهادات. نسأل الله لك التوفيق والسداد في مسيرتك العلمية."
+                    });
+                }
 
                 return new QuizResultDto
                 {
