@@ -75,6 +75,12 @@ namespace AdminDashboard.Controllers
             return RedirectToAction("Index");
         }
 
-
+        public async Task<IActionResult> Delete(int id)
+        {
+            var category = await _unitOfWork.Repository<Course>().GetByIdAsync(id);
+            _unitOfWork.Repository<Course>().Delete(category);
+            await _unitOfWork.Complete();
+            return RedirectToAction("Index");
+        }
     }
 }
