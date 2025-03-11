@@ -67,7 +67,7 @@ namespace AdminDashboard.Extentions
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Strict;
-                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+                options.ExpireTimeSpan = TimeSpan.FromDays(1);
                 options.LoginPath = "/Admin/Login";
                 options.AccessDeniedPath = "/Admin/AccessDenied";
                 options.SlidingExpiration = true;
