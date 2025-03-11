@@ -32,10 +32,17 @@
                         <td class="align-middle">@item.Id</td>
                         <td class="align-middle">@item.Name</td>
                         <td class="text-center">
-                            <a class="btn btn-sm btn-outline-warning mr-2" asp-action="Update" asp-route-id="@item.Id">
+                            @{
+                                var isDisabled = item.Name == "Admin" || item.Name == "User";
+                            }
+                            <a class="btn btn-sm btn-outline-warning mr-2 @(isDisabled ? "disabled" : "")"
+                               asp-action="Update" asp-route-id="@item.Id"
+                               aria-disabled="@(isDisabled)">
                                 <i class="fas fa-edit"></i> Update
                             </a>
-                            <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">
+                            <a class="btn btn-sm btn-outline-danger @(isDisabled ? "disabled" : "")"
+                               asp-action="Delete" asp-route-id="@item.Id"
+                               aria-disabled="@(isDisabled)">
                                 <i class="fas fa-trash-alt"></i> Delete
                             </a>
                         </td>
