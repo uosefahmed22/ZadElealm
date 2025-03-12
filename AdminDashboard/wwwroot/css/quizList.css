@@ -1,0 +1,63 @@
+﻿/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header Styles */
+h1 {
+    font-size: 2.5rem;
+    color: #ffc107;
+}
+
+hr {
+    border-top: 2px solid #007bff;
+}
+
+/* Button Styles */
+.btn-dark {
+    background-color: #343a40;
+    border-color: #343a40;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-dark:hover {
+        background-color: #23272b;
+        border-color: #1d2124;
+    }
+
+/* Table Styles */
+.table {
+    margin-top: 20px;
+}
+
+    .table th, .table td {
+        vertical-align: middle;
+    }
+
+    .table thead th {
+        background-color: #343a40;
+        color: #fff;
+    }
+
+.table-responsive {
+    margin-top: 20px;
+}
+
+.table td.description {
+    max-width: 200px; /* تحديد عرض ثابت للعمود */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Alert Styles */
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
+}
+
+.alert h2 {
+    font-size: 1.75rem;
+    color: #856404;
+}

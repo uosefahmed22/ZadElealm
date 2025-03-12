@@ -99,5 +99,27 @@ namespace ZadElealm.Service.AppServices
                 throw new Exception($"{ex.Message}");
             }
         }
+
+        public async Task CreateQuizAsync(QuizDto quizDto)
+        {
+            var quiz = new Quiz
+            {
+                Name = quizDto.Name,
+                Description = quizDto.Description,
+                CourseId = quizDto.CourseId,
+                Questions = quizDto.Questions.Select(q => new Question
+                {
+                    Text = q.Text,
+                    CorrectChoice = q.CorrectChoice,
+                    Choices = q.Choices.Select(c => new Choice
+                    {
+                        Text = c.Text
+                    }).ToList()
+                }).ToList()
+            };
+
+            await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
+            await _unitOfWork.Complete();
+        }
     }
 }

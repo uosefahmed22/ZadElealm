@@ -1,0 +1,87 @@
+﻿@model QuizDto
+
+@{
+    ViewData["Title"] = "إنشاء امتحان";
+}
+
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إنشاء امتحان</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="~/css/createQuiz.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">إنشاء امتحان جديد</h2>
+        <form method="post" asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name">اسم الامتحان</label>
+                <input asp-for="Name" class="form-control" required />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Description">الوصف</label>
+                <textarea asp-for="Description" class="form-control" required></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CourseId">اختر الدورة</label>
+                <select asp-for="CourseId" class="form-control" required>
+                    <option value="">اختر دورة</option>
+                    @foreach (var course in ViewBag.Courses)
+                    {
+                        <option value="@course.Id">@course.Name</option>
+                    }
+                </select>
+                <span asp-validation-for="CourseId" class="text-danger"></span>
+            </div>
+            <div id="questions-container">
+                <h4>الأسئلة</h4>
+                <div class="question-template">
+                    <div class="form-group">
+                        <label>نص السؤال</label>
+                        <input type="text" name="Questions[0].Text" class="form-control" required />
+                    </div>
+                    <div class="form-group">
+                        <label>الخيارات</label>
+                        <input type="text" name="Questions[0].Choices[0].Text" class="form-control" placeholder="الخيار 1" required />
+                        <input type="text" name="Questions[0].Choices[1].Text" class="form-control" placeholder="الخيار 2" required />
+                        <input type="text" name="Questions[0].Choices[2].Text" class="form-control" placeholder="الخيار 3" required />
+                        <input type="text" name="Questions[0].Choices[3].Text" class="form-control" placeholder="الخيار 4" required />
+                    </div>
+                    <div class="form-group">
+                        <label>الإجابة الصحيحة</label>
+                        <select name="Questions[0].CorrectChoice" class="form-control" required>
+                            <option value="1">الخيار 1</option>
+                            <option value="2">الخيار 2</option>
+                            <option value="3">الخيار 3</option>
+                            <option value="4">الخيار 4</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button type="button" class="btn btn-secondary" id="add-question">إضافة سؤال</button>
+                <button type="submit" class="btn btn-primary">إرسال</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('add-question').addEventListener('click', function() {
+            var container = document.getElementById('questions-container');
+            var template = document.querySelector('.question-template').cloneNode(true);
+            var index = container.children.length;
+            template.querySelectorAll('input, select').forEach(function(input) {
+                input.name = input.name.replace('0', index);
+                input.value = '';
+            });
+            container.appendChild(template);
+        });
+    </script>
+</body>
+</html>

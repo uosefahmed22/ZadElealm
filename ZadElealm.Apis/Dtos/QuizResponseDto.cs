@@ -1,4 +1,6 @@
-﻿namespace ZadElealm.Apis.Dtos
+﻿using ZadElealm.Core.Models.ServiceDto;
+
+namespace ZadElealm.Apis.Dtos
 {
     public class QuizResponseDto
     {

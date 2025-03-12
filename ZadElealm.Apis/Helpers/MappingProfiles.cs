@@ -27,6 +27,7 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<Quiz, QuizResponseForCourseDto>();
 
             CreateMap<Quiz, QuizResponseDto>();
+            CreateMap<Quiz, QuizDto>();
             CreateMap<Question, QuestionDto>();
             CreateMap<Choice, ChoiceDto>();
             CreateMap<Progress, ProgressDto>();
