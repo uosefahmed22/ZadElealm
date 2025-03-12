@@ -103,6 +103,7 @@ namespace AdminDashboard.Extentions
             services.AddSingleton<ISendEmailService, SendEmailService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IQuizService, QuizService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
