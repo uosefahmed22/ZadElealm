@@ -32,13 +32,12 @@ namespace ZadElealm.Apis.Handlers.Category
                 var spec = new CategoryWithCoursesSpecification(request.SpecParams);
                 var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecAsync(spec);
 
-                if (courses == null || !courses.Any())
+                var totalItems = await _unitOfWork.Repository<Core.Models.Course>().CountAsync(spec);
+
+                if (!courses.Any())
                     return new ApiResponse(404, "لا توجد دورات في هذه الفئة");
 
                 var coursesDto = _mapper.Map<IReadOnlyList<CourseDto>>(courses);
-
-                var totalItems = await _unitOfWork.Repository<Core.Models.Course>()
-                    .CountAsync(spec);
 
                 var metaData = MetaData.Create(
                     totalItems,
