@@ -43,6 +43,7 @@ namespace ZadElealm.Apis.Handlers.Notification
                 if (!userNotification.IsRead)
                 {
                     userNotification.IsRead = true;
+                    _unitOfWork.Repository<UserNotification>().Update(userNotification);
                     await _unitOfWork.Complete();
                 }
 

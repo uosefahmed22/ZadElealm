@@ -79,6 +79,9 @@ namespace ZadElealm.Repository.Repositories
 
         public void Update(T entity)
         => _dbContext.Set<T>().Update(entity);
+
+        public void UpdateRange(IEnumerable<T> entities)
+            => _dbContext.Set<T>().UpdateRange(entities);
         public void Delete(T entity)
         => _dbContext.Set<T>().Remove(entity);
 

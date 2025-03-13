@@ -10,14 +10,11 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
     public class UnenrollCourseCommandHandler : BaseCommandHandler<UnenrollCourseCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
 
         public UnenrollCourseCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(UnenrollCourseCommand request, CancellationToken cancellationToken)
@@ -30,10 +27,11 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 if (enrollment == null)
                     return new ApiResponse(404, "لم يتم العثور على التسجيل");
 
-                _unitOfWork.Repository<Enrollment>().Delete(enrollment);
+                //_unitOfWork.Repository<Enrollment>().Delete(enrollment);
+                
+                enrollment.IsDeleted = true;
+                _unitOfWork.Repository<Enrollment>().Update(enrollment);
                 await _unitOfWork.Complete();
-
-                _cache.Remove($"enrolled_courses_{request.UserId}");
 
                 return new ApiResponse(200, "تم إلغاء التسجيل بنجاح");
             }

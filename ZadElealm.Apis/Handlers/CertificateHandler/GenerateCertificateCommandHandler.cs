@@ -37,7 +37,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
                         PdfUrl = existingCertificate.PdfUrl,
                         CreatedAt = existingCertificate.CreatedAt
                     };
-                    return new ApiDataResponse(200, existingResponse, "تم العثور على الشهادة");
+                    return new ApiDataResponse(200, existingResponse, "لقد تم إنشاء الشهادة من قبل");
                 }
 
                 var certificate = await _certificateService.GenerateAndSaveCertificate(request.UserId, request.QuizId);

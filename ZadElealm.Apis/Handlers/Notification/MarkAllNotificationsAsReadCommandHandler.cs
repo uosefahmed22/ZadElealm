@@ -11,14 +11,10 @@ namespace ZadElealm.Apis.Handlers.Notification
     public class MarkAllNotificationsAsReadCommandHandler : BaseCommandHandler<MarkAllNotificationsAsReadCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
-
         public MarkAllNotificationsAsReadCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(MarkAllNotificationsAsReadCommand request, CancellationToken cancellationToken)
@@ -36,7 +32,7 @@ namespace ZadElealm.Apis.Handlers.Notification
                 {
                     notification.IsRead = true;
                 }
-
+                _unitOfWork.Repository<UserNotification>().UpdateRange(notifications);
                 await _unitOfWork.Complete();
 
                 return new ApiResponse(200, "تم تحديد جميع الإشعارات كمقروءة");

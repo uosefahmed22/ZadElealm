@@ -17,6 +17,7 @@ namespace ZadElealm.Core.Repositories
         Task<int> CountAsync(ISpecification<T> spec);
         Task AddAsync(T entity);
         void Update(T entity);
+        void UpdateRange(IEnumerable<T> entities);
         void Delete(T entity);
     }
 }

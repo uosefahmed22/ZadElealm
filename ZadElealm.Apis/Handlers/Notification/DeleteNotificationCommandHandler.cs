@@ -11,14 +11,10 @@ namespace ZadElealm.Apis.Handlers.Notification
     public class DeleteNotificationCommandHandler : BaseCommandHandler<DeleteNotificationCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
-
         public DeleteNotificationCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(DeleteNotificationCommand request, CancellationToken cancellationToken)
@@ -32,10 +28,10 @@ namespace ZadElealm.Apis.Handlers.Notification
                 if (notification == null)
                     return new ApiResponse(404, "الإشعار غير موجود");
 
-                _unitOfWork.Repository<UserNotification>().Delete(notification);
+                //_unitOfWork.Repository<UserNotification>().Delete(notification);
+                notification.IsDeleted = true;
+                _unitOfWork.Repository<UserNotification>().Update(notification);
                 await _unitOfWork.Complete();
-
-                _cache.Remove($"user_notifications_{request.UserId}");
 
                 return new ApiResponse(200, "تم حذف الإشعار بنجاح");
             }
