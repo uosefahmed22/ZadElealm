@@ -148,6 +148,18 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+        
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpPost("delete-account")]
+        public async Task<ActionResult<ApiResponse>> DeleteAccount(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "User not found"));
+            user.IsDeleted = true;
+            await _userManager.UpdateAsync(user);
+            return Ok(new ApiResponse(200, "Account deleted successfully"));
+        }
 
         [HttpPost("verify-otp")]
         public async Task<ActionResult<ApiResponse>> VerifyOtp(string email, string otp)

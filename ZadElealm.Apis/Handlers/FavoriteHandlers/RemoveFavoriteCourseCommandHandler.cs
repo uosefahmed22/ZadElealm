@@ -11,14 +11,11 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
     public class RemoveFavoriteCourseCommandHandler : BaseCommandHandler<RemoveFavoriteCourseCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
 
         public RemoveFavoriteCourseCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(RemoveFavoriteCourseCommand request, CancellationToken cancellationToken)
@@ -31,10 +28,10 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
                 if (favorite == null)
                     return new ApiResponse(404, "الدورة غير موجودة في المفضلة");
 
-                _unitOfWork.Repository<Favorite>().Delete(favorite);
+                //_unitOfWork.Repository<Favorite>().Delete(favorite);
+                favorite.IsDeleted = true;
+                _unitOfWork.Repository<Favorite>().Update(favorite);
                 await _unitOfWork.Complete();
-
-                _cache.Remove($"favorite_courses_{request.UserId}");
 
                 return new ApiResponse(200, "تم حذف الدورة من المفضلة بنجاح");
             }

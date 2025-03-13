@@ -21,8 +21,9 @@ namespace ZadElealm.Repository.Data.Datbases
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<AppUser>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<BaseEntity>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
         }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Course> Courses { get; set; }

@@ -15,16 +15,13 @@ namespace ZadElealm.Apis.Handlers.Notification
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
 
         public GetUserNotificationsQueryHandler(
             IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IMemoryCache cache)
+            IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
@@ -63,7 +60,8 @@ namespace ZadElealm.Apis.Handlers.Notification
             }
 
             if (unreadNotifications.Any())
-                await _unitOfWork.Complete();
+            _unitOfWork.Repository<UserNotification>().UpdateRange(unreadNotifications);
+            await _unitOfWork.Complete();
         }
     }
 }

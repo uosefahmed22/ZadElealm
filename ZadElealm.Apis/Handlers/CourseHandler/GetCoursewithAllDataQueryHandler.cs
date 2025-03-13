@@ -13,16 +13,13 @@ namespace ZadElealm.Apis.Handlers.Course
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
 
         public GetCourseWithAllDataQueryHandler(
             IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IMemoryCache cache)
+            IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(GetCourseWithAllDataQuery request, CancellationToken cancellationToken)
