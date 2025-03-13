@@ -36,6 +36,8 @@ namespace ZadElealm.Repository.Data.Datbases
             modelBuilder.Entity<VideoProgress>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Video>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Notification>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Question>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Choice>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
         public DbSet<Category> Categories { get; set; }
