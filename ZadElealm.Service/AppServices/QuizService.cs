@@ -121,5 +121,80 @@ namespace ZadElealm.Service.AppServices
             await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
             await _unitOfWork.Complete();
         }
+        public async Task UpdateQuizAsync(QuizDto quizDto)
+        {
+            if (quizDto == null)
+            {
+                throw new ArgumentNullException(nameof(quizDto));
+            }
+
+            var spec = new QuizWithQuestionsAndChoicesSpecification(quizDto.Id);
+            var quiz = await _unitOfWork.Repository<Quiz>().GetEntityWithSpecAsync(spec);
+
+            if (quiz == null)
+            {
+                throw new Exception("الامتحان غير موجود.");
+            }
+
+            // Update basic quiz properties
+            quiz.Name = quizDto.Name;
+            quiz.Description = quizDto.Description;
+            quiz.CourseId = quizDto.CourseId;
+
+            // Create a list of question IDs from the DTO to track which ones to keep
+            var questionIdsInDto = quizDto.Questions
+                .Where(q => q.Id > 0)
+                .Select(q => q.Id)
+                .ToList();
+
+            // Find questions to remove (those in the database but not in the DTO)
+            var questionsToRemove = quiz.Questions
+                .Where(q => !questionIdsInDto.Contains(q.Id))
+                .ToList();
+
+            // Remove questions that were deleted in the UI
+            foreach (var questionToRemove in questionsToRemove)
+            {
+                quiz.Questions.Remove(questionToRemove);
+            }
+
+            // Update existing questions and add new ones
+            for (int i = 0; i < quizDto.Questions.Count; i++)
+            {
+                var questionDto = quizDto.Questions[i];
+                if (questionDto.Id > 0)
+                {
+                    var existingQuestion = quiz.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
+                    if (existingQuestion != null)
+                    {
+                        existingQuestion.Text = questionDto.Text;
+                        existingQuestion.CorrectChoice = questionDto.CorrectChoice;
+
+                        // Clear and update choices
+                        existingQuestion.Choices.Clear();
+                        existingQuestion.Choices = questionDto.Choices.Select(c => new Choice
+                        {
+                            Text = c.Text
+                        }).ToList();
+                    }
+                }
+                else
+                {
+                    // Add new question
+                    var newQuestion = new Question
+                    {
+                        Text = questionDto.Text,
+                        CorrectChoice = questionDto.CorrectChoice,
+                        Choices = questionDto.Choices.Select(c => new Choice
+                        {
+                            Text = c.Text
+                        }).ToList()
+                    };
+                    quiz.Questions.Add(newQuestion);
+                }
+            }
+
+            await _unitOfWork.Complete();
+        }
     }
 }
