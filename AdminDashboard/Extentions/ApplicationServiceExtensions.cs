@@ -1,4 +1,5 @@
-﻿using CloudinaryDotNet;
+﻿using AdminDashboard.Middlwares;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -129,5 +130,7 @@ namespace AdminDashboard.Extentions
                 };
             });
         }
+     
+
     }
 }

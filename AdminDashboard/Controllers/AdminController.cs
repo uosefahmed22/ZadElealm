@@ -14,11 +14,18 @@ namespace AdminDashboard.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
+        private readonly string _primaryAdminEmail;
+        private readonly int _maxAdminCount;
 
-        public AdminController(UserManager<AppUser> userManager, SignInManager<AppUser> signInManager)
+        public AdminController(UserManager<AppUser> userManager,
+            IConfiguration configuration,
+            SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _primaryAdminEmail = configuration["AdminSettings:PrimaryAdminEmail"];
+            _maxAdminCount = int.Parse(configuration["AdminSettings:MaxAdminCount"] ?? "10");
+
         }
         public IActionResult Login()
         {
@@ -69,19 +76,65 @@ namespace AdminDashboard.Controllers
 
             return RedirectToAction("Index", "Home");
         }
-
         [Authorize(Roles = "Admin")]
-        public IActionResult AddAdmin()
+
+        public async Task<IActionResult> AddAdmin()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || currentUser.Email != _primaryAdminEmail)
+            {
+                TempData["ErrorMessage"] = "غير مسموح لك بإضافة مديرين للنظام.";
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+            if (adminUsers.Count >= _maxAdminCount)
+            {
+                TempData["ErrorMessage"] = $"لا يمكن إضافة أكثر من {_maxAdminCount} مديرين للنظام.";
+                return RedirectToAction("Index", "User");
+            }
+
+            ViewBag.AdminCount = adminUsers.Count;
+            ViewBag.MaxAdminCount = _maxAdminCount;
+
             return View(new AdminDto());
         }
-
         [Authorize(Roles = "Admin")]
+
         [HttpPost]
         public async Task<IActionResult> AddAdmin(AdminDto model)
         {
             if (!ModelState.IsValid)
             {
+                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                ViewBag.AdminCount = adminUsers.Count;
+                ViewBag.MaxAdminCount = _maxAdminCount;
+                return View(model);
+            }
+            var confimedAdmin = await _userManager.FindByEmailAsync(_primaryAdminEmail);
+            if (confimedAdmin != null) {
+                if (!confimedAdmin.EmailConfirmed)
+                {
+                    TempData["ErrorMessage"] = "لا يمكن إضافة مديرين للنظام حتى يتم تأكيد البريد الإلكتروني للمدير الأساسي.";
+                    return RedirectToAction("Index", "User");
+                }
+            }
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || currentUser.Email != _primaryAdminEmail)
+            {
+                ModelState.AddModelError("", "غير مسموح لك بإضافة مديرين للنظام.");
+                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                ViewBag.AdminCount = adminUsers.Count;
+                ViewBag.MaxAdminCount = _maxAdminCount;
+                return View(model);
+            }
+
+            var adminCount = await _userManager.GetUsersInRoleAsync("Admin");
+            if (adminCount.Count >= _maxAdminCount)
+            {
+                ModelState.AddModelError("", $"لا يمكن إضافة أكثر من {_maxAdminCount} مديرين للنظام.");
+                ViewBag.AdminCount = adminCount.Count;
+                ViewBag.MaxAdminCount = _maxAdminCount;
                 return View(model);
             }
 
@@ -94,7 +147,9 @@ namespace AdminDashboard.Controllers
 
             if (await _userManager.FindByEmailAsync(model.Email) != null)
             {
-                ModelState.AddModelError("", "Email already exists.");
+                ModelState.AddModelError("", "البريد الإلكتروني مستخدم بالفعل.");
+                ViewBag.AdminCount = adminCount.Count;
+                ViewBag.MaxAdminCount = _maxAdminCount;
                 return View(model);
             }
 
@@ -103,7 +158,9 @@ namespace AdminDashboard.Controllers
             {
                 await _userManager.AddToRoleAsync(user, "Admin");
                 user.EmailConfirmed = true;
-                TempData["SuccessMessage"] = "Admin added successfully";
+                await _userManager.UpdateAsync(user);
+
+                TempData["SuccessMessage"] = "تمت إضافة المدير بنجاح";
                 return RedirectToAction("Index", "User");
             }
 
@@ -112,9 +169,10 @@ namespace AdminDashboard.Controllers
                 ModelState.AddModelError("", error.Description);
             }
 
+            ViewBag.AdminCount = adminCount.Count;
+            ViewBag.MaxAdminCount = _maxAdminCount;
             return View(model);
         }
-
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();

@@ -9,6 +9,7 @@ public class Program
 
         builder.Services.AddControllersWithViews();
         builder.Services.ConfigureApplicationServices(builder.Configuration);
+        builder.Services.AddRateLimiting(builder.Configuration);
 
         var app = builder.Build();
         if (app.Environment.IsDevelopment())
