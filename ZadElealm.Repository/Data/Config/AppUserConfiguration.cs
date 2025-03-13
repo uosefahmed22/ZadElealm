@@ -19,6 +19,9 @@ namespace ZadElealm.Repository.Data.Config
             builder.HasMany(u => u.Reviews).WithOne(r => r.User).OnDelete(DeleteBehavior.Cascade);
             builder.HasMany(u => u.Ratings).WithOne(r => r.User).OnDelete(DeleteBehavior.Cascade);
             builder.HasMany(u => u.Reports).WithOne(r => r.AppUser).OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(u => u.Certificates).WithOne(c => c.User).OnDelete(DeleteBehavior.Cascade);
+            builder.HasMany(u => u.Progresses).WithOne(p => p.AppUser).OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }
