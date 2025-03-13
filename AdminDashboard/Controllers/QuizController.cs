@@ -86,7 +86,55 @@ namespace AdminDashboard.Controllers
             await _unitOfWork.Complete();
             return RedirectToAction("Index");
         }
-       
+
+
+
+
+        public async Task<IActionResult> Edit(int id)
+        {
+            var spec = new QuizWithQuestionsAndChoicesSpecification(id);
+            var quiz = await _unitOfWork.Repository<Quiz>().GetEntityWithSpecAsync(spec);
+
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            var quizDto = _mapper.Map<QuizDto>(quiz);
+            var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+            ViewBag.Courses = courses;
+            return View(quizDto);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(QuizDto quizDto)
+        {
+            if (quizDto == null)
+            {
+                return BadRequest("QuizDto is null");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+                ViewBag.Courses = courses;
+                return View(quizDto);
+            }
+
+            try
+            {
+                await _quizService.UpdateQuizAsync(quizDto);
+                TempData["SuccessMessage"] = "تم تحديث الامتحان بنجاح.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "حدث خطأ أثناء تحديث الامتحان: " + ex.Message);
+                var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+                ViewBag.Courses = courses;
+                return View(quizDto);
+            }
+        }
     }
 }
 
