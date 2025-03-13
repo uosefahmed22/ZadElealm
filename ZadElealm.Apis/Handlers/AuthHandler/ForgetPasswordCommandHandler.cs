@@ -11,18 +11,15 @@ namespace ZadElealm.Apis.Handlers.Auth
         private readonly UserManager<AppUser> _userManager;
         private readonly IOtpService _otpService;
         private readonly ISendEmailService _sendEmailService;
-        private readonly ILogger<ForgetPasswordCommandHandler> _logger;
 
         public ForgetPasswordCommandHandler(
             UserManager<AppUser> userManager,
             IOtpService otpService,
-            ISendEmailService sendEmailService,
-            ILogger<ForgetPasswordCommandHandler> logger)
+            ISendEmailService sendEmailService)
         {
             _userManager = userManager;
             _otpService = otpService;
             _sendEmailService = sendEmailService;
-            _logger = logger;
         }
 
         public override async Task<ApiResponse> Handle(ForgetPasswordCommand request, CancellationToken cancellationToken)
@@ -40,7 +37,6 @@ namespace ZadElealm.Apis.Handlers.Auth
 
                 await _sendEmailService.SendEmailAsync(emailMessage);
 
-                _logger.LogInformation("الرمز المؤقت تم إرساله بنجاح إلى: {Email}", request.Email);
                 return new ApiResponse(200, "الرمز المؤقت تم إرساله بنجاح.");
             }
             catch (Exception ex)

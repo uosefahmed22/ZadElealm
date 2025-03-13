@@ -20,11 +20,7 @@ namespace ZadElealm.Apis.Handlers.Auth
             if (user == null)
                 return new ApiResponse(404, "المستخدم غير موجود");
 
-            var result = await _userManager.ChangePasswordAsync(
-                user,
-                request.ChangePasswordDto.CurrentPassword,
-                request.ChangePasswordDto.NewPassword
-            );
+            var result = await _userManager.ChangePasswordAsync(user,request.ChangePasswordDto.CurrentPassword,request.ChangePasswordDto.NewPassword);
 
             if (!result.Succeeded)
                 return new ApiResponse(400, "كلمة المرور الحالية غير صحيحة");
