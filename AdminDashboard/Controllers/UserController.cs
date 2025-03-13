@@ -12,14 +12,25 @@ namespace AdminDashboard.Controllers
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly string _primaryAdminEmail;
+        private readonly int _maxAdminCount;
 
-        public UserController(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+        public UserController(UserManager<AppUser> userManager,IConfiguration configuration ,RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _primaryAdminEmail = configuration["AdminSettings:PrimaryAdminEmail"];
+            _maxAdminCount = int.Parse(configuration["AdminSettings:MaxAdminCount"] ?? "10");
+
         }
         public async Task<IActionResult> Index()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null || currentUser.Email != _primaryAdminEmail)
+            {
+                TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
+                return RedirectToAction("AccessDenied", "Account");
+            }
             var Users = await _userManager.Users.Select(u => new UserViewModel
             {
                 Id = u.Id,
