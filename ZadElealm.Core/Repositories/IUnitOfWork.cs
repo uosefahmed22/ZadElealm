@@ -10,7 +10,9 @@ namespace ZadElealm.Core.Repositories
     public interface IUnitOfWork : IAsyncDisposable
     {
         IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity;
-
         Task<int> Complete();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

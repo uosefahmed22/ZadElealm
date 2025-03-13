@@ -13,8 +13,8 @@ namespace ZadElealm.Core.Models
         public int Score { get; set; }
         public bool IsCompleted { get; set; }
         public int QuizId { get; set; }
-        public Quiz Quiz { get; set; }
         public string UserId { get; set; }
+        public Quiz Quiz { get; set; }
         public AppUser AppUser { get; set; }
     }
 }

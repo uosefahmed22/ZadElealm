@@ -41,6 +41,5 @@ namespace ZadElealm.Repository.Data.Datbases
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Question> Question { get; set; }
         public DbSet<Choice> Choice { get; set; }
-
     }
 }

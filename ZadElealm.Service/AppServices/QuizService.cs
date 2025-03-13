@@ -31,75 +31,161 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<QuizResultDto> SubmitQuizAsync(string userId, QuizSubmissionDto submission)
         {
+            if (submission == null)
+                throw new ArgumentNullException(nameof(submission), "Quiz submission cannot be null");
+
+            if (string.IsNullOrEmpty(userId))
+                throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty");
+
+            if (submission.QuizId <= 0)
+                throw new ArgumentException("Invalid Quiz ID", nameof(submission.QuizId));
+
+            if (submission.StudentAnswers == null || !submission.StudentAnswers.Any())
+                throw new ArgumentException("No answers provided", nameof(submission.StudentAnswers));
+
             try
             {
+                var spec = new QuizWithQuestionsAndChoicesSpecification(submission.QuizId);
                 var quiz = await _unitOfWork.Repository<Quiz>()
-                    .GetEntityWithSpecAsync(new QuizWithQuestionsAndChoicesSpecification(submission.QuizId));
+                    .GetEntityWithSpecAsync(spec);
 
                 if (quiz == null)
-                    throw new Exception("Quiz not found");
+                    throw new Exception($"Quiz with ID {submission.QuizId} not found.");
+
+                if (!quiz.Questions.Any())
+                    throw new Exception($"Quiz with ID {submission.QuizId} does not contain any questions");
 
                 var existingProgress = await _unitOfWork.Repository<Progress>()
                     .GetEntityWithSpecAsync(new ProgressByQuizAndUserSpecification(submission.QuizId, userId));
 
                 if (existingProgress != null && existingProgress.IsCompleted)
-                    throw new Exception("Quiz already completed");
+                    throw new Exception($"Quiz with ID {submission.QuizId} has already been completed by user {userId}.");
 
-                int correctAnswers = 0;
+                var questionMap = quiz.Questions.ToDictionary(q => q.Id);
+
                 foreach (var answer in submission.StudentAnswers)
                 {
-                    var question = quiz.Questions.FirstOrDefault(q => q.Id == answer.QuestionId);
-                    if (question != null && question.CorrectChoice == answer.StudentChoice)
-                    {
-                        correctAnswers++;
-                    }
+                    if (!questionMap.ContainsKey(answer.QuestionId))
+                        throw new Exception($"Question with ID {answer.QuestionId} not found in quiz.");
                 }
 
                 int totalQuestions = quiz.Questions.Count;
-                if (totalQuestions == 0)
-                    throw new Exception("No questions found in this quiz");
+                int correctAnswers = 0;
+                var questionResults = new List<QuestionResultDto>();
 
-                int score = (correctAnswers * 100) / totalQuestions;
-                bool isCompleted = score >= 60;
+                var answeredQuestionIds = new HashSet<int>(submission.StudentAnswers.Select(a => a.QuestionId));
+                var unansweredQuestions = quiz.Questions.Where(q => !answeredQuestionIds.Contains(q.Id)).ToList();
 
-                var progress = new Progress
+                foreach (var question in quiz.Questions)
                 {
-                    QuizId = submission.QuizId,
-                    UserId = userId,
-                    Score = score,
-                    IsCompleted = isCompleted,
-                    CreatedAt = DateTime.Now
-                };
+                    var answer = submission.StudentAnswers.FirstOrDefault(a => a.QuestionId == question.Id);
 
-                await _unitOfWork.Repository<Progress>().AddAsync(progress);
-                await _unitOfWork.Complete();
+                    bool isCorrect = false;
+                    int selectedChoice = 0;
 
-                if (isCompleted)
-                {
-                    await _notificationService.SendNotificationAsync(new NotificationServiceDto
+                    if (answer != null)
                     {
-                        UserId = userId,
-                        Type = NotificationType.Certificate,
-                        Title = "مبارك على اجتيازك!",
-                        Description = "الحمد لله، لقد اجتزت الامتحان بنجاح! نسأل الله أن يبارك لك في علمك وعملك، وأن يجعلك من النافعين لدينك وأمتك. يمكنك الآن استلام شهادتك من قسم الشهادات. نسأل الله لك التوفيق والسداد في مسيرتك العلمية."
+                        selectedChoice = answer.SelectedChoice;
+                        isCorrect = question.CorrectChoice == selectedChoice;
+
+                        if (isCorrect)
+                        {
+                            correctAnswers++;
+                        }
+                    }
+
+                    questionResults.Add(new QuestionResultDto
+                    {
+                        QuestionId = question.Id,
+                        QuestionText = question.Text,
+                        IsCorrect = isCorrect,
+                        SelectedChoice = selectedChoice,
+                        CorrectChoice = question.CorrectChoice
                     });
                 }
 
-                return new QuizResultDto
+                int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
+                bool isCompleted = score >= 60;
+
+                Progress progress;
+                if (existingProgress != null)
                 {
-                    Score = score,
-                    IsCompleted = isCompleted,
-                    Date = progress.CreatedAt,
-                    TotalQuestions = totalQuestions,
-                    CorrectAnswers = correctAnswers
-                };
+                    progress = existingProgress;
+                    progress.Score = Math.Max(progress.Score, score);
+                    progress.IsCompleted = progress.IsCompleted || isCompleted;
+                    progress.CreatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    progress = new Progress
+                    {
+                        QuizId = submission.QuizId,
+                        UserId = userId,
+                        Score = score,
+                        IsCompleted = isCompleted,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                }
+
+                await _unitOfWork.BeginTransactionAsync();
+
+                try
+                {
+                    if (existingProgress != null)
+                    {
+                        _unitOfWork.Repository<Progress>().Update(progress);
+                    }
+                    else
+                    {
+                        await _unitOfWork.Repository<Progress>().AddAsync(progress);
+                    }
+
+                    if (isCompleted && (!existingProgress?.IsCompleted ?? true))
+                    {
+                        var notification = new Notification
+                        {
+                            Title = "مبارك على اجتيازك!",
+                            Description = "الحمد لله، لقد اجتزت الامتحان بنجاح! نسأل الله أن يبارك لك في علمك وعملك، وأن يجعلك من النافعين لدينك وأمتك. يمكنك الآن استلام شهادتك من قسم الشهادات. نسأل الله لك التوفيق والسداد في مسيرتك العلمية.",
+                            Type = NotificationType.Certificate,
+                            UserNotifications = new List<UserNotification>
+                    {
+                        new UserNotification
+                        {
+                            UserId = userId,
+                            IsRead = false
+                        }
+                    }
+                        };
+
+                        await _unitOfWork.Repository<Notification>().AddAsync(notification);
+                    }
+
+                    await _unitOfWork.Complete();
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    return new QuizResultDto
+                    {
+                        QuizName = quiz.Name,
+                        Score = score,
+                        IsCompleted = isCompleted,
+                        TotalQuestions = totalQuestions,
+                        CorrectAnswers = correctAnswers,
+                        UnansweredQuestions = unansweredQuestions.Count,
+                        Date = progress.CreatedAt,
+                        QuestionResults = questionResults
+                    };
+                }
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    throw new ApplicationException("Failed to process quiz submission. Please try again later.", ex);
+                }
             }
             catch (Exception ex)
             {
-                throw new Exception($"{ex.Message}");
+                throw new ApplicationException("Failed to process quiz submission. Please try again later.", ex);
             }
         }
-
         public async Task CreateQuizAsync(QuizDto quizDto)
         {
             var quiz = new Quiz
