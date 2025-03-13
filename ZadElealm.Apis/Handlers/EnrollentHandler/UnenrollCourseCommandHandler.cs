@@ -30,7 +30,6 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 //_unitOfWork.Repository<Enrollment>().Delete(enrollment);
                 
                 enrollment.IsDeleted = true;
-                _unitOfWork.Repository<Enrollment>().Update(enrollment);
                 await _unitOfWork.Complete();
 
                 return new ApiResponse(200, "تم إلغاء التسجيل بنجاح");

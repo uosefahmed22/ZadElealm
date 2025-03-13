@@ -22,7 +22,20 @@ namespace ZadElealm.Repository.Data.Datbases
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<AppUser>().HasQueryFilter(u => !u.IsDeleted);
-            modelBuilder.Entity<BaseEntity>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Category>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Course>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Enrollment>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Favorite>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Rating>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Review>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Report>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Progress>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<UserNotification>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Certificate>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Quiz>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<VideoProgress>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Video>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Notification>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
         public DbSet<Category> Categories { get; set; }

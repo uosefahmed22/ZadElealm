@@ -11,14 +11,9 @@ namespace ZadElealm.Apis.Handlers.Rating
     public class AddRatingCommandHandler : BaseCommandHandler<AddRatingCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
-
-        public AddRatingCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+        public AddRatingCommandHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(AddRatingCommand request, CancellationToken cancellationToken)
@@ -54,8 +49,6 @@ namespace ZadElealm.Apis.Handlers.Rating
 
                 await _unitOfWork.Repository<Core.Models.Rating>().AddAsync(rating);
                 await _unitOfWork.Complete();
-
-                _cache.Remove($"course_ratings_{request.CourseId}");
 
                 await UpdateCourseAverageRating(request.CourseId);
 
