@@ -41,7 +41,7 @@ namespace ZadElealm.Service.AppServices
             try
             {
                 var user = await _userManager.FindByIdAsync(userId);
-                var quiz = await _unitOfWork.Repository<Quiz>().GetByIdAsync(quizId);
+                var quiz = await _unitOfWork.Repository<Quiz>().GetEntityAsync(quizId);
 
                 if (user == null || quiz == null)
                     throw new Exception("المستخدم أو الاختبار غير موجود");

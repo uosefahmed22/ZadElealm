@@ -28,9 +28,7 @@ namespace ZadElealm.Apis.Handlers.Notification
                 if (notification == null)
                     return new ApiResponse(404, "الإشعار غير موجود");
 
-                //_unitOfWork.Repository<UserNotification>().Delete(notification);
                 notification.IsDeleted = true;
-                _unitOfWork.Repository<UserNotification>().Update(notification);
                 await _unitOfWork.Complete();
 
                 return new ApiResponse(200, "تم حذف الإشعار بنجاح");

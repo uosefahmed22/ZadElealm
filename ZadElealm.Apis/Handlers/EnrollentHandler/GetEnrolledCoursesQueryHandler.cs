@@ -30,7 +30,8 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
             try
             {
                 var spec = new EnrollmentSpecification(request.UserId);
-                var enrollments = await _unitOfWork.Repository<Enrollment>().GetAllWithSpecAsync(spec);
+                var enrollments = await _unitOfWork.Repository<Enrollment>()
+                    .GetAllWithSpecNoTrackingAsync(spec);
 
                 if (!enrollments.Any())
                     return new ApiResponse(200, "لا توجد دورات مسجلة");

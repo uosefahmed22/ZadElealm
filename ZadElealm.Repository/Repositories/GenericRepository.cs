@@ -20,7 +20,7 @@ namespace ZadElealm.Repository.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<T> GetByIdAsync(int id)
+        public async Task<T> GetEntityAsync(int id)
         {
             try
             {
@@ -42,7 +42,6 @@ namespace ZadElealm.Repository.Repositories
                 throw new Exception($"Couldn't retrieve entities: {ex.Message}");
             }
         }
-
         public async Task<T> GetEntityWithSpecAsync(ISpecification<T> spec)
         {
             try
@@ -69,22 +68,71 @@ namespace ZadElealm.Repository.Repositories
                 throw new Exception($"Couldn't retrieve entities with specification: {ex.Message}");
             }
         }
+
+        //With no tracking
+        public async Task<IReadOnlyList<T>> GetAllWithNoTrackingAsync()
+        {
+            try
+            {
+                return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Couldn't retrieve entities: {ex.Message}");
+            }
+        }
+        public async Task<IReadOnlyList<T>> GetAllWithSpecNoTrackingAsync(ISpecification<T> spec)
+        {
+            try
+            {
+                return await ApplySpecification(spec)
+                    .AsNoTracking()
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Couldn't retrieve entities with specification: {ex.Message}");
+            }
+        }
+        public async Task<T> GetEntityWithSpecNoTrackingAsync(ISpecification<T> spec)
+        {
+            try
+            {
+                return await ApplySpecification(spec)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Couldn't retrieve entity with specification: {ex.Message}");
+            }
+        }
+        public async Task<T> GetEntityWithNoTrackingAsync(int id)
+        {
+            try
+            {
+                return await _dbContext.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Couldn't retrieve entity with id: {ex.Message}");
+            }
+        }
+
+
+
         public async Task<int> CountAsync(ISpecification<T> spec)
         {
             return await ApplySpecification(spec).CountAsync();
         }
-
         public async Task AddAsync(T entity)
             => await _dbContext.Set<T>().AddAsync(entity);
-
         public void Update(T entity)
         => _dbContext.Set<T>().Update(entity);
-
         public void UpdateRange(IEnumerable<T> entities)
             => _dbContext.Set<T>().UpdateRange(entities);
         public void Delete(T entity)
         => _dbContext.Set<T>().Remove(entity);
-
         private IQueryable<T> ApplySpecification(ISpecification<T> spec)
         {
             return SpecificationEvaluator<T>.GetQuery(_dbContext.Set<T>(), spec);

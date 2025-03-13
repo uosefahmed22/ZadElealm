@@ -25,7 +25,8 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
             try
             {
                 var spec = new QuizWithQuestionsAndChoicesAndProgressSpecification(request.QuizId);
-                var quiz = await _unitOfWork.Repository<Quiz>().GetEntityWithSpecAsync(spec);
+                var quiz = await _unitOfWork.Repository<Quiz>()
+                    .GetEntityWithSpecNoTrackingAsync(spec);
 
                 if (quiz == null)
                     return new ApiResponse(404, "الاختبار غير موجود");

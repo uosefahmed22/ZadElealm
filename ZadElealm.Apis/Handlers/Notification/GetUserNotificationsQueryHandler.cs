@@ -29,7 +29,8 @@ namespace ZadElealm.Apis.Handlers.Notification
             try
             {
                 var spec = new UserNotificationWithNotificationSpecification(request.UserId);
-                var notifications = await _unitOfWork.Repository<UserNotification>().GetAllWithSpecAsync(spec);
+                var notifications = await _unitOfWork.Repository<UserNotification>()
+                    .GetAllWithSpecAsync(spec);
 
                 if (!notifications.Any())
                     return new ApiResponse(200, "لا توجد إشعارات");
@@ -60,7 +61,6 @@ namespace ZadElealm.Apis.Handlers.Notification
             }
 
             if (unreadNotifications.Any())
-            _unitOfWork.Repository<UserNotification>().UpdateRange(unreadNotifications);
             await _unitOfWork.Complete();
         }
     }

@@ -30,7 +30,7 @@ namespace ZadElealm.Apis.Handlers.Category
             try
             {
                 var spec = new CategoryWithCoursesSpecification(request.SpecParams);
-                var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecAsync(spec);
+                var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecNoTrackingAsync(spec);
 
                 var totalItems = await _unitOfWork.Repository<Core.Models.Course>().CountAsync(spec);
 

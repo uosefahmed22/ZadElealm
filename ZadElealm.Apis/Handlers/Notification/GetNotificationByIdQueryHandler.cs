@@ -33,7 +33,7 @@ namespace ZadElealm.Apis.Handlers.Notification
 
                 var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
                 var userNotification = await _unitOfWork.Repository<UserNotification>()
-                    .GetEntityWithSpecAsync(spec);
+                    .GetEntityWithSpecNoTrackingAsync(spec);
 
                 if (userNotification == null)
                     return new ApiResponse(404, "الإشعار غير موجود");

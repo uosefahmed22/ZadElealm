@@ -27,7 +27,8 @@ namespace ZadElealm.Apis.Handlers.Course
             try
             {
                 var spec = new CourseWithAllDataSpecification(request.CourseId);
-                var course = await _unitOfWork.Repository<ZadElealm.Core.Models.Course>().GetEntityWithSpecAsync(spec);
+                var course = await _unitOfWork.Repository<ZadElealm.Core.Models.Course>()
+                    .GetEntityWithSpecNoTrackingAsync(spec);
 
                 if (course == null)
                     return new ApiResponse(404, "الدورة غير موجودة");

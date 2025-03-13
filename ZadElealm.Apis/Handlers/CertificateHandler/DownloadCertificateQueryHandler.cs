@@ -24,7 +24,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
         {
             var spec = new CertificateByIdSpecification(request.CertificateId);
             var certificate = await _unitOfWork.Repository<Core.Models.Certificate>()
-                .GetEntityWithSpecAsync(spec);
+                .GetEntityWithSpecNoTrackingAsync(spec);
 
             if (certificate == null)
                 throw new Exception("الشهادة غير موجودة");
