@@ -22,7 +22,7 @@ namespace ZadElealm.Apis.Handlers.Category
         {
             try
             {
-                var categories = await _unitOfWork.Repository<ZadElealm.Core.Models.Category>().GetAllAsync();
+                var categories = await _unitOfWork.Repository<ZadElealm.Core.Models.Category>().GetAllWithNoTrackingAsync();
                 var mappedCategories = _mapper.Map<IReadOnlyList<ZadElealm.Core.Models.Category>, IReadOnlyList<CategoryResponseDto>>(categories);
 
                 return new ApiDataResponse(200,mappedCategories);

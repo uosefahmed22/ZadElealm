@@ -25,7 +25,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
             {
                 var spec = new CertificatesByUserSpecification(request.UserId);
                 var certificates = await _unitOfWork.Repository<Core.Models.Certificate>()
-                    .GetAllWithSpecAsync(spec);
+                    .GetAllWithSpecNoTrackingAsync(spec);
 
                 var certificateDtos = _mapper.Map<IReadOnlyList<CertificateDto>>(certificates);
 

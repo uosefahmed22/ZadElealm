@@ -26,7 +26,7 @@ namespace ZadElealm.Apis.Handlers.Rating
                 if (existingRating != null)
                     return new ApiResponse(400, "لقد قمت بتقييم هذه الدورة من قبل");
 
-                var course = await _unitOfWork.Repository<Core.Models.Course>().GetByIdAsync(request.CourseId);
+                var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(request.CourseId);
                 if (course == null)
                     return new ApiResponse(404, "الدورة غير موجودة");
 
@@ -68,7 +68,7 @@ namespace ZadElealm.Apis.Handlers.Rating
             if (ratings.Any())
             {
                 var averageRating = Math.Min(5, ratings.Select(r => r.Value).Average());
-                var course = await _unitOfWork.Repository<Core.Models.Course>().GetByIdAsync(courseId);
+                var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(courseId);
 
                 if (course != null)
                 {

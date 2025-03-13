@@ -26,7 +26,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
             {
                 var certSpec = new CertificateByUserAndQuizSpecification(request.UserId, request.QuizId);
                 var existingCertificate = await _unitOfWork.Repository<Core.Models.Certificate>()
-                    .GetEntityWithSpecAsync(certSpec);
+                    .GetEntityWithSpecNoTrackingAsync(certSpec);
 
                 if (existingCertificate != null)
                 {

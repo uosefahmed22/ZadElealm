@@ -32,7 +32,6 @@ namespace ZadElealm.Apis.Handlers.Notification
                     return new ApiResponse(200, "الإشعار مقروء بالفعل");
 
                 notification.IsRead = true;
-                _unitOfWork.Repository<UserNotification>().Update(notification);
                 await _unitOfWork.Complete();
 
                 return new ApiResponse(200, "تم تحديد الإشعار كمقروء");

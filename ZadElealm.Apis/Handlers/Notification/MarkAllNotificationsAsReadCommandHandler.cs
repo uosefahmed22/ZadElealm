@@ -32,7 +32,6 @@ namespace ZadElealm.Apis.Handlers.Notification
                 {
                     notification.IsRead = true;
                 }
-                _unitOfWork.Repository<UserNotification>().UpdateRange(notifications);
                 await _unitOfWork.Complete();
 
                 return new ApiResponse(200, "تم تحديد جميع الإشعارات كمقروءة");

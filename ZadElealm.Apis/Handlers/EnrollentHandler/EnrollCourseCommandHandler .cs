@@ -33,7 +33,7 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
         {
             try
             {
-                var course = await _unitOfWork.Repository<Core.Models.Course>().GetByIdAsync(request.CourseId);
+                var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(request.CourseId);
                 if (course == null)
                     return new ApiResponse(404, "الدورة غير موجودة");
 

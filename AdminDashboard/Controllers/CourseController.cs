@@ -36,7 +36,7 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var course = await _unitOfWork.Repository<Course>().GetByIdAsync(id);
+            var course = await _unitOfWork.Repository<Course>().GetEntityAsync(id);
             if (course == null)
             {
                 return NotFound();
@@ -60,7 +60,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            var courseExsist = await _unitOfWork.Repository<Course>().GetByIdAsync(model.Id);
+            var courseExsist = await _unitOfWork.Repository<Course>().GetEntityAsync(model.Id);
             if (courseExsist == null)
             {
                 return NotFound();
@@ -84,7 +84,7 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _unitOfWork.Repository<Course>().GetByIdAsync(id);
+            var category = await _unitOfWork.Repository<Course>().GetEntityAsync(id);
             _unitOfWork.Repository<Course>().Delete(category);
             await _unitOfWork.Complete();
             return RedirectToAction("Index");
@@ -134,7 +134,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            var category = await _unitOfWork.Repository<Category>().GetByIdAsync(model.CategoryId);
+            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(model.CategoryId);
             if (category == null)
             {
                 ModelState.AddModelError("CategoryId", "Category not found.");

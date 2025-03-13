@@ -32,7 +32,7 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var category = await _unitOfWork.Repository<Category>().GetByIdAsync(id);
+            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(id);
             if (category == null)
             {
                 return NotFound();
@@ -53,7 +53,7 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            var categoryExsist = await _unitOfWork.Repository<Category>().GetByIdAsync(model.Id);
+            var categoryExsist = await _unitOfWork.Repository<Category>().GetEntityAsync(model.Id);
             if (categoryExsist == null)
             {
                 return NotFound();
@@ -74,7 +74,7 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _unitOfWork.Repository<Category>().GetByIdAsync(id);
+            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(id);
             _unitOfWork.Repository<Category>().Delete(category);
             await _unitOfWork.Complete();
             return RedirectToAction("Index");

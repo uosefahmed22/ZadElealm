@@ -28,9 +28,7 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
                 if (favorite == null)
                     return new ApiResponse(404, "الدورة غير موجودة في المفضلة");
 
-                //_unitOfWork.Repository<Favorite>().Delete(favorite);
                 favorite.IsDeleted = true;
-                _unitOfWork.Repository<Favorite>().Update(favorite);
                 await _unitOfWork.Complete();
 
                 return new ApiResponse(200, "تم حذف الدورة من المفضلة بنجاح");

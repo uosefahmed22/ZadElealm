@@ -79,17 +79,6 @@ namespace AdminDashboard.Controllers
             await _quizService.CreateQuizAsync(quizDto);
             return RedirectToAction("Index");
         }
-        public async Task<IActionResult> Delete(int id)
-        {
-            var quiz = await _unitOfWork.Repository<Quiz>().GetByIdAsync(id);
-            _unitOfWork.Repository<Quiz>().Delete(quiz);
-            await _unitOfWork.Complete();
-            return RedirectToAction("Index");
-        }
-
-
-
-
         public async Task<IActionResult> Edit(int id)
         {
             var spec = new QuizWithQuestionsAndChoicesSpecification(id);
@@ -134,6 +123,14 @@ namespace AdminDashboard.Controllers
                 ViewBag.Courses = courses;
                 return View(quizDto);
             }
+        }
+       
+        public async Task<IActionResult> Delete(int id)
+        {
+            var quiz = await _unitOfWork.Repository<Quiz>().GetEntityAsync(id);
+            _unitOfWork.Repository<Quiz>().Delete(quiz);
+            await _unitOfWork.Complete();
+            return RedirectToAction("Index");
         }
     }
 }

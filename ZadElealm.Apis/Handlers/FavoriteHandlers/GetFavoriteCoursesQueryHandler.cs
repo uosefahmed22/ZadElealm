@@ -33,7 +33,8 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
             try
             {
                 var spec = new FavoriteWithCourseAndUserSpecification(request.UserId);
-                var favoriteCourses = await _unitOfWork.Repository<Favorite>().GetAllWithSpecAsync(spec);
+                var favoriteCourses = await _unitOfWork.Repository<Favorite>()
+                    .GetAllWithSpecNoTrackingAsync(spec);
 
                 if (!favoriteCourses.Any())
                     return new ApiResponse(200, "لا توجد دورات مفضلة");

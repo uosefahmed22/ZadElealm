@@ -27,8 +27,6 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 if (enrollment == null)
                     return new ApiResponse(404, "لم يتم العثور على التسجيل");
 
-                //_unitOfWork.Repository<Enrollment>().Delete(enrollment);
-                
                 enrollment.IsDeleted = true;
                 await _unitOfWork.Complete();
 

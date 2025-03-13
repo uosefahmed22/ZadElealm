@@ -31,7 +31,7 @@ namespace ZadElealm.Apis.Handlers.Review
                 if (existingReview != null)
                     return new ApiResponse(400, "لقد قمت بإضافة مراجعة لهذه الدورة من قبل");
 
-                var course = await _unitOfWork.Repository<Core.Models.Course>().GetByIdAsync(request.CourseId);
+                var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(request.CourseId);
                 if (course == null)
                     return new ApiResponse(404, "الدورة غير موجودة");
 
