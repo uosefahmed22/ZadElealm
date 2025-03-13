@@ -22,22 +22,31 @@ namespace ZadElealm.Service.AppServices
 
         public async Task SendNotificationAsync(NotificationServiceDto notificationServiceDto)
         {
-            var notification = new Notification
+            try
             {
-                Title = notificationServiceDto.Title,
-                Description = notificationServiceDto.Description,
-                Type = notificationServiceDto.Type,
-                UserNotifications = new List<UserNotification>()
-            };
-            var userNotification = new UserNotification
+                var notification = new Notification
+                {
+                    Title = notificationServiceDto.Title,
+                    Description = notificationServiceDto.Description,
+                    Type = notificationServiceDto.Type,
+                    UserNotifications = new List<UserNotification>()
+                };
+
+                var userNotification = new UserNotification
+                {
+                    UserId = notificationServiceDto.UserId,
+                    IsRead = false
+                };
+
+                notification.UserNotifications.Add(userNotification);
+
+                await _unitOfWork.Repository<Notification>().AddAsync(notification);
+                await _unitOfWork.Complete();
+            }
+            catch (Exception ex)
             {
-                UserId = notificationServiceDto.UserId,
-                Notification = notification,
-                IsRead = false
-            };
-            notification.UserNotifications.Add(userNotification);
-            await _unitOfWork.Repository<Notification>().AddAsync(notification);
-            await _unitOfWork.Complete();
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
