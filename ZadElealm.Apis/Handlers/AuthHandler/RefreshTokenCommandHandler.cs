@@ -17,10 +17,7 @@ namespace ZadElealm.Apis.Handlers.Auth
         {
             try
             {
-                var result = await _tokenService.RefreshToken(
-                    request.TokenRequest.Token,
-                    request.TokenRequest.RefreshToken
-                );
+                var result = await _tokenService.RefreshToken(request.TokenRequest.Token,request.TokenRequest.RefreshToken);
 
                 return new ApiDataResponse(200, result );
             }

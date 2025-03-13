@@ -29,7 +29,7 @@ namespace ZadElealm.Apis.Handlers.Auth
 
                 var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
                 if (result.Succeeded)
-                    return new ApiDataResponse(200, "https://www.google.com/webhp?authuser=0", "تم تأكيد البريد الإلكتروني بنجاح");
+                    return new ApiDataResponse(200, "https://resonant-dusk-db1070.netlify.app/login", "تم تأكيد البريد الإلكتروني بنجاح, يمكنك الآن تسجيل الدخول في المنصه ونتمنى لك تجربة ممتعة");
 
                 return new ApiResponse(400, "فشل في تأكيد البريد الإلكتروني. الرمز غير صالح أو منتهي الصلاحية");
             }
