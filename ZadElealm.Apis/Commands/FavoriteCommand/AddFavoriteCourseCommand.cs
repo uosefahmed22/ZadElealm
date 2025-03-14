@@ -4,12 +4,12 @@ namespace ZadElealm.Apis.Commands.FavoriteCommand
 {
     public class AddFavoriteCourseCommand : BaseCommand<ApiResponse>
     {
-        public string UserId { get; }
+        public string AppUserId { get; }
         public int CourseId { get; }
 
-        public AddFavoriteCourseCommand(string userId, int courseId)
+        public AddFavoriteCourseCommand(string appUserId, int courseId)
         {
-            UserId = userId;
+            AppUserId = appUserId;
             CourseId = courseId;
         }
     }

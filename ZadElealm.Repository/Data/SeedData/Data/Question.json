@@ -3,19 +3,19 @@
     "QuestionId": 1,
     "Text": "ما هي عاصمة السعودية؟",
     "ImageUrl": null,
-    "QuizId": 1
+    "QuizId": 4
   },
   {
     "QuestionId": 2,
     "Text": "في أي قارة تقع مصر؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 4
   },
   {
     "QuestionId": 3,
     "Text": "ما هو أعلى جبل في العالم؟",
     "ImageUrl": null,
-    "QuizId": 3
+    "QuizId": 4
   },
   {
     "QuestionId": 4,
@@ -75,18 +75,18 @@
     "QuestionId": 13,
     "Text": "كم عدد شهور السنة؟",
     "ImageUrl": null,
-    "QuizId": 1
+    "QuizId": 12
   },
   {
     "QuestionId": 14,
     "Text": "ما هو معنى كلمة 'سلام'؟",
     "ImageUrl": null,
-    "QuizId": 2
+    "QuizId": 12
   },
   {
     "QuestionId": 15,
     "Text": "ما هو عكس كلمة 'ليل'؟",
     "ImageUrl": null,
-    "QuizId": 3
+    "QuizId": 13
   }
 ]

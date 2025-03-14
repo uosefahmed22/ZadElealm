@@ -44,8 +44,10 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("{courseId}")]
         public async Task<ActionResult<ApiResponse>> AddToFavorites(int courseId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var command = new AddFavoriteCourseCommand(userId, courseId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var command = new AddFavoriteCourseCommand(user.Id, courseId);
             var response = await _mediator.Send(command);
 
             return StatusCode(response.StatusCode, response);

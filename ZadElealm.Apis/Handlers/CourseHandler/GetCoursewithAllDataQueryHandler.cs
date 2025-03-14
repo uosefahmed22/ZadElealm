@@ -35,7 +35,7 @@ namespace ZadElealm.Apis.Handlers.Course
 
                 var mappedCourse = _mapper.Map<CourseResponseWithAllDataDto>(course);
 
-                return new ApiDataResponse(200,mappedCourse);
+                return new ApiDataResponse(200, mappedCourse);
             }
             catch
             {

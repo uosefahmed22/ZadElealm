@@ -147,7 +147,7 @@ namespace AdminDashboard.Controllers
             var playlist = new Course
             {
                 Name = snippet["title"]?.ToString(),
-                Description = snippet["description"]?.ToString(),
+                Description = snippet["description"]?.ToString() ?? snippet["title"]?.ToString(),
                 Author = !string.IsNullOrEmpty(model.Author) ? model.Author : defaultAuthor,
                 CourseLanguage = !string.IsNullOrEmpty(model.CourseLanguage) ? model.CourseLanguage : defaultLanguage,
                 CreatedAt = DateTime.Now,

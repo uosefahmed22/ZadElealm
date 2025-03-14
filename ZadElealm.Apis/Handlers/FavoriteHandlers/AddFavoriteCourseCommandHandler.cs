@@ -12,14 +12,9 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
     public class AddFavoriteCourseCommandHandler : BaseCommandHandler<AddFavoriteCourseCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
-
-        public AddFavoriteCourseCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+        public AddFavoriteCourseCommandHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(AddFavoriteCourseCommand request, CancellationToken cancellationToken)
@@ -31,24 +26,22 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
                 if (course == null)
                     return new ApiResponse(404, "الدورة غير موجودة");
 
-                var spec = new FavoriteWithCourseAndUserSpecification(request.UserId);
+                var spec = new FavoriteWithCourseAndUserSpecification(request.AppUserId);
                 var existingFavorite = await _unitOfWork.Repository<Favorite>()
-                    .GetEntityWithSpecAsync(new FavoriteSpecification(request.UserId, request.CourseId));
+                    .GetEntityWithSpecAsync(new FavoriteSpecification(request.AppUserId, request.CourseId));
 
                 if (existingFavorite != null)
                     return new ApiResponse(400, "الدورة موجودة بالفعل في المفضلة");
 
                 var favorite = new Favorite
                 {
-                    AppUserId = request.UserId,
+                    AppUserId = request.AppUserId,
                     CourseId = request.CourseId,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _unitOfWork.Repository<Favorite>().AddAsync(favorite);
                 await _unitOfWork.Complete();
-
-                _cache.Remove($"favorite_courses_{request.UserId}");
 
                 return new ApiResponse(200, "تمت إضافة الدورة إلى المفضلة بنجاح");
             }
