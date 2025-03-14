@@ -12,7 +12,7 @@ namespace ZadElealm.Core.Specifications.Notification
     public class UserNotificationWithNotificationSpecification : BaseSpecification<UserNotification>
     {
         public UserNotificationWithNotificationSpecification(string userId)
-            : base(un => un.UserId == userId)
+            : base(un => un.AppUserId == userId)
         {
             Includes.Add(un => un.Notification);
             AddOrderByDescending(un => un.Notification.CreatedAt);

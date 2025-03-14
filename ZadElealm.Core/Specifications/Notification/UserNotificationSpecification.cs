@@ -11,7 +11,7 @@ namespace ZadElealm.Core.Specifications.Notification
     public class UserNotificationSpecification : BaseSpecification<UserNotification>
     {
         public UserNotificationSpecification(string userId, int notificationId)
-            : base(un => un.UserId == userId && un.NotificationId == notificationId)
+            : base(un => un.AppUserId == userId && un.NotificationId == notificationId)
         {
             Includes.Add(un => un.Notification);
         }

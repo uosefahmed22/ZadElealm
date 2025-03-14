@@ -40,7 +40,7 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
 
                 var favorite = new Favorite
                 {
-                    UserId = request.UserId,
+                    AppUserId = request.UserId,
                     CourseId = request.CourseId,
                     CreatedAt = DateTime.UtcNow
                 };

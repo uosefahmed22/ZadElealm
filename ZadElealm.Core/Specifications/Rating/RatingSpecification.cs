@@ -9,7 +9,7 @@ namespace ZadElealm.Core.Specifications.Rating
     public class RatingSpecification : BaseSpecification<Core.Models.Rating>
     {
         public RatingSpecification(string userId, int courseId)
-            : base(r => r.UserId == userId && r.courseId == courseId)
+            : base(r => r.AppUserId == userId && r.courseId == courseId)
         {
         }
     }

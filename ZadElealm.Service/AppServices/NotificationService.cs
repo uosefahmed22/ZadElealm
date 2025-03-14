@@ -34,7 +34,7 @@ namespace ZadElealm.Service.AppServices
 
                 var userNotification = new UserNotification
                 {
-                    UserId = notificationServiceDto.UserId,
+                    AppUserId = notificationServiceDto.UserId,
                     IsRead = false
                 };
 

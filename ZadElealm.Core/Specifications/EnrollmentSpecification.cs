@@ -10,12 +10,12 @@ namespace ZadElealm.Core.Specifications
     public class EnrollmentSpecification : BaseSpecification<Enrollment>
     {
         public EnrollmentSpecification(int courseId, string userId)
-            : base(x => x.CourseId == courseId && x.UserId == userId)
+            : base(x => x.CourseId == courseId && x.AppUserId == userId)
         {
         }
 
         public EnrollmentSpecification(string userId)
-            : base(x => x.UserId == userId)
+            : base(x => x.AppUserId == userId)
         {
             Includes.Add(x => x.Course);
         }

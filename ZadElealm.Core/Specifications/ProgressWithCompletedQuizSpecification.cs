@@ -10,7 +10,7 @@ namespace ZadElealm.Core.Specifications
     public class ProgressWithCompletedQuizSpecification : BaseSpecification<Progress>
     {
         public ProgressWithCompletedQuizSpecification(string userId, int quizId)
-            : base(p => p.UserId == userId && p.QuizId == quizId && p.IsCompleted)
+            : base(p => p.AppUserId == userId && p.QuizId == quizId && p.IsCompleted)
         {
             Includes.Add(p => p.Quiz);
         }

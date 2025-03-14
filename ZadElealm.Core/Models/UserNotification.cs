@@ -9,7 +9,7 @@ namespace ZadElealm.Core.Models
 {
     public class UserNotification : BaseEntity
     {
-        public string UserId { get; set; }
+        public string AppUserId { get; set; }
         public AppUser User { get; set; }
         public int NotificationId { get; set; }
         public Notification Notification { get; set; }

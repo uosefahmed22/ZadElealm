@@ -120,7 +120,7 @@ namespace ZadElealm.Service.AppServices
                     progress = new Progress
                     {
                         QuizId = submission.QuizId,
-                        UserId = userId,
+                        AppUserId = userId,
                         Score = score,
                         IsCompleted = isCompleted,
                         CreatedAt = DateTime.UtcNow
@@ -151,7 +151,7 @@ namespace ZadElealm.Service.AppServices
                     {
                         new UserNotification
                         {
-                            UserId = userId,
+                            AppUserId = userId,
                             IsRead = false
                         }
                     }

@@ -10,7 +10,7 @@ namespace ZadElealm.Core.Specifications.Favorite
     public class FavoriteWithCourseAndUserSpecification : BaseSpecification<Core.Models.Favorite>
     {
         public FavoriteWithCourseAndUserSpecification(string userId)
-            : base(f => f.UserId == userId)
+            : base(f => f.AppUserId == userId)
         {
             Includes.Add(f => f.Course);
             OrderByDescending = f => f.CreatedAt;
