@@ -15,15 +15,12 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
 
         public override async Task<ApiResponse> Handle(SubmitQuizCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _quizService.SubmitQuizAsync(request.UserId, request.Submission);
-                return new ApiDataResponse(200,result);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(400, ex.Message);
-            }
+            var result = await _quizService.SubmitQuizAsync(request.UserId, request.Submission);
+
+            if (!result.IsSuccess)
+                return new ApiResponse(400, result.Message);
+
+            return new ApiDataResponse(200, result.Data);
         }
     }
 }
