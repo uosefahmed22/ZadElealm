@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,11 +13,13 @@ namespace ZadElealm.Core.Specifications.Course
         public CourseWithAllDataSpecification(int courseId)
             : base(x => x.Id == courseId)
         {
-           Includes.Add(x => x.Category);
+            Includes.Add(x => x.Category);
             Includes.Add(x => x.Videos.OrderBy(v => v.OrderInCourse));
             Includes.Add(x => x.Quizzes.OrderBy(q => q.CreatedAt));
             Includes.Add(x => x.enrollments);
-            Includes.Add(x => x.Review);
+            AddThenInclude(query => query
+                .Include(c => c.Review)
+                .ThenInclude(r => r.User));
         }
     }
 }

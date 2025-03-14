@@ -82,62 +82,31 @@ namespace ZadElealm.Apis.Controllers
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("update-profile")]
-        public async Task<ActionResult<ApiResponse>> UploadImage(IFormFile file)
+        [HttpPost("update-profile-image")]
+        public async Task<ActionResult<ApiResponse>> UpdateProfileImage(IFormFile? file)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email);
-
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return Unauthorized(new ApiResponse(401, "User not found"));
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
-            try
-            {
-                if (file == null)
-                {
-                    if (!string.IsNullOrEmpty(user.ImageUrl))
-                    {
-                        await _imageService.DeleteImageAsync(user.ImageUrl);
-                        user.ImageUrl = null;
-                        await _userManager.UpdateAsync(user);
-                    }
-                    return Ok(new ApiResponse(200, "Profile image removed successfully"));
-                }
+            var command = new UpdateProfileImageCommand(user.Id, file);
+            var response = await _mediator.Send(command);
 
-                if (!string.IsNullOrEmpty(user.ImageUrl))
-                {
-                    await _imageService.DeleteImageAsync(user.ImageUrl);
-                }
-
-                var imageUrl = await _imageService.UploadImageAsync(file);
-                user.ImageUrl = imageUrl;
-                await _userManager.UpdateAsync(user);
-
-                return Ok(new ApiResponse(200, "Image uploaded successfully"));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse(500, "An error occurred while processing the image"));
-            }
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("get-User-Profile")]
-        public async Task<ActionResult<ApiResponse>> GetUserProfile()
+        [HttpGet("profile")]
+        public async Task<ActionResult<ApiResponse>> GetProfile()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.GetUserAsync(User);
             if (user == null)
-                return Unauthorized(new ApiResponse(401, "User not found"));
-            var userDTO = new UserProfileDTO
-            {
-                Email = email,
-                ImageUrl = user.ImageUrl,
-                UserName = user.UserName,
-                PhoneNumber = user.PhoneNumber,
-                DisplayName = user.DisplayName
-            };
-            return Ok(new ApiDataResponse(200, userDTO));
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var query = new GetUserProfileQuery(user.Id);
+            var response = await _mediator.Send(query);
+
+            return StatusCode(response.StatusCode, response);
         }
 
         [HttpPost("forget-password")]

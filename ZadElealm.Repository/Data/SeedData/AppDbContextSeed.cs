@@ -42,7 +42,7 @@ namespace ZadElealm.Repository.Data.SeedData
                         logger.LogInformation("Seeded Quizzes successfully.");
                     }
 
-                    ////Seed Questions
+                    //////Seed Questions
                     if (!context.Question.Any())
                     {
                         logger.LogInformation("Seeding Questions...");
@@ -53,7 +53,7 @@ namespace ZadElealm.Repository.Data.SeedData
                         logger.LogInformation("Seeded Questions successfully.");
                     }
 
-                    //Seed Choices
+                    ////Seed Choices
                     if (!context.Choice.Any())
                     {
                         logger.LogInformation("Seeding Choices...");
@@ -64,38 +64,38 @@ namespace ZadElealm.Repository.Data.SeedData
                         logger.LogInformation("Seeded Choices successfully.");
                     }
 
-                    //Seed Reports
-                    if (!context.Reports.Any())
-                    {
-                        logger.LogInformation("Seeding Reports...");
-                        var reportsData = File.ReadAllText(Path.Combine(basePath, "Report.json"));
-                        var reports = JsonSerializer.Deserialize<List<Report>>(reportsData);
-                        await context.Reports.AddRangeAsync(reports);
-                        await context.SaveChangesAsync();
-                        logger.LogInformation("Seeded Reports successfully.");
-                    }
+                    ////Seed Reports
+                    //if (!context.Reports.Any())
+                    //{
+                    //    logger.LogInformation("Seeding Reports...");
+                    //    var reportsData = File.ReadAllText(Path.Combine(basePath, "Report.json"));
+                    //    var reports = JsonSerializer.Deserialize<List<Report>>(reportsData);
+                    //    await context.Reports.AddRangeAsync(reports);
+                    //    await context.SaveChangesAsync();
+                    //    logger.LogInformation("Seeded Reports successfully.");
+                    //}
 
-                    //Seed Notifications
-                    if (!context.Notifications.Any())
-                    {
-                        logger.LogInformation("Seeding Notifications...");
-                        var notificationsData = File.ReadAllText(Path.Combine(basePath, "Notification.json"));
-                        var notifications = JsonSerializer.Deserialize<List<Notification>>(notificationsData);
-                        await context.Notifications.AddRangeAsync(notifications);
-                        await context.SaveChangesAsync();
-                        logger.LogInformation("Seeded Notifications successfully.");
-                    }
+                    ////Seed Notifications
+                    //if (!context.Notifications.Any())
+                    //{
+                    //    logger.LogInformation("Seeding Notifications...");
+                    //    var notificationsData = File.ReadAllText(Path.Combine(basePath, "Notification.json"));
+                    //    var notifications = JsonSerializer.Deserialize<List<Notification>>(notificationsData);
+                    //    await context.Notifications.AddRangeAsync(notifications);
+                    //    await context.SaveChangesAsync();
+                    //    logger.LogInformation("Seeded Notifications successfully.");
+                    //}
 
-                    //Seed UserNotifications
-                    if (!context.Notifications.Any())
-                    {
-                        logger.LogInformation("Seeding UserNotifications...");
-                        var userNotificationsData = File.ReadAllText(Path.Combine(basePath, "UserNotification.json"));
-                        var userNotifications = JsonSerializer.Deserialize<List<UserNotification>>(userNotificationsData);
-                        await context.UserNotifications.AddRangeAsync(userNotifications);
-                        await context.SaveChangesAsync();
-                        logger.LogInformation("Seeded UserNotifications successfully.");
-                    }
+                    ////Seed UserNotifications
+                    //if (!context.Notifications.Any())
+                    //{
+                    //    logger.LogInformation("Seeding UserNotifications...");
+                    //    var userNotificationsData = File.ReadAllText(Path.Combine(basePath, "UserNotification.json"));
+                    //    var userNotifications = JsonSerializer.Deserialize<List<UserNotification>>(userNotificationsData);
+                    //    await context.UserNotifications.AddRangeAsync(userNotifications);
+                    //    await context.SaveChangesAsync();
+                    //    logger.LogInformation("Seeded UserNotifications successfully.");
+                    //}
 
                     await transaction.CommitAsync();
                     logger.LogInformation("Database seeding completed successfully.");
