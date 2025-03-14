@@ -43,7 +43,7 @@ namespace ZadElealm.Apis.Handlers.Rating
                 {
                     Value = request.Value,
                     courseId = request.CourseId,
-                    UserId = request.UserId,
+                    AppUserId = request.UserId,
                     CreatedAt = DateTime.UtcNow
                 };
 

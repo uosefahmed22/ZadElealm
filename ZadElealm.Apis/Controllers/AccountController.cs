@@ -150,10 +150,10 @@ namespace ZadElealm.Apis.Controllers
         }
         
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpPost("delete-account")]
-        public async Task<ActionResult<ApiResponse>> DeleteAccount(string email)
+        [HttpDelete("delete-account")]
+        public async Task<ActionResult<ApiResponse>> DeleteAccount()
         {
-            var user = await _userManager.FindByEmailAsync(email);
+            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "User not found"));
             user.IsDeleted = true;

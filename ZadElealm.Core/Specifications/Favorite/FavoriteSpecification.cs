@@ -10,7 +10,7 @@ namespace ZadElealm.Core.Specifications.Favorite
     public class FavoriteSpecification : BaseSpecification<Core.Models.Favorite>
     {
         public FavoriteSpecification(string userId, int courseId)
-            : base(f => f.UserId == userId && f.CourseId == courseId)
+            : base(f => f.AppUserId == userId && f.CourseId == courseId)
         {
         }
     }

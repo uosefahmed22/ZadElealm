@@ -46,7 +46,7 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 var enrollment = new Enrollment
                 {
                     CourseId = request.CourseId,
-                    UserId = request.UserId,
+                    AppUserId = request.UserId,
                     CreatedAt = DateTime.UtcNow
                 };
 

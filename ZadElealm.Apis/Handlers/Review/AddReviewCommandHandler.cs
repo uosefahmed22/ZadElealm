@@ -49,7 +49,7 @@ namespace ZadElealm.Apis.Handlers.Review
                 {
                     Text = request.ReviewText.Trim(),
                     courseId = request.CourseId,
-                    UserId = request.UserId,
+                    AppUserId = request.UserId,
                     CreatedAt = DateTime.UtcNow,
                 };
 

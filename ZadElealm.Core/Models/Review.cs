@@ -13,8 +13,7 @@ namespace ZadElealm.Core.Models
         public string Text { get; set; }
         public int courseId { get; set; }
         public Course course { get; set; }
-        public string UserId { get; set; }
-        [ForeignKey("UserId")]
+        public string AppUserId { get; set; }
         public AppUser User { get; set; }
     }
 }

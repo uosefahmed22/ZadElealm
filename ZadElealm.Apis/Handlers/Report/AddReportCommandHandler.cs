@@ -21,7 +21,7 @@ namespace ZadElealm.Apis.Handlers.Report
             try
             {
                 var mappedReport = _mapper.Map<Core.Models.Report>(request.ReportDto);
-                mappedReport.UserId = request.UserId;
+                mappedReport.AppUserId = request.UserId;
 
                 await _unitOfWork.Repository<Core.Models.Report>().AddAsync(mappedReport);
                 await _unitOfWork.Complete();
