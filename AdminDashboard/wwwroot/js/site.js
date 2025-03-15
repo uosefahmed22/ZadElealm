@@ -33,3 +33,34 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+// في نفس الملف site.js
+document.addEventListener('DOMContentLoaded', function () {
+    // Search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function () {
+            const searchText = this.value.toLowerCase();
+            const table = document.getElementById('rolesTable');
+            const rows = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < rows.length; i++) {
+                const roleNameCell = rows[i].getElementsByTagName('td')[1];
+                if (roleNameCell) {
+                    const roleName = roleNameCell.textContent || roleNameCell.innerText;
+                    if (roleName.toLowerCase().indexOf(searchText) > -1) {
+                        rows[i].style.display = '';
+                    } else {
+                        rows[i].style.display = 'none';
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Delete role function
+function deleteRole(roleId) {
+    if (confirm('Are you sure you want to delete this role?')) {
+        window.location.href = `/Role/Delete/${roleId}`;
+    }
+}
