@@ -10,173 +10,184 @@ using ZadElealm.Core.Models.Identity;
 
 namespace AdminDashboard.Controllers
 {
-    public class AdminController : Controller
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+    using System.Security.Claims;
+    using ZadElealm.Apis.Dtos.Auth;
+    using ZadElealm.Core.Models.Identity;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
+    using System.Threading.Tasks;
+    using MediatR;
+    using global::AdminDashboard.Commands;
+    using global::AdminDashboard.Quires;
+
+    namespace AdminDashboard.Controllers
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
-        private readonly string _primaryAdminEmail;
-        private readonly int _maxAdminCount;
-
-        public AdminController(UserManager<AppUser> userManager,
-            IConfiguration configuration,
-            SignInManager<AppUser> signInManager)
+        public class AdminController : Controller
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _primaryAdminEmail = configuration["AdminSettings:PrimaryAdminEmail"];
-            _maxAdminCount = int.Parse(configuration["AdminSettings:MaxAdminCount"] ?? "10");
+            private readonly IMediator _mediator;
+            private readonly SignInManager<AppUser> _signInManager;
+            private readonly UserManager<AppUser> _userManager;
+            private readonly ILogger<AdminController> _logger;
 
-        }
-        public IActionResult Login()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Login(LoginDTO model)
-        {
-            if (!ModelState.IsValid)
+            public AdminController(
+                IMediator mediator,
+                SignInManager<AppUser> signInManager,
+                UserManager<AppUser> userManager,  
+                ILogger<AdminController> logger)
             {
-                return View(model);
+                _mediator = mediator;
+                _signInManager = signInManager;
+                _userManager = userManager;
+                _logger = logger;
             }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user == null)
+            [HttpGet]
+            public IActionResult Login()
             {
-                ModelState.AddModelError("", "Invalid login attempt.");
-                return View(model);
+                return View();
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-            if (!result.Succeeded)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> Login(LoginDTO model)
             {
-                ModelState.AddModelError("", "Invalid login attempt.");
-                return View(model);
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.Email, user.Email)
-            };
-
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
-            }
-
-            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
-
-            await _signInManager.SignInAsync(user, isPersistent: false);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
-
-            return RedirectToAction("Index", "Home");
-        }
-        [Authorize(Roles = "Admin")]
-
-        public async Task<IActionResult> AddAdmin()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null || currentUser.Email != _primaryAdminEmail)
-            {
-                TempData["ErrorMessage"] = "غير مسموح لك بإضافة مديرين للنظام.";
-                return RedirectToAction("AccessDenied", "Account");
-            }
-
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-            if (adminUsers.Count >= _maxAdminCount)
-            {
-                TempData["ErrorMessage"] = $"لا يمكن إضافة أكثر من {_maxAdminCount} مديرين للنظام.";
-                return RedirectToAction("Index", "User");
-            }
-
-            ViewBag.AdminCount = adminUsers.Count;
-            ViewBag.MaxAdminCount = _maxAdminCount;
-
-            return View(new AdminDto());
-        }
-        [Authorize(Roles = "Admin")]
-
-        [HttpPost]
-        public async Task<IActionResult> AddAdmin(AdminDto model)
-        {
-            if (!ModelState.IsValid)
-            {
-                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-                ViewBag.AdminCount = adminUsers.Count;
-                ViewBag.MaxAdminCount = _maxAdminCount;
-                return View(model);
-            }
-            var confimedAdmin = await _userManager.FindByEmailAsync(_primaryAdminEmail);
-            if (confimedAdmin != null) {
-                if (!confimedAdmin.EmailConfirmed)
+                try
                 {
-                    TempData["ErrorMessage"] = "لا يمكن إضافة مديرين للنظام حتى يتم تأكيد البريد الإلكتروني للمدير الأساسي.";
-                    return RedirectToAction("Index", "User");
+                    if (!ModelState.IsValid)
+                    {
+                        return View(model);
+                    }
+
+                    var command = new LoginCommand
+                    {
+                        Email = model.Email,
+                        Password = model.Password
+                    };
+
+                    var result = await _mediator.Send(command);
+
+                    if (!result.Succeeded)
+                    {
+                        ModelState.AddModelError("", result.ErrorMessage);
+                        return View(model);
+                    }
+
+                    await SetupUserAuthentication(result.User);
+                    return RedirectToAction("Index", "Home");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error during login");
+                    ModelState.AddModelError("", "An error occurred during login.");
+                    return View(model);
                 }
             }
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null || currentUser.Email != _primaryAdminEmail)
+
+            [Authorize(Roles = "Admin")]
+            public async Task<IActionResult> AddAdmin()
             {
-                ModelState.AddModelError("", "غير مسموح لك بإضافة مديرين للنظام.");
-                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-                ViewBag.AdminCount = adminUsers.Count;
-                ViewBag.MaxAdminCount = _maxAdminCount;
-                return View(model);
+                try
+                {
+                    var stats = await _mediator.Send(new GetAdminStatsQuery());
+                    ViewBag.AdminCount = stats.CurrentAdminCount;
+                    ViewBag.MaxAdminCount = stats.MaxAdminCount;
+
+                    return View(new AdminDto());
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error getting admin stats");
+                    TempData["ErrorMessage"] = "An error occurred while loading the page.";
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
-            var adminCount = await _userManager.GetUsersInRoleAsync("Admin");
-            if (adminCount.Count >= _maxAdminCount)
+            [HttpPost]
+            [Authorize(Roles = "Admin")]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> AddAdmin(AdminDto model)
             {
-                ModelState.AddModelError("", $"لا يمكن إضافة أكثر من {_maxAdminCount} مديرين للنظام.");
-                ViewBag.AdminCount = adminCount.Count;
-                ViewBag.MaxAdminCount = _maxAdminCount;
-                return View(model);
+                try
+                {
+                    if (!ModelState.IsValid)
+                    {
+                        var stats = await _mediator.Send(new GetAdminStatsQuery());
+                        ViewBag.AdminCount = stats.CurrentAdminCount;
+                        ViewBag.MaxAdminCount = stats.MaxAdminCount;
+                        return View(model);
+                    }
+
+                    var command = new AddAdminCommand
+                    {
+                        DisplayName = model.DisplayName,
+                        Email = model.Email,
+                        Password = model.Password
+                    };
+
+                    var result = await _mediator.Send(command);
+
+                    if (!result.Succeeded)
+                    {
+                        if (result.Errors != null)
+                        {
+                            foreach (var error in result.Errors)
+                            {
+                                ModelState.AddModelError("", error.Description);
+                            }
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("", result.ErrorMessage);
+                        }
+
+                        var stats = await _mediator.Send(new GetAdminStatsQuery());
+                        ViewBag.AdminCount = stats.CurrentAdminCount;
+                        ViewBag.MaxAdminCount = stats.MaxAdminCount;
+                        return View(model);
+                    }
+
+                    TempData["SuccessMessage"] = "Administrator added successfully";
+                    return RedirectToAction("Index", "User");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error adding admin");
+                    ModelState.AddModelError("", "An error occurred while adding the administrator.");
+                    return View(model);
+                }
             }
 
-            var user = new AppUser
+            public async Task<IActionResult> Logout()
             {
-                DisplayName = model.DisplayName,
-                UserName = model.Email,
-                Email = model.Email
-            };
-
-            if (await _userManager.FindByEmailAsync(model.Email) != null)
-            {
-                ModelState.AddModelError("", "البريد الإلكتروني مستخدم بالفعل.");
-                ViewBag.AdminCount = adminCount.Count;
-                ViewBag.MaxAdminCount = _maxAdminCount;
-                return View(model);
+                await _mediator.Send(new LogoutCommand());
+                return RedirectToAction(nameof(Login));
             }
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
+            private async Task SetupUserAuthentication(AppUser user)
             {
-                await _userManager.AddToRoleAsync(user, "Admin");
-                user.EmailConfirmed = true;
-                await _userManager.UpdateAsync(user);
+                var roles = await _userManager.GetRolesAsync(user);
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Email, user.Email)
+                };
 
-                TempData["SuccessMessage"] = "تمت إضافة المدير بنجاح";
-                return RedirectToAction("Index", "User");
+                claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
             }
-
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError("", error.Description);
-            }
-
-            ViewBag.AdminCount = adminCount.Count;
-            ViewBag.MaxAdminCount = _maxAdminCount;
-            return View(model);
-        }
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return RedirectToAction(nameof(Login));
         }
     }
 }
