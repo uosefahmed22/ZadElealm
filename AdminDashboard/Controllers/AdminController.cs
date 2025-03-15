@@ -7,27 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Dtos.Auth;
 using ZadElealm.Core.Models.Identity;
+using MediatR;
+using AdminDashboard.Commands;
+using AdminDashboard.Quires;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 
 namespace AdminDashboard.Controllers
 {
-    using Microsoft.AspNetCore.Authentication;
-    using Microsoft.AspNetCore.Authentication.Cookies;
-    using Microsoft.AspNetCore.Authentication.JwtBearer;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-    using System.Security.Claims;
-    using ZadElealm.Apis.Dtos.Auth;
-    using ZadElealm.Core.Models.Identity;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Options;
-    using System.Threading.Tasks;
-    using MediatR;
-    using global::AdminDashboard.Commands;
-    using global::AdminDashboard.Quires;
-
     namespace AdminDashboard.Controllers
     {
         public class AdminController : Controller
