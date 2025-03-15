@@ -13,6 +13,7 @@ using ZadElealm.Core.Specifications.Quiz;
 using ZadElealm.Core.Enums;
 using ZadElealm.Service.Errors;
 using ZadElealm.Core.ServiceDto;
+using static ZadElealm.Service.AppServices.QuizService;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -36,35 +37,20 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ServiceApiResponse<QuizResultDto>> SubmitQuizAsync(string userId, QuizSubmissionDto submission)
         {
-            if (submission == null)
-                return ServiceApiResponse<QuizResultDto>.Failure("Quiz submission cannot be null", 400);
-
-            if (string.IsNullOrEmpty(userId))
-                return ServiceApiResponse<QuizResultDto>.Failure("User ID cannot be null or empty", 400);
-
-            if (submission.QuizId <= 0)
-                return ServiceApiResponse<QuizResultDto>.Failure("Invalid Quiz ID", 400);
-
-            if (submission.StudentAnswers == null || !submission.StudentAnswers.Any())
-                return ServiceApiResponse<QuizResultDto>.Failure("No answers provided", 400);
+            var (isValid, error) = ValidateSubmission(userId, submission);
+            if (!isValid)
+                return ServiceApiResponse<QuizResultDto>.Failure(error, 400);
 
             try
             {
                 var spec = new QuizWithQuestionsAndChoicesSpecification(submission.QuizId);
-                var quiz = await _unitOfWork.Repository<Quiz>()
-                    .GetEntityWithSpecAsync(spec);
+                var quiz = await _unitOfWork.Repository<Quiz>().GetEntityWithSpecAsync(spec);
 
                 if (quiz == null)
                     return ServiceApiResponse<QuizResultDto>.Failure($"Quiz with ID {submission.QuizId} not found", 404);
 
                 if (!quiz.Questions.Any())
                     return ServiceApiResponse<QuizResultDto>.Failure($"Quiz with ID {submission.QuizId} does not contain any questions", 400);
-
-                var existingProgress = await _unitOfWork.Repository<Progress>()
-                    .GetEntityWithSpecAsync(new ProgressByQuizAndUserSpecification(submission.QuizId, userId));
-
-                if (existingProgress != null && existingProgress.IsCompleted)
-                    return ServiceApiResponse<QuizResultDto>.Failure($"Quiz with ID {submission.QuizId} has already been completed by user {userId}", 400);
 
                 var questionMap = quiz.Questions.ToDictionary(q => q.Id);
                 foreach (var answer in submission.StudentAnswers)
@@ -73,66 +59,20 @@ namespace ZadElealm.Service.AppServices
                         return ServiceApiResponse<QuizResultDto>.Failure($"Question with ID {answer.QuestionId} not found in quiz", 400);
                 }
 
-                int totalQuestions = quiz.Questions.Count;
-                int correctAnswers = 0;
-                var questionResults = new List<QuestionResultDto>();
+                var existingProgress = await _unitOfWork.Repository<Progress>()
+                    .GetEntityWithSpecAsync(new ProgressByQuizAndUserSpecification(submission.QuizId, userId));
 
-                var answeredQuestionIds = new HashSet<int>(submission.StudentAnswers.Select(a => a.QuestionId));
-                var unansweredQuestions = quiz.Questions.Where(q => !answeredQuestionIds.Contains(q.Id)).ToList();
+                if (existingProgress?.IsCompleted == true)
+                    return ServiceApiResponse<QuizResultDto>.Failure($"Quiz with ID {submission.QuizId} has already been completed by user {userId}", 400);
 
-                foreach (var question in quiz.Questions)
-                {
-                    var answer = submission.StudentAnswers.FirstOrDefault(a => a.QuestionId == question.Id);
+                var (score, correctAnswers, questionResults, unansweredCount) =
+                    ProcessQuizAnswers(quiz, submission.StudentAnswers);
 
-                    bool isCorrect = false;
-                    int selectedChoice = 0;
-
-                    if (answer != null)
-                    {
-                        selectedChoice = answer.SelectedChoice;
-                        isCorrect = question.CorrectChoice == selectedChoice;
-
-                        if (isCorrect)
-                        {
-                            correctAnswers++;
-                        }
-                    }
-
-                    questionResults.Add(new QuestionResultDto
-                    {
-                        QuestionId = question.Id,
-                        QuestionText = question.Text,
-                        IsCorrect = isCorrect,
-                        SelectedChoice = selectedChoice,
-                        CorrectChoice = question.CorrectChoice
-                    });
-                }
-
-                int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
                 bool isCompleted = score >= 60;
 
-                Progress progress;
-                if (existingProgress != null)
-                {
-                    progress = existingProgress;
-                    progress.Score = Math.Max(progress.Score, score);
-                    progress.IsCompleted = progress.IsCompleted || isCompleted;
-                    progress.CreatedAt = DateTime.UtcNow;
-                }
-                else
-                {
-                    progress = new Progress
-                    {
-                        QuizId = submission.QuizId,
-                        AppUserId = userId,
-                        Score = score,
-                        IsCompleted = isCompleted,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                }
+                var progress = PrepareProgressEntity(existingProgress, userId, submission.QuizId, score, isCompleted);
 
                 await _unitOfWork.BeginTransactionAsync();
-
                 try
                 {
                     if (existingProgress != null)
@@ -153,21 +93,20 @@ namespace ZadElealm.Service.AppServices
                         var notification = new Notification
                         {
                             Title = "مبارك على اجتيازك!",
-                            Description = "الحمد لله، لقد اجتزت الامتحان بنجاح!...",
+                            Description = "الحمد لله، لقد اجتزت الامتحان بنجاح! نسأل الله أن يبارك لك في علمك وعملك، وأن يجعلك من النافعين لدينك وأمتك. يمكنك الآن استلام شهادتك من قسم الشهادات. نسأل الله لك التوفيق والسداد في مسيرتك العلمية.",
                             Type = NotificationType.Certificate,
                             UserNotifications = new List<UserNotification>
+                        {
+                            new UserNotification
                             {
-                                new UserNotification
-                                {
-                                    AppUserId = userId,
-                                    IsRead = false
-                                }
+                                AppUserId = userId,
+                                IsRead = false
                             }
+                        }
                         };
 
                         await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
                         await _unitOfWork.Repository<Notification>().AddAsync(notification);
-
                         await _unitOfWork.Complete();
                     }
 
@@ -178,9 +117,9 @@ namespace ZadElealm.Service.AppServices
                         QuizName = quiz.Name,
                         Score = score,
                         IsCompleted = isCompleted,
-                        TotalQuestions = totalQuestions,
+                        TotalQuestions = quiz.Questions.Count,
                         CorrectAnswers = correctAnswers,
-                        UnansweredQuestions = unansweredQuestions.Count,
+                        UnansweredQuestions = unansweredCount,
                         Date = progress.CreatedAt,
                         QuestionResults = questionResults
                     };
@@ -190,124 +129,157 @@ namespace ZadElealm.Service.AppServices
                 catch (Exception)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-                    return ServiceApiResponse<QuizResultDto>.Failure("Failed to process quiz submission. Please try again later.", 500);
+                    return ServiceApiResponse<QuizResultDto>.Failure("Failed to process quiz submission", 500);
                 }
             }
             catch (Exception)
             {
-                return ServiceApiResponse<QuizResultDto>.Failure("An unexpected error occurred while processing the quiz", 500);
+                return ServiceApiResponse<QuizResultDto>.Failure("An unexpected error occurred", 500);
             }
         }
+        private (bool IsValid, string Error) ValidateSubmission(string userId, QuizSubmissionDto submission)
+        {
+            if (submission == null)
+                return (false, "Quiz submission cannot be null");
+
+            if (string.IsNullOrEmpty(userId))
+                return (false, "User ID cannot be null or empty");
+
+            if (submission.QuizId <= 0)
+                return (false, "Invalid Quiz ID");
+
+            if (submission.StudentAnswers == null || !submission.StudentAnswers.Any())
+                return (false, "No answers provided");
+
+            return (true, null);
+        }
+        private (int Score, int CorrectAnswers, List<QuestionResultDto> QuestionResults, int UnansweredCount) ProcessQuizAnswers(Quiz quiz, List<StudentAnswerDto> studentAnswers)
+        {
+            var answerMap = studentAnswers.ToDictionary(a => a.QuestionId);
+            var questionResults = new List<QuestionResultDto>();
+            int correctAnswers = 0;
+
+            foreach (var question in quiz.Questions)
+            {
+                if (answerMap.TryGetValue(question.Id, out var answer))
+                {
+                    bool isCorrect = question.CorrectChoice == answer.SelectedChoice;
+                    if (isCorrect) correctAnswers++;
+
+                    questionResults.Add(new QuestionResultDto
+                    {
+                        QuestionId = question.Id,
+                        QuestionText = question.Text,
+                        IsCorrect = isCorrect,
+                        SelectedChoice = answer.SelectedChoice,
+                        CorrectChoice = question.CorrectChoice
+                    });
+                }
+                else
+                {
+                    questionResults.Add(new QuestionResultDto
+                    {
+                        QuestionId = question.Id,
+                        QuestionText = question.Text,
+                        IsCorrect = false,
+                        SelectedChoice = 0,
+                        CorrectChoice = question.CorrectChoice
+                    });
+                }
+            }
+
+            int totalQuestions = quiz.Questions.Count;
+            int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
+            int unansweredCount = totalQuestions - studentAnswers.Count;
+
+            return (score, correctAnswers, questionResults, unansweredCount);
+        }
+        private Progress PrepareProgressEntity(Progress existingProgress, string userId, int quizId, int score, bool isCompleted)
+        {
+            if (existingProgress != null)
+            {
+                existingProgress.Score = Math.Max(existingProgress.Score, score);
+                existingProgress.IsCompleted = existingProgress.IsCompleted || isCompleted;
+                existingProgress.CreatedAt = DateTime.UtcNow;
+                return existingProgress;
+            }
+
+            return new Progress
+            {
+                QuizId = quizId,
+                AppUserId = userId,
+                Score = score,
+                IsCompleted = isCompleted,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+       
         public async Task<ServiceApiResponse<int>> CreateQuizAsync(QuizDto quizDto)
         {
+            var (isValid, error) = ValidateQuizDto(quizDto);
+            if (!isValid)
+                return ServiceApiResponse<int>.Failure(error, 400);
+
             try
             {
-                if (quizDto == null)
-                    return ServiceApiResponse<int>.Failure("Quiz data cannot be null", 400);
-
-                if (string.IsNullOrEmpty(quizDto.Name))
-                    return ServiceApiResponse<int>.Failure("Quiz name is required", 400);
-
-                if (!quizDto.Questions?.Any() ?? true)
-                    return ServiceApiResponse<int>.Failure("Quiz must contain at least one question", 400);
-
                 var quiz = new Quiz
                 {
-                    Name = quizDto.Name,
-                    Description = quizDto.Description,
+                    Name = quizDto.Name.Trim(),
+                    Description = quizDto.Description?.Trim(),
                     CourseId = quizDto.CourseId,
                     Questions = quizDto.Questions.Select(q => new Question
                     {
-                        Text = q.Text,
+                        Text = q.Text.Trim(),
                         CorrectChoice = q.CorrectChoice,
                         Choices = q.Choices.Select(c => new Choice
                         {
-                            Text = c.Text
+                            Text = c.Text.Trim()
                         }).ToList()
                     }).ToList()
                 };
 
-                await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
-                await _unitOfWork.Complete();
+                await _unitOfWork.BeginTransactionAsync();
 
-                return ServiceApiResponse<int>.Success(quiz.Id, "Quiz created successfully");
+                try
+                {
+                    await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
+                    await _unitOfWork.Complete();
+                    await _unitOfWork.CommitTransactionAsync();
+
+                    return ServiceApiResponse<int>.Success(quiz.Id, "Quiz created successfully");
+                }
+                catch
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ServiceApiResponse<int>.Failure("Failed to save quiz", 500);
+                }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return ServiceApiResponse<int>.Failure("Failed to create quiz", 500);
+                return ServiceApiResponse<int>.Failure("An unexpected error occurred while creating the quiz", 500);
             }
         }
+       
         public async Task<ServiceApiResponse<bool>> UpdateQuizAsync(QuizDto quizDto)
         {
+            var (isValid, error) = ValidateQuizDto(quizDto);
+            if (!isValid)
+                return ServiceApiResponse<bool>.Failure(error, 400);
+
             try
             {
-                if (quizDto == null)
-                    return ServiceApiResponse<bool>.Failure("Quiz data cannot be null", 400);
-
-                if (quizDto.Id <= 0)
-                    return ServiceApiResponse<bool>.Failure("Invalid quiz ID", 400);
-
                 var spec = new QuizWithQuestionsAndChoicesSpecification(quizDto.Id);
                 var quiz = await _unitOfWork.Repository<Quiz>().GetEntityWithSpecAsync(spec);
 
                 if (quiz == null)
                     return ServiceApiResponse<bool>.Failure("Quiz not found", 404);
 
-                if (!quizDto.Questions?.Any() ?? true)
-                    return ServiceApiResponse<bool>.Failure("Quiz must contain at least one question", 400);
-
                 await _unitOfWork.BeginTransactionAsync();
 
                 try
                 {
-                    quiz.Name = quizDto.Name;
-                    quiz.Description = quizDto.Description;
-                    quiz.CourseId = quizDto.CourseId;
-
-                    var questionIdsInDto = quizDto.Questions
-                        .Where(q => q.Id > 0)
-                        .Select(q => q.Id)
-                        .ToList();
-
-                    var questionsToRemove = quiz.Questions
-                        .Where(q => !questionIdsInDto.Contains(q.Id))
-                        .ToList();
-
-                    foreach (var questionToRemove in questionsToRemove)
-                    {
-                        quiz.Questions.Remove(questionToRemove);
-                    }
-
-                    foreach (var questionDto in quizDto.Questions)
-                    {
-                        if (questionDto.Id > 0)
-                        {
-                            var existingQuestion = quiz.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
-                            if (existingQuestion != null)
-                            {
-                                existingQuestion.Text = questionDto.Text;
-                                existingQuestion.CorrectChoice = questionDto.CorrectChoice;
-
-                                existingQuestion.Choices.Clear();
-                                existingQuestion.Choices = questionDto.Choices.Select(c => new Choice
-                                {
-                                    Text = c.Text
-                                }).ToList();
-                            }
-                        }
-                        else
-                        {
-                            quiz.Questions.Add(new Question
-                            {
-                                Text = questionDto.Text,
-                                CorrectChoice = questionDto.CorrectChoice,
-                                Choices = questionDto.Choices.Select(c => new Choice
-                                {
-                                    Text = c.Text
-                                }).ToList()
-                            });
-                        }
-                    }
+                    UpdateQuizBasicInfo(quiz, quizDto);
+                    await UpdateQuizQuestions(quiz, quizDto.Questions);
 
                     await _unitOfWork.Complete();
                     await _unitOfWork.CommitTransactionAsync();
@@ -324,6 +296,97 @@ namespace ZadElealm.Service.AppServices
             {
                 return ServiceApiResponse<bool>.Failure("An unexpected error occurred", 500);
             }
+        }
+
+        private (bool IsValid, string Error) ValidateQuizDto(QuizDto quizDto)
+        {
+            if (quizDto == null)
+                return (false, "Quiz data cannot be null");
+
+            if (quizDto.Id <= 0)
+                return (false, "Invalid quiz ID");
+
+            if (string.IsNullOrWhiteSpace(quizDto.Name))
+                return (false, "Quiz name is required");
+
+            if (!quizDto.Questions?.Any() ?? true)
+                return (false, "Quiz must contain at least one question");
+
+            foreach (var question in quizDto.Questions)
+            {
+                if (string.IsNullOrWhiteSpace(question.Text))
+                    return (false, "Question text cannot be empty");
+
+                if (question.Choices == null || question.Choices.Count < 2)
+                    return (false, "Each question must have at least 2 choices");
+
+                if (question.CorrectChoice <= 0 || question.CorrectChoice > question.Choices.Count)
+                    return (false, "Invalid correct choice number");
+
+                if (question.Choices.Any(c => string.IsNullOrWhiteSpace(c.Text)))
+                    return (false, "Choice text cannot be empty");
+            }
+
+            return (true, null);
+        }
+        private void UpdateQuizBasicInfo(Quiz quiz, QuizDto quizDto)
+        {
+            quiz.Name = quizDto.Name.Trim();
+            quiz.Description = quizDto.Description?.Trim();
+            quiz.CourseId = quizDto.CourseId;
+        }
+        private async Task UpdateQuizQuestions(Quiz quiz, List<QuestionDto> questionDtos)
+        {
+            var questionIdsToKeep = questionDtos
+                .Where(q => q.Id > 0)
+                .Select(q => q.Id)
+                .ToHashSet();
+
+            var questionsToRemove = quiz.Questions
+                .Where(q => !questionIdsToKeep.Contains(q.Id))
+                .ToList();
+
+            foreach (var question in questionsToRemove)
+            {
+                quiz.Questions.Remove(question);
+            }
+
+            foreach (var questionDto in questionDtos)
+            {
+                if (questionDto.Id > 0)
+                {
+                    UpdateExistingQuestion(quiz, questionDto);
+                }
+                else
+                {
+                    AddNewQuestion(quiz, questionDto);
+                }
+            }
+        }
+        private void UpdateExistingQuestion(Quiz quiz, QuestionDto questionDto)
+        {
+            var existingQuestion = quiz.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
+            if (existingQuestion != null)
+            {
+                existingQuestion.Text = questionDto.Text.Trim();
+                existingQuestion.CorrectChoice = questionDto.CorrectChoice;
+
+                existingQuestion.Choices.Clear();
+                existingQuestion.Choices = questionDto.Choices
+                    .Select(c => new Choice { Text = c.Text.Trim() })
+                    .ToList();
+            }
+        }
+        private void AddNewQuestion(Quiz quiz, QuestionDto questionDto)
+        {
+            quiz.Questions.Add(new Question
+            {
+                Text = questionDto.Text.Trim(),
+                CorrectChoice = questionDto.CorrectChoice,
+                Choices = questionDto.Choices
+                    .Select(c => new Choice { Text = c.Text.Trim() })
+                    .ToList()
+            });
         }
     }
 }
