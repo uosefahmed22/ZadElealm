@@ -1,57 +1,155 @@
-﻿body {
-    background-color: #3C6255;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+﻿:root {
+    --primary-color: #3C6255;
+    --primary-dark: #35594A;
+    --secondary-color: #EAE7B1;
+    --text-color: #3C6255;
+    --background-color: #A6BB8D;
 }
 
-.container {
+body {
+    background: linear-gradient(135deg, var(--primary-color), var(--background-color));
+    font-family: 'Segoe UI', 'Arial', sans-serif;
     min-height: 100vh;
+    margin: 0;
+    direction: rtl;
 }
 
-.card {
-    width: 762px;
-    height: auto;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    background-color: #fff;
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-box {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+    position: relative;
+}
+
+.login-content {
     padding: 40px;
 }
 
-.text-center h3 {
-    font-weight: bold;
-    color: #3C6255;
+.logo {
+    width: 120px;
+    height: auto;
+    margin-bottom: 20px;
 }
 
-.form-group label {
-    font-weight: bold;
-    color: #3C6255;
+h3 {
+    color: var(--text-color);
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.text-muted {
+    color: #6c757d !important;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+    .form-group label {
+        color: var(--text-color);
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: var(--primary-color);
 }
 
 .form-control {
+    border: 1px solid #ced4da;
     border-radius: 5px;
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 15px;
+    padding: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
-.btn-dark {
-    background-color: #3C6255;
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(60, 98, 85, 0.25);
+    }
+
+.password-toggle {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .password-toggle:hover {
+        color: var(--primary-color);
+    }
+
+.btn-login {
+    background-color: var(--primary-color);
     border: none;
-    border-radius: 5px;
-    padding: 10px;
-    font-weight: bold;
-    transition: background-color 0.3s;
+    padding: 12px;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
-    .btn-dark:hover {
-        background-color: #35594A;
+    .btn-login:hover {
+        background-color: var(--primary-dark);
+        transform: translateY(-1px);
     }
 
-a {
-    color: #3C6255;
-    text-decoration: none;
-    font-weight: bold;
+.alert {
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
 }
 
-    a:hover {
-        text-decoration: underline;
+.custom-control-label {
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+    .login-box {
+        margin: 10px;
     }
+
+    .login-content {
+        padding: 20px;
+    }
+
+    h3 {
+        font-size: 1.5rem;
+    }
+
+    .form-control {
+        padding: 10px;
+    }
+
+    .btn-login {
+        padding: 10px;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.login-box {
+    animation: fadeIn 0.5s ease-out;
+}
