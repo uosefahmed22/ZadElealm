@@ -79,7 +79,6 @@ namespace AdminDashboard.Controllers
                 }
             }
 
-            [Authorize(Roles = "Admin")]
             public async Task<IActionResult> AddAdmin()
             {
                 try
@@ -87,6 +86,9 @@ namespace AdminDashboard.Controllers
                     var stats = await _mediator.Send(new GetAdminStatsQuery());
                     ViewBag.AdminCount = stats.CurrentAdminCount;
                     ViewBag.MaxAdminCount = stats.MaxAdminCount;
+
+                    if (ViewBag.AdminCount == null) ViewBag.AdminCount = 0;
+                    if (ViewBag.MaxAdminCount == null) ViewBag.MaxAdminCount = 1;
 
                     return View(new AdminDto());
                 }
@@ -155,8 +157,8 @@ namespace AdminDashboard.Controllers
 
             public async Task<IActionResult> Logout()
             {
-                await _mediator.Send(new LogoutCommand());
-                return RedirectToAction(nameof(Login));
+                await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                return RedirectToAction("Login");
             }
 
             private async Task SetupUserAuthentication(AppUser user)

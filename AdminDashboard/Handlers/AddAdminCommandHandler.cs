@@ -27,36 +27,67 @@ namespace AdminDashboard.Handlers
 
         public async Task<AddAdminResult> Handle(AddAdminCommand request, CancellationToken cancellationToken)
         {
-            var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
-            if (adminUsers.Count >= _adminSettings.Value.MaxAdminCount)
+            try
+            {
+                var existingUser = await _userManager.FindByEmailAsync(request.Email);
+                if (existingUser != null)
+                {
+                    return new AddAdminResult
+                    {
+                        Succeeded = false,
+                        ErrorMessage = "User with this email already exists."
+                    };
+                }
+
+                var adminUsersCount = (await _userManager.GetUsersInRoleAsync("Admin")).Count;
+                if (adminUsersCount >= _adminSettings.Value.MaxAdminCount)
+                {
+                    return new AddAdminResult
+                    {
+                        Succeeded = false,
+                        ErrorMessage = $"Cannot add more than {_adminSettings.Value.MaxAdminCount} administrators."
+                    };
+                }
+
+                var user = new AppUser
+                {
+                    DisplayName = request.DisplayName,
+                    UserName = request.Email,
+                    Email = request.Email,
+                    EmailConfirmed = true
+                };
+
+                var result = await _userManager.CreateAsync(user, request.Password);
+                if (!result.Succeeded)
+                {
+                    return new AddAdminResult
+                    {
+                        Succeeded = false,
+                        Errors = result.Errors
+                    };
+                }
+
+                var roleResult = await _userManager.AddToRoleAsync(user, "Admin");
+                if (!roleResult.Succeeded)
+                {
+                    await _userManager.DeleteAsync(user);
+                    return new AddAdminResult
+                    {
+                        Succeeded = false,
+                        ErrorMessage = "Failed to assign admin role."
+                    };
+                }
+
+                return new AddAdminResult { Succeeded = true };
+            }
+            catch (Exception ex)
             {
                 return new AddAdminResult
                 {
                     Succeeded = false,
-                    ErrorMessage = $"Cannot add more than {_adminSettings.Value.MaxAdminCount} administrators."
+                    ErrorMessage = "An unexpected error occurred while creating the admin user."
                 };
             }
-
-            var user = new AppUser
-            {
-                DisplayName = request.DisplayName,
-                UserName = request.Email,
-                Email = request.Email,
-                EmailConfirmed = true
-            };
-
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRoleAsync(user, "Admin");
-                return new AddAdminResult { Succeeded = true };
-            }
-
-            return new AddAdminResult
-            {
-                Succeeded = false,
-                Errors = result.Errors
-            };
         }
     }
 }
