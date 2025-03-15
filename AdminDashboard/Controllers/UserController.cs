@@ -51,6 +51,7 @@ namespace AdminDashboard.Controllers
 
             return View(users);
         }
+        
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
