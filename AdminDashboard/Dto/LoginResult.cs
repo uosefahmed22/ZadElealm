@@ -9,3 +9,4 @@ namespace AdminDashboard.Dto
         public AppUser User { get; init; }
     }
 }
+    
