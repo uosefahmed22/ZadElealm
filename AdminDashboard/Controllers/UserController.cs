@@ -31,17 +31,25 @@ namespace AdminDashboard.Controllers
                 TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
                 return RedirectToAction("AccessDenied", "Account");
             }
-            var Users = await _userManager.Users.Select(u => new UserViewModel
-            {
-                Id = u.Id,
-                UserName = u.UserName,
-                Email = u.Email,
-                IsDeleted = u.IsDeleted,
-                DisplayName = u.DisplayName,
-                Roles = _userManager.GetRolesAsync(u).Result
-            }).ToListAsync();
 
-            return View(Users);
+            var users = await _userManager.Users
+                .Select(u => new UserViewModel
+                {
+                    Id = u.Id,
+                    UserName = u.UserName,
+                    Email = u.Email,
+                    IsDeleted = u.IsDeleted,
+                    DisplayName = u.DisplayName,
+                    Roles = new List<string>()
+                }).ToListAsync();
+
+            foreach (var user in users)
+            {
+                var userEntity = await _userManager.FindByIdAsync(user.Id);
+                user.Roles = (await _userManager.GetRolesAsync(userEntity)).ToList();
+            }
+
+            return View(users);
         }
         public async Task<IActionResult> Edit(string id)
         {
