@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Models;
-using ZadElealm.Core.Models.ServiceDto;
+using ZadElealm.Core.ServiceDto;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ZadElealm.Apis.Helpers

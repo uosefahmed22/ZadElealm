@@ -1,7 +1,7 @@
-﻿using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+﻿using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Handlers;
 using ZadElealm.Core.Service;
+using ZadElealm.Core.ServiceDto;
 
 namespace ZadElealm.Apis.Commands.QuizCommands
 {

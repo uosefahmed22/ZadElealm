@@ -33,19 +33,19 @@ namespace ZadElealm.Apis.Handlers.Notification
 
                 var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
                 var userNotification = await _unitOfWork.Repository<UserNotification>()
-                    .GetEntityWithSpecNoTrackingAsync(spec);
+                    .GetEntityWithSpecAsync(spec);
 
                 if (userNotification == null)
                     return new ApiResponse(404, "الإشعار غير موجود");
 
                var mappedNotification = _mapper.Map<NotificationDto>(userNotification.Notification);
 
-                if (!userNotification.IsRead)
+                if (userNotification.IsRead)
                 {
                     userNotification.IsRead = true;
-                    _unitOfWork.Repository<UserNotification>().Update(userNotification);
                     await _unitOfWork.Complete();
                 }
+                await _unitOfWork.Complete();
 
                 return new ApiDataResponse(200, mappedNotification);
             }

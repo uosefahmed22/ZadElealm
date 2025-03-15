@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ZadElealm.Core.Models.ServiceDto
+namespace ZadElealm.Core.ServiceDto
 {
     public class QuestionResultDto
     {

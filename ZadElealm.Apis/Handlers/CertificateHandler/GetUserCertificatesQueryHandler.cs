@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.Certificate;
-using ZadElealm.Core.Models.ServiceDto;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Core.ServiceDto;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Certificate;
 

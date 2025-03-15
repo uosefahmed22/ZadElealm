@@ -1,4 +1,4 @@
-﻿namespace ZadElealm.Apis.Dtos
+﻿namespace ZadElealm.Core.ServiceDto
 {
     public class QuizSubmissionDto
     {

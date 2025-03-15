@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ZadElealm.Apis.Dtos;
-using ZadElealm.Core.Models.ServiceDto;
+using ZadElealm.Core.ServiceDto;
 using ZadElealm.Service.Errors;
 
 namespace ZadElealm.Core.Service

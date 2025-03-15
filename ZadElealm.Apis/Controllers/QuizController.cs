@@ -7,13 +7,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.QuizCommands;
-using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.QuizQuery;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
+using ZadElealm.Core.ServiceDto;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Service.AppServices;
 

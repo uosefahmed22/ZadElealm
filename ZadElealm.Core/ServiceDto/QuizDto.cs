@@ -1,4 +1,4 @@
-﻿namespace ZadElealm.Core.Models.ServiceDto
+﻿namespace ZadElealm.Core.ServiceDto
 {
     public class QuizDto
     {

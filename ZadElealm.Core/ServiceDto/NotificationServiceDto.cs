@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Enums;
 
-namespace ZadElealm.Core.Models.ServiceDto
+namespace ZadElealm.Core.ServiceDto
 {
     public class NotificationServiceDto
     {
