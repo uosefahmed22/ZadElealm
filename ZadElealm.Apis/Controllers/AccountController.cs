@@ -85,7 +85,8 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("update-profile-image")]
         public async Task<ActionResult<ApiResponse>> UpdateProfileImage(IFormFile? file)
         {
-            var user = await _userManager.GetUserAsync(User);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
