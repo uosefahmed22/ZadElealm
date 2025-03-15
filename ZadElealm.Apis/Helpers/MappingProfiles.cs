@@ -39,7 +39,9 @@ namespace ZadElealm.Apis.Helpers
            .ForMember(d => d.DisplayName, o => o.MapFrom(s => s.User.DisplayName))
            .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.User.ImageUrl));
 
-            CreateMap<Notification, NotificationDto>();
+            CreateMap<Notification, NotificationDto>()
+                .ForMember(dest => dest.IsRead, opt =>
+                    opt.MapFrom(src => src.UserNotifications.FirstOrDefault().IsRead));
             CreateMap<Notification, NotificationsResponse>();
 
         }
