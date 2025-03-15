@@ -72,21 +72,21 @@
     "QuizId": 12
   },
   {
-    "QuestionId": 13,
+    "QuestionId": 1,
     "Text": "كم عدد شهور السنة؟",
     "ImageUrl": null,
     "QuizId": 12
   },
   {
-    "QuestionId": 14,
+    "QuestionId": 1,
     "Text": "ما هو معنى كلمة 'سلام'؟",
     "ImageUrl": null,
     "QuizId": 12
   },
   {
-    "QuestionId": 15,
+    "QuestionId": 1,
     "Text": "ما هو عكس كلمة 'ليل'؟",
     "ImageUrl": null,
-    "QuizId": 13
+    "QuizId": 12
   }
 ]
