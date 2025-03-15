@@ -42,7 +42,7 @@ namespace AdminDashboard.Controllers
                 return NotFound();
             }
 
-            var model = new AdminDashboard.Dto.CourseDto
+            var model = new CourseDto
             {
                 Name = course.Name,
                 Description = course.Description,
@@ -53,7 +53,7 @@ namespace AdminDashboard.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(AdminDashboard.Dto.CourseDto model)
+        public async Task<IActionResult> Edit(Dto.CourseDto model)
         {
             if (!ModelState.IsValid)
             {

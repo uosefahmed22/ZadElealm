@@ -1,4 +1,6 @@
-﻿using AdminDashboard.Middlwares;
+﻿using AdminDashboard.Controllers;
+using AdminDashboard.Helpers;
+using AdminDashboard.Middlwares;
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -107,7 +109,7 @@ namespace AdminDashboard.Extentions
             services.AddScoped<INotificationService, NotificationService>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-
+            services.Configure<AdminSettings>(configuration.GetSection("AdminSettings"));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ApplicationServiceExtensions).Assembly));
         }
         private static void ConfigureValidationErrorHandling(IServiceCollection services)
