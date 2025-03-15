@@ -15,22 +15,16 @@ namespace ZadElealm.Apis.Handlers.Notification
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IMemoryCache _cache;
-
-        public GetNotificationByIdQueryHandler(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IMemoryCache cache)
+        public GetNotificationByIdQueryHandler(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(GetNotificationByIdQuery request, CancellationToken cancellationToken)
         {
             try
             {
-
                 var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
                 var userNotification = await _unitOfWork.Repository<UserNotification>()
                     .GetEntityWithSpecAsync(spec);
@@ -38,20 +32,26 @@ namespace ZadElealm.Apis.Handlers.Notification
                 if (userNotification == null)
                     return new ApiResponse(404, "الإشعار غير موجود");
 
-               var mappedNotification = _mapper.Map<NotificationDto>(userNotification.Notification);
+                var mappedNotification = _mapper.Map<NotificationDto>(userNotification.Notification);
+                mappedNotification.IsRead = userNotification.IsRead;
 
-                if (userNotification.IsRead)
+                if (!userNotification.IsRead)
                 {
                     userNotification.IsRead = true;
-                    await _unitOfWork.Complete();
+                    _unitOfWork.Repository<UserNotification>().Update(userNotification);
+                    var result = await _unitOfWork.Complete();
+
+                    if (result > 0)
+                    {
+                        mappedNotification.IsRead = true;
+                    }
                 }
-                await _unitOfWork.Complete();
 
                 return new ApiDataResponse(200, mappedNotification);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب الإشعار");
+                return new ApiResponse(500, $"حدث خطأ أثناء جلب الإشعار: {ex.Message}");
             }
         }
     }
