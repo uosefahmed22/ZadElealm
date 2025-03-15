@@ -6,7 +6,7 @@ using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.EnrollmentQuery;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models;
-using ZadElealm.Core.Models.ServiceDto;
+using ZadElealm.Core.ServiceDto;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;

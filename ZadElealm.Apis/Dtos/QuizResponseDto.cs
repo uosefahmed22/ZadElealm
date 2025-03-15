@@ -1,4 +1,4 @@
-﻿using ZadElealm.Core.Models.ServiceDto;
+﻿using ZadElealm.Core.ServiceDto;
 
 namespace ZadElealm.Apis.Dtos
 {

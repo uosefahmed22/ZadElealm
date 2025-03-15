@@ -8,12 +8,11 @@ using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
-using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Quiz;
 using ZadElealm.Core.Enums;
-using ZadElealm.Core.Models.ServiceDto;
 using ZadElealm.Service.Errors;
+using ZadElealm.Core.ServiceDto;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -21,12 +20,17 @@ namespace ZadElealm.Service.AppServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly ICertificateService _certificateService;
         private readonly INotificationService _notificationService;
 
-        public QuizService(IUnitOfWork unitOfWork, UserManager<AppUser> userManager, INotificationService notificationService)
+        public QuizService(IUnitOfWork unitOfWork,
+            UserManager<AppUser> userManager,
+            ICertificateService certificateService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _certificateService = certificateService;
             _notificationService = notificationService;
         }
 
@@ -140,27 +144,33 @@ namespace ZadElealm.Service.AppServices
                         await _unitOfWork.Repository<Progress>().AddAsync(progress);
                     }
 
+                    await _unitOfWork.Complete();
+
                     if (isCompleted && (!existingProgress?.IsCompleted ?? true))
                     {
+                        var certificate = await _certificateService.GenerateAndSaveCertificate(userId, submission.QuizId);
+
                         var notification = new Notification
                         {
                             Title = "مبارك على اجتيازك!",
-                            Description = "الحمد لله، لقد اجتزت الامتحان بنجاح! نسأل الله أن يبارك لك في علمك وعملك، وأن يجعلك من النافعين لدينك وأمتك. يمكنك الآن استلام شهادتك من قسم الشهادات. نسأل الله لك التوفيق والسداد في مسيرتك العلمية.",
+                            Description = "الحمد لله، لقد اجتزت الامتحان بنجاح!...",
                             Type = NotificationType.Certificate,
                             UserNotifications = new List<UserNotification>
-                        {
-                            new UserNotification
                             {
-                                AppUserId = userId,
-                                IsRead = false
+                                new UserNotification
+                                {
+                                    AppUserId = userId,
+                                    IsRead = false
+                                }
                             }
-                        }
                         };
 
+                        await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
                         await _unitOfWork.Repository<Notification>().AddAsync(notification);
+
+                        await _unitOfWork.Complete();
                     }
 
-                    await _unitOfWork.Complete();
                     await _unitOfWork.CommitTransactionAsync();
 
                     var result = new QuizResultDto

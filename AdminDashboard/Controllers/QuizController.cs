@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZadElealm.Core.Models;
-using ZadElealm.Core.Models.ServiceDto;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
+using ZadElealm.Core.ServiceDto;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Quiz;
 using ZadElealm.Service.AppServices;

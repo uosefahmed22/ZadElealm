@@ -43,9 +43,6 @@ namespace ZadElealm.Service.AppServices
                 var user = await _userManager.FindByIdAsync(userId);
                 var quiz = await _unitOfWork.Repository<Quiz>().GetEntityAsync(quizId);
 
-                if (user == null || quiz == null)
-                    throw new Exception("المستخدم أو الاختبار غير موجود");
-
                 var progressSpec = new ProgressWithUserDataAndQuiz(userId, quizId);
                 var progress = await _unitOfWork.Repository<Progress>().GetEntityWithSpecAsync(progressSpec);
 
@@ -55,7 +52,7 @@ namespace ZadElealm.Service.AppServices
                 if (!progress.IsCompleted)
                     throw new Exception("لم يتم إكمال الاختبار بعد");
 
-               
+
                 var (filePath, fileName) = GeneratePdfCertificate(userId, quizId, user, quiz);
 
                 var baseUrl = _configuration["BaseUrl"];
@@ -80,113 +77,145 @@ namespace ZadElealm.Service.AppServices
         }
         private (string filePath, string fileName) GeneratePdfCertificate(string userId, int quizId, AppUser user, Quiz quiz)
         {
-            // Initialize QuestPDF
+            var goldColor = Color.FromRGB(218, 165, 32);
+            var greyDark = Color.FromRGB(96, 96, 96);
+            var blueDark = Color.FromRGB(25, 25, 112);
+            var redDark = Color.FromRGB(139, 0, 0);
+
             QuestPDF.Settings.License = LicenseType.Community;
 
-            // Setup directory
             var certificatesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "certificates");
             if (!Directory.Exists(certificatesDirectory))
             {
                 Directory.CreateDirectory(certificatesDirectory);
             }
 
-            // Create file paths
             var fileName = $"certificate_{userId}_{quizId}_{Guid.NewGuid()}.pdf";
             var filePath = Path.Combine(certificatesDirectory, fileName);
 
-            // Generate PDF
             Document.Create(container =>
             {
                 container.Page(page =>
                 {
-                    page.Size(PageSizes.A4);
-                    page.Margin(40);
+                    page.Size(PageSizes.A4.Landscape());
+                    page.Margin(20);
                     page.DefaultTextStyle(x => x.FontFamily("Arial"));
 
-                    // Background with border
                     page.Background()
                         .Border(2)
-                        .BorderColor(Colors.Grey.Darken1)
-                        .Padding(15)
+                        .BorderColor(goldColor)
+                        .Padding(5)
                         .Border(1)
-                        .BorderColor(Colors.Grey.Lighten1)
-                        .Padding(25);
+                        .BorderColor(greyDark)
+                        .Padding(15);
 
                     page.Content()
-                        .PaddingVertical(50)
+                        .PaddingVertical(15)
                         .Column(column =>
                         {
-                            // Title - شهادة تقدير
-                            column.Item()
-                                .Height(60)
-                                .AlignCenter()
-                                .Text("شهادة تقدير", TextStyle.Default
-                                    .FontSize(48)
-                                    .FontColor(Colors.Blue.Medium)
-                                    .Bold());
+                            column.Item().AlignCenter()
+                                .Text("بسم الله الرحمن الرحيم")
+                                .FontSize(24)
+                                .FontColor(goldColor);
 
-                            // Spacing after title
-                            column.Item().Height(40);
+                            column.Item().Height(20);
 
-                            // Content
+                            column.Item().AlignCenter()
+                                .Text("شهادة تقدير")
+                                .FontSize(42)
+                                .FontColor(goldColor)
+                                .Bold();
+
+                            column.Item().Height(2)
+                                .Background(goldColor)
+                                .ExtendHorizontal();
+
+                            column.Item().Height(20);
+
                             column.Item().AlignCenter()
                                 .Text(text =>
                                 {
-                                    text.Span("نشهد بأن الطالب", TextStyle.Default
-                                        .FontSize(32)
-                                        .FontColor(Colors.Black));
+                                    text.Span("تشهد")
+                                        .FontSize(24)
+                                        .FontColor(greyDark);
+
+                                    text.EmptyLine();
+                                    text.Span("أكاديمية زاد العلم")
+                                        .FontSize(28)
+                                        .Bold()
+                                        .FontColor(blueDark);
+
+                                    text.EmptyLine();
+                                    text.Span("بأن الطالب")
+                                        .FontSize(24)
+                                        .FontColor(greyDark);
 
                                     text.EmptyLine();
                                     text.EmptyLine();
 
-                                    text.Span(user.DisplayName, TextStyle.Default
+                                    text.Span(user.DisplayName)
                                         .FontSize(42)
                                         .Bold()
-                                        .FontColor(Colors.Red.Medium));
+                                        .FontColor(redDark);
 
                                     text.EmptyLine();
                                     text.EmptyLine();
 
-                                    text.Span("قد اجتاز بنجاح امتحان", TextStyle.Default
+                                    text.Span("قد اجتاز بنجاح اختبار")
+                                        .FontSize(24)
+                                        .FontColor(greyDark);
+
+                                    text.EmptyLine();
+
+                                    text.Span(quiz.Name)
                                         .FontSize(32)
-                                        .FontColor(Colors.Black));
-
-                                    text.EmptyLine();
-                                    text.EmptyLine();
-
-                                    text.Span(quiz.Name, TextStyle.Default
-                                        .FontSize(38)
                                         .Bold()
-                                        .FontColor(Colors.Blue.Medium));
-
-                                    text.EmptyLine();
-                                    text.EmptyLine();
-
-                                    text.Span("ونتمنى له دوام التوفيق والنجاح", TextStyle.Default
-                                        .FontSize(32)
-                                        .FontColor(Colors.Black));
+                                        .FontColor(blueDark);
                                 });
 
-                            // Spacing before date
-                            column.Item().Height(100);
+                            column.Item().Height(40);
 
-                            // Date
-                            column.Item().AlignCenter()
-                                .Text(text =>
+                            column.Item()
+                                .Row(row =>
                                 {
-                                    text.Span("تحريراً في: ", TextStyle.Default
-                                        .FontSize(24)
-                                        .FontColor(Colors.Grey.Darken3));
-                                    text.Span(DateTime.Now.ToString("dd/MM/yyyy"), TextStyle.Default
-                                        .FontSize(24)
-                                        .FontColor(Colors.Grey.Darken3));
+                                    row.RelativeItem().AlignCenter()
+                                        .Text(text =>
+                                        {
+                                            text.Span("أكاديمية زاد العلم")
+                                                .FontSize(20)
+                                                .FontColor(blueDark)
+                                                .Bold();
+                                            text.EmptyLine();
+                                            text.Span("____________")
+                                                .FontSize(20)
+                                                .FontColor(greyDark);
+                                        });
+
+                                    row.RelativeItem().AlignCenter()
+                                        .Text(text =>
+                                        {
+                                            text.Span("تاريخ الإصدار")
+                                                .FontSize(20)
+                                                .FontColor(blueDark)
+                                                .Bold();
+                                            text.EmptyLine();
+                                            text.Span(DateTime.Now.ToString("dd/MM/yyyy"))
+                                                .FontSize(20)
+                                                .FontColor(greyDark);
+                                        });
                                 });
+
+                            column.Item().Height(20);
+
+                            column.Item().AlignCenter()
+                                .Text($"رقم الشهادة: {Guid.NewGuid().ToString().Substring(0, 8)}")
+                                .FontSize(16)
+                                .FontColor(greyDark);
                         });
                 });
             })
             .GeneratePdf(filePath);
 
-            // Verify file creation
             if (!File.Exists(filePath))
             {
                 throw new Exception("Failed to generate PDF file");
@@ -194,6 +223,5 @@ namespace ZadElealm.Service.AppServices
 
             return (filePath, fileName);
         }
-
     }
 }

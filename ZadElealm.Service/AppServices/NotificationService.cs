@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models;
-using ZadElealm.Core.Models.ServiceDto;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
+using ZadElealm.Core.ServiceDto;
 
 namespace ZadElealm.Service.AppServices
 {
