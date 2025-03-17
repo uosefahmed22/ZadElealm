@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿using AdminDashboard.Commands.QuizCommand;
+using AdminDashboard.Quires.QuizQuery;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZadElealm.Core.Models;
@@ -17,39 +20,32 @@ namespace AdminDashboard.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly IQuizService _quizService;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public QuizController(IUnitOfWork unitOfWork,IQuizService quizService,IMapper mapper)
+        public QuizController(IUnitOfWork unitOfWork,IQuizService quizService,IMapper mapper,IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _quizService = quizService;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var quizzes = await _unitOfWork.Repository<Quiz>().GetAllAsync();
-            var questions = await _unitOfWork.Repository<Question>().GetAllAsync();
-
-            var quizDtos = quizzes.Select(q => new QuizDto
-            {
-                Id = q.Id,
-                Name = q.Name,
-                Description = q.Description,
-                CourseId = q.CourseId,
-                QuestionCount = questions.Count(question => question.QuizId == q.Id) 
-            }).ToList();
+            var quizDtos = await _mediator.Send(new GetAllQuizzesQuery());
 
             var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
             ViewBag.Courses = courses.ToDictionary(c => c.Id, c => c.Name);
 
             return View(quizDtos);
         }
-        
+
+
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+            var courses = await _mediator.Send(new GetCoursesForQuizQuery());
             ViewBag.Courses = courses;
             return View(new QuizDto());
         }
@@ -59,26 +55,24 @@ namespace AdminDashboard.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+                var courses = await _mediator.Send(new GetCoursesForQuizQuery());
                 ViewBag.Courses = courses;
                 return View(quizDto);
             }
 
-            var spec = new QuizWithCourseSpecification(quizDto.CourseId);
-            var existingQuiz = await _unitOfWork.Repository<Quiz>()
-                .GetEntityWithSpecAsync(spec);
+            var result = await _mediator.Send(new CreateQuizCommand { QuizDto = quizDto });
 
-            if (existingQuiz != null)
+            if (!result)
             {
                 ModelState.AddModelError("", "هذا الكورس يحتوي بالفعل على امتحان.");
-                var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+                var courses = await _mediator.Send(new GetCoursesForQuizQuery());
                 ViewBag.Courses = courses;
                 return View(quizDto);
             }
 
-            await _quizService.CreateQuizAsync(quizDto);
             return RedirectToAction("Index");
         }
+
         public async Task<IActionResult> Edit(int id)
         {
             var spec = new QuizWithQuestionsAndChoicesSpecification(id);
