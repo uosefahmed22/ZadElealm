@@ -1,18 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ZadElealm.Core.Models.Identity;
-using ZadElealm.Core.Models;
+﻿using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Quiz;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.ServiceDto;
-using static ZadElealm.Service.AppServices.QuizService;
 using ZadElealm.Apis.Errors;
 
 namespace ZadElealm.Service.AppServices
@@ -35,54 +27,56 @@ namespace ZadElealm.Service.AppServices
         {
             try
             {
-                if (quizDto == null)
-                    return new ApiResponse(400, "Quiz data cannot be null");
-
-                if (string.IsNullOrWhiteSpace(quizDto.Name))
-                    return new ApiResponse(400, "Quiz name is required");
-
-                if (!quizDto.Questions?.Any() == true)
-                    return new ApiResponse(400, "Quiz must have at least one question");
+                if (quizDto == null || !quizDto.Questions.Any())
+                    return new ApiResponse(400, "بيانات الاختبار غير صحيحة");
 
                 var quiz = new Quiz
                 {
-                    Name = quizDto.Name.Trim(),
-                    Description = quizDto.Description?.Trim(),
+                    Name = quizDto.Name,
+                    Description = quizDto.Description,
                     CourseId = quizDto.CourseId,
-                    Questions = quizDto.Questions.Select(q => new Question
-                    {
-                        Text = q.Text?.Trim() ?? throw new ArgumentException("Question text cannot be null"),
-                        CorrectChoice = q.CorrectChoice,
-                        Choices = q.Choices?.Select(c => new Choice
-                        {
-                            Text = c.Text?.Trim() ?? throw new ArgumentException("Choice text cannot be null")
-                        }).ToList() ?? throw new ArgumentException("Choices cannot be null")
-                    }).ToList()
+                    Questions = new List<Question>()
                 };
 
-                await _unitOfWork.BeginTransactionAsync();
-
-                try
+                foreach (var questionDto in quizDto.Questions)
                 {
-                    await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
-                    await _unitOfWork.Complete();
-                    await _unitOfWork.CommitTransactionAsync();
+                    var question = new Question
+                    {
+                        Text = questionDto.Text,
+                        Choices = new List<Choice>()
+                    };
 
-                    return new ApiResponse(200, "Quiz created successfully");
+                    foreach (var choiceDto in questionDto.Choices)
+                    {
+                        var choice = new Choice
+                        {
+                            Text = choiceDto.Text,
+                            Question = question
+                        };
+                        question.Choices.Add(choice);
+                    }
+
+                    quiz.Questions.Add(question);
                 }
-                catch (Exception ex)
+
+                // First save to get IDs
+                await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
+                await _unitOfWork.Complete();
+
+                // Update correct choices
+                foreach (var question in quiz.Questions)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new ApiResponse(500, $"Failed to create quiz: {ex.Message}");
+                    var questionDto = quizDto.Questions[quiz.Questions.ToList().IndexOf(question)];
+                    question.CorrectChoiceId = question.Choices.ToList()[questionDto.CorrectChoiceIndex].Id;
                 }
-            }
-            catch (ArgumentException ex)
-            {
-                return new ApiResponse(400, ex.Message);
+
+                await _unitOfWork.Complete();
+
+                return new ApiResponse(200, "تم إنشاء الاختبار بنجاح");
             }
             catch (Exception ex)
             {
-                return new ApiResponse(500, $"An unexpected error occurred: {ex.Message}");
+                return new ApiResponse(400, $"حدث خطأ أثناء إنشاء الاختبار: {ex.Message}");
             }
         }
         public async Task<ApiDataResponse> SubmitQuizAsync(string userId, QuizSubmissionDto submission)
@@ -135,7 +129,7 @@ namespace ZadElealm.Service.AppServices
                 foreach (var question in quiz.Questions)
                 {
                     bool hasAnswer = answerMap.TryGetValue(question.Id, out var answer);
-                    bool isCorrect = hasAnswer && question.CorrectChoice == answer!.SelectedChoice;
+                    bool isCorrect = hasAnswer && question.CorrectChoiceId == answer!.SelectedChoice;
 
                     if (isCorrect) correctAnswers++;
 
@@ -145,7 +139,7 @@ namespace ZadElealm.Service.AppServices
                         QuestionText = question.Text,
                         IsCorrect = isCorrect,
                         SelectedChoice = hasAnswer ? answer!.SelectedChoice : 0,
-                        CorrectChoice = question.CorrectChoice
+                        CorrectChoice = question.CorrectChoiceId
                     });
                 }
 
@@ -228,112 +222,119 @@ namespace ZadElealm.Service.AppServices
                 return new ApiDataResponse(500, null, $"An unexpected error occurred: {ex.Message}");
             }
         }
-        public async Task<ApiResponse> UpdateQuizAsync(QuizDto quizDto)
+
+        public Task<ApiResponse> UpdateQuizAsync(QuizDto quizDto)
         {
-            try
-            {
-                if (quizDto == null || quizDto.Id <= 0)
-                    return new ApiResponse(400, "Invalid quiz data");
-
-                if (string.IsNullOrWhiteSpace(quizDto.Name))
-                    return new ApiResponse(400, "Quiz name is required");
-
-                if (!quizDto.Questions?.Any() == true)
-                    return new ApiResponse(400, "Quiz must have at least one question");
-
-                var quiz = await _unitOfWork.Repository<Quiz>()
-                    .GetEntityWithSpecAsync(new QuizWithQuestionsAndChoicesSpecification(quizDto.Id));
-
-                if (quiz == null)
-                    return new ApiResponse(404, "Quiz not found");
-
-                await _unitOfWork.BeginTransactionAsync();
-                try
-                {
-                    quiz.Name = quizDto.Name.Trim();
-                    quiz.Description = quizDto.Description?.Trim();
-                    quiz.CourseId = quizDto.CourseId;
-
-                    // Get questions to keep and remove
-                    var questionIdsToKeep = quizDto.Questions
-                        .Where(q => q.Id > 0)
-                        .Select(q => q.Id)
-                        .ToHashSet();
-
-                    // Remove questions not in the updated list
-                    var questionsToRemove = quiz.Questions
-                        .Where(q => !questionIdsToKeep.Contains(q.Id))
-                        .ToList();
-
-                    foreach (var question in questionsToRemove)
-                    {
-                        quiz.Questions.Remove(question);
-                    }
-
-                    // Update existing and add new questions
-                    foreach (var questionDto in quizDto.Questions)
-                    {
-                        if (questionDto.Id > 0)
-                        {
-                            var existingQuestion = quiz.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
-                            if (existingQuestion != null)
-                            {
-                                existingQuestion.Text = questionDto.Text?.Trim()
-                                    ?? throw new ArgumentException("Question text cannot be null");
-                                existingQuestion.CorrectChoice = questionDto.CorrectChoice;
-                                existingQuestion.Choices.Clear();
-                                existingQuestion.Choices = questionDto.Choices?
-                                    .Select(c => new Choice
-                                    {
-                                        Text = c.Text?.Trim() ?? throw new ArgumentException("Choice text cannot be null")
-                                    })
-                                    .ToList() ?? throw new ArgumentException("Choices cannot be null");
-                            }
-                        }
-                        else
-                        {
-                            quiz.Questions.Add(new Question
-                            {
-                                Text = questionDto.Text?.Trim() ?? throw new ArgumentException("Question text cannot be null"),
-                                CorrectChoice = questionDto.CorrectChoice,
-                                Choices = questionDto.Choices?
-                                    .Select(c => new Choice
-                                    {
-                                        Text = c.Text?.Trim() ?? throw new ArgumentException("Choice text cannot be null")
-                                    })
-                                    .ToList() ?? throw new ArgumentException("Choices cannot be null")
-                            });
-                        }
-                    }
-
-                    await _unitOfWork.Complete();
-
-                    var notificationDto = new NotificationServiceDto
-                    {
-                        Title = "تم تحديث الاختبار",
-                        Description = $"تم تحديث اختبار {quiz.Name} بنجاح",
-                        Type = NotificationType.Quiz,
-                    };
-                    await _notificationService.SendNotificationAsync(notificationDto);
-
-                    await _unitOfWork.CommitTransactionAsync();
-                    return new ApiResponse(200, "Quiz updated successfully");
-                }
-                catch (ArgumentException ex)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new ApiResponse(400, ex.Message);
-                }
-                catch (Exception ex)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new ApiResponse(500, $"Failed to update quiz: {ex.Message}");
-                }
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(500, $"An unexpected error occurred: {ex.Message}");
-            }
+            throw new NotImplementedException();
         }
+
+
+        //public async Task<ApiResponse> UpdateQuizAsync(QuizDto quizDto)
+        //{
+        //    try
+        //    {
+        //        if (quizDto == null || quizDto.Id <= 0)
+        //            return new ApiResponse(400, "Invalid quiz data");
+
+        //        if (string.IsNullOrWhiteSpace(quizDto.Name))
+        //            return new ApiResponse(400, "Quiz name is required");
+
+        //        if (!quizDto.Questions?.Any() == true)
+        //            return new ApiResponse(400, "Quiz must have at least one question");
+
+        //        var quiz = await _unitOfWork.Repository<Quiz>()
+        //            .GetEntityWithSpecAsync(new QuizWithQuestionsAndChoicesSpecification(quizDto.Id));
+
+        //        if (quiz == null)
+        //            return new ApiResponse(404, "Quiz not found");
+
+        //        await _unitOfWork.BeginTransactionAsync();
+        //        try
+        //        {
+        //            quiz.Name = quizDto.Name.Trim();
+        //            quiz.Description = quizDto.Description?.Trim();
+        //            quiz.CourseId = quizDto.CourseId;
+
+        //            // Get questions to keep and remove
+        //            var questionIdsToKeep = quizDto.Questions
+        //                .Where(q => q.Id > 0)
+        //                .Select(q => q.Id)
+        //                .ToHashSet();
+
+        //            // Remove questions not in the updated list
+        //            var questionsToRemove = quiz.Questions
+        //                .Where(q => !questionIdsToKeep.Contains(q.Id))
+        //                .ToList();
+
+        //            foreach (var question in questionsToRemove)
+        //            {
+        //                quiz.Questions.Remove(question);
+        //            }
+
+        //            // Update existing and add new questions
+        //            foreach (var questionDto in quizDto.Questions)
+        //            {
+        //                if (questionDto.Id > 0)
+        //                {
+        //                    var existingQuestion = quiz.Questions.FirstOrDefault(q => q.Id == questionDto.Id);
+        //                    if (existingQuestion != null)
+        //                    {
+        //                        existingQuestion.Text = questionDto.Text?.Trim()
+        //                            ?? throw new ArgumentException("Question text cannot be null");
+        //                        existingQuestion.CorrectChoiceId = questionDto.CorrectChoice;
+        //                        existingQuestion.Choices.Clear();
+        //                        existingQuestion.Choices = questionDto.Choices?
+        //                            .Select(c => new Choice
+        //                            {
+        //                                Text = c.Text?.Trim() ?? throw new ArgumentException("Choice text cannot be null")
+        //                            })
+        //                            .ToList() ?? throw new ArgumentException("Choices cannot be null");
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    quiz.Questions.Add(new Question
+        //                    {
+        //                        Text = questionDto.Text?.Trim() ?? throw new ArgumentException("Question text cannot be null"),
+        //                        CorrectChoiceId = questionDto.CorrectChoice,
+        //                        Choices = questionDto.Choices?
+        //                            .Select(c => new Choice
+        //                            {
+        //                                Text = c.Text?.Trim() ?? throw new ArgumentException("Choice text cannot be null")
+        //                            })
+        //                            .ToList() ?? throw new ArgumentException("Choices cannot be null")
+        //                    });
+        //                }
+        //            }
+
+        //            await _unitOfWork.Complete();
+
+        //            var notificationDto = new NotificationServiceDto
+        //            {
+        //                Title = "تم تحديث الاختبار",
+        //                Description = $"تم تحديث اختبار {quiz.Name} بنجاح",
+        //                Type = NotificationType.Quiz,
+        //            };
+        //            await _notificationService.SendNotificationAsync(notificationDto);
+
+        //            await _unitOfWork.CommitTransactionAsync();
+        //            return new ApiResponse(200, "Quiz updated successfully");
+        //        }
+        //        catch (ArgumentException ex)
+        //        {
+        //            await _unitOfWork.RollbackTransactionAsync();
+        //            return new ApiResponse(400, ex.Message);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            await _unitOfWork.RollbackTransactionAsync();
+        //            return new ApiResponse(500, $"Failed to update quiz: {ex.Message}");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new ApiResponse(500, $"An unexpected error occurred: {ex.Message}");
+        //    }
+        //}
     }
 }
