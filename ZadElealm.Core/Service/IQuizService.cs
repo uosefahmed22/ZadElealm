@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZadElealm.Apis.Errors;
 using ZadElealm.Core.ServiceDto;
-using ZadElealm.Service.Errors;
 
 namespace ZadElealm.Core.Service
 {
     public interface IQuizService
     {
-        Task<ServiceApiResponse<int>> CreateQuizAsync(QuizDto quizDto);
-        Task<ServiceApiResponse<QuizResultDto>> SubmitQuizAsync(string userId, QuizSubmissionDto submission);
-        Task<ServiceApiResponse<bool>> UpdateQuizAsync(QuizDto quizDto);
+        Task<ApiResponse> CreateQuizAsync(QuizDto quizDto);
+        Task<ApiDataResponse> SubmitQuizAsync(string userId, QuizSubmissionDto submission);
+        Task<ApiResponse> UpdateQuizAsync(QuizDto quizDto);
     }
 }

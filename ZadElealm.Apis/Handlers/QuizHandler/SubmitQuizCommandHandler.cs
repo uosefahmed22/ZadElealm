@@ -17,10 +17,10 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
         {
             var result = await _quizService.SubmitQuizAsync(request.UserId, request.Submission);
 
-            if (!result.IsSuccess)
-                return new ApiResponse(400, result.Message);
+            if (result == null)
+                return new ApiResponse(400, "Quiz submission failed.");
 
-            return new ApiDataResponse(200, result.Data);
+            return new ApiDataResponse(200, result);
         }
     }
 }
