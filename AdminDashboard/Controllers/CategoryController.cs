@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using AdminDashboard.Quires;
+using AutoMapper;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -12,12 +14,15 @@ namespace AdminDashboard.Controllers
     [Authorize(Roles = "Admin")]
     public class CategoryController : Controller
     {
+        private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
 
-        public CategoryController(IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
+        public CategoryController(IMediator mediator,
+            IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
         {
+           _mediator = mediator;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _imageService = imageService;
@@ -25,9 +30,9 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var categories = await _unitOfWork.Repository<Category>().GetAllAsync();
-            var mappedCategories = _mapper.Map<IReadOnlyList<Category>, IReadOnlyList<CategoryResponseDto>>(categories);
-            return View(mappedCategories);
+            var query = new GetAllCategoriesQuery();
+            var categories = await _mediator.Send(query);
+            return View(categories);
         }
 
         public async Task<IActionResult> Edit(int id)
