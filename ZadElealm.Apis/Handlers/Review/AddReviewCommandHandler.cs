@@ -25,12 +25,6 @@ namespace ZadElealm.Apis.Handlers.Review
         {
             try
             {
-                var existingReview = await _unitOfWork.Repository<Core.Models.Review>()
-                    .GetEntityWithSpecAsync(new ReviewSpecification(request.UserId, request.CourseId));
-
-                if (existingReview != null)
-                    return new ApiResponse(400, "لقد قمت بإضافة مراجعة لهذه الدورة من قبل");
-
                 var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(request.CourseId);
                 if (course == null)
                     return new ApiResponse(404, "الدورة غير موجودة");
