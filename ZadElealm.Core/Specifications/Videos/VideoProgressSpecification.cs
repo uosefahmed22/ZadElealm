@@ -13,6 +13,7 @@ namespace ZadElealm.Core.Specifications.Videos
             : base(p => p.UserId == userId && p.VideoId == videoId)
         {
             Includes.Add(p => p.Video);
+            Includes.Add(p => p.Course);
         }
     }
 }
