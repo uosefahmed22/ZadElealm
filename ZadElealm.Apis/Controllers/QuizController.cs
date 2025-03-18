@@ -54,5 +54,25 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [HttpPost("create")]
+        public async Task<ActionResult<ApiResponse>> CreateQuiz([FromBody] QuizDto quizDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(new ApiResponse(400, "Invalid quiz data"));
+
+                var command = new CreateQuizCommand(quizDto);
+                var response = await _mediator.Send(command);
+
+                return StatusCode(response.StatusCode, response);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new ApiResponse(500, "An unexpected error occurred"));
+            }
+        }
     }
 }
