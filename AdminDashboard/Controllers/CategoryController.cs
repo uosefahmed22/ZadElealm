@@ -72,24 +72,29 @@ namespace AdminDashboard.Controllers
         }
         public IActionResult Create()
         {
-            var model = new CreateCategoryDto();
-            return View(model);
+            return View(new CreateCategoryDto());
         }
+
         [HttpPost]
         public async Task<IActionResult> Create(CreateCategoryDto model)
         {
-            if(model.ImageUrl == null)
-            {
-                ModelState.AddModelError("ImageUrl", "Image is required!");
+            if (!ModelState.IsValid)
                 return View(model);
-            }
 
-            var uploadedImage = await _imageService.UploadImageAsync(model.ImageUrl);
-            var category = _mapper.Map<CreateCategoryDto, Category>(model);
-            category.ImageUrl = uploadedImage;
-            await _unitOfWork.Repository<Category>().AddAsync(category);
-            await _unitOfWork.Complete();
-            return RedirectToAction("Index");
+            var command = new CreateCategoryCommand
+            {
+                Name = model.Name,
+                Description = model.Description,
+                ImageUrl = model.ImageUrl?? null
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result)
+                return RedirectToAction("Index");
+
+            ModelState.AddModelError("", "Failed to create category");
+            return View(model);
         }
     }
 }
