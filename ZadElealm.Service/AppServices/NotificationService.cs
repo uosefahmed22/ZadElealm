@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
@@ -20,7 +21,7 @@ namespace ZadElealm.Service.AppServices
             _unitOfWork = unitOfWork;
         }
 
-        public async Task SendNotificationAsync(NotificationServiceDto notificationServiceDto)
+        public async Task<ApiDataResponse> SendNotificationAsync(NotificationServiceDto notificationServiceDto)
         {
             try
             {
@@ -38,14 +39,18 @@ namespace ZadElealm.Service.AppServices
                     IsRead = false
                 };
 
+                if(notification.UserNotifications == null)
+                    return new ApiDataResponse(400, null, "UserNotifications is null");
+
                 notification.UserNotifications.Add(userNotification);
 
                 await _unitOfWork.Repository<Notification>().AddAsync(notification);
                 await _unitOfWork.Complete();
+                return new ApiDataResponse(200, null, "Notification sent successfully");
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                return new ApiDataResponse(500, null, "Error while sending notification");
             }
         }
     }

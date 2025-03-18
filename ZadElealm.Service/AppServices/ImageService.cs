@@ -8,6 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Service;
+using ZadElealm.Apis.Errors;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -21,7 +22,7 @@ namespace ZadElealm.Service.AppServices
             _cloudinary = cloudinary;
         }
 
-        public async Task<string> UploadImageAsync(IFormFile imageFile)
+        public async Task<ApiDataResponse> UploadImageAsync(IFormFile imageFile)
         {
             if (imageFile == null)
             {
@@ -30,18 +31,18 @@ namespace ZadElealm.Service.AppServices
 
             if (imageFile.Length == 0)
             {
-                return "No file uploaded.";
+                return new ApiDataResponse(400, null, "File is empty.");
             }
 
             if (imageFile.Length > 5 * 1024 * 1024)
             {
-                return "File size should not exceed 5MB.";
+                return new ApiDataResponse(400, null, "File size cannot exceed 5MB.");
             }
 
             var ext = Path.GetExtension(imageFile.FileName).ToLower();
             if (!_allowedExtensions.Contains(ext))
             {
-                return $"Only {string.Join(", ", _allowedExtensions)} extensions are allowed.";
+                return new ApiDataResponse(400, null, "Invalid file type. Only JPG and PNG are allowed.");
             }
 
             try
@@ -57,16 +58,16 @@ namespace ZadElealm.Service.AppServices
 
                 if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    return uploadResult.SecureUrl.AbsoluteUri;
+                    return new ApiDataResponse(200, uploadResult.Url.AbsoluteUri, "Image uploaded successfully.");
                 }
                 else
                 {
-                    return $"Error occurred while uploading the image. Status Code: {uploadResult.StatusCode}, Error: {uploadResult.Error?.Message}";
+                    return new ApiDataResponse(400, null, "Failed to upload image.");
                 }
             }
             catch (Exception ex)
             {
-                return $"An unexpected error occurred: {ex.Message}";
+                return new ApiDataResponse(500, null, $"An unexpected error occurred");
             }
         }
         private string GetPublicIdFromUrl(string url)
@@ -88,7 +89,7 @@ namespace ZadElealm.Service.AppServices
                 throw new InvalidOperationException("Failed to extract public ID from URL.", ex);
             }
         }
-        public async Task<string> DeleteImageAsync(string imageUrl)
+        public async Task<ApiDataResponse> DeleteImageAsync(string imageUrl)
         {
             if (string.IsNullOrEmpty(imageUrl))
             {
@@ -98,7 +99,7 @@ namespace ZadElealm.Service.AppServices
             var publicId = GetPublicIdFromUrl(imageUrl);
             if (string.IsNullOrEmpty(publicId))
             {
-                return "Invalid image URL.";
+                return new ApiDataResponse(400, null, "Failed to extract public ID from URL.");
             }
 
             try
@@ -112,16 +113,16 @@ namespace ZadElealm.Service.AppServices
 
                 if (deletionResult.StatusCode == HttpStatusCode.OK)
                 {
-                    return "Image deleted successfully.";
+                    return new ApiDataResponse(200, null, "Image deleted successfully.");
                 }
                 else
                 {
-                    return $"Failed to delete image. Status Code: {deletionResult.StatusCode}";
+                    return new ApiDataResponse(400, null, "Failed to delete image.");
                 }
             }
             catch (Exception ex)
             {
-                return $"An unexpected error occurred: {ex.Message}";
+                return new ApiDataResponse(500, null, $"An unexpected error occurred");
             }
         }
     }

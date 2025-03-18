@@ -16,6 +16,7 @@ using QuestPDF.Infrastructure;
 using ZadElealm.Core.Specifications.CertificateFolder;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Specifications;
+using ZadElealm.Apis.Errors;
 
 
 namespace ZadElealm.Service.AppServices
@@ -36,7 +37,7 @@ namespace ZadElealm.Service.AppServices
             _configuration = configuration;
         }
 
-        public async Task<Certificate> GenerateAndSaveCertificate(string userId, int quizId)
+        public async Task<ApiDataResponse> GenerateAndSaveCertificate(string userId, int quizId)
         {
             try
             {
@@ -47,10 +48,10 @@ namespace ZadElealm.Service.AppServices
                 var progress = await _unitOfWork.Repository<Progress>().GetEntityWithSpecAsync(progressSpec);
 
                 if (progress == null)
-                    throw new Exception("لم يتم العثور على محاولة للاختبار");
+                    return new ApiDataResponse(404, null, "لم يتم العثور على الاختبار");
 
                 if (!progress.IsCompleted)
-                    throw new Exception("لم يتم إكمال الاختبار بعد");
+                    return new ApiDataResponse(400, null, "لم يتم اجتياز الاختبار بعد");
 
 
                 var (filePath, fileName) = GeneratePdfCertificate(userId, quizId, user, quiz);
@@ -68,7 +69,7 @@ namespace ZadElealm.Service.AppServices
                     CreatedAt = DateTime.UtcNow
                 };
 
-                return certificate;
+                return new ApiDataResponse(200,certificate, "تم إنشاء الشهادة بنجاح");
             }
             catch (Exception ex)
             {
