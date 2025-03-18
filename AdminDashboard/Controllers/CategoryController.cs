@@ -1,4 +1,5 @@
-﻿using AdminDashboard.Quires;
+﻿using AdminDashboard.Commands;
+using AdminDashboard.Quires;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -37,43 +38,28 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
+            var query = new GetCategoryByIdQuery { Id = id };
+            var category = await _mediator.Send(query);
 
-            var model = new CreateCategoryDto
-            {
-                Name = category.Name,
-                Description = category.Description,
-            };
+            if (category == null)
+                return NotFound();
+
+            var model = _mapper.Map<CreateCategoryDto>(category);
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> Edit(CreateCategoryDto model)
         {
             if (!ModelState.IsValid)
-            {
                 return View(model);
-            }
 
-            var categoryExsist = await _unitOfWork.Repository<Category>().GetEntityAsync(model.Id);
-            if (categoryExsist == null)
-            {
+            var command = _mapper.Map<UpdateCategoryCommand>(model);
+            var result = await _mediator.Send(command);
+
+            if (!result)
                 return NotFound();
-            }
 
-            categoryExsist.Name = model.Name;
-            categoryExsist.Description = model.Description;
-
-            if (model.ImageUrl != null)
-            {
-                var uploadedImage = await _imageService.UploadImageAsync(model.ImageUrl);
-                categoryExsist.ImageUrl = uploadedImage;
-            }
-
-            await _unitOfWork.Complete();
             return RedirectToAction("Index");
         }
 
