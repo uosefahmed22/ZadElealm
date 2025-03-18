@@ -23,6 +23,15 @@ namespace AdminDashboard.Helpers
 
             CreateMap<Course, CourseDto>();
             CreateMap<Course, CourseResponseWithAllDataDto>();
+
+            CreateMap<CreateCategoryDto, CreateCategoryCommand>();
+
+            CreateMap<CreateCategoryCommand, Category>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore()); 
+
+            CreateMap<CreateCategoryDto, Category>()
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
+                    src.ImageUrl != null ? src.ImageUrl.FileName : null));
         }
     }
 }
