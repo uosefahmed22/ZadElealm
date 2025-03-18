@@ -51,6 +51,7 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
                     {
                         UserId = request.UserId,
                         VideoId = request.VideoId,
+                        CourseId = video.CourseId,
                         WatchedDuration = request.WatchedDuration,
                         IsCompleted = false
                     };
@@ -69,6 +70,7 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
                 var videoDto = new VideoProgressDto
                 {
                     VideoId = progress.VideoId,
+                    CourseId = progress.CourseId, 
                     WatchedDuration = progress.WatchedDuration.TotalSeconds,
                     IsCompleted = progress.IsCompleted
                 };

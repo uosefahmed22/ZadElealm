@@ -26,6 +26,7 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
             return new VideoProgressDto
             {
                 VideoId = progress.VideoId,
+                CourseId = progress.CourseId,
                 WatchedDuration = progress.WatchedDuration.TotalSeconds,
                 IsCompleted = progress.IsCompleted
             };
