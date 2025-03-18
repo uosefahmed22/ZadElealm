@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models.Identity;
 
 namespace ZadElealm.Core.Service
 {
     public interface ISendEmailService
     {
-        Task SendEmailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default);
+        Task<ApiDataResponse> SendEmailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default);
     }
 }

@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
+using ZadElealm.Apis.Errors;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -24,14 +25,16 @@ namespace ZadElealm.Service.AppServices
             _logger = logger;
         }
 
-        public async Task SendEmailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
+        public async Task<ApiDataResponse> SendEmailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(emailMessage.To))
-                throw new ArgumentException("Recipient email cannot be null or empty.", nameof(emailMessage.To));
+               return new ApiDataResponse(400,null, "To cannot be null or empty.");
+
             if (string.IsNullOrWhiteSpace(emailMessage.Subject))
-                throw new ArgumentException("Subject cannot be null or empty.", nameof(emailMessage.Subject));
+               return new ApiDataResponse(400, null, "Subject cannot be null or empty.");
+
             if (string.IsNullOrWhiteSpace(emailMessage.Body))
-                throw new ArgumentException("Body cannot be null or empty.", nameof(emailMessage.Body));
+                return new ApiDataResponse(400, null, "Body cannot be null or empty.");
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.DisplayedName, _emailSettings.Email));
@@ -48,11 +51,11 @@ namespace ZadElealm.Service.AppServices
                     await client.SendAsync(message, cancellationToken);
                     await client.DisconnectAsync(true, cancellationToken);
                 }
+                return new ApiDataResponse(200, null, "Email sent successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send email to {Email}", emailMessage.To);
-                throw new InvalidOperationException("Failed to send email.", ex);
+                return new ApiDataResponse(500, null, "Error while sending email");
             }
         }
     }

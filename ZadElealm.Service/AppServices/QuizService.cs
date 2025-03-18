@@ -226,6 +226,5 @@ namespace ZadElealm.Service.AppServices
                 return new ApiDataResponse(500, null, $"An unexpected error occurred: {ex.Message}");
             }
         }
-
      }
 }
