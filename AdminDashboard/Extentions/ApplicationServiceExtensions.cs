@@ -31,7 +31,7 @@ namespace AdminDashboard.Extentions
             ConfigureCors(services);
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
-            services.AddAutoMapper(typeof(MappingProfiles));
+            services.AddAutoMapper(typeof(AdminDashboard.Helpers.MappingProfiles));
             services.AddMemoryCache();
             services.AddHttpClient();
             var cloudName = configuration["CloudinarySetting:CloudName"];
