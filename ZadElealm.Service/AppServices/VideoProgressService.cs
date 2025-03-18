@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
@@ -24,13 +25,13 @@ namespace ZadElealm.Service.AppServices
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<VideoProgress> UpdateProgressAsync(string userId, int videoId, TimeSpan watchedDuration)
+        public async Task<ApiDataResponse> UpdateProgressAsync(string userId, int videoId, TimeSpan watchedDuration)
         {
             var videoSpec = new VideoByIdSpecification(videoId);
             var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
 
             if (video == null)
-                throw new Exception($"Video with ID {videoId} not found");
+                return new ApiDataResponse(404, null, "Video not found");
 
             var progressSpec = new VideoProgressSpecification(userId, videoId);
             var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(progressSpec);
@@ -56,15 +57,15 @@ namespace ZadElealm.Service.AppServices
             progress.IsCompleted = (watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds) >= COMPLETION_THRESHOLD;
 
             await _unitOfWork.Complete();
-            return progress;
+            return new ApiDataResponse(200, progress, "Progress updated successfully");
         }
-        public async Task<CourseProgress> GetCourseProgressAsync(string userId, int courseId)
+        public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)
         {
             var spec = new CourseWithVideosAndQuizzesSpecification(courseId);
             var course = await _unitOfWork.Repository<Course>().GetEntityWithSpecAsync(spec);
 
             if (course == null)
-                throw new Exception("Course not found");
+                return new ApiDataResponse(404, null, "Course not found");
 
             var videoProgressSpec = new VideoProgressWithSpec(userId, courseId);
             var videoProgresses = await _unitOfWork.Repository<VideoProgress>().GetAllWithSpecNoTrackingAsync(videoProgressSpec);
@@ -79,7 +80,7 @@ namespace ZadElealm.Service.AppServices
             var overallProgress = videoProgress;
             var isEligibleForQuiz = videoProgress >= 80;
 
-            return new CourseProgress
+            var courseProgress = new CourseProgress
             {
                 VideoProgress = videoProgress,
                 OverallProgress = overallProgress,
@@ -87,16 +88,19 @@ namespace ZadElealm.Service.AppServices
                 TotalVideos = totalVideos,
                 IsEligibleForQuiz = isEligibleForQuiz
             };
+            return new ApiDataResponse(200, courseProgress, "Course progress retrieved successfully");
         }
         public async Task<bool> CheckCourseCompletionEligibilityAsync(string userId, int courseId)
         {
             var progress = await GetCourseProgressAsync(userId, courseId);
-            return progress.OverallProgress >= 80;
+            var courseProgress = progress.Data as CourseProgress;
+            return courseProgress.OverallProgress >= 80;
         }
-        public async Task<VideoProgress> GetVideoProgressAsync(string userId, int videoId)
+        public async Task<ApiDataResponse> GetVideoProgressAsync(string userId, int videoId)
         {
             var spec = new VideoProgressWithSpec(userId, videoId);
-            return await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(spec);
+            await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(spec);
+            return new ApiDataResponse(200, spec, "Video progress retrieved successfully");
         }
     }
 }
