@@ -12,6 +12,5 @@ namespace ZadElealm.Core.Service
     {
         Task<ApiResponse> CreateQuizAsync(QuizDto quizDto);
         Task<ApiDataResponse> SubmitQuizAsync(string userId, QuizSubmissionDto submission);
-        Task<ApiResponse> UpdateQuizAsync(QuizDto quizDto);
     }
 }
