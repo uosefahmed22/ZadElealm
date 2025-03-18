@@ -107,6 +107,7 @@ namespace AdminDashboard.Extentions
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IQuizService, QuizService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IVideoProgressService, VideoProgressService>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             services.Configure<AdminSettings>(configuration.GetSection("AdminSettings"));

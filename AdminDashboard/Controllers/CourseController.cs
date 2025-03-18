@@ -75,7 +75,7 @@ namespace AdminDashboard.Controllers
             if (model.Image != null)
             {
                 var uploadedImage = await _imageService.UploadImageAsync(model.Image);
-                courseExsist.ImageUrl = uploadedImage;
+                courseExsist.ImageUrl = uploadedImage.Data as string;
             }
 
             await _unitOfWork.Complete();

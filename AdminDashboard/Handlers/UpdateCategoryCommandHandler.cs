@@ -28,7 +28,7 @@ namespace AdminDashboard.Handlers
             if (request.ImageUrl != null)
             {
                 var uploadedImage = await _imageService.UploadImageAsync(request.ImageUrl);
-                category.ImageUrl = uploadedImage;
+                category.ImageUrl = uploadedImage.Data as string;
             }
 
             await _unitOfWork.Complete();

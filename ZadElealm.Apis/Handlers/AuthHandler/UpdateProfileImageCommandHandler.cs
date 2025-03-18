@@ -55,7 +55,7 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
                 }
 
                 var imageUrl = await _imageService.UploadImageAsync(request.File);
-                user.ImageUrl = imageUrl;
+                user.ImageUrl = imageUrl.Data as string;
                 await _userManager.UpdateAsync(user);
 
                 return new ApiResponse(200, "تم رفع الصورة بنجاح");

@@ -195,7 +195,7 @@ namespace ZadElealm.Service.AppServices
                         };
 
                         await _notificationService.SendNotificationAsync(notificationServiceDto);
-                        await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
+                        await _unitOfWork.Repository<Certificate>().AddAsync((Certificate)certificate.Data);
                         await _unitOfWork.Complete();
                     }
 

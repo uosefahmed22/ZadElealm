@@ -24,7 +24,7 @@ namespace AdminDashboard.Handlers
         {
             var uploadedImage = await _imageService.UploadImageAsync(request.ImageUrl);
             var category = _mapper.Map<Category>(request);
-            category.ImageUrl = uploadedImage;
+            category.ImageUrl = uploadedImage.Data as string;
 
             await _unitOfWork.Repository<Category>().AddAsync(category);
             await _unitOfWork.Complete();
