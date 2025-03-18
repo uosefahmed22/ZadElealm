@@ -27,6 +27,9 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ApiDataResponse> UpdateProgressAsync(string userId, int videoId, TimeSpan watchedDuration)
         {
+            if (watchedDuration.TotalSeconds < 0)
+                return new ApiDataResponse(400, null, "Watch duration cannot be negative");
+
             var videoSpec = new VideoByIdSpecification(videoId);
             var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
 
@@ -36,28 +39,48 @@ namespace ZadElealm.Service.AppServices
             var progressSpec = new VideoProgressSpecification(userId, videoId);
             var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(progressSpec);
 
-            if (progress == null)
+            if (progress != null)
+            {
+                if (progress.IsCompleted)
+                    return new ApiDataResponse(200, progress, "You have already completed this video");
+
+                if (progress.WatchedDuration.TotalSeconds > watchedDuration.TotalSeconds)
+                    return new ApiDataResponse(200, progress, "Previously recorded progress is greater");
+
+                if (watchedDuration.TotalSeconds > video.VideoDuration.TotalSeconds)
+                {
+                    watchedDuration = video.VideoDuration;
+                }
+
+                progress.WatchedDuration = watchedDuration;
+                _unitOfWork.Repository<VideoProgress>().Update(progress);
+            }
+            else
             {
                 progress = new VideoProgress
                 {
                     UserId = userId,
                     VideoId = videoId,
-                    WatchedDuration = watchedDuration,
-                    IsCompleted = false
+                    WatchedDuration = watchedDuration > video.VideoDuration ? video.VideoDuration : watchedDuration,
+                    IsCompleted = false,
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 await _unitOfWork.Repository<VideoProgress>().AddAsync(progress);
             }
-            else
+
+            double completionPercentage = watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds;
+            progress.IsCompleted = completionPercentage >= COMPLETION_THRESHOLD;
+
+            try
             {
-                progress.WatchedDuration = watchedDuration;
-                _unitOfWork.Repository<VideoProgress>().Update(progress);
+                await _unitOfWork.Complete();
+                return new ApiDataResponse(200, progress, "Progress updated successfully");
             }
-
-            progress.IsCompleted = (watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds) >= COMPLETION_THRESHOLD;
-
-            await _unitOfWork.Complete();
-            return new ApiDataResponse(200, progress, "Progress updated successfully");
+            catch (Exception ex)
+            {
+                return new ApiDataResponse(500, null, "Failed to update progress");
+            }
         }
         public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)
         {
