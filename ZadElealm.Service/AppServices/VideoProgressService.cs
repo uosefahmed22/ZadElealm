@@ -36,6 +36,9 @@ namespace ZadElealm.Service.AppServices
             if (video == null)
                 return new ApiDataResponse(404, null, "Video not found");
 
+            if (video.CourseId <= 0)
+                return new ApiDataResponse(400, null, "Invalid CourseId associated with the video");
+
             var progressSpec = new VideoProgressSpecification(userId, videoId);
             var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(progressSpec);
 
@@ -61,6 +64,7 @@ namespace ZadElealm.Service.AppServices
                 {
                     UserId = userId,
                     VideoId = videoId,
+                    CourseId = video.CourseId,
                     WatchedDuration = watchedDuration > video.VideoDuration ? video.VideoDuration : watchedDuration,
                     IsCompleted = false,
                     CreatedAt = DateTime.UtcNow
@@ -77,9 +81,13 @@ namespace ZadElealm.Service.AppServices
                 await _unitOfWork.Complete();
                 return new ApiDataResponse(200, progress, "Progress updated successfully");
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                return new ApiDataResponse(500, null, "Failed to update progress");
+                return new ApiDataResponse(500, null, "Failed to update progress: Database constraint violation");
+            }
+            catch (Exception)
+            {
+                return new ApiDataResponse(500, null, "Failed to update progress: Unexpected error");
             }
         }
         public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)
