@@ -57,7 +57,7 @@ namespace ZadElealm.Apis.Controllers
             var command = new SubmitQuizCommand(user.Id, submission);
             var response = await _mediator.Send(command);
 
-            return StatusCode(response.StatusCode, response);
+            return response;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]

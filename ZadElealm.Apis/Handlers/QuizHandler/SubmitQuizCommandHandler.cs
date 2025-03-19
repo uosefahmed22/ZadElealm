@@ -20,7 +20,7 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
             if (result == null)
                 return new ApiResponse(400, "Quiz submission failed.");
 
-            return new ApiDataResponse(200, result);
+            return result;
         }
     }
 }
