@@ -98,6 +98,12 @@ namespace ZadElealm.Service.AppServices
             if (course == null)
                 return new ApiDataResponse(404, null, "Course not found");
 
+            var enrollmentSpec = new EnrollmentSpecification(courseId, userId);
+            var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecAsync(enrollmentSpec);
+
+            if (enrollment == null)
+                return new ApiDataResponse(404, null, "User is not enrolled in this course");
+
             var videoProgressSpec = new VideoProgressWithSpec(userId, courseId);
             var videoProgresses = await _unitOfWork.Repository<VideoProgress>().GetAllWithSpecNoTrackingAsync(videoProgressSpec);
 

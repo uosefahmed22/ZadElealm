@@ -8,6 +8,5 @@
         public string VideoUrl { get; set; }
         public string ThumbnailUrl { get; set; }
         public TimeSpan VideoDuration { get; set; }
-        public int OrderInCourse { get; set; }
     }
 }
