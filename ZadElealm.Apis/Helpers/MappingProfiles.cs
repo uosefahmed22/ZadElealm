@@ -35,9 +35,17 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<ReportDto, Report>();
 
             CreateMap<ReviewDto, Review>();
+            CreateMap<Reply, ReplyDto>()
+            .ForMember(dest => dest.DisplayName, opt =>
+                opt.MapFrom(src => src.User.DisplayName))
+
+            .ForMember(dest => dest.UserImage, opt =>
+                opt.MapFrom(src => src.User.ImageUrl));
             CreateMap<Review, ReviewWithReviwerDataDto>()
            .ForMember(d => d.DisplayName, o => o.MapFrom(s => s.User.DisplayName))
-           .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.User.ImageUrl));
+           .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.User.ImageUrl))
+           .ForMember(dest => dest.HasReplies, opt => opt.MapFrom(src => src.Replies.Any()))
+           .ForMember(dest => dest.RepliesCount, opt => opt.MapFrom(src => src.Replies.Count));
 
             CreateMap<Notification, NotificationDto>()
                 .ForMember(dest => dest.IsRead, opt =>
