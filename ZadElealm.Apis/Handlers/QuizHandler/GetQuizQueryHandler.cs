@@ -34,12 +34,12 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
                 if (quiz == null)
                     return new ApiResponse(404, "الاختبار غير موجود");
 
-                var isUserEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(request.UserId, quiz.CourseId);
-                if (!isUserEligible)
-                    return new ApiResponse(403, "غير مؤهل للدخول لهذا الاختبار");
+                //var isUserEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(request.UserId, quiz.CourseId);
+                //if (!isUserEligible)
+                //    return new ApiResponse(403, "غير مؤهل للدخول لهذا الاختبار");
 
                 var mappedQuiz = _mapper.Map<QuizResponseDto>(quiz);
-                return new ApiDataResponse(200,mappedQuiz);
+                return new ApiDataResponse(200, mappedQuiz);
             }
             catch (Exception ex)
             {
