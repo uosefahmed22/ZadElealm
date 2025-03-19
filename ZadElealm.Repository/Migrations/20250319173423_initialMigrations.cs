@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ZadElealm.Repository.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialMigration : Migration
+    public partial class initialMigrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -411,7 +411,7 @@ namespace ZadElealm.Repository.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    courseId = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
                     AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -423,14 +423,12 @@ namespace ZadElealm.Repository.Migrations
                         name: "FK_Reviews_AspNetUsers_AppUserId",
                         column: x => x.AppUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_Reviews_Courses_courseId",
-                        column: x => x.courseId,
+                        name: "FK_Reviews_Courses_CourseId",
+                        column: x => x.CourseId,
                         principalTable: "Courses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -529,7 +527,7 @@ namespace ZadElealm.Repository.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CorrectChoice = table.Column<int>(type: "int", nullable: false),
+                    CorrectChoiceId = table.Column<int>(type: "int", nullable: false),
                     QuizId = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
@@ -546,6 +544,61 @@ namespace ZadElealm.Repository.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "replies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReviewId = table.Column<int>(type: "int", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_replies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_replies_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_replies_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ReviewLikes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ReviewId = table.Column<int>(type: "int", nullable: false),
+                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ReviewLikes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ReviewLikes_AspNetUsers_AppUserId",
+                        column: x => x.AppUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_ReviewLikes_Reviews_ReviewId",
+                        column: x => x.ReviewId,
+                        principalTable: "Reviews",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VideoProgresses",
                 columns: table => new
                 {
@@ -553,6 +606,7 @@ namespace ZadElealm.Repository.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     VideoId = table.Column<int>(type: "int", nullable: false),
+                    CourseId = table.Column<int>(type: "int", nullable: false),
                     WatchedDuration = table.Column<TimeSpan>(type: "time", nullable: false),
                     IsCompleted = table.Column<bool>(type: "bit", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -565,14 +619,17 @@ namespace ZadElealm.Repository.Migrations
                         name: "FK_VideoProgresses_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_VideoProgresses_Courses_CourseId",
+                        column: x => x.CourseId,
+                        principalTable: "Courses",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_VideoProgresses_Videos_VideoId",
                         column: x => x.VideoId,
                         principalTable: "Videos",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -707,9 +764,29 @@ namespace ZadElealm.Repository.Migrations
                 column: "courseId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_replies_AppUserId",
+                table: "replies",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_replies_ReviewId",
+                table: "replies",
+                column: "ReviewId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Reports_AppUserId",
                 table: "Reports",
                 column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReviewLikes_AppUserId",
+                table: "ReviewLikes",
+                column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReviewLikes_ReviewId",
+                table: "ReviewLikes",
+                column: "ReviewId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_AppUserId",
@@ -717,9 +794,9 @@ namespace ZadElealm.Repository.Migrations
                 column: "AppUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_courseId",
+                name: "IX_Reviews_CourseId",
                 table: "Reviews",
-                column: "courseId");
+                column: "CourseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserNotifications_AppUserId",
@@ -732,9 +809,14 @@ namespace ZadElealm.Repository.Migrations
                 column: "NotificationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_VideoProgresses_UserId",
+                name: "IX_VideoProgresses_CourseId",
                 table: "VideoProgresses",
-                column: "UserId");
+                column: "CourseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VideoProgresses_UserId_CourseId",
+                table: "VideoProgresses",
+                columns: new[] { "UserId", "CourseId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_VideoProgresses_VideoId",
@@ -787,10 +869,13 @@ namespace ZadElealm.Repository.Migrations
                 name: "RefreshTokens");
 
             migrationBuilder.DropTable(
+                name: "replies");
+
+            migrationBuilder.DropTable(
                 name: "Reports");
 
             migrationBuilder.DropTable(
-                name: "Reviews");
+                name: "ReviewLikes");
 
             migrationBuilder.DropTable(
                 name: "UserNotifications");
@@ -805,16 +890,19 @@ namespace ZadElealm.Repository.Migrations
                 name: "Question");
 
             migrationBuilder.DropTable(
-                name: "Notifications");
+                name: "Reviews");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "Videos");
 
             migrationBuilder.DropTable(
                 name: "Quizzes");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Courses");

@@ -3,6 +3,7 @@ using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Videos;
 
@@ -11,11 +12,14 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
     public class UpdateVideoProgressHandler : BaseCommandHandler<UpdateVideoProgressCommand, ApiDataResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private const double COMPLETION_THRESHOLD = 0.85;
+        private readonly IVideoProgressService _videoProgressService;
 
-        public UpdateVideoProgressHandler(IUnitOfWork unitOfWork)
+        public UpdateVideoProgressHandler(
+            IUnitOfWork unitOfWork,
+            IVideoProgressService videoProgressService)
         {
             _unitOfWork = unitOfWork;
+            _videoProgressService = videoProgressService;
         }
 
         public override async Task<ApiDataResponse> Handle(UpdateVideoProgressCommand request, CancellationToken cancellationToken)
@@ -42,37 +46,21 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
                 if (!canAccessVideo)
                     return new ApiDataResponse(403, "You need to complete previous videos first");
 
-                var progressSpec = new VideoProgressSpecification(request.UserId, request.VideoId);
-                var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(progressSpec);
+                var progressResponse = await _videoProgressService.UpdateProgressAsync(
+                    request.UserId,
+                    request.VideoId,
+                    request.WatchedDuration
+                );
 
-                if (progress == null)
-                {
-                    progress = new VideoProgress
-                    {
-                        UserId = request.UserId,
-                        VideoId = request.VideoId,
-                        CourseId = video.CourseId,
-                        WatchedDuration = request.WatchedDuration,
-                        IsCompleted = false
-                    };
-                    await _unitOfWork.Repository<VideoProgress>().AddAsync(progress);
-                }
-                else
-                {
-                    progress.WatchedDuration = request.WatchedDuration;
-                    _unitOfWork.Repository<VideoProgress>().Update(progress);
-                }
-
-                progress.IsCompleted = (request.WatchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds) >= COMPLETION_THRESHOLD;
-
-                await _unitOfWork.Complete();
+                if (progressResponse.StatusCode != 200)
+                    return progressResponse;
 
                 var videoDto = new VideoProgressDto
                 {
-                    VideoId = progress.VideoId,
-                    CourseId = progress.CourseId, 
-                    WatchedDuration = progress.WatchedDuration.TotalSeconds,
-                    IsCompleted = progress.IsCompleted
+                    VideoId = request.VideoId,
+                    CourseId = video.CourseId,
+                    WatchedDuration = request.WatchedDuration.TotalSeconds,
+                    IsCompleted = progressResponse.Data as bool? ?? false
                 };
 
                 return new ApiDataResponse(200, videoDto);

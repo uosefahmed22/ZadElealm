@@ -13,37 +13,44 @@ namespace ZadElealm.Apis.Handlers.Category
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IMemoryCache _cache;
 
-        public GetCategoryWithCoursesQueryHandler(
-            IUnitOfWork unitOfWork,
-            IMapper mapper,
-            IMemoryCache cache)
+        public GetCategoryWithCoursesQueryHandler(IUnitOfWork unitOfWork,IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _cache = cache;
         }
+
 
         public override async Task<ApiResponse> Handle(GetCategoryWithCoursesQuery request, CancellationToken cancellationToken)
         {
             try
             {
+                var countSpec = new CategoryWithCoursesSpecification(request.SpecParams, true);
+                var totalItems = await _unitOfWork.Repository<Core.Models.Course>().CountAsync(countSpec);
+
+                if (totalItems == 0)
+                    return new ApiResponse(404, "لا توجد دورات في هذه الفئة");
+
                 var spec = new CategoryWithCoursesSpecification(request.SpecParams);
                 var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecNoTrackingAsync(spec);
 
-                var totalItems = await _unitOfWork.Repository<Core.Models.Course>().CountAsync(spec);
-
-                if (!courses.Any())
-                    return new ApiResponse(404, "لا توجد دورات في هذه الفئة");
-
                 var coursesDto = _mapper.Map<IReadOnlyList<CourseDto>>(courses);
 
-                var metaData = MetaData.Create(
-                    totalItems,
-                    request.SpecParams.PageNumber,
-                    request.SpecParams.PageSize
-                );
+                var metaData = new MetaData
+                {
+                    CurrentPage = request.SpecParams.PageNumber,
+                    PageSize = request.SpecParams.PageSize,
+                    TotalMatchedItems = totalItems,
+                    NumberOfPages = (int)Math.Ceiling(totalItems / (double)request.SpecParams.PageSize)
+                };
+
+                metaData.NextPage = metaData.CurrentPage < metaData.NumberOfPages
+                    ? metaData.CurrentPage + 1
+                    : null;
+
+                metaData.PreviousPage = metaData.CurrentPage > 1
+                    ? metaData.CurrentPage - 1
+                    : null;
 
                 return new PaginatedResponse<CourseDto>(
                     200,

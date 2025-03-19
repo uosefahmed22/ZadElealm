@@ -46,6 +46,8 @@ namespace ZadElealm.Repository.Data.Datbases
         public DbSet<Favorite> Favorites { get; set; }
         public DbSet<Rating> Ratings { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<Reply> replies { get; set; }
+        public DbSet<ReviewLike> ReviewLikes { get; set; }
         public DbSet<Report> Reports { get; set; }
         public DbSet<Progress> Progresses { get; set; }
         public DbSet<UserNotification> UserNotifications { get; set; }

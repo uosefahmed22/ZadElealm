@@ -42,5 +42,36 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("{reviewId}/replies")]
+        public async Task<ActionResult<ApiResponse>> AddReply(int reviewId, [FromBody] string replyText)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            var command = new AddReplyCommand
+            {
+                ReviewId = reviewId,
+                ReplyText = replyText,
+                UserId =user.Id
+            };
+
+            return Ok(await _mediator.Send(command));
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("{reviewId}/like")]
+        public async Task<ActionResult<ApiResponse>> ToggleLike(int reviewId) 
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            var command = new ToggleLikeCommand
+            {
+                ReviewId = reviewId,
+                UserId = user.Id
+            };
+
+            return Ok(await _mediator.Send(command));
+        }
     }
 }

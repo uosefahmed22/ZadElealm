@@ -11,7 +11,7 @@ namespace ZadElealm.Core.Specifications
 {
     public class CategoryWithCoursesSpecification : BaseSpecification<Core.Models.Course>
     {
-        public CategoryWithCoursesSpecification(CourseSpecParams specParams)
+        public CategoryWithCoursesSpecification(CourseSpecParams specParams, bool countOnly = false)
             : base(x => x.CategoryId == specParams.CategoryId &&
                 (string.IsNullOrEmpty(specParams.Search) ||
                 x.Name.ToLower().Contains(specParams.Search) ||
@@ -25,9 +25,12 @@ namespace ZadElealm.Core.Specifications
                 && (!specParams.FromDate.HasValue || x.CreatedAt >= specParams.FromDate)
                 && (!specParams.ToDate.HasValue || x.CreatedAt <= specParams.ToDate))
         {
-            Includes.Add(x => x.Category);
-            ApplyOrdering(specParams);
-            ApplyPagination((specParams.PageNumber - 1) * specParams.PageSize, specParams.PageSize);
+            if (!countOnly) 
+            {
+                Includes.Add(x => x.Category);
+                ApplyOrdering(specParams);
+                ApplyPagination((specParams.PageNumber - 1) * specParams.PageSize, specParams.PageSize);
+            }
         }
 
         private void ApplyOrdering(CourseSpecParams specParams)
@@ -63,7 +66,7 @@ namespace ZadElealm.Core.Specifications
                     break;
 
                 default:
-                    OrderByDescending = x => x.rating; // ترتيب افتراضي تنازلي حسب التقييم
+                    OrderByDescending = x => x.rating;
                     break;
             }
         }

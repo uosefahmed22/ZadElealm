@@ -11,9 +11,11 @@ namespace ZadElealm.Core.Models
     public class Review : BaseEntity
     {
         public string Text { get; set; }
-        public int courseId { get; set; }
-        public Course course { get; set; }
+        public int CourseId { get; set; } 
+        public Course Course { get; set; }
         public string AppUserId { get; set; }
         public AppUser User { get; set; }
+        public ICollection<Reply> Replies { get; set; } = new List<Reply>();
+        public ICollection<ReviewLike> Likes { get; set; } = new List<ReviewLike>();
     }
 }
