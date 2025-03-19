@@ -21,15 +21,15 @@ namespace ZadElealm.Repository.Data.SeedData
                 {
                     var basePath = "../ZadElealm.Repository/Data/SeedData/Data";
                     //Seed Categories
-                    if (!context.Categories.Any())
-                    {
-                        logger.LogInformation("Seeding Categories...");
-                        var categoriesData = File.ReadAllText(Path.Combine(basePath, "Category.json"));
-                        var categories = JsonSerializer.Deserialize<List<Category>>(categoriesData);
-                        await context.Categories.AddRangeAsync(categories);
-                        await context.SaveChangesAsync();
-                        logger.LogInformation("Seeded Categories successfully.");
-                    }
+                    //if (!context.Categories.Any())
+                    //{
+                    //    logger.LogInformation("Seeding Categories...");
+                    //    var categoriesData = File.ReadAllText(Path.Combine(basePath, "Category.json"));
+                    //    var categories = JsonSerializer.Deserialize<List<Category>>(categoriesData);
+                    //    await context.Categories.AddRangeAsync(categories);
+                    //    await context.SaveChangesAsync();
+                    //    logger.LogInformation("Seeded Categories successfully.");
+                    //}
 
                     //Seed Quizzes.
                     //if (!context.Quizzes.Any())

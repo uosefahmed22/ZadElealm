@@ -10,6 +10,7 @@ using System.Security.Claims;
 using ZadElealm.Apis.Commands.Review;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Quaries.Review;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
@@ -72,6 +73,15 @@ namespace ZadElealm.Apis.Controllers
             };
 
             return Ok(await _mediator.Send(command));
+        }
+
+        [HttpGet("{reviewId}/replies")]
+        public async Task<ActionResult<ApiResponse>> GetReplies(int reviewId)
+        {
+            var query = new GetReviewRepliesQuery(reviewId);
+            var response = await _mediator.Send(query);
+
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

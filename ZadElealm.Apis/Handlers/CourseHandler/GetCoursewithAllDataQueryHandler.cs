@@ -27,7 +27,7 @@ namespace ZadElealm.Apis.Handlers.Course
             try
             {
                 var spec = new CourseWithAllDataSpecification(request.CourseId);
-                var course = await _unitOfWork.Repository<ZadElealm.Core.Models.Course>()
+                var course = await _unitOfWork.Repository<Core.Models.Course>()
                     .GetEntityWithSpecNoTrackingAsync(spec);
 
                 if (course == null)
