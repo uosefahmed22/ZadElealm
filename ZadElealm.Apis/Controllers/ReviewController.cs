@@ -83,5 +83,42 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpDelete("{reviewId}")]
+        public async Task<ActionResult<ApiResponse>> DeleteReview(int reviewId)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (email == null)
+            {
+                return BadRequest(new ApiResponse(400, "User email not found"));
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse(404, "User not found"));
+            }
+
+            var command = new DeleteReviewCommand(reviewId, user.Id);
+            var response = await _mediator.Send(command);
+
+            return Ok(response);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpDelete("{replyId}/reply")]
+        public async Task<ActionResult<ApiResponse>> DeleteReply(int replyId)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return NotFound(new ApiResponse(404, "User not found"));
+            }
+            var command = new DeleteReplyreviewCommand(replyId, user.Id);
+            var response = await _mediator.Send(command);
+            return Ok(response);
+        }
     }
 }
