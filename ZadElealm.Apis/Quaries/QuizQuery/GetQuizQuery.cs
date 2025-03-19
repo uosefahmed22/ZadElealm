@@ -11,10 +11,12 @@ namespace ZadElealm.Apis.Quaries.QuizQuery
     public class GetQuizQuery : BaseQuery<ApiResponse>
     {
         public int QuizId { get; }
+        public string UserId { get; }
 
-        public GetQuizQuery(int quizId)
+        public GetQuizQuery(int quizId, string userId)
         {
             QuizId = quizId;
+            UserId = userId;
         }
     }
 }

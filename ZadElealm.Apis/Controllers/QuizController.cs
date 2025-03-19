@@ -29,11 +29,16 @@ namespace ZadElealm.Apis.Controllers
             _mediator = mediator;
             _userManager = userManager;
         }
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpGet("{quizId}")]
         public async Task<ActionResult<ApiResponse>> GetQuiz(int quizId)
         {
-            var query = new GetQuizQuery(quizId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) {
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+            }
+            var query = new GetQuizQuery(quizId, user.Id);
             var response = await _mediator.Send(query);
 
             return StatusCode(response.StatusCode, response);
