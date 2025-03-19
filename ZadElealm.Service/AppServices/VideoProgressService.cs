@@ -39,23 +39,24 @@ namespace ZadElealm.Service.AppServices
             if (video.CourseId <= 0)
                 return new ApiDataResponse(400, null, "Invalid CourseId associated with the video");
 
+            if (watchedDuration.TotalSeconds > video.VideoDuration.TotalSeconds)
+            {
+                return new ApiDataResponse(400, null, $"Watch duration ({watchedDuration.TotalSeconds} seconds) cannot exceed video duration ({video.VideoDuration.TotalSeconds} seconds)");
+            }
+
             var progressSpec = new VideoProgressSpecification(userId, videoId);
             var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(progressSpec);
 
+            double completionPercentage = watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds;
+            bool isCompleted = completionPercentage >= COMPLETION_THRESHOLD;
+
             if (progress != null)
             {
-                if (progress.IsCompleted)
-                    return new ApiDataResponse(200, progress, "You have already completed this video");
-
                 if (progress.WatchedDuration.TotalSeconds > watchedDuration.TotalSeconds)
                     return new ApiDataResponse(200, progress, "Previously recorded progress is greater");
 
-                if (watchedDuration.TotalSeconds > video.VideoDuration.TotalSeconds)
-                {
-                    watchedDuration = video.VideoDuration;
-                }
-
                 progress.WatchedDuration = watchedDuration;
+                progress.IsCompleted = isCompleted;
                 _unitOfWork.Repository<VideoProgress>().Update(progress);
             }
             else
@@ -65,29 +66,22 @@ namespace ZadElealm.Service.AppServices
                     UserId = userId,
                     VideoId = videoId,
                     CourseId = video.CourseId,
-                    WatchedDuration = watchedDuration > video.VideoDuration ? video.VideoDuration : watchedDuration,
-                    IsCompleted = false,
+                    WatchedDuration = watchedDuration,
+                    IsCompleted = isCompleted,
                     CreatedAt = DateTime.UtcNow
                 };
 
                 await _unitOfWork.Repository<VideoProgress>().AddAsync(progress);
             }
 
-            double completionPercentage = watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds;
-            progress.IsCompleted = completionPercentage >= COMPLETION_THRESHOLD;
-
             try
             {
                 await _unitOfWork.Complete();
                 return new ApiDataResponse(200, progress, "Progress updated successfully");
             }
-            catch (DbUpdateException)
+            catch (Exception ex)
             {
-                return new ApiDataResponse(500, null, "Failed to update progress: Database constraint violation");
-            }
-            catch (Exception)
-            {
-                return new ApiDataResponse(500, null, "Failed to update progress: Unexpected error");
+                return new ApiDataResponse(500, null, $"Failed to update progress: {ex.Message}");
             }
         }
         public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)
