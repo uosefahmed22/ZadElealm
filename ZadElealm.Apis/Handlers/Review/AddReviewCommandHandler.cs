@@ -11,14 +11,11 @@ namespace ZadElealm.Apis.Handlers.Review
     public class AddReviewCommandHandler : BaseCommandHandler<AddReviewCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMemoryCache _cache;
 
         public AddReviewCommandHandler(
-            IUnitOfWork unitOfWork,
-            IMemoryCache cache)
+            IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _cache = cache;
         }
 
         public override async Task<ApiResponse> Handle(AddReviewCommand request, CancellationToken cancellationToken)
@@ -42,7 +39,7 @@ namespace ZadElealm.Apis.Handlers.Review
                 var review = new Core.Models.Review
                 {
                     Text = request.ReviewText.Trim(),
-                    courseId = request.CourseId,
+                    CourseId = request.CourseId,
                     AppUserId = request.UserId,
                     CreatedAt = DateTime.UtcNow,
                 };

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,11 @@ namespace ZadElealm.Core.Specifications
         public EnrollmentSpecification(int courseId, string userId)
             : base(x => x.CourseId == courseId && x.AppUserId == userId)
         {
+            Includes.Add(x => x.Course);
+
+            AddThenInclude(quwery=> quwery
+                .Include(c => c.Course)
+                .ThenInclude(c => c.Videos));
         }
 
         public EnrollmentSpecification(string userId)

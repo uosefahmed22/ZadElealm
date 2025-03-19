@@ -12,6 +12,7 @@ namespace ZadElealm.Core.Specifications.Videos
         public VideoByIdSpecification(int videoId)
             : base(v => v.Id == videoId)
         {
+            Includes.Add(v => v.Course);
         }
     }
 }

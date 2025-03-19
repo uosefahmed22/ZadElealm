@@ -12,8 +12,8 @@ using ZadElealm.Repository.Data.Datbases;
 namespace ZadElealm.Repository.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250317223747_add_InQuestionsCorrectChoiceId")]
-    partial class add_InQuestionsCorrectChoiceId
+    [Migration("20250319173423_initialMigrations")]
+    partial class initialMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -655,6 +655,40 @@ namespace ZadElealm.Repository.Migrations
                     b.ToTable("Ratings");
                 });
 
+            modelBuilder.Entity("ZadElealm.Core.Models.Reply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("ReviewId");
+
+                    b.ToTable("replies");
+                });
+
             modelBuilder.Entity("ZadElealm.Core.Models.Report", b =>
                 {
                     b.Property<int>("Id")
@@ -703,6 +737,9 @@ namespace ZadElealm.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -713,16 +750,43 @@ namespace ZadElealm.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("courseId")
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("CourseId");
+
+                    b.ToTable("Reviews", (string)null);
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.ReviewLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("ReviewId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("AppUserId");
 
-                    b.HasIndex("courseId");
+                    b.HasIndex("ReviewId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("ReviewLikes");
                 });
 
             modelBuilder.Entity("ZadElealm.Core.Models.UserNotification", b =>
@@ -812,6 +876,9 @@ namespace ZadElealm.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CourseId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -833,9 +900,11 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("VideoId");
+
+                    b.HasIndex("UserId", "CourseId");
 
                     b.ToTable("VideoProgresses");
                 });
@@ -1030,6 +1099,25 @@ namespace ZadElealm.Repository.Migrations
                     b.Navigation("course");
                 });
 
+            modelBuilder.Entity("ZadElealm.Core.Models.Reply", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ZadElealm.Core.Models.Review", "Review")
+                        .WithMany("Replies")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ZadElealm.Core.Models.Report", b =>
                 {
                     b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "AppUser")
@@ -1046,18 +1134,37 @@ namespace ZadElealm.Repository.Migrations
                     b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ZadElealm.Core.Models.Course", "course")
+                    b.HasOne("ZadElealm.Core.Models.Course", "Course")
                         .WithMany("Review")
-                        .HasForeignKey("courseId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("User");
+                });
 
-                    b.Navigation("course");
+            modelBuilder.Entity("ZadElealm.Core.Models.ReviewLike", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ZadElealm.Core.Models.Review", "Review")
+                        .WithMany("Likes")
+                        .HasForeignKey("ReviewId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Review");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ZadElealm.Core.Models.UserNotification", b =>
@@ -1092,17 +1199,25 @@ namespace ZadElealm.Repository.Migrations
 
             modelBuilder.Entity("ZadElealm.Core.Models.VideoProgress", b =>
                 {
+                    b.HasOne("ZadElealm.Core.Models.Course", "Course")
+                        .WithMany()
+                        .HasForeignKey("CourseId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("ZadElealm.Core.Models.Video", "Video")
                         .WithMany()
                         .HasForeignKey("VideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Course");
 
                     b.Navigation("User");
 
@@ -1161,6 +1276,13 @@ namespace ZadElealm.Repository.Migrations
                     b.Navigation("Progresses");
 
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.Review", b =>
+                {
+                    b.Navigation("Likes");
+
+                    b.Navigation("Replies");
                 });
 #pragma warning restore 612, 618
         }
