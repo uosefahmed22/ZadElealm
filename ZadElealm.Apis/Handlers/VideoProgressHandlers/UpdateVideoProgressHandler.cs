@@ -55,12 +55,18 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
                 if (progressResponse.StatusCode != 200)
                     return progressResponse;
 
+                var progress = progressResponse.Data as VideoProgress;
+                if (progress == null)
+                {
+                    return new ApiDataResponse(500, "Invalid progress response");
+                }
+
                 var videoDto = new VideoProgressDto
                 {
                     VideoId = request.VideoId,
                     CourseId = video.CourseId,
                     WatchedDuration = request.WatchedDuration.TotalSeconds,
-                    IsCompleted = progressResponse.Data as bool? ?? false
+                    IsCompleted = progress.IsCompleted
                 };
 
                 return new ApiDataResponse(200, videoDto);
