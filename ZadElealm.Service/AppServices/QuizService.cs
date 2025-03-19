@@ -68,7 +68,7 @@ namespace ZadElealm.Service.AppServices
                 foreach (var question in quiz.Questions)
                 {
                     var questionDto = quizDto.Questions[quiz.Questions.ToList().IndexOf(question)];
-                    question.CorrectChoiceId = question.Choices.ToList()[questionDto.CorrectChoiceIndex].Id;
+                    question.CorrectChoiceId = question.Choices.ToList()[questionDto.CorrectChoiceId].Id;
                 }
 
                 await _unitOfWork.Complete();
@@ -100,10 +100,6 @@ namespace ZadElealm.Service.AppServices
                 var quiz = await _unitOfWork.Repository<Quiz>()
                     .GetEntityWithSpecAsync(new QuizWithQuestionsAndChoicesSpecification(submission.QuizId));
 
-                var courseProgress = await _videoProgressService.CheckCourseCompletionEligibilityAsync(userId, quiz.CourseId);
-                if (!courseProgress == true)
-                    return new ApiDataResponse(400, null, "You are not eligible to take this quiz");
-
                 if (quiz == null)
                     return new ApiDataResponse(404, null, $"Quiz with ID {submission.QuizId} not found");
 
@@ -117,11 +113,15 @@ namespace ZadElealm.Service.AppServices
                         return new ApiDataResponse(400, null, $"Question with ID {answer.QuestionId} not found in quiz");
                 }
 
+                //var courseProgress = await _videoProgressService.CheckCourseCompletionEligibilityAsync(userId, quiz.CourseId);
+                //if (!courseProgress == true)
+                //    return new ApiDataResponse(400, null, "You are not eligible to take this quiz");
+
                 var existingProgress = await _unitOfWork.Repository<Progress>()
                     .GetEntityWithSpecAsync(new ProgressByQuizAndUserSpecification(submission.QuizId, userId));
 
-                if (existingProgress?.IsCompleted == true)
-                    return new ApiDataResponse(400, null, $"Quiz already completed by user {userId}");
+                //if (existingProgress?.IsCompleted == true)
+                //    return new ApiDataResponse(400, null, $"Quiz already completed.");
 
                 var answerMap = submission.StudentAnswers
                     .DistinctBy(a => a.QuestionId)
@@ -133,7 +133,7 @@ namespace ZadElealm.Service.AppServices
                 foreach (var question in quiz.Questions)
                 {
                     bool hasAnswer = answerMap.TryGetValue(question.Id, out var answer);
-                    bool isCorrect = hasAnswer && question.CorrectChoiceId == answer!.SelectedChoice;
+                    bool isCorrect = hasAnswer && question.CorrectChoiceId == answer!.ChoiceId;
 
                     if (isCorrect) correctAnswers++;
 
@@ -142,7 +142,7 @@ namespace ZadElealm.Service.AppServices
                         QuestionId = question.Id,
                         QuestionText = question.Text,
                         IsCorrect = isCorrect,
-                        SelectedChoice = hasAnswer ? answer!.SelectedChoice : 0,
+                        SelectedChoice = hasAnswer ? answer!.ChoiceId : 0,
                         CorrectChoice = question.CorrectChoiceId
                     });
                 }
@@ -150,7 +150,7 @@ namespace ZadElealm.Service.AppServices
                 int totalQuestions = quiz.Questions.Count;
                 int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
                 int unansweredCount = totalQuestions - submission.StudentAnswers.Count;
-                bool isCompleted = score >= 60;
+                bool isCompleted = score >= 1;
 
                 Progress progress;
                 if (existingProgress != null)
@@ -215,16 +215,16 @@ namespace ZadElealm.Service.AppServices
 
                     return new ApiDataResponse(200, result, "Quiz submitted successfully");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     await _unitOfWork.RollbackTransactionAsync();
-                    return new ApiDataResponse(500, null, $"Failed to submit quiz: {ex.Message}");
+                    return new ApiDataResponse(500, null, "Failed to submit quiz");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return new ApiDataResponse(500, null, $"An unexpected error occurred: {ex.Message}");
+                return new ApiDataResponse(500, null, "An unexpected error occurred");
             }
         }
-     }
+    }
 }

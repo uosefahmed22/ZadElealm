@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ZadElealm.Apis.Dtos;
 
 namespace ZadElealm.Core.ServiceDto
 {
@@ -14,6 +15,6 @@ namespace ZadElealm.Core.ServiceDto
         [Required]
         public int CourseId { get; set; }
         public int QuestionCount { get; set; }
-        public List<QuestionDto> Questions { get; set; } = new List<QuestionDto>();
+        public List<CreateQuestionDto> Questions { get; set; } = new List<CreateQuestionDto>();
     }
 }
