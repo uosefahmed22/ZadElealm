@@ -3,6 +3,7 @@ using AdminDashboard.Middlwares;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models.Identity;
 
 namespace AdminDashboard.Handlers

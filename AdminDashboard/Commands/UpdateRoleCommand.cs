@@ -1,5 +1,6 @@
 ﻿using AdminDashboard.Middlwares;
 using MediatR;
+using ZadElealm.Apis.Errors;
 
 namespace AdminDashboard.Commands
 {

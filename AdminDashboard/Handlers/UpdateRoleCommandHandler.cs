@@ -2,6 +2,7 @@
 using AdminDashboard.Middlwares;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using ZadElealm.Apis.Errors;
 
 namespace AdminDashboard.Handlers
 {

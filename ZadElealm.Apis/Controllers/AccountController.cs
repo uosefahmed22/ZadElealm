@@ -96,11 +96,12 @@ namespace ZadElealm.Apis.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-        [HttpGet("profile")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpGet("get-User-Profile")]
         public async Task<ActionResult<ApiResponse>> GetProfile()
         {
-            var user = await _userManager.GetUserAsync(User);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 

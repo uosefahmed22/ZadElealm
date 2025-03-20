@@ -32,9 +32,6 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
                 var userDto = _mapper.Map<UserProfileDTO>(user);
 
-                var cacheOptions = new MemoryCacheEntryOptions()
-                    .SetSlidingExpiration(TimeSpan.FromMinutes(30));
-
                 return new ApiDataResponse(200, userDto);
             }
             catch (Exception)

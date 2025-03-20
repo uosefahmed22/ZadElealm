@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using Microsoft.AspNetCore.RateLimiting;
+using System.Collections.Concurrent;
 using System.Text.Json;
 using ZadElealm.Apis.Errors;
 
@@ -10,86 +11,101 @@ namespace ZadElealm.Apis.Middlwares
         private static readonly ConcurrentDictionary<string, ClientStatistics> _clientStatistics =
             new ConcurrentDictionary<string, ClientStatistics>();
 
-        private readonly int _maxRequests; 
-        private readonly TimeSpan _interval; 
+        private readonly RateLimitOptions _options;
+        private readonly ILogger<RateLimitingMiddleware> _logger;
 
-        public RateLimitingMiddleware(RequestDelegate next)
+        public RateLimitingMiddleware(
+            RequestDelegate next,
+            RateLimitOptions options,
+            ILogger<RateLimitingMiddleware> logger)
         {
             _next = next;
-            _maxRequests = 100; 
-            _interval = TimeSpan.FromMinutes(1); 
+            _options = options;
+            _logger = logger;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            var clientId = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+            var clientId = GetClientIdentifier(context);
+            var clientStats = GetClientStatistics(clientId);
 
-            if (IsRateLimitExceeded(clientId))
+            if (IsRateLimitExceeded(clientStats))
             {
-                context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-                context.Response.ContentType = "application/json";
-
-                var response = new ApiResponse(
-                    StatusCodes.Status429TooManyRequests,
-                    "Too many requests, please try again later, please wait a few seconds and try again."
-                );
-
-                var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                });
-
-                await context.Response.WriteAsync(json);
+                _logger.LogWarning($"Rate limit exceeded for client {clientId}");
+                await HandleRateLimitExceeded(context, clientStats);
                 return;
             }
 
+            AddRateLimitHeaders(context, clientStats);
             await _next(context);
         }
-        private bool IsRateLimitExceeded(string clientId)
+
+        private string GetClientIdentifier(HttpContext context)
         {
-            var clientStats = _clientStatistics.AddOrUpdate(
+            return $"{context.Connection.RemoteIpAddress}_{context.Request.Headers["User-Agent"]}";
+        }
+
+        private bool IsRateLimitExceeded(ClientStatistics clientStats)
+        {
+            return clientStats.RequestCount > _options.MaxRequests;
+        }
+
+        private ClientStatistics GetClientStatistics(string clientId)
+        {
+            return _clientStatistics.AddOrUpdate(
                 clientId,
-                _ => new ClientStatistics { LastRequestTime = DateTime.UtcNow, RequestCount = 1 },
-                (_, stats) =>
+                _ => new ClientStatistics
                 {
-                    if (DateTime.UtcNow - stats.LastRequestTime > _interval)
-                    {
-                        // Reset if interval has passed
-                        stats.RequestCount = 1;
-                        stats.LastRequestTime = DateTime.UtcNow;
-                    }
-                    else
-                    {
-                        // Increment request count
-                        stats.RequestCount++;
-                    }
-                    return stats;
-                });
-
-            // Clean up old entries periodically (optional)
-            CleanupOldEntries();
-
-            return clientStats.RequestCount > _maxRequests;
+                    LastRequestTime = DateTime.UtcNow,
+                    RequestCount = 1
+                },
+                (_, stats) => UpdateStatistics(stats)
+            );
         }
-        private void CleanupOldEntries()
+
+        private ClientStatistics UpdateStatistics(ClientStatistics stats)
         {
-            // Periodically remove old entries (optional)
-            foreach (var key in _clientStatistics.Keys)
+            if (DateTime.UtcNow - stats.LastRequestTime > TimeSpan.FromMinutes(_options.TimeWindowMinutes))
             {
-                if (_clientStatistics.TryGetValue(key, out var stats))
-                {
-                    if (DateTime.UtcNow - stats.LastRequestTime > _interval.Add(_interval))
-                    {
-                        _clientStatistics.TryRemove(key, out _);
-                    }
-                }
+                stats.RequestCount = 1;
+                stats.LastRequestTime = DateTime.UtcNow;
             }
+            else
+            {
+                stats.RequestCount++;
+            }
+            return stats;
         }
-    }
 
-    public class ClientStatistics
-    {
-        public DateTime LastRequestTime { get; set; }
-        public int RequestCount { get; set; }
+        private void AddRateLimitHeaders(HttpContext context, ClientStatistics stats)
+        {
+            context.Response.Headers["X-RateLimit-Limit"] = _options.MaxRequests.ToString();
+            context.Response.Headers["X-RateLimit-Remaining"] =
+                Math.Max(0, _options.MaxRequests - stats.RequestCount).ToString();
+            context.Response.Headers["X-RateLimit-Reset"] =
+                stats.LastRequestTime.Add(TimeSpan.FromMinutes(_options.TimeWindowMinutes))
+                                   .ToString("o");
+        }
+
+        private void AddCacheHeaders(HttpContext context)
+        {
+            context.Response.Headers["Cache-Control"] = "no-store";
+            context.Response.Headers["Pragma"] = "no-cache";
+        }
+
+        private async Task HandleRateLimitExceeded(HttpContext context, ClientStatistics stats)
+        {
+            context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+            context.Response.ContentType = "application/json";
+            AddRateLimitHeaders(context, stats);
+            AddCacheHeaders(context);
+
+            var response = new ApiResponse(
+                StatusCodes.Status429TooManyRequests,
+                "Rate limit exceeded. Please try again later."
+            );
+
+            await context.Response.WriteAsJsonAsync(response);
+        }
     }
 }
