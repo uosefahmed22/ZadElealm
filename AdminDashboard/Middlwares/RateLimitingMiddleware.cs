@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
+using ZadElealm.Apis.Errors;
 
 namespace AdminDashboard.Middlwares
 {
@@ -18,17 +19,14 @@ namespace AdminDashboard.Middlwares
             _next = next;
             _logger = logger;
 
-            // Get configuration values with defaults
             _maxRequests = configuration.GetValue<int>("RateLimiting:MaxRequests", 100);
             _interval = TimeSpan.FromSeconds(configuration.GetValue<int>("RateLimiting:IntervalSeconds", 60));
 
-            // Set up periodic cleanup timer (runs every 5 minutes)
             _cleanupTimer = new Timer(CleanupOldEntries, null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // Consider X-Forwarded-For header for clients behind proxies
             var clientId = context.Request.Headers["X-Forwarded-For"].FirstOrDefault() ??
                           context.Connection.RemoteIpAddress?.ToString() ??
                           "unknown";
@@ -46,7 +44,7 @@ namespace AdminDashboard.Middlwares
 
                 var response = new ApiResponse(
                     StatusCodes.Status429TooManyRequests,
-                    "Too many requests. Please try again later after 60 seconds."
+                    "Too many requests. Please try again later."
                 );
 
                 var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
@@ -63,19 +61,17 @@ namespace AdminDashboard.Middlwares
 
         private int GetMaxRequestsForEndpoint(string path)
         {
-            // Different rate limits for different types of endpoints
             if (path.StartsWith("/api/admin", StringComparison.OrdinalIgnoreCase))
-                return _maxRequests / 2; // More strict for admin endpoints
+                return _maxRequests / 2;
 
             if (path.StartsWith("/api/public", StringComparison.OrdinalIgnoreCase))
-                return _maxRequests * 2; // More lenient for public endpoints
+                return _maxRequests * 2; 
 
             if (path.EndsWith(".js") || path.EndsWith(".css") || path.EndsWith(".png") || path.EndsWith(".jpg"))
-                return _maxRequests * 5; // Static resources need higher limits
+                return _maxRequests * 5;
 
-            return _maxRequests; // Default limit
+            return _maxRequests; 
         }
-
         private bool IsRateLimitExceeded(string clientId, int maxRequests)
         {
             var clientStats = _clientStatistics.AddOrUpdate(
@@ -85,13 +81,11 @@ namespace AdminDashboard.Middlwares
                 {
                     if (DateTime.UtcNow - stats.LastRequestTime > _interval)
                     {
-                        // Reset if interval has passed
                         stats.RequestCount = 1;
                         stats.LastRequestTime = DateTime.UtcNow;
                     }
                     else
                     {
-                        // Increment request count
                         stats.RequestCount++;
                     }
                     return stats;
@@ -99,14 +93,12 @@ namespace AdminDashboard.Middlwares
 
             return clientStats.RequestCount > maxRequests;
         }
-
         private void CleanupOldEntries(object state)
         {
             try
             {
                 int removedEntries = 0;
 
-                // Remove entries older than twice the interval
                 foreach (var key in _clientStatistics.Keys)
                 {
                     if (_clientStatistics.TryGetValue(key, out var stats))
@@ -130,25 +122,6 @@ namespace AdminDashboard.Middlwares
             {
                 _logger.LogError(ex, "Error during rate limiting cleanup");
             }
-        }
-    }
-
-    public class ClientStatistics
-    {
-        public DateTime LastRequestTime { get; set; }
-        public int RequestCount { get; set; }
-    }
-
-    // Assuming you have an ApiResponse class like this:
-    public class ApiResponse
-    {
-        public int StatusCode { get; set; }
-        public string Message { get; set; }
-
-        public ApiResponse(int statusCode, string message)
-        {
-            StatusCode = statusCode;
-            Message = message;
         }
     }
 }

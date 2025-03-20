@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.ServiceDto;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -55,6 +56,8 @@ namespace ZadElealm.Apis.Helpers
                 .ForMember(dest => dest.IsRead, opt =>
                     opt.MapFrom(src => src.UserNotifications.FirstOrDefault().IsRead));
             CreateMap<Notification, NotificationsResponse>();
+
+            CreateMap<AppUser, UserProfileDTO>();
 
         }
     }

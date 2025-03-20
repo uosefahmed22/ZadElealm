@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Configuration;
 using System.Text;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Helpers;
+using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
@@ -28,12 +30,13 @@ namespace AdminDashboard.Extentions
             services.AddControllers();
             ConfigureAuthentication(services, configuration);
             ConfigureDatabase(services, configuration);
-            ConfigureCors(services);
+            ConfigureCors(services, configuration);
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
             services.AddAutoMapper(typeof(AdminDashboard.Helpers.MappingProfiles));
             services.AddMemoryCache();
             services.AddHttpClient();
+            services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
             var cloudName = configuration["CloudinarySetting:CloudName"];
             var apiKey = configuration["CloudinarySetting:ApiKey"];
             var apiSecret = configuration["CloudinarySetting:ApiSecret"];
@@ -85,13 +88,13 @@ namespace AdminDashboard.Extentions
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
         }
-        private static void ConfigureCors(IServiceCollection services)
+        private static void ConfigureCors(IServiceCollection services, IConfiguration configuration)
         {
             services.AddCors(options =>
             {
                 options.AddPolicy("Restricted", builder =>
                 {
-                    builder.WithOrigins() 
+                    builder.WithOrigins(configuration["FrontbaseUrl"])
                            .WithMethods("GET", "POST")
                            .WithHeaders("Content-Type", "Authorization");
                 });
@@ -133,7 +136,5 @@ namespace AdminDashboard.Extentions
                 };
             });
         }
-     
-
     }
 }
