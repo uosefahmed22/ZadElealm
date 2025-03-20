@@ -29,7 +29,9 @@ namespace ZadElealm.Apis.Handlers.Auth
 
                 var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
                 if (result.Succeeded)
-                    return new ApiDataResponse(200, "https://zad-elealm.netlify.app/login", "تم تأكيد البريد الإلكتروني بنجاح, يمكنك الآن تسجيل الدخول في المنصه ونتمنى لك تجربة ممتعة");
+                {
+                    return new ApiDataResponse(200, "تم تأكيد البريد الإلكتروني بنجاح", "https://zad-elealm.netlify.app/login");
+                }
 
                 return new ApiResponse(400, "فشل في تأكيد البريد الإلكتروني. الرمز غير صالح أو منتهي الصلاحية");
             }

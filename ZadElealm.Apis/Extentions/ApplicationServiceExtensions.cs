@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Principal;
@@ -30,6 +31,16 @@ namespace ZadElealm.Apis.Extentions
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
             services.AddAutoMapper(typeof(MappingProfiles));
+            //services.AddAntiforgery(options =>
+            //{
+            //    options.HeaderName = "X-XSRF-TOKEN";
+            //    options.Cookie.Name = "XSRF-TOKEN";
+            //});
+            //services.AddControllersWithViews(options =>
+            //{
+            //    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            //});
+            services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
             services.AddMemoryCache();
 
             var cloudName = configuration["CloudinarySetting:CloudName"];
