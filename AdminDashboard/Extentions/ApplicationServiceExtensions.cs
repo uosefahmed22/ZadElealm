@@ -12,7 +12,6 @@ using System.Configuration;
 using System.Text;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Helpers;
-using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
@@ -37,6 +36,11 @@ namespace AdminDashboard.Extentions
             services.AddMemoryCache();
             services.AddHttpClient();
             services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
+            services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-XSRF-TOKEN";
+                options.Cookie.Name = "XSRF-TOKEN";
+            });
             var cloudName = configuration["CloudinarySetting:CloudName"];
             var apiKey = configuration["CloudinarySetting:ApiKey"];
             var apiSecret = configuration["CloudinarySetting:ApiSecret"];

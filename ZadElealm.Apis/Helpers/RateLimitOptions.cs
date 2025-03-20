@@ -1,4 +1,4 @@
-﻿namespace ZadElealm.Apis.Middlwares
+﻿namespace ZadElealm.Apis.Helpers
 {
     public class RateLimitOptions
     {
