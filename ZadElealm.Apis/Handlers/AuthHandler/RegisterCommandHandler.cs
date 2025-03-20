@@ -77,12 +77,13 @@ namespace ZadElealm.Apis.Handlers.Auth
                                "<p>شكرًا لتسجيلك في موقعنا. يرجى تأكيد عنوان بريدك الإلكتروني بالنقر على الزر أدناه</p>" +
                                $"<a href='{callBackUrl}'><button style='background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;'>تأكيد البريد الإلكتروني</button></a>";
 
-                await _sendEmailService.SendEmailAsync(new EmailMessage
+                var emailmessage = new EmailMessage
                 {
                     To = user.Email,
                     Subject = "تأكيد البريد الإلكتروني",
                     Body = emailBody
-                });
+                };
+                await _sendEmailService.SendEmailAsync(emailmessage);
 
                 return new ApiResponse(200, "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب");
             }
@@ -111,12 +112,7 @@ namespace ZadElealm.Apis.Handlers.Auth
             var encodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
             var encodedUserId = WebUtility.UrlEncode(userId);
 
-            var request = _httpContextAccessor.HttpContext?.Request
-                ?? throw new InvalidOperationException("HttpContext is not available");
-
-            return new Uri(new Uri($"{request.Scheme}://{request.Host}"),
-                $"/api/Account/confirm-email?userId={encodedUserId}&token={encodedToken}")
-                .ToString();
+            return $"https://zadelealm.runasp.net/api/Account/confirm-email?userId={encodedUserId}&token={encodedToken}";
         }
     }
 }

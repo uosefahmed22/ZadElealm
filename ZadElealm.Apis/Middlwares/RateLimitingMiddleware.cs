@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Text.Json;
 using ZadElealm.Apis.Errors;
@@ -9,15 +10,14 @@ namespace ZadElealm.Apis.Middlwares
     public class RateLimitingMiddleware
     {
         private readonly RequestDelegate _next;
+        private readonly IOptions<RateLimitOptions> _options;
+        private readonly ILogger<RateLimitingMiddleware> _logger;
         private static readonly ConcurrentDictionary<string, ClientStatistics> _clientStatistics =
             new ConcurrentDictionary<string, ClientStatistics>();
 
-        private readonly RateLimitOptions _options;
-        private readonly ILogger<RateLimitingMiddleware> _logger;
-
         public RateLimitingMiddleware(
             RequestDelegate next,
-            RateLimitOptions options,
+            IOptions<RateLimitOptions> options,
             ILogger<RateLimitingMiddleware> logger)
         {
             _next = next;
@@ -33,11 +33,10 @@ namespace ZadElealm.Apis.Middlwares
             if (IsRateLimitExceeded(clientStats))
             {
                 _logger.LogWarning($"Rate limit exceeded for client {clientId}");
-                await HandleRateLimitExceeded(context, clientStats);
+                await HandleRateLimitExceeded(context);
                 return;
             }
 
-            AddRateLimitHeaders(context, clientStats);
             await _next(context);
         }
 
@@ -45,12 +44,6 @@ namespace ZadElealm.Apis.Middlwares
         {
             return $"{context.Connection.RemoteIpAddress}_{context.Request.Headers["User-Agent"]}";
         }
-
-        private bool IsRateLimitExceeded(ClientStatistics clientStats)
-        {
-            return clientStats.RequestCount > _options.MaxRequests;
-        }
-
         private ClientStatistics GetClientStatistics(string clientId)
         {
             return _clientStatistics.AddOrUpdate(
@@ -63,10 +56,10 @@ namespace ZadElealm.Apis.Middlwares
                 (_, stats) => UpdateStatistics(stats)
             );
         }
-
         private ClientStatistics UpdateStatistics(ClientStatistics stats)
         {
-            if (DateTime.UtcNow - stats.LastRequestTime > TimeSpan.FromMinutes(_options.TimeWindowMinutes))
+            if (DateTime.UtcNow - stats.LastRequestTime >
+                TimeSpan.FromMinutes(_options.Value.TimeWindowMinutes))
             {
                 stats.RequestCount = 1;
                 stats.LastRequestTime = DateTime.UtcNow;
@@ -77,36 +70,36 @@ namespace ZadElealm.Apis.Middlwares
             }
             return stats;
         }
-
-        private void AddRateLimitHeaders(HttpContext context, ClientStatistics stats)
+        private bool IsRateLimitExceeded(ClientStatistics stats)
         {
-            context.Response.Headers["X-RateLimit-Limit"] = _options.MaxRequests.ToString();
-            context.Response.Headers["X-RateLimit-Remaining"] =
-                Math.Max(0, _options.MaxRequests - stats.RequestCount).ToString();
-            context.Response.Headers["X-RateLimit-Reset"] =
-                stats.LastRequestTime.Add(TimeSpan.FromMinutes(_options.TimeWindowMinutes))
-                                   .ToString("o");
+            return stats.RequestCount > _options.Value.MaxRequests;
         }
-
-        private void AddCacheHeaders(HttpContext context)
-        {
-            context.Response.Headers["Cache-Control"] = "no-store";
-            context.Response.Headers["Pragma"] = "no-cache";
-        }
-
-        private async Task HandleRateLimitExceeded(HttpContext context, ClientStatistics stats)
+        private async Task HandleRateLimitExceeded(HttpContext context)
         {
             context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
             context.Response.ContentType = "application/json";
-            AddRateLimitHeaders(context, stats);
-            AddCacheHeaders(context);
 
             var response = new ApiResponse(
                 StatusCodes.Status429TooManyRequests,
-                "Rate limit exceeded. Please try again later."
+                "Too many requests. Please try again later."
             );
 
             await context.Response.WriteAsJsonAsync(response);
+        }
+        private void CleanupOldEntries()
+        {
+            var expirationTime = TimeSpan.FromMinutes(_options.Value.TimeWindowMinutes * 2);
+
+            foreach (var key in _clientStatistics.Keys)
+            {
+                if (_clientStatistics.TryGetValue(key, out var stats))
+                {
+                    if (DateTime.UtcNow - stats.LastRequestTime > expirationTime)
+                    {
+                        _clientStatistics.TryRemove(key, out _);
+                    }
+                }
+            }
         }
     }
 }
