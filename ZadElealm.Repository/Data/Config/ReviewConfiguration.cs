@@ -23,10 +23,10 @@ namespace ZadElealm.Repository.Data.Config
                 .HasForeignKey(x => x.CourseId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(x => x.User)
-                .WithMany(u => u.Reviews) 
-                .HasForeignKey(x => x.AppUserId)
-                .OnDelete(DeleteBehavior.NoAction);
+            builder.HasOne(r => r.User)
+              .WithMany(u => u.Reviews)
+              .HasForeignKey(r => r.AppUserId)
+              .OnDelete(DeleteBehavior.Cascade);
 
             builder.Ignore("AppUserId1");
             builder.Ignore("CourseId1");

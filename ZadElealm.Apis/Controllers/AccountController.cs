@@ -111,6 +111,46 @@ namespace ZadElealm.Apis.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("send-email-otp")]
+        public async Task<ActionResult<ApiResponse>> SendEmailOtp([FromBody]SendChangeEmailOtpDto sendChangeEmailOtpDto)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+
+            var command = new SendChangeEmailOtpCommand
+            {
+                OldEmail = email,
+                NewEmail = sendChangeEmailOtpDto.NewEmail,
+                password = sendChangeEmailOtpDto.Password
+            };
+            var response = await _mediator.Send(command);
+            return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("update-email")]
+        public async Task<ActionResult<ApiResponse>> UpdateEmail([FromBody] UpdateEmailDto request)
+        {
+            try
+            {
+                var email = User.FindFirstValue(ClaimTypes.Email);
+                var user = await _userManager.FindByEmailAsync(email);
+                var command = new UpdateEmailCommand
+                {
+                    UserId = user.Id,
+                    NewEmail = request.NewEmail,
+                    Token = request.Token
+                };
+                var response = await _mediator.Send(command);
+                return StatusCode(response.StatusCode, response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new ApiResponse(400, "An error occurred"));
+            }
+        }
+
         [HttpPost("forget-password")]
         public async Task<ActionResult<ApiResponse>> ForgetPassword(string email)
         {

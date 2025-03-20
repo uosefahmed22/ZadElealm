@@ -12,6 +12,7 @@ namespace ZadElealm.Apis.Dtos
         public int CourseVideosCount { get; set; }
         public decimal rating { get; set; }
         public string ImageUrl { get; set; }
+        public CategoryResponseDto Category { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
