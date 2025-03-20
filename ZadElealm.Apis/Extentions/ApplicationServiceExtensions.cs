@@ -120,6 +120,7 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<IQuizService, QuizService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVideoProgressService, VideoProgressService>();
+            services.AddScoped<ICheckPasswordService, CheckPasswordService>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
