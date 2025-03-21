@@ -25,7 +25,7 @@ namespace ZadElealm.Apis.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IImageService _imageService;
 
-        public AccountController(IMediator mediator,UserManager<AppUser> userManager,IImageService imageService)
+        public AccountController(IMediator mediator, UserManager<AppUser> userManager, IImageService imageService)
         {
             _mediator = mediator;
             _userManager = userManager;
@@ -113,7 +113,7 @@ namespace ZadElealm.Apis.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpPost("send-email-otp")]
-        public async Task<ActionResult<ApiResponse>> SendEmailOtp([FromBody]SendChangeEmailOtpDto sendChangeEmailOtpDto)
+        public async Task<ActionResult<ApiResponse>> SendEmailOtp([FromBody] SendChangeEmailOtpDto sendChangeEmailOtpDto)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
@@ -150,6 +150,18 @@ namespace ZadElealm.Apis.Controllers
                 return BadRequest(new ApiResponse(400, "An error occurred"));
             }
         }
+       
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpPost("update-profile")]
+        public async Task<ActionResult<ApiResponse>> UpdateProfile([FromBody] UpdateProfileDto request)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new ApiResponse(401));
+            var command = new UpdateProfileCommand(request.DisplayName, request.PhoneNumber, email);
+            var response = await _mediator.Send(command);
+            return StatusCode(response.StatusCode, response);
+        }
 
         [HttpPost("forget-password")]
         public async Task<ActionResult<ApiResponse>> ForgetPassword(string email)
@@ -159,7 +171,7 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
-        
+
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpDelete("delete-account")]
         public async Task<ActionResult<ApiResponse>> DeleteAccount()
@@ -180,7 +192,7 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
-              
+
         [HttpPost("reset-password")]
         public async Task<ActionResult<ApiResponse>> ResetPassword(ResetPasswordDTO resetPasswordDTO)
         {
@@ -207,7 +219,7 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
-        
+
         [HttpPost("revoke-token")]
         public async Task<ActionResult<ApiResponse>> RevokeToken([FromBody] TokenRequestDto tokenRequest)
         {

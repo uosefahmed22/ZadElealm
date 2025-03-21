@@ -2,17 +2,13 @@
 
 namespace ZadElealm.Apis.Dtos.Auth
 {
-    public class RegisterDTO
+    public class UpdateProfileDto
     {
-        [Required]
         [RegularExpression(@"^[\u0600-\u06FF\s]+$",
             ErrorMessage = "يجب إدخال الاسم باللغة العربية فقط")]
-        public string DisplayName { get; set; }
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        [Required]
-        public string Password { get; set; }
+        public string? DisplayName { get; set; }
 
+        [Phone]
+        public string? PhoneNumber { get; set; }
     }
 }
