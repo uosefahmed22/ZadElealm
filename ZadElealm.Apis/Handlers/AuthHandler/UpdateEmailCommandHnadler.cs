@@ -55,6 +55,13 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
                 user.EmailConfirmed = true;
                 await _userManager.UpdateAsync(user);
+                var snedEmailMessage = new EmailMessage
+                {
+                    To = request.NewEmail,
+                    Subject = "Email Updated",
+                    Body = "تم تحديث البريد الإلكتروني بنجاح, سجل الدخول الآن واستمتع بالتعامل معنا"    
+                };
+                await _sendEmailService.SendEmailAsync(snedEmailMessage);
 
                 return new ApiResponse(200, "Email updated successfully");
             }
