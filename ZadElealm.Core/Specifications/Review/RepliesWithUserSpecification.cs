@@ -13,7 +13,7 @@ namespace ZadElealm.Core.Specifications.Review
             : base(x => x.ReviewId == reviewId && !x.IsDeleted)
         {
             Includes.Add(x => x.User);
-            AddOrderBy(x => x.CreatedAt);
+            Includes.Add(x => x.ReplyLikes);
         }
     }
 }

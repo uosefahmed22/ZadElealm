@@ -19,7 +19,8 @@ namespace ZadElealm.Apis.Handlers.Review
         {
             try
             {
-                var review = await _unitOfWork.Repository<Core.Models.Review>().GetEntityAsync(request.ReviewId);
+                var review = await _unitOfWork.Repository<Core.Models.Review>()
+                    .GetEntityWithNoTrackingAsync(request.ReviewId);
                 if (review == null)
                     return new ApiResponse(404, "المراجعة غير موجودة");
 

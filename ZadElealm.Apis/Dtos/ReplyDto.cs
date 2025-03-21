@@ -7,5 +7,6 @@
         public string DisplayName { get; set; }
         public string UserImage { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int ReplyLikesCount { get; set; }
     }
 }

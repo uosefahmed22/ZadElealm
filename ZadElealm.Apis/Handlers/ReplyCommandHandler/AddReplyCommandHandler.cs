@@ -3,7 +3,7 @@ using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
-namespace ZadElealm.Apis.Handlers.Review
+namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
 {
     public class AddReplyCommandHandler : BaseCommandHandler<AddReplyCommand, ApiResponse>
     {

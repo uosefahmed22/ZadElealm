@@ -14,5 +14,7 @@ namespace ZadElealm.Core.Models
         public Review Review { get; set; }
         public string AppUserId { get; set; }
         public AppUser User { get; set; }
+        public ICollection<ReplyLike> ReplyLikes { get; set; } = new List<ReplyLike>();
+        public int ReplyLikesCount => ReplyLikes.Count;
     }
 }
