@@ -40,12 +40,12 @@ namespace ZadElealm.Apis.Helpers
             CreateMap<ReportDto, Report>();
 
             CreateMap<ReviewDto, Review>();
-            CreateMap<Reply, ReplyDto>()
-            .ForMember(dest => dest.DisplayName, opt =>
-                opt.MapFrom(src => src.User.DisplayName))
 
-            .ForMember(dest => dest.UserImage, opt =>
-                opt.MapFrom(src => src.User.ImageUrl));
+            CreateMap<Reply, ReplyDto>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.User.DisplayName))
+            .ForMember(dest => dest.UserImage, opt => opt.MapFrom(src => src.User.ImageUrl))
+            .ForMember(dest => dest.ReplyLikesCount, opt => opt.MapFrom(src => src.ReplyLikes.Count));
+
             CreateMap<Review, ReviewWithReviwerDataDto>()
            .ForMember(d => d.DisplayName, o => o.MapFrom(s => s.User.DisplayName))
            .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.User.ImageUrl))
@@ -53,13 +53,19 @@ namespace ZadElealm.Apis.Helpers
            .ForMember(dest => dest.RepliesCount, opt => opt.MapFrom(src => src.Replies.Count))
            .ForMember(dest => dest.LikesCount, opt => opt.MapFrom(src => src.LikesCount));
 
+            CreateMap<Reply,ReplyDto>()
+                .ForMember(dest => dest.DisplayName, opt =>
+                    opt.MapFrom(src => src.User.DisplayName))
+                .ForMember(dest => dest.UserImage, opt =>
+                    opt.MapFrom(src => src.User.ImageUrl));
+
             CreateMap<Notification, NotificationDto>()
                 .ForMember(dest => dest.IsRead, opt =>
                     opt.MapFrom(src => src.UserNotifications.FirstOrDefault().IsRead));
+
             CreateMap<Notification, NotificationsResponse>();
 
             CreateMap<AppUser, UserProfileDTO>();
-
         }
     }
 }

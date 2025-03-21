@@ -7,7 +7,7 @@ using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications.Review;
 
-namespace ZadElealm.Apis.Handlers.Review
+namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
 {
     public class GetReviewRepliesQueryHandler : BaseQueryHandler<GetReviewRepliesQuery, ApiResponse>
     {
@@ -34,7 +34,7 @@ namespace ZadElealm.Apis.Handlers.Review
 
                 var spec = new RepliesWithUserSpecification(request.ReviewId);
                 var replies = await _unitOfWork.Repository<Reply>()
-                    .GetAllWithSpecAsync(spec);
+                    .GetAllWithSpecNoTrackingAsync(spec);
 
                 if (!replies.Any())
                     return new ApiResponse(404, "لا توجد ردود لهذه المراجعة");

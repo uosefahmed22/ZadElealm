@@ -4,7 +4,7 @@ using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
 
-namespace ZadElealm.Apis.Handlers.Review
+namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
 {
     public class DeleteReplyreviewCommandHandler : BaseCommandHandler<DeleteReplyreviewCommand, ApiResponse>
     {
