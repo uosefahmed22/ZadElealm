@@ -1,11 +1,13 @@
 ﻿using AdminDashboard.Commands;
 using AdminDashboard.Dto;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZadElealm.Apis.Dtos;
 
 namespace AdminDashboard.Controllers
 {
+    [Authorize(Roles = "Admin")]    
     public class ReportController : Controller
     {
         private readonly IMediator _mediator;
@@ -21,11 +23,11 @@ namespace AdminDashboard.Controllers
 
             if (response.StatusCode == 200)  
             {
-                var reports = (IEnumerable<ReportDto>)response.Data;  
+                var reports = (IEnumerable<Dto.ReportDto>)response.Data;
                 return View(reports);
             }
 
-            return View(new List<ReportDto>());
+            return View(new List<Dto.ReportDto>());
         }
         public async Task<IActionResult> Details(int id)
         {
@@ -34,7 +36,7 @@ namespace AdminDashboard.Controllers
 
             if (response.StatusCode == 200)
             {
-                var report = (ReportDto)response.Data;
+                var report = (Dto.ReportDto)response.Data;
                 return View(report);
             }
 

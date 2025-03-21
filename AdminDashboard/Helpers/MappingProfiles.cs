@@ -28,10 +28,10 @@ namespace AdminDashboard.Helpers
 
             CreateMap<CreateCategoryDto, CreateCategoryCommand>();
 
-            CreateMap<Report, ReportDto>()
+            CreateMap<Report,AdminDashboard.Dto.ReportDto>()
     .ForMember(dest => dest.reportTypes, opt => opt.MapFrom(src => src.reportTypes.ToString()));
 
-            CreateMap<ReportDto, Report>()
+            CreateMap<Dto.ReportDto, Report>()
                 .ForMember(dest => dest.reportTypes, opt => opt.MapFrom(src => Enum.Parse<ReportType>(src.reportTypes)));
             CreateMap<AdminDashboard.Dto.HandleReportDto, Report>().ReverseMap();
 

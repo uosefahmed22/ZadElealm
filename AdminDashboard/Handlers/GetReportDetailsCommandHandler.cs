@@ -25,7 +25,7 @@ namespace AdminDashboard.Handlers
             if (report == null)
                 return new ApiDataResponse(404, null, "التقرير غير موجود");
 
-            var mappedReport = _mapper.Map<ReportDto>(report);
+            var mappedReport = _mapper.Map<Dto.ReportDto>(report);
             return new ApiDataResponse(200, mappedReport);
         }
     }
