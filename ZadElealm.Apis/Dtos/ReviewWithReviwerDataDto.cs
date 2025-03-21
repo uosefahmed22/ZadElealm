@@ -9,5 +9,6 @@
         public string ImageUrl { get; set; }
         public bool HasReplies { get; set; }
         public int RepliesCount { get; set; }
+        public int LikesCount { get; set; }
     }
 }
