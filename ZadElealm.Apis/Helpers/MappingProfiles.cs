@@ -50,7 +50,8 @@ namespace ZadElealm.Apis.Helpers
            .ForMember(d => d.DisplayName, o => o.MapFrom(s => s.User.DisplayName))
            .ForMember(d => d.ImageUrl, o => o.MapFrom(s => s.User.ImageUrl))
            .ForMember(dest => dest.HasReplies, opt => opt.MapFrom(src => src.Replies.Any()))
-           .ForMember(dest => dest.RepliesCount, opt => opt.MapFrom(src => src.Replies.Count));
+           .ForMember(dest => dest.RepliesCount, opt => opt.MapFrom(src => src.Replies.Count))
+           .ForMember(dest => dest.LikesCount, opt => opt.MapFrom(src => src.LikesCount));
 
             CreateMap<Notification, NotificationDto>()
                 .ForMember(dest => dest.IsRead, opt =>
