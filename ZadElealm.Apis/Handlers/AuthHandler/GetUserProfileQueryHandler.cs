@@ -24,8 +24,6 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
         {
             try
             {
-                var cacheKey = $"user_profile_{request.UserId}";
-
                 var user = await _userManager.FindByIdAsync(request.UserId);
                 if (user == null)
                     return new ApiResponse(401, "المستخدم غير موجود");
