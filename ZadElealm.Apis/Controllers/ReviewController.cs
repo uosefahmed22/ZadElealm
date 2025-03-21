@@ -80,5 +80,19 @@ namespace ZadElealm.Apis.Controllers
 
             return Ok(response);
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpGet("user-add-rateing-before/{courseId}")]
+        public async Task<ActionResult<ApiResponse>> GetUserAddRateingBefore(int courseId)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return NotFound(new ApiResponse(404, "User not found"));
+
+            var query = new GetUserAddRateingBeforeQuery(courseId, user.Id);
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
     }
 }
