@@ -22,7 +22,7 @@ namespace AdminDashboard.Handlers
         {
             var getAllReports = await _unitOfWork.Repository<Report>().GetAllAsync();
 
-            var mappedReports = _mapper.Map<IEnumerable<ReportDto>>(getAllReports);
+            var mappedReports = _mapper.Map<IEnumerable<Dto.ReportDto>>(getAllReports);
             return new ApiDataResponse(200, mappedReports);
         }
     }
