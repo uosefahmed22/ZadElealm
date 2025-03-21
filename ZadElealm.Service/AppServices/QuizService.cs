@@ -113,15 +113,15 @@ namespace ZadElealm.Service.AppServices
                         return new ApiDataResponse(400, null, $"Question with ID {answer.QuestionId} not found in quiz");
                 }
 
-                //var courseProgress = await _videoProgressService.CheckCourseCompletionEligibilityAsync(userId, quiz.CourseId);
-                //if (!courseProgress == true)
-                //    return new ApiDataResponse(400, null, "You are not eligible to take this quiz");
+                var courseProgress = await _videoProgressService.CheckCourseCompletionEligibilityAsync(userId, quiz.CourseId);
+                if (!courseProgress == true)
+                    return new ApiDataResponse(400, null, "You are not eligible to take this quiz");
 
                 var existingProgress = await _unitOfWork.Repository<Progress>()
                     .GetEntityWithSpecAsync(new ProgressByQuizAndUserSpecification(submission.QuizId, userId));
 
-                //if (existingProgress?.IsCompleted == true)
-                //    return new ApiDataResponse(400, null, $"Quiz already completed.");
+                if (existingProgress?.IsCompleted == true)
+                    return new ApiDataResponse(400, null, $"Quiz already completed.");
 
                 var answerMap = submission.StudentAnswers
                     .DistinctBy(a => a.QuestionId)
@@ -150,7 +150,7 @@ namespace ZadElealm.Service.AppServices
                 int totalQuestions = quiz.Questions.Count;
                 int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
                 int unansweredCount = totalQuestions - submission.StudentAnswers.Count;
-                bool isCompleted = score >= 1;
+                bool isCompleted = score >= 60;
 
                 Progress progress;
                 if (existingProgress != null)

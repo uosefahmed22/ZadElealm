@@ -69,7 +69,7 @@ namespace ZadElealm.Service.AppServices
                     CreatedAt = DateTime.UtcNow
                 };
 
-                return new ApiDataResponse(200,certificate, "تم إنشاء الشهادة بنجاح");
+                return new ApiDataResponse(200, certificate, "تم إنشاء الشهادة بنجاح");
             }
             catch (Exception ex)
             {
@@ -112,120 +112,117 @@ namespace ZadElealm.Service.AppServices
 
 
                     page.Content()
-     .PaddingVertical(10)
-     .Column(column =>
-     {
-         column.Item().Row(row =>
-         {
-             // مساحة فارغة على اليسار بنفس حجم اللوجو
-             row.ConstantItem(80);
+                    .PaddingVertical(10)
+                    .Column(column =>
+                    {
+                        column.Item().Row(row =>
+                        {
+                            row.ConstantItem(80);
 
-             // البسملة في المنتصف تماماً
-             row.RelativeItem().AlignCenter()
-                 .PaddingTop(10)
-                 .Text("بسم الله الرحمن الرحيم")
-                 .FontSize(24)
-                 .FontColor(goldColor);
+                            row.RelativeItem().AlignCenter()
+                                .PaddingTop(10)
+                                .Text("بسم الله الرحمن الرحيم")
+                                .FontSize(24)
+                                .FontColor(goldColor);
 
-             // اللوجو على اليمين
-             row.ConstantItem(80).AlignRight()
-                 .Image(logoPath, ImageScaling.FitArea);
-         });
-
-         column.Item().Height(8);
-
-         column.Item().AlignCenter()
-             .Text("شهادة تقدير")
-             .FontSize(36)
-             .FontColor(goldColor)
-             .Bold();
-
-         column.Item().Height(3);
-
-         column.Item().Height(2)
-             .Background(goldColor)
-             .ExtendHorizontal();
-
-         column.Item().Height(20);  // مسافة قبل المحتوى
-
-        column.Item().AlignCenter()
-            .Text(text =>
-            {
-                text.Span("تشهد")
-                                        .FontSize(20)
-                                        .FontColor(greyDark);
-
-                                    text.EmptyLine();
-                                    text.Span("أكاديمية زاد العلم")
-                                        .FontSize(24)
-                                        .Bold()
-                                        .FontColor(blueDark);
-
-                                    text.EmptyLine();
-                                    text.Span("بأن الطالب")
-                                        .FontSize(20)
-                                        .FontColor(greyDark);
-
-                                    text.EmptyLine();
-                                    text.Span(user.DisplayName)
-                                        .FontSize(36)
-                                        .Bold()
-                                        .FontColor(redDark);
-
-                                    text.EmptyLine();
-                                    text.Span("قد اجتاز بنجاح اختبار")
-                                        .FontSize(20)
-                                        .FontColor(greyDark);
-
-                                    text.EmptyLine();
-                                    text.Span(quiz.Name)
-                                        .FontSize(28)
-                                        .Bold()
-                                        .FontColor(blueDark);
-                                });
-
-                            column.Item().Height(20);
-
-                            column.Item()
-                                .Row(row =>
-                                {
-                                    row.RelativeItem().AlignCenter()
-                                        .Text(text =>
-                                        {
-                                            text.Span("أكاديمية زاد العلم")
-                                                .FontSize(18)
-                                                .FontColor(blueDark)
-                                                .Bold();
-                                            text.EmptyLine();
-                                            text.Span("____________")
-                                                .FontSize(18)
-                                                .FontColor(greyDark);
-                                        });
-
-                                    row.RelativeItem().AlignCenter()
-                                        .Text(text =>
-                                        {
-                                            text.Span("تاريخ الإصدار")
-                                                .FontSize(18)
-                                                .FontColor(blueDark)
-                                                .Bold();
-                                            text.EmptyLine();
-                                            text.Span(DateTime.Now.ToString("dd/MM/yyyy"))
-                                                .FontSize(18)
-                                                .FontColor(greyDark);
-                                        });
-                                });
-
-                            column.Item().Height(10);
-
-                            column.Item().AlignCenter()
-                                .Text($"رقم الشهادة: {Guid.NewGuid().ToString().Substring(0, 8)}")
-                                .FontSize(14)
-                                .FontColor(greyDark);
+                            row.ConstantItem(80).AlignRight()
+                                .Image(logoPath, ImageScaling.FitArea);
                         });
+
+                        column.Item().Height(8);
+
+                        column.Item().AlignCenter()
+                            .Text("شهادة تقدير")
+                            .FontSize(36)
+                            .FontColor(goldColor)
+                            .Bold();
+
+                        column.Item().Height(3);
+
+                        column.Item().Height(2)
+                            .Background(goldColor)
+                            .ExtendHorizontal();
+
+                        column.Item().Height(20);
+
+                        column.Item().AlignCenter()
+                            .Text(text =>
+                            {
+                                text.Span("تشهد")
+                                                        .FontSize(20)
+                                                        .FontColor(greyDark);
+
+                                text.EmptyLine();
+                                text.Span("أكاديمية زاد العلم")
+                                   .FontSize(24)
+                                   .Bold()
+                                   .FontColor(blueDark);
+
+                                text.EmptyLine();
+                                text.Span("بأن الطالب")
+                                   .FontSize(20)
+                                   .FontColor(greyDark);
+
+                                text.EmptyLine();
+                                text.Span(user.DisplayName)
+                                   .FontSize(36)
+                                   .Bold()
+                                   .FontColor(redDark);
+
+                                text.EmptyLine();
+                                text.Span("قد اجتاز بنجاح اختبار")
+                                   .FontSize(20)
+                                   .FontColor(greyDark);
+
+                                text.EmptyLine();
+                                text.Span(quiz.Name)
+                                   .FontSize(28)
+                                   .Bold()
+                                   .FontColor(blueDark);
+                            });
+
+                        column.Item().Height(20);
+
+                        column.Item()
+                            .Row(row =>
+                            {
+                                row.RelativeItem().AlignCenter()
+                                    .Text(text =>
+                                    {
+                                        text.Span("أكاديمية زاد العلم")
+                                            .FontSize(18)
+                                            .FontColor(blueDark)
+                                            .Bold();
+                                        text.EmptyLine();
+                                        text.Span("____________")
+                                            .FontSize(18)
+                                            .FontColor(greyDark);
+                                    });
+
+                                row.RelativeItem().AlignCenter()
+                                    .Text(text =>
+                                    {
+                                        text.Span("تاريخ الإصدار")
+                                            .FontSize(18)
+                                            .FontColor(blueDark)
+                                            .Bold();
+                                        text.EmptyLine();
+                                        text.Span(DateTime.Now.ToString("dd/MM/yyyy"))
+                                            .FontSize(18)
+                                            .FontColor(greyDark);
+                                    });
+                            });
+
+                        column.Item().Height(10);
+
+                        column.Item().AlignCenter()
+                            .Text($"رقم الشهادة: {Guid.NewGuid().ToString().Substring(0, 8)}")
+                            .FontSize(14)
+                            .FontColor(greyDark);
+                    });
                 });
             })
-            .GeneratePdf(filePath);
+                           .GeneratePdf(filePath);
 
             if (!File.Exists(filePath))
             {

@@ -60,7 +60,7 @@ namespace ZadElealm.Apis.Controllers
             return response;
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpPost("create")]
         public async Task<ActionResult<ApiResponse>> CreateQuiz([FromBody] QuizDto quizDto)
         {
