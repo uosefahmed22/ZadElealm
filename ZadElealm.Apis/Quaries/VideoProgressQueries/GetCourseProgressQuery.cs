@@ -1,4 +1,4 @@
-﻿using ZadElealm.Apis.Dtos;
+﻿using ZadElealm.Apis.Dtos.DtosCourse;
 
 namespace ZadElealm.Apis.Quaries.VideoProgressQueries
 {

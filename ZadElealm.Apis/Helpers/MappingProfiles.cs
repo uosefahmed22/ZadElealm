@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
 using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.Auth;
+using ZadElealm.Apis.Dtos.DtosCategory;
+using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.ServiceDto;

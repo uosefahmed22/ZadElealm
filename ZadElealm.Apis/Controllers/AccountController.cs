@@ -10,7 +10,6 @@ using Microsoft.Extensions.Caching.Memory;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.Auth;
-using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Dtos.Auth;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.Auth;

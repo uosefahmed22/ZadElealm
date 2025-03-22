@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.VideoProgressCommands;
 using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.Auth;
+using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.VideoProgressQueries;
 using ZadElealm.Core.Models.Identity;

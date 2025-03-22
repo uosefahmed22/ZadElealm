@@ -1,7 +1,8 @@
 ﻿using AdminDashboard.Commands;
 using AutoMapper;
 using Org.BouncyCastle.Asn1.Cmp;
-using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.DtosCategory;
+using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models;
 

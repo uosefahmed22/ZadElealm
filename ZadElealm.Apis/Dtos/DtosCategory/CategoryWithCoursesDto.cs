@@ -1,4 +1,6 @@
-﻿namespace ZadElealm.Apis.Dtos
+﻿using ZadElealm.Apis.Dtos.DtosCourse;
+
+namespace ZadElealm.Apis.Dtos.DtosCategory
 {
     public class CategoryWithCoursesDto
     {
