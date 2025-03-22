@@ -3,9 +3,11 @@ using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.Course;
+using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Course;
+using ZadElealm.Core.Specifications.Videos;
 
 namespace ZadElealm.Apis.Handlers.Course
 {
@@ -24,23 +26,32 @@ namespace ZadElealm.Apis.Handlers.Course
 
         public override async Task<ApiResponse> Handle(GetCourseWithAllDataQuery request, CancellationToken cancellationToken)
         {
-            try
+            var spec = new CourseWithAllDataSpecification(request.CourseId);
+            var course = await _unitOfWork.Repository<Core.Models.Course>()
+                .GetEntityWithSpecNoTrackingAsync(spec);
+
+            if (course == null)
+                return new ApiResponse(404, "الدورة غير موجودة");
+
+            var mappedCourse = _mapper.Map<CourseResponseWithAllDataDto>(course);
+
+            if (!string.IsNullOrEmpty(request.UserId))
             {
-                var spec = new CourseWithAllDataSpecification(request.CourseId);
-                var course = await _unitOfWork.Repository<Core.Models.Course>()
-                    .GetEntityWithSpecNoTrackingAsync(spec);
+                var specvideoProgress = new VideoProgressSpecification(request.UserId, request.CourseId);
+                var videoProgress = await _unitOfWork.Repository<VideoProgress>()
+                    .GetAllWithSpecNoTrackingAsync(specvideoProgress);
 
-                if (course == null)
-                    return new ApiResponse(404, "الدورة غير موجودة");
-
-                var mappedCourse = _mapper.Map<CourseResponseWithAllDataDto>(course);
-
-                return new ApiDataResponse(200, mappedCourse);
+                foreach (var video in mappedCourse.Videos)
+                {
+                    var progress = videoProgress.FirstOrDefault(vp => vp.VideoId == video.Id);
+                    if (progress != null)
+                    {
+                        video.IsCompleted = progress.IsCompleted;
+                        video.WatchedDuration = progress.WatchedDuration;
+                    }
+                }
             }
-            catch
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب بيانات الدورة");
-            }
+            return new ApiDataResponse(200, mappedCourse);
         }
     }
 }
