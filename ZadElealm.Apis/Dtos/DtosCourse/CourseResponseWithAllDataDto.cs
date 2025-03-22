@@ -15,7 +15,7 @@ namespace ZadElealm.Apis.Dtos.DtosCourse
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public int TotalEnrolledStudents { get; set; }
         public CategoryResponseDto Category { get; set; }
-        public IReadOnlyCollection<VideoDto> Videos { get; set; }
+        public IReadOnlyCollection<VideoWithUserProgressDto> Videos { get; set; }
         public ICollection<ReviewWithReviwerDataDto> Review { get; set; }
         public IReadOnlyCollection<QuizResponseForCourseDto> Quizzes { get; set; }
     }

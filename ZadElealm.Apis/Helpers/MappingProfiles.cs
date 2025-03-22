@@ -29,6 +29,9 @@ namespace ZadElealm.Apis.Helpers
 
             CreateMap<Video, VideoDto>();
             CreateMap<Quiz, QuizResponseForCourseDto>();
+            CreateMap<Video, VideoWithUserProgressDto>()
+                .ForMember(dest => dest.IsCompleted, opt => opt.Ignore())
+                .ForMember(dest => dest.WatchedDuration, opt => opt.Ignore());
 
             CreateMap<Quiz, QuizResponseDto>();
             CreateMap<Question, QuestionDto>();
@@ -58,7 +61,7 @@ namespace ZadElealm.Apis.Helpers
            .ForMember(dest => dest.RepliesCount, opt => opt.MapFrom(src => src.Replies.Count))
            .ForMember(dest => dest.LikesCount, opt => opt.MapFrom(src => src.LikesCount));
 
-            CreateMap<Reply,ReplyDto>()
+            CreateMap<Reply, ReplyDto>()
                 .ForMember(dest => dest.DisplayName, opt =>
                     opt.MapFrom(src => src.User.DisplayName))
                 .ForMember(dest => dest.UserImage, opt =>
