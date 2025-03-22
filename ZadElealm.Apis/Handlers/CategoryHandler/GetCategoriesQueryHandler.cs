@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.DtosCategory;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.Category;
 using ZadElealm.Core.Models;

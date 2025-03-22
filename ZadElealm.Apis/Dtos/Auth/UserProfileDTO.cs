@@ -1,4 +1,4 @@
-﻿namespace ZadElealm.Apis.Dtos
+﻿namespace ZadElealm.Apis.Dtos.Auth
 {
     public class UserProfileDTO
     {

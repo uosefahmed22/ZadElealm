@@ -1,4 +1,5 @@
-﻿using ZadElealm.Core.ServiceDto;
+﻿using ZadElealm.Apis.Dtos.DtosCourse;
+using ZadElealm.Core.ServiceDto;
 
 namespace ZadElealm.Apis.Dtos
 {

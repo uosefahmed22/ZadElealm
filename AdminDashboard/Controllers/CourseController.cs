@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Web;
 using System.Xml;
-using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;

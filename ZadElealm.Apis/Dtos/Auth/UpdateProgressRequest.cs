@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ZadElealm.Apis.Dtos
+namespace ZadElealm.Apis.Dtos.Auth
 {
     public class UpdateProgressRequest
     {

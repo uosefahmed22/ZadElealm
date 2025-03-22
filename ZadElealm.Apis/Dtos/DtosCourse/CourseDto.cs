@@ -1,6 +1,7 @@
-﻿using ZadElealm.Core.Models;
+﻿using ZadElealm.Apis.Dtos.DtosCategory;
+using ZadElealm.Core.Models;
 
-namespace ZadElealm.Apis.Dtos
+namespace ZadElealm.Apis.Dtos.DtosCourse
 {
     public class CourseDto
     {

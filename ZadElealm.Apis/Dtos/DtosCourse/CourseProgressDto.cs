@@ -1,4 +1,4 @@
-﻿namespace ZadElealm.Apis.Dtos
+﻿namespace ZadElealm.Apis.Dtos.DtosCourse
 {
     public class CourseProgressDto
     {

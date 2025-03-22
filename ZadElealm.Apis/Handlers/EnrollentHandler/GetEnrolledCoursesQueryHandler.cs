@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Quaries.EnrollmentQuery;
 using ZadElealm.Core.Models;

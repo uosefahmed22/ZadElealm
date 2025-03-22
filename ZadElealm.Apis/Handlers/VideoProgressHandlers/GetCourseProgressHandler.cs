@@ -1,4 +1,4 @@
-﻿using ZadElealm.Apis.Dtos;
+﻿using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Apis.Quaries.VideoProgressQueries;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;

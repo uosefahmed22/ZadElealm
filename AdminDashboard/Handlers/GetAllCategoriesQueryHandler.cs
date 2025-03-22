@@ -2,7 +2,7 @@
 using AdminDashboard.Quires;
 using AutoMapper;
 using MediatR;
-using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos.DtosCategory;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
