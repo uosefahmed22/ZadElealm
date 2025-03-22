@@ -17,9 +17,7 @@ namespace ZadElealm.Apis.Handlers.Auth
         public override async Task<ApiResponse> Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
-            if (user == null)
-                return new ApiResponse(404, "المستخدم غير موجود");
-
+            
             var result = await _userManager.ChangePasswordAsync(user,request.ChangePasswordDto.CurrentPassword,request.ChangePasswordDto.NewPassword);
 
             if (!result.Succeeded)

@@ -13,17 +13,12 @@ public class Program
 
         builder.Services.ConfigureApplicationServices(builder.Configuration);
         builder.Services.AddService();
-        builder.Services.AddControllers()
-        .AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-        });
-        QuestPDF.Settings.License = LicenseType.Community;
+       
         var app = builder.Build();
-        app.UseMiddleware<RateLimitingMiddleware>();
-        //app.UseMiddleware<BasicAuthMiddleware>();
+        
         await app.ConfigureMiddlewareAsync();
         app.UseConfiguration(app.Configuration);
+        
         app.Run();
     }
 }

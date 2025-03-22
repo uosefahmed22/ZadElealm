@@ -16,29 +16,23 @@ namespace ZadElealm.Apis.Handlers.Auth
         }
         public override async Task<ApiResponse> Handle(ConfirmEmailQuery request, CancellationToken cancellationToken)
         {
-            try
+
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+                return new ApiResponse(404, "المستخدم غير موجود");
+
+            if (user.EmailConfirmed)
+                return new ApiResponse(400, "البريد الإلكتروني مؤكد بالفعل");
+
+            var decodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(request.Token));
+
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            if (result.Succeeded)
             {
-                var user = await _userManager.FindByIdAsync(request.UserId);
-                if (user == null)
-                    return new ApiResponse(404, "المستخدم غير موجود");
-
-                if (user.EmailConfirmed)
-                    return new ApiResponse(400, "البريد الإلكتروني مؤكد بالفعل");
-
-                var decodedToken = Encoding.UTF8.GetString(Convert.FromBase64String(request.Token));
-
-                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
-                if (result.Succeeded)
-                {
-                    return new ApiDataResponse(200, "تم تأكيد البريد الإلكتروني بنجاح", "https://zad-elealm.netlify.app/login");
-                }
-
-                return new ApiResponse(400, "فشل في تأكيد البريد الإلكتروني. الرمز غير صالح أو منتهي الصلاحية");
+                return new ApiDataResponse(200, "تم تأكيد البريد الإلكتروني بنجاح", "https://zad-elealm.netlify.app/login");
             }
-            catch
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء معالجة طلبك");
-            }
+
+            return new ApiResponse(400, "فشل في تأكيد البريد الإلكتروني. الرمز غير صالح أو منتهي الصلاحية");
         }
     }
 }

@@ -22,20 +22,11 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
         public override async Task<ApiResponse> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var user = await _userManager.FindByIdAsync(request.UserId);
-                if (user == null)
-                    return new ApiResponse(401, "المستخدم غير موجود");
 
-                var userDto = _mapper.Map<UserProfileDTO>(user);
+            var user = await _userManager.FindByIdAsync(request.UserId);
+            var userDto = _mapper.Map<UserProfileDTO>(user);
 
-                return new ApiDataResponse(200, userDto);
-            }
-            catch (Exception)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب بيانات المستخدم");
-            }
+            return new ApiDataResponse(200, userDto);
         }
     }
 }

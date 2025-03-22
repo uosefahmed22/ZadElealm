@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using QuestPDF.Infrastructure;
 using System.Security.Principal;
 using System.Text;
+using System.Text.Json.Serialization;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Helpers;
 using ZadElealm.Core.Models.Identity;
@@ -24,32 +26,22 @@ namespace ZadElealm.Apis.Extentions
     {
         public static IServiceCollection ConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddControllers();
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
+
+            QuestPDF.Settings.License = LicenseType.Community;
+
             ConfigureAuthentication(services, configuration);
             ConfigureDatabase(services, configuration);
             ConfigureCors(services);
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
             services.AddAutoMapper(typeof(MappingProfiles));
-            //services.AddAntiforgery(options =>
-            //{
-            //    options.HeaderName = "X-XSRF-TOKEN";
-            //    options.Cookie.Name = "XSRF-TOKEN";
-            //});
-            //services.AddControllersWithViews(options =>
-            //{
-            //    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-            //});
-            services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
-            services.AddMemoryCache();
-
-            var cloudName = configuration["CloudinarySetting:CloudName"];
-            var apiKey = configuration["CloudinarySetting:ApiKey"];
-            var apiSecret = configuration["CloudinarySetting:ApiSecret"];
-
-            var account = new Account(cloudName, apiKey, apiSecret);
-            var cloudinary = new Cloudinary(account);
-            services.AddSingleton(cloudinary);
+            
+          
 
             return services;
         }
@@ -58,11 +50,11 @@ namespace ZadElealm.Apis.Extentions
             services.AddIdentity<AppUser, IdentityRole>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireDigit = true;
-                options.Password.RequiredLength = 6;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 8;
             }).AddEntityFrameworkStores<AppDbContext>()
                 .AddSignInManager<SignInManager<AppUser>>()
                 .AddDefaultTokenProviders();
@@ -123,6 +115,27 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<ICheckPasswordService, CheckPasswordService>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            
+            ///services.AddAntiforgery(options =>
+            ///{
+            ///    options.HeaderName = "X-XSRF-TOKEN";
+            ///    options.Cookie.Name = "XSRF-TOKEN";
+            ///});
+            ///services.AddControllersWithViews(options =>
+            ///{
+            ///    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+            ///});
+
+            services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
+            services.AddMemoryCache();
+
+            var cloudName = configuration["CloudinarySetting:CloudName"];
+            var apiKey = configuration["CloudinarySetting:ApiKey"];
+            var apiSecret = configuration["CloudinarySetting:ApiSecret"];
+
+            var account = new Account(cloudName, apiKey, apiSecret);
+            var cloudinary = new Cloudinary(account);
+            services.AddSingleton(cloudinary);
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ApplicationServiceExtensions).Assembly));
         }
