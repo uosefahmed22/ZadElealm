@@ -27,40 +27,36 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
         public override async Task<ApiResponse> Handle(SendChangeEmailOtpCommand request, CancellationToken cancellationToken)
         {
-            try
+
+            var user = await _userManager.FindByEmailAsync(request.NewEmail);
+            if (user != null)
             {
-                var user = await _userManager.FindByEmailAsync(request.NewEmail);
-                if (user != null)
-                {
-                    return new ApiResponse(400, "Email already owned by another user");
-                }
-
-                var checkPassword = await _checkPasswordService.CheckPasswordAsync(request.OldEmail, request.password);
-                if (checkPassword.StatusCode != 200)
-                {
-                    return checkPassword;
-                }
-
-                var otp = _otpService.GenerateOtp(request.NewEmail);
-                var emailMessage = new EmailMessage
-                {
-                    To = request.NewEmail,
-                    Subject = "Change Email OTP",
-                    Body = $"Your OTP is {otp}. It will expire in 5 minutes. Do not share it with anyone."
-                };
-
-                var result = await _sendEmailService.SendEmailAsync(emailMessage);
-                if (result.StatusCode != 200)
-                {
-                    return new ApiResponse(400, "Failed to send OTP");
-                }
-
-                return new ApiResponse(200, "OTP sent successfully");
+                return new ApiResponse(400, "البريد الإلكتروني موجود بالفعل");
             }
-            catch (Exception ex)
+
+            var checkPassword = await _checkPasswordService.CheckPasswordAsync(request.OldEmail, request.password);
+            if (checkPassword.StatusCode != 200)
             {
-                return new ApiResponse(500, "An error occurred");
+                return checkPassword;
             }
+
+            var otp = _otpService.GenerateOtp(request.NewEmail);
+            var emailMessage = new EmailMessage
+            {
+                To = request.NewEmail,
+                Subject = "تغيير البريد الإلكتروني",
+                Body = $"رمز التحقق الخاص بك هو: {otp}" +
+                       "إذا لم تقم بطلب تغيير البريد الإلكتروني، يرجى تجاهل هذا البريد الإلكتروني"+
+                       "لن يتم تغيير البريد الإلكتروني إلا بعد تأكيد الرمز"
+            };
+
+            var result = await _sendEmailService.SendEmailAsync(emailMessage);
+            if (result.StatusCode != 200)
+            {
+                return new ApiResponse(400, "فشل في إرسال رمز التحقق");
+            }
+
+            return new ApiResponse(200, "لقد تم إرسال رمز التحقق بنجاح");
         }
     }
 }

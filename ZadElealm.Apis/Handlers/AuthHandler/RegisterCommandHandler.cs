@@ -13,18 +13,15 @@ namespace ZadElealm.Apis.Handlers.Auth
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ISendEmailService _sendEmailService;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public RegisterCommandHandler(
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ISendEmailService sendEmailService,
-            IHttpContextAccessor httpContextAccessor)
+            ISendEmailService sendEmailService)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _sendEmailService = sendEmailService;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         public override async Task<ApiResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -35,11 +32,14 @@ namespace ZadElealm.Apis.Handlers.Auth
                 return new ApiResponse(400, "المستخدم موجود بالفعل");
             }
 
-            if (await _roleManager.FindByNameAsync("User") == null)
+            var userRole = await _roleManager.FindByNameAsync("User");
+            if (userRole == null)
             {
                 var roleResult = await _roleManager.CreateAsync(new IdentityRole("User"));
                 if (!roleResult.Succeeded)
+                {
                     return new ApiResponse(500, "فشل في إنشاء الدور");
+                }
             }
 
             var user = new AppUser
@@ -49,65 +49,55 @@ namespace ZadElealm.Apis.Handlers.Auth
                 UserName = request.RegisterDto.Email.Split('@')[0]
             };
 
-            bool userCreated = false;
-
-            try
+            var createUserResult = await _userManager.CreateAsync(user, request.RegisterDto.Password);
+            if (!createUserResult.Succeeded)
             {
-                var createUserResult = await _userManager.CreateAsync(user, request.RegisterDto.Password);
-                if (!createUserResult.Succeeded)
-                {
-                    var errors = string.Join(", ", createUserResult.Errors.Select(e => e.Description));
-                    return new ApiResponse(400, $"فشل في إنشاء الحساب: {errors}");
-                }
-
-                userCreated = true;
-
-                var addToRoleResult = await _userManager.AddToRoleAsync(user, "User");
-                if (!addToRoleResult.Succeeded)
-                {
-                    var errors = string.Join(", ", addToRoleResult.Errors.Select(e => e.Description));
-                    throw new Exception($"فشل في إضافة المستخدم إلى الدور: {errors}");
-                }
-
-                var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callBackUrl = GenerateCallBackUrl(emailConfirmationToken, user.Id);
-
-                var emailBody = $"<h1>عزيزي {user.DisplayName}</h1>" +
-                    "مرحبًا بك في موقعنا, ونحن سعداء بانضمامك إلينا" +
-                               "<p>شكرًا لتسجيلك في موقعنا. يرجى تأكيد عنوان بريدك الإلكتروني بالنقر على الزر أدناه</p>" +
-                               $"<a href='{callBackUrl}'><button style='background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;'>تأكيد البريد الإلكتروني</button></a>";
-
-                var emailmessage = new EmailMessage
-                {
-                    To = user.Email,
-                    Subject = "تأكيد البريد الإلكتروني",
-                    Body = emailBody
-                };
-                await _sendEmailService.SendEmailAsync(emailmessage);
-
-                return new ApiResponse(200, "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب");
+                var errors = string.Join(", ", createUserResult.Errors.Select(e => e.Description));
+                return new ApiResponse(400, $"فشل في إنشاء الحساب: {errors}");
             }
-            catch (Exception ex)
+
+            var addToRoleResult = await _userManager.AddToRoleAsync(user, "User");
+            if (!addToRoleResult.Succeeded)
             {
-                if (userCreated)
-                {
-                    try
-                    {
-                        await _userManager.DeleteAsync(user);
-                    }
-                    catch
-                    {
-                        new ApiResponse(500, "هناك خطأ غير متوقع حدث ");
-                    }
-                }
-
-                return new ApiResponse(400, "حدث خطأ أثناء إنشاء الحساب: ");
+                await _userManager.DeleteAsync(user);
+                return new ApiResponse(400, "فشل في إضافة المستخدم إلى الدور");
             }
+
+            var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callBackUrl = GenerateCallBackUrl(emailConfirmationToken, user.Id);
+
+            var emailBody = BuildEmailBody(user.DisplayName, callBackUrl);
+            var emailMessage = new EmailMessage
+            {
+                To = user.Email,
+                Subject = "تأكيد البريد الإلكتروني",
+                Body = emailBody
+            };
+
+            var emailSent = await _sendEmailService.SendEmailAsync(emailMessage);
+
+            if (emailSent.StatusCode != 200)
+            {
+                await _userManager.DeleteAsync(user);
+                return new ApiResponse(500, "فشل في إرسال البريد الإلكتروني للتأكيد");
+            }
+
+            return new ApiResponse(200, "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب");
+        }
+
+        private string BuildEmailBody(string displayName, string callBackUrl)
+        {
+            return $@"<h1>عزيزي {displayName}</h1>
+              مرحبًا بك في موقعنا, ونحن سعداء بانضمامك إلينا
+              <p>شكرًا لتسجيلك في موقعنا. يرجى تأكيد عنوان بريدك الإلكتروني بالنقر على الزر أدناه</p>
+              <a href='{callBackUrl}'><button style='background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;'>تأكيد البريد الإلكتروني</button></a>";
         }
         private string GenerateCallBackUrl(string token, string userId)
         {
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))
-                throw new ArgumentNullException("Token and userId cannot be null or empty");
+            {
+                return string.Empty;
+            }
 
             var encodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
             var encodedUserId = WebUtility.UrlEncode(userId);

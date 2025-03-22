@@ -23,9 +23,6 @@ namespace ZadElealm.Apis.Handlers.Auth
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
 
-            if (user == null)
-                return new ApiResponse(404, "المستخدم غير موجود");
-
             var userDto = await _tokenService.CreateToken(user);
             return new ApiDataResponse(200, userDto);
         }

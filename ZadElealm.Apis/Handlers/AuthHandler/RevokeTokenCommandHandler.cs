@@ -15,19 +15,10 @@ namespace ZadElealm.Apis.Handlers.Auth
 
         public override async Task<ApiResponse> Handle(RevokeTokenCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _tokenService.RevokeToken(
-                    request.TokenRequest.Token,
-                    request.TokenRequest.RefreshToken
-                );
 
-                return new ApiDataResponse(200,result);
-            }
-            catch
-            {
-                return new ApiResponse(400, "فشل في إلغاء التوكن");
-            }
+            var result = await _tokenService.RevokeToken(request.TokenRequest.Token, request.TokenRequest.RefreshToken);
+
+            return new ApiDataResponse(200, result);
         }
     }
 }

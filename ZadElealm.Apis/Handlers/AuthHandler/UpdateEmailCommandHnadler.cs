@@ -23,52 +23,41 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
         public override async Task<ApiResponse> Handle(UpdateEmailCommand request, CancellationToken cancellationToken)
         {
-            try
+            var user = await _userManager.FindByIdAsync(request.UserId);
+
+            var isValidOtp = _otpService.IsValidOtp(request.NewEmail, request.Token);
+            if (!isValidOtp)
             {
-                var user = await _userManager.FindByIdAsync(request.UserId);
-                if (user == null)
-                {
-                    return new ApiResponse(404, "User not found");
-                }
-
-                var isValidOtp = _otpService.IsValidOtp(request.NewEmail, request.Token);
-                if (!isValidOtp)
-                {
-                    return new ApiResponse(400, "Invalid or expired OTP");
-                }
-
-                var oldEmail = user.Email;
-
-                var emailMessage = new EmailMessage
-                {
-                    To = oldEmail,
-                    Subject = "Email Updated",
-                    Body = "تم تحديث البريد الإلكتروني بنجاح, إذا لم تكن أنت من قام بتغيير البريد الإلكتروني يرجى التواصل بالدعم الفني عن طريق ارسال ريبورت"
-                };
-                await _sendEmailService.SendEmailAsync(emailMessage);
-
-                var result = await _userManager.SetEmailAsync(user, request.NewEmail);
-                if (!result.Succeeded)
-                {
-                    return new ApiResponse(400, "Failed to update email");
-                }
-
-                user.EmailConfirmed = true;
-                await _userManager.UpdateAsync(user);
-                var snedEmailMessage = new EmailMessage
-                {
-                    To = request.NewEmail,
-                    Subject = "Email Updated",
-                    Body = "تم تحديث البريد الإلكتروني بنجاح, سجل الدخول الآن واستمتع بالتعامل معنا"    
-                };
-                await _sendEmailService.SendEmailAsync(snedEmailMessage);
-
-                return new ApiResponse(200, "Email updated successfully");
+                return new ApiResponse(400, "الرمز غير صحيح او منتهي الصلاحية");
             }
-            catch (Exception ex)
+
+            var oldEmail = user.Email;
+
+            var emailMessage = new EmailMessage
             {
-                return new ApiResponse(500, "An error occurred");
+                To = oldEmail,
+                Subject = "تم تحديث البريد الإلكتروني",
+                Body = "تم تحديث البريد الإلكتروني بنجاح, إذا لم تكن أنت من قام بتغيير البريد الإلكتروني يرجى التواصل بالدعم الفني عن طريق ارسال ريبورت"
+            };
+            await _sendEmailService.SendEmailAsync(emailMessage);
+
+            var result = await _userManager.SetEmailAsync(user, request.NewEmail);
+            if (!result.Succeeded)
+            {
+                return new ApiResponse(400, "فشل تحديث البريد الإلكتروني");
             }
+
+            user.EmailConfirmed = true;
+            await _userManager.UpdateAsync(user);
+            var snedEmailMessage = new EmailMessage
+            {
+                To = request.NewEmail,
+                Subject = "تم تحديث البريد الإلكتروني",
+                Body = "تم تحديث البريد الإلكتروني بنجاح, سجل الدخول الآن واستمتع بالتعامل معنا"
+            };
+            await _sendEmailService.SendEmailAsync(snedEmailMessage);
+
+            return new ApiResponse(200, "لقد تم تحديث البريد الإلكتروني بنجاح");
         }
     }
 }

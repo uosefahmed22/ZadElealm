@@ -34,16 +34,10 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserDTO>> Login(LoginDTO loginDTO)
         {
-            try
-            {
-                var command = new LoginCommand(loginDTO);
-                var result = await _mediator.Send(command);
-                return Ok(result);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new ApiResponse(401, ex.Message));
-            }
+            var command = new LoginCommand(loginDTO);
+            var result = await _mediator.Send(command);
+
+            return StatusCode(result.StatusCode, result);
         }
 
         [HttpPost("register")]
@@ -61,6 +55,9 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var query = new GetCurrentUserQuery(user.Id);
             var response = await _mediator.Send(query);
 
@@ -73,7 +70,7 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
-                return Unauthorized(new ApiResponse(401));
+                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var command = new ChangePasswordCommand(email, changePasswordDTO);
             var response = await _mediator.Send(command);
@@ -117,14 +114,12 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
-            var command = new SendChangeEmailOtpCommand
-            {
-                OldEmail = email,
-                NewEmail = sendChangeEmailOtpDto.NewEmail,
-                password = sendChangeEmailOtpDto.Password
-            };
+            var command = new SendChangeEmailOtpCommand(email, sendChangeEmailOtpDto.Password, sendChangeEmailOtpDto.NewEmail);
             var response = await _mediator.Send(command);
+           
             return StatusCode(response.StatusCode, response);
         }
 
@@ -136,13 +131,12 @@ namespace ZadElealm.Apis.Controllers
             {
                 var email = User.FindFirstValue(ClaimTypes.Email);
                 var user = await _userManager.FindByEmailAsync(email);
-                var command = new UpdateEmailCommand
-                {
-                    UserId = user.Id,
-                    NewEmail = request.NewEmail,
-                    Token = request.Token
-                };
+                if (user == null)
+                    return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+                var command = new UpdateEmailCommand(user.Id, request.NewEmail, request.Token);
                 var response = await _mediator.Send(command);
+
                 return StatusCode(response.StatusCode, response);
             }
             catch (Exception ex)
@@ -157,9 +151,11 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
-                return Unauthorized(new ApiResponse(401));
+                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var command = new UpdateProfileCommand(request.DisplayName, request.PhoneNumber, email);
             var response = await _mediator.Send(command);
+
             return StatusCode(response.StatusCode, response);
         }
 
@@ -174,14 +170,16 @@ namespace ZadElealm.Apis.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpDelete("delete-account")]
-        public async Task<ActionResult<ApiResponse>> DeleteAccount()
+        public async Task<ActionResult<ApiResponse>> DeleteAccount([FromBody] string password)
         {
-            var user = await _userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email));
-            if (user == null)
-                return Unauthorized(new ApiResponse(401, "User not found"));
-            user.IsDeleted = true;
-            await _userManager.UpdateAsync(user);
-            return Ok(new ApiResponse(200, "Account deleted successfully"));
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var command = new DeleteAccountCommand( email, password);
+            var response = await _mediator.Send(command);
+
+            return StatusCode(response.StatusCode, response);
         }
 
         [HttpPost("verify-otp")]

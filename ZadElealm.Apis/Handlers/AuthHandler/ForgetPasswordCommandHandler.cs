@@ -24,35 +24,23 @@ namespace ZadElealm.Apis.Handlers.Auth
 
         public override async Task<ApiResponse> Handle(ForgetPasswordCommand request, CancellationToken cancellationToken)
         {
-            try
+            var user = await _userManager.FindByEmailAsync(request.Email);
+            if (user == null)
             {
-                var user = await _userManager.FindByEmailAsync(request.Email);
-                if (user == null)
-                {
-                    return new ApiResponse(400, "المستخدم غير موجود");
-                }
-
-                var otp = _otpService.GenerateOtp(request.Email);
-                var emailMessage = CreateEmailMessage(request.Email, otp);
-
-                await _sendEmailService.SendEmailAsync(emailMessage);
-
-                return new ApiResponse(200, "الرمز المؤقت تم إرساله بنجاح.");
+                return new ApiResponse(404, "المستخدم غير موجود");
             }
-            catch (Exception ex)
-            {
-                return new ApiResponse(500, "حدث خطأ غير متوقع");
-            }
-        }
 
-        private EmailMessage CreateEmailMessage(string email, string otp)
-        {
-            return new EmailMessage
+            var otp = _otpService.GenerateOtp(request.Email);
+            var emailMessage = new EmailMessage
             {
-                To = email,
+                To =request.Email,
                 Subject = "نسيت كلمة المرور",
                 Body = $"<h1>الرمز المؤقت الخاص بك هو: {otp}</h1>"
             };
+
+            await _sendEmailService.SendEmailAsync(emailMessage);
+
+            return new ApiResponse(200, "الرمز المؤقت تم إرساله بنجاح.");
         }
     }
 }

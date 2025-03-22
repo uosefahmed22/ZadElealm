@@ -15,16 +15,9 @@ namespace ZadElealm.Apis.Handlers.Auth
 
         public override async Task<ApiResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var result = await _tokenService.RefreshToken(request.TokenRequest.Token,request.TokenRequest.RefreshToken);
+            var result = await _tokenService.RefreshToken(request.TokenRequest.Token, request.TokenRequest.RefreshToken);
 
-                return new ApiDataResponse(200, result );
-            }
-            catch
-            {
-                return new ApiResponse(400, "فشل في تحديث التوكن");
-            }
+            return new ApiDataResponse(200, result);
         }
     }
 }

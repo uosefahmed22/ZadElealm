@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Repository.Data.Datbases;
 using ZadElealm.Repository.Data.SeedData;
@@ -9,6 +10,9 @@ public static class MiddlewareExtensions
 {
     public static async Task ConfigureMiddlewareAsync(this WebApplication app)
     {
+        app.UseMiddleware<ExceptionMiddleware>();
+        app.UseMiddleware<RateLimitingMiddleware>();
+        //app.UseMiddleware<SwaggerBasicAuthMiddleware>();
         app.UseStatusCodePagesWithRedirects("/errors/{0}");
         app.UseCors("Open");
         app.UseStaticFiles();
@@ -34,7 +38,6 @@ public static class MiddlewareExtensions
             logger.LogError(ex, $"An error occurred while applying migrations: {ex.Message}");
         }
         #endregion
-
         app.MapControllers();
     }
 }
