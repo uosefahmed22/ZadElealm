@@ -19,23 +19,16 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
 
         public override async Task<ApiResponse> Handle(UnenrollCourseCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var enrollment = await _unitOfWork.Repository<Enrollment>()
-                    .GetEntityWithSpecAsync(new EnrollmentSpecification(request.CourseId, request.UserId));
+            var enrollment = await _unitOfWork.Repository<Enrollment>()
+                .GetEntityWithSpecAsync(new EnrollmentSpecification(request.CourseId, request.UserId));
 
-                if (enrollment == null)
-                    return new ApiResponse(404, "لم يتم العثور على التسجيل");
+            if (enrollment == null)
+                return new ApiResponse(404, "لم يتم العثور على التسجيل");
 
-                enrollment.IsDeleted = true;
-                await _unitOfWork.Complete();
+            enrollment.IsDeleted = true;
+            await _unitOfWork.Complete();
 
-                return new ApiResponse(200, "تم إلغاء التسجيل بنجاح");
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء إلغاء التسجيل");
-            }
+            return new ApiResponse(200, "تم إلغاء التسجيل بنجاح");
         }
     }
 }

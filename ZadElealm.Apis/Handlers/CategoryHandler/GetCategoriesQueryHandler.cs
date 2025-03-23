@@ -20,17 +20,10 @@ namespace ZadElealm.Apis.Handlers.Category
 
         public override async Task<ApiResponse> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var categories = await _unitOfWork.Repository<ZadElealm.Core.Models.Category>().GetAllWithNoTrackingAsync();
-                var mappedCategories = _mapper.Map<IReadOnlyList<ZadElealm.Core.Models.Category>, IReadOnlyList<CategoryResponseDto>>(categories);
+            var categories = await _unitOfWork.Repository<ZadElealm.Core.Models.Category>().GetAllWithNoTrackingAsync();
+            var mappedCategories = _mapper.Map<IReadOnlyList<ZadElealm.Core.Models.Category>, IReadOnlyList<CategoryResponseDto>>(categories);
 
-                return new ApiDataResponse(200,mappedCategories);
-            }
-            catch
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب الفئات");
-            }
+            return new ApiDataResponse(200, mappedCategories);
         }
     }
 }

@@ -17,21 +17,14 @@ namespace ZadElealm.Apis.Handlers.Review
 
         public override async Task<bool> Handle(GetUserAddRateingBeforeQuery request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var spec = new RatingSpecification(request.UserId, request.CourseId);
-                var rating = await _unitOfWork.Repository<Core.Models.Rating>()
-                    .GetEntityWithSpecNoTrackingAsync(spec);
+            var spec = new RatingSpecification(request.UserId, request.CourseId);
+            var rating = await _unitOfWork.Repository<Core.Models.Rating>()
+                .GetEntityWithSpecNoTrackingAsync(spec);
 
-                if (rating != null)
-                    return false;
+            if (rating != null)
+                return false;
 
-                return true;
-            }
-            catch (Exception)
-            {
-                throw new Exception("حدث خطأ أثناء التحقق من إضافة التقييم");
-            }
+            return true;
         }
     }
 }

@@ -27,8 +27,8 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
             {
                 IsEligible = isEligible,
                 Message = isEligible
-                    ? "You can now take the quiz!"
-                    : "Complete at least 80% of the videos to unlock the quiz"
+                    ? "يمكنك الآن الدخول للإختبار"
+                    : "الرجاء إكمال 80% من الدورة للدخول للإختبار"
             };
         }
     }

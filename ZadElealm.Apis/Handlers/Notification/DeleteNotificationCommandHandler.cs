@@ -19,24 +19,17 @@ namespace ZadElealm.Apis.Handlers.Notification
 
         public override async Task<ApiResponse> Handle(DeleteNotificationCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
-                var notification = await _unitOfWork.Repository<UserNotification>()
-                    .GetEntityWithSpecAsync(spec);
+            var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
+            var notification = await _unitOfWork.Repository<UserNotification>()
+                .GetEntityWithSpecAsync(spec);
 
-                if (notification == null)
-                    return new ApiResponse(404, "الإشعار غير موجود");
+            if (notification == null)
+                return new ApiResponse(404, "الإشعار غير موجود");
 
-                notification.IsDeleted = true;
-                await _unitOfWork.Complete();
+            notification.IsDeleted = true;
+            await _unitOfWork.Complete();
 
-                return new ApiResponse(200, "تم حذف الإشعار بنجاح");
-            }
-            catch (Exception)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء حذف الإشعار");
-            }
+            return new ApiResponse(200, "تم حذف الإشعار بنجاح");
         }
     }
 }

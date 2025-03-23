@@ -16,39 +16,32 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
         }
         public override async Task<ApiResponse> Handle(LikeReplyCommand request, CancellationToken cancellationToken)
         {
-            try
+            var reply = await _unitOfWork.Repository<Reply>()
+                .GetEntityAsync(request.ReplyId);
+            if (reply == null)
             {
-                var reply = await _unitOfWork.Repository<Reply>()
-                    .GetEntityAsync(request.ReplyId);
-                if (reply == null)
-                {
-                    return new ApiResponse(404, "الرد غير موجود");
-                }
-
-                var spec = new ReplyLikeWithLikesSpecification(request.ReplyId, request.AppUserId);
-                var exsistingLike = await _unitOfWork.Repository<ReplyLike>()
-                    .GetEntityWithSpecAsync(spec);
-                if (exsistingLike != null)
-                {
-                    _unitOfWork.Repository<ReplyLike>().Delete(exsistingLike);
-                    await _unitOfWork.Complete();
-                    return new ApiResponse(200, "تم إلغاء الإعجاب");
-                }
-                else
-                {
-                    var like = new ReplyLike
-                    {
-                        ReplyId = request.ReplyId,
-                        AppUserId = request.AppUserId
-                    };
-                    await _unitOfWork.Repository<ReplyLike>().AddAsync(like);
-                    await _unitOfWork.Complete();
-                    return new ApiResponse(200, "تم إضافة الإعجاب");
-                }
+                return new ApiResponse(404, "الرد غير موجود");
             }
-            catch (Exception)
+
+            var spec = new ReplyLikeWithLikesSpecification(request.ReplyId, request.AppUserId);
+            var exsistingLike = await _unitOfWork.Repository<ReplyLike>()
+                .GetEntityWithSpecAsync(spec);
+            if (exsistingLike != null)
             {
-                return new ApiResponse(500, "حدث خطأ أثناء تحديث الإعجاب");
+                _unitOfWork.Repository<ReplyLike>().Delete(exsistingLike);
+                await _unitOfWork.Complete();
+                return new ApiResponse(200, "تم إلغاء الإعجاب");
+            }
+            else
+            {
+                var like = new ReplyLike
+                {
+                    ReplyId = request.ReplyId,
+                    AppUserId = request.AppUserId
+                };
+                await _unitOfWork.Repository<ReplyLike>().AddAsync(like);
+                await _unitOfWork.Complete();
+                return new ApiResponse(200, "تم إضافة الإعجاب");
             }
         }
     }

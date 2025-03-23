@@ -27,7 +27,6 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
         public override async Task<ApiResponse> Handle(SendChangeEmailOtpCommand request, CancellationToken cancellationToken)
         {
-
             var user = await _userManager.FindByEmailAsync(request.NewEmail);
             if (user != null)
             {

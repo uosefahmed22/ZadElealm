@@ -18,46 +18,39 @@ namespace ZadElealm.Apis.Handlers.Rating
 
         public override async Task<ApiResponse> Handle(AddRatingCommand request, CancellationToken cancellationToken)
         {
-            try
+            var existingRating = await _unitOfWork.Repository<Core.Models.Rating>()
+                .GetEntityWithSpecAsync(new RatingSpecification(request.UserId, request.CourseId));
+
+            if (existingRating != null)
+                return new ApiResponse(400, "لقد قمت بتقييم هذه الدورة من قبل");
+
+            var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(request.CourseId);
+            if (course == null)
+                return new ApiResponse(404, "الدورة غير موجودة");
+
+            var enrollment = await _unitOfWork.Repository<Enrollment>()
+                .GetEntityWithSpecAsync(new EnrollmentSpecification(request.CourseId, request.UserId));
+
+            if (enrollment == null)
+                return new ApiResponse(400, "يجب التسجيل في الدورة أولاً قبل تقييمها");
+
+            if (request.Value < 1 || request.Value > 5)
+                return new ApiResponse(400, "قيمة التقييم يجب أن تكون بين 1 و 5");
+
+            var rating = new Core.Models.Rating
             {
-                var existingRating = await _unitOfWork.Repository<Core.Models.Rating>()
-                    .GetEntityWithSpecAsync(new RatingSpecification(request.UserId, request.CourseId));
+                Value = request.Value,
+                courseId = request.CourseId,
+                AppUserId = request.UserId,
+                CreatedAt = DateTime.UtcNow
+            };
 
-                if (existingRating != null)
-                    return new ApiResponse(400, "لقد قمت بتقييم هذه الدورة من قبل");
+            await _unitOfWork.Repository<Core.Models.Rating>().AddAsync(rating);
+            await _unitOfWork.Complete();
 
-                var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(request.CourseId);
-                if (course == null)
-                    return new ApiResponse(404, "الدورة غير موجودة");
+            await UpdateCourseAverageRating(request.CourseId);
 
-                var enrollment = await _unitOfWork.Repository<Enrollment>()
-                    .GetEntityWithSpecAsync(new EnrollmentSpecification(request.CourseId, request.UserId));
-
-                if (enrollment == null)
-                    return new ApiResponse(400, "يجب التسجيل في الدورة أولاً قبل تقييمها");
-
-                if (request.Value < 1 || request.Value > 5)
-                    return new ApiResponse(400, "قيمة التقييم يجب أن تكون بين 1 و 5");
-
-                var rating = new Core.Models.Rating
-                {
-                    Value = request.Value,
-                    courseId = request.CourseId,
-                    AppUserId = request.UserId,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                await _unitOfWork.Repository<Core.Models.Rating>().AddAsync(rating);
-                await _unitOfWork.Complete();
-
-                await UpdateCourseAverageRating(request.CourseId);
-
-                return new ApiResponse(200, "تم إضافة التقييم بنجاح");
-            }
-            catch (Exception)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء إضافة التقييم");
-            }
+            return new ApiResponse(200, "تم إضافة التقييم بنجاح");
         }
 
         private async Task UpdateCourseAverageRating(int courseId)
