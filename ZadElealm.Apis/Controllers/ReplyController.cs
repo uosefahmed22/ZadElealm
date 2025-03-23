@@ -35,9 +35,12 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var command = new LikeReplyCommand(replyId, user.Id);
             var response = await _mediator.Send(command);
+
             return StatusCode(response.StatusCode, response);
         }
 
@@ -48,9 +51,8 @@ namespace ZadElealm.Apis.Controllers
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-            {
-                return NotFound(new ApiResponse(404, "User not found"));
-            }
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var command = new DeleteReplyreviewCommand(replyId, user.Id);
             var response = await _mediator.Send(command);
             return Ok(response);
@@ -71,14 +73,18 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var command = new AddReplyCommand
             {
                 ReviewId = reviewId,
                 ReplyText = replyText,
                 UserId = user.Id
             };
+            var response = await _mediator.Send(command);
 
-            return Ok(await _mediator.Send(command));
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

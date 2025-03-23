@@ -39,6 +39,8 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) 
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var command = new EnrollCourseCommand(courseId, user.Id);
             var response = await _mediator.Send(command);
@@ -52,7 +54,6 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
-
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 

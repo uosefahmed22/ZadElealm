@@ -42,6 +42,7 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+       
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpPost("mark-all-as-read")]
         public async Task<ActionResult<ApiResponse>> MarkAllAsRead()

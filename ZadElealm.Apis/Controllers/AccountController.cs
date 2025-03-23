@@ -225,6 +225,7 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+       
         [HttpGet("confirm-email")]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
@@ -234,7 +235,7 @@ namespace ZadElealm.Apis.Controllers
             if (response.StatusCode == 200 && response.Message != null)
                 return Redirect(response.Message);
 
-            return BadRequest(response);
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

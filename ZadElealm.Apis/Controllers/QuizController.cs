@@ -35,7 +35,8 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) {
+            if (user == null)
+            {
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
             }
             var query = new GetQuizQuery(quizId, user.Id);
@@ -60,24 +61,14 @@ namespace ZadElealm.Apis.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPost("create")]
         public async Task<ActionResult<ApiResponse>> CreateQuiz([FromBody] CreateQuizDto quizDto)
         {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(new ApiResponse(400, "Invalid quiz data"));
+            var command = new CreateQuizCommand(quizDto);
+            var response = await _mediator.Send(command);
 
-                var command = new CreateQuizCommand(quizDto);
-                var response = await _mediator.Send(command);
-
-                return StatusCode(response.StatusCode, response);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new ApiResponse(500, "An unexpected error occurred"));
-            }
+            return StatusCode(response.StatusCode, response);
         }
     }
 }
