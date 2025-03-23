@@ -25,26 +25,19 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
 
         public override async Task<ApiResponse> Handle(GetQuizQuery request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var spec = new QuizWithQuestionsAndChoicesAndProgressSpecification(request.QuizId);
-                var quiz = await _unitOfWork.Repository<Quiz>()
-                    .GetEntityWithSpecNoTrackingAsync(spec);
+            var spec = new QuizWithQuestionsAndChoicesAndProgressSpecification(request.QuizId);
+            var quiz = await _unitOfWork.Repository<Quiz>()
+                .GetEntityWithSpecNoTrackingAsync(spec);
 
-                if (quiz == null)
-                    return new ApiResponse(404, "الاختبار غير موجود");
+            if (quiz == null)
+                return new ApiResponse(404, "الاختبار غير موجود");
 
-                //var isUserEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(request.UserId, quiz.CourseId);
-                //if (!isUserEligible)
-                //    return new ApiResponse(403, "غير مؤهل للدخول لهذا الاختبار");
+            //var isUserEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(request.UserId, quiz.CourseId);
+            //if (!isUserEligible)
+            //    return new ApiResponse(403, "غير مؤهل للدخول لهذا الاختبار");
 
-                var mappedQuiz = _mapper.Map<QuizResponseDto>(quiz);
-                return new ApiDataResponse(200, mappedQuiz);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب الاختبار");
-            }
+            var mappedQuiz = _mapper.Map<QuizResponseDto>(quiz);
+            return new ApiDataResponse(200, mappedQuiz);
         }
     }
 }

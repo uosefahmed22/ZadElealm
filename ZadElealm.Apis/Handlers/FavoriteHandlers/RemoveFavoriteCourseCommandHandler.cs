@@ -20,24 +20,16 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
 
         public override async Task<ApiResponse> Handle(RemoveFavoriteCourseCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var favorite = await _unitOfWork.Repository<Favorite>()
-                    .GetEntityWithSpecAsync(new FavoriteSpecification(request.UserId, request.CourseId));
+            var favorite = await _unitOfWork.Repository<Favorite>()
+                .GetEntityWithSpecAsync(new FavoriteSpecification(request.UserId, request.CourseId));
 
-                if (favorite == null)
-                    return new ApiResponse(404, "الدورة غير موجودة في المفضلة");
+            if (favorite == null)
+                return new ApiResponse(404, "الدورة غير موجودة في المفضلة");
 
-                favorite.IsDeleted = true;
-                await _unitOfWork.Complete();
+            favorite.IsDeleted = true;
+            await _unitOfWork.Complete();
 
-                return new ApiResponse(200, "تم حذف الدورة من المفضلة بنجاح");
-            }
-            catch (Exception)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء حذف الدورة من المفضلة");
-            }
+            return new ApiResponse(200, "تم حذف الدورة من المفضلة بنجاح");
         }
     }
-
 }

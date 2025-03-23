@@ -18,22 +18,22 @@ namespace ZadElealm.Apis.Handlers.Review
         }
         public override async Task<ApiResponse> Handle(DeleteReviewCommand request, CancellationToken cancellationToken)
         {
-            var existingReview = 
+            var existingReview =
                 await _unitOfWork.Repository<Core.Models.Review>().GetEntityAsync(request.ReviewId);
             var user = await _userManager.FindByIdAsync(request.UserId);
             if (existingReview == null || user == null)
             {
-                return new ApiResponse(404, "Review not found");
+                return new ApiResponse(404, "لم يتم العثور على المراجعة");
             }
 
             if (existingReview.AppUserId != request.UserId)
             {
-                return new ApiResponse(403, "You are not authorized to delete this review");
+                return new ApiResponse(403, "أنت غير مخول لحذف هذه المراجعة");
             }
 
             _unitOfWork.Repository<Core.Models.Review>().Delete(existingReview);
             await _unitOfWork.Complete();
-            return new ApiResponse(200, "Review deleted successfully");
+            return new ApiResponse(200, "تم حذف المراجعة بنجاح");
         }
     }
 }

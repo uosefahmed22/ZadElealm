@@ -22,7 +22,8 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
             var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityWithSpecAsync(spec);
 
             if (course == null)
-                throw new Exception($"Course with ID {request.CourseId} not found");
+                if (course == null)
+                    throw new Exception($"لم يتم العثور على الدورة التدريبية بالمعرف {request.CourseId}");
 
             var videoProgressSpec = new VideoProgressWithSpec(request.UserId, request.CourseId);
             var videoProgresses = await _unitOfWork.Repository<VideoProgress>()

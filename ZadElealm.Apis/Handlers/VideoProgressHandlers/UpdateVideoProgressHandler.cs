@@ -24,59 +24,51 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
 
         public override async Task<ApiDataResponse> Handle(UpdateVideoProgressCommand request, CancellationToken cancellationToken)
         {
-            try
+            var videoSpec = new VideoByIdSpecification(request.VideoId);
+            var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
+
+            if (video == null)
+                return new ApiDataResponse(404, "الفيديو غير موجود");
+
+            var enrollmentSpec = new EnrollmentSpecification(video.CourseId, request.UserId);
+            var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecAsync(enrollmentSpec);
+
+            if (enrollment == null)
+                return new ApiDataResponse(403, "أنت غير مسجل في هذه الدورة");
+
+            var previousVideosSpec = new VideoProgressWithSpec(request.UserId, video.CourseId);
+            var previousVideosProgress = await _unitOfWork.Repository<VideoProgress>()
+                .GetAllWithSpecAsync(previousVideosSpec);
+
+            var canAccessVideo = await CanAccessVideo(video, previousVideosProgress);
+            if (!canAccessVideo)
+                return new ApiDataResponse(403, "يجب عليك إكمال الفيديوهات السابقة أولاً");
+
+            var progressResponse = await _videoProgressService.UpdateProgressAsync(
+                request.UserId,
+                request.VideoId,
+                request.WatchedDuration
+            );
+
+            if (progressResponse.StatusCode != 200)
+                return progressResponse;
+
+            var progress = progressResponse.Data as VideoProgress;
+            if (progress == null)
             {
-                var videoSpec = new VideoByIdSpecification(request.VideoId);
-                var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
-
-                if (video == null)
-                    return new ApiDataResponse(404, "Video not found");
-
-                var enrollmentSpec = new EnrollmentSpecification(video.CourseId, request.UserId);
-                var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecAsync(enrollmentSpec);
-
-                if (enrollment == null)
-                    return new ApiDataResponse(403, "You are not enrolled in this course");
-
-                var previousVideosSpec = new VideoProgressWithSpec(request.UserId, video.CourseId);
-                var previousVideosProgress = await _unitOfWork.Repository<VideoProgress>()
-                    .GetAllWithSpecAsync(previousVideosSpec);
-
-                var canAccessVideo = await CanAccessVideo(video, previousVideosProgress);
-                if (!canAccessVideo)
-                    return new ApiDataResponse(403, "You need to complete previous videos first");
-
-                var progressResponse = await _videoProgressService.UpdateProgressAsync(
-                    request.UserId,
-                    request.VideoId,
-                    request.WatchedDuration
-                );
-
-                if (progressResponse.StatusCode != 200)
-                    return progressResponse;
-
-                var progress = progressResponse.Data as VideoProgress;
-                if (progress == null)
-                {
-                    return new ApiDataResponse(500, "Invalid progress response");
-                }
-
-                var videoDto = new VideoProgressDto
-                {
-                    VideoId = request.VideoId,
-                    CourseId = video.CourseId,
-                    WatchedDuration = request.WatchedDuration.TotalSeconds,
-                    IsCompleted = progress.IsCompleted
-                };
-
-                return new ApiDataResponse(200, videoDto);
+                return new ApiDataResponse(500, "استجابة تقدم غير صالحة");
             }
-            catch (Exception ex)
+
+            var videoDto = new VideoProgressDto
             {
-                return new ApiDataResponse(500, "An error occurred while updating video progress");
-            }
+                VideoId = request.VideoId,
+                CourseId = video.CourseId,
+                WatchedDuration = request.WatchedDuration.TotalSeconds,
+                IsCompleted = progress.IsCompleted
+            };
+
+            return new ApiDataResponse(200, videoDto);
         }
-
         private async Task<bool> CanAccessVideo(Video video, IEnumerable<VideoProgress> previousVideosProgress)
         {
             if (video.OrderInCourse == 1)

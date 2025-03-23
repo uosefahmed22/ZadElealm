@@ -19,27 +19,20 @@ namespace ZadElealm.Apis.Handlers.Notification
 
         public override async Task<ApiResponse> Handle(MarkNotificationAsReadCommand request, CancellationToken cancellationToken)
         {
-            try
-            {
-                var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
-                var notification = await _unitOfWork.Repository<UserNotification>()
-                    .GetEntityWithSpecAsync(spec);
+            var spec = new UserNotificationSpecification(request.UserId, request.NotificationId);
+            var notification = await _unitOfWork.Repository<UserNotification>()
+                .GetEntityWithSpecAsync(spec);
 
-                if (notification == null)
-                    return new ApiResponse(404, "الإشعار غير موجود");
+            if (notification == null)
+                return new ApiResponse(404, "الإشعار غير موجود");
 
-                if (notification.IsRead)
-                    return new ApiResponse(200, "الإشعار مقروء بالفعل");
+            if (notification.IsRead)
+                return new ApiResponse(200, "الإشعار مقروء بالفعل");
 
-                notification.IsRead = true;
-                await _unitOfWork.Complete();
+            notification.IsRead = true;
+            await _unitOfWork.Complete();
 
-                return new ApiResponse(200, "تم تحديد الإشعار كمقروء");
-            }
-            catch (Exception)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء تحديث الإشعار");
-            }
+            return new ApiResponse(200, "تم تحديد الإشعار كمقروء");
         }
     }
 }

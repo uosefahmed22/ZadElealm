@@ -25,32 +25,22 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
 
         public override async Task<ApiResponse> Handle(GetEnrolledCoursesQuery request, CancellationToken cancellationToken)
         {
-            try
+            var spec = new EnrollmentSpecification(request.UserId);
+            var enrollments = await _unitOfWork.Repository<Enrollment>()
+                .GetAllWithSpecNoTrackingAsync(spec);
+
+            if (!enrollments.Any())
+                return new ApiResponse(200, "لا توجد دورات مسجلة");
+
+            var mappedCourses = _mapper.Map<IEnumerable<CourseDto>>(enrollments.Select(e => e.Course));
+
+            var response = new AllEnrollementData()
             {
-                var spec = new EnrollmentSpecification(request.UserId);
-                var enrollments = await _unitOfWork.Repository<Enrollment>()
-                    .GetAllWithSpecNoTrackingAsync(spec);
+                Courses = mappedCourses,
+                AllEnrolledCourses = enrollments.Count()
+            };
 
-                if (!enrollments.Any())
-                    return new ApiResponse(200, "لا توجد دورات مسجلة");
-
-                var mappedCourses = _mapper.Map<IEnumerable<CourseDto>>(enrollments.Select(e => e.Course));
-
-                var response = new AllEnrollementData()
-                {
-                    Courses = mappedCourses,
-                    AllEnrolledCourses = enrollments.Count()
-                };
-
-                return new ApiDataResponse(200, response);
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(500, "حدث خطأ أثناء جلب الدورات المسجلة");
-            }
+            return new ApiDataResponse(200, response);
         }
     }
 }
-
-
-
