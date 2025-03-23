@@ -13,7 +13,6 @@ using Microsoft.AspNetCore.Identity;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using ZadElealm.Core.Specifications.CertificateFolder;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Apis.Errors;

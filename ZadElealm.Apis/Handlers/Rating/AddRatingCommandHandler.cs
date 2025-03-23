@@ -55,7 +55,7 @@ namespace ZadElealm.Apis.Handlers.Rating
 
         private async Task UpdateCourseAverageRating(int courseId)
         {
-            var spec = new RatingsByCoursesSpecification(courseId);
+            var spec = new RatingSpecification(courseId);
             var ratings = await _unitOfWork.Repository<Core.Models.Rating>().GetAllWithSpecAsync(spec);
 
             if (ratings.Any())

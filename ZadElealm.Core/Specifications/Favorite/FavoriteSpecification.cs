@@ -13,5 +13,12 @@ namespace ZadElealm.Core.Specifications.Favorite
             : base(f => f.AppUserId == userId && f.CourseId == courseId)
         {
         }
+
+        public FavoriteSpecification(string userId)
+         : base(f => f.AppUserId == userId)
+        {
+            Includes.Add(f => f.Course);
+            OrderByDescending = f => f.CreatedAt;
+        }
     }
 }

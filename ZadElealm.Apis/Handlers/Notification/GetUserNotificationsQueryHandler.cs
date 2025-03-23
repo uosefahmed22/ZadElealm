@@ -26,7 +26,7 @@ namespace ZadElealm.Apis.Handlers.Notification
 
         public override async Task<ApiResponse> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
         {
-            var spec = new UserNotificationWithNotificationSpecification(request.UserId);
+            var spec = new UserNotificationSpecification(request.UserId);
             var notifications = await _unitOfWork.Repository<UserNotification>()
                 .GetAllWithSpecAsync(spec);
 

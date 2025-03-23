@@ -12,5 +12,10 @@ namespace ZadElealm.Core.Specifications.Rating
             : base(r => r.AppUserId == userId && r.courseId == courseId)
         {
         }
+        public RatingSpecification(int courseId)
+           : base(r => r.courseId == courseId)
+        {
+            AddOrderByDescending(r => r.CreatedAt);
+        }
     }
 }
