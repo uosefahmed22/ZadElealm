@@ -37,11 +37,11 @@ namespace ZadElealm.Apis.Handlers.Course
 
             if (!string.IsNullOrEmpty(request.UserId))
             {
-                var specvideoProgress = new VideoProgressSpecification(request.UserId, request.CourseId);
+                var specvideoProgress = new VideoProgressWithCourseAndUserSpecification(request.UserId, request.CourseId);
                 var videoProgress = await _unitOfWork.Repository<VideoProgress>()
                     .GetAllWithSpecNoTrackingAsync(specvideoProgress);
 
-                foreach (var video in mappedCourse.Videos)
+                foreach (var video in mappedCourse. Videos)
                 {
                     var progress = videoProgress.FirstOrDefault(vp => vp.VideoId == video.Id);
                     if (progress != null)

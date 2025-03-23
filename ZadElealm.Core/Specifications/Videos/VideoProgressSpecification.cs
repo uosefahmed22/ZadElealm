@@ -14,6 +14,7 @@ namespace ZadElealm.Core.Specifications.Videos
         {
             Includes.Add(p => p.Video);
             Includes.Add(p => p.Course);
+            Includes.Add(p => p.User);
         }
     }
 }
