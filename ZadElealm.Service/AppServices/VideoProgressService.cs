@@ -123,9 +123,13 @@ namespace ZadElealm.Service.AppServices
         }
         public async Task<bool> CheckCourseCompletionEligibilityAsync(string userId, int courseId)
         {
-            var progress = await GetCourseProgressAsync(userId, courseId);
-            var courseProgress = progress.Data as CourseProgress;
-            return courseProgress.OverallProgress >= 80;
+            var progressResponse = await GetCourseProgressAsync(userId, courseId);
+
+            if (progressResponse.StatusCode != 200 || progressResponse.Data == null)
+                return false;
+
+            var courseProgress = progressResponse.Data as CourseProgress;
+            return courseProgress?.OverallProgress >= 80;
         }
         public async Task<ApiDataResponse> GetVideoProgressAsync(string userId, int videoId)
         {

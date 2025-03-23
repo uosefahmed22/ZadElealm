@@ -17,9 +17,6 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
         {
             var result = await _quizService.SubmitQuizAsync(request.UserId, request.Submission);
 
-            if (result == null)
-                return new ApiResponse(400, "Quiz submission failed.");
-
             return result;
         }
     }
