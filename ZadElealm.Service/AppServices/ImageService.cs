@@ -24,19 +24,14 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ApiDataResponse> UploadImageAsync(IFormFile imageFile)
         {
-            if (imageFile == null)
+            if (imageFile == null|| imageFile.Length == 0)
             {
-                throw new ArgumentNullException(nameof(imageFile), "Image file cannot be null.");
-            }
-
-            if (imageFile.Length == 0)
-            {
-                return new ApiDataResponse(400, null, "File is empty.");
+                return new ApiDataResponse(400, null, "لا يوجد ملف للرفع");
             }
 
             if (imageFile.Length > 5 * 1024 * 1024)
             {
-                return new ApiDataResponse(400, null, "File size cannot exceed 5MB.");
+                return new ApiDataResponse(400, null, "حجم الملف كبير جداً لا يجب ان يتعدى 5 ميجا بايت");
             }
 
             var ext = Path.GetExtension(imageFile.FileName).ToLower();

@@ -39,62 +39,65 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ApiDataResponse> GenerateAndSaveCertificate(string userId, int quizId)
         {
-            try
+            var user = await _userManager.FindByIdAsync(userId);
+            var quiz = await _unitOfWork.Repository<Quiz>().GetEntityAsync(quizId);
+
+            // 1. Check quiz completion and user progress
+            var progressSpec = new ProgressWithUserDataAndQuiz(userId, quizId);
+            var progress = await _unitOfWork.Repository<Progress>().GetEntityWithSpecAsync(progressSpec);
+
+            if (progress == null)
+                return new ApiDataResponse(404, null, "Quiz not found");
+
+            if (!progress.IsCompleted)
+                return new ApiDataResponse(400, null, "Quiz not completed yet");
+
+            // 2. Generate PDF certificate
+            var (filePath, fileName) = GeneratePdfCertificate(userId, quizId, user, quiz);
+
+            // 3. Create certificate URL
+            var baseUrl = _configuration["BaseUrl"];
+            var pdfUrl = $"{baseUrl}/certificates/{fileName}";
+
+            // 5. Create and populate certificate object
+            var certificate = new Certificate
             {
-                var user = await _userManager.FindByIdAsync(userId);
-                var quiz = await _unitOfWork.Repository<Quiz>().GetEntityAsync(quizId);
+                Name = $"Certificate_{user.DisplayName}_{quiz.Name}",
+                Description = $"Certificate for completing {quiz.Name} with score {progress.Score}",
+                PdfUrl = pdfUrl,
+                UserId = userId,
+                QuizId = quizId,
+                CreatedAt = DateTime.UtcNow
+            };
 
-                var progressSpec = new ProgressWithUserDataAndQuiz(userId, quizId);
-                var progress = await _unitOfWork.Repository<Progress>().GetEntityWithSpecAsync(progressSpec);
-
-                if (progress == null)
-                    return new ApiDataResponse(404, null, "لم يتم العثور على الاختبار");
-
-                if (!progress.IsCompleted)
-                    return new ApiDataResponse(400, null, "لم يتم اجتياز الاختبار بعد");
-
-
-                var (filePath, fileName) = GeneratePdfCertificate(userId, quizId, user, quiz);
-
-                var baseUrl = _configuration["BaseUrl"];
-                var pdfUrl = $"{baseUrl}/certificates/{fileName}";
-
-                var certificate = new Certificate
-                {
-                    Name = $"Certificate_{user.DisplayName}_{quiz.Name}",
-                    Description = $"Certificate for completing {quiz.Name} with score {progress.Score}",  // Added score to description
-                    PdfUrl = pdfUrl,
-                    UserId = userId,
-                    QuizId = quizId,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                return new ApiDataResponse(200, certificate, "تم إنشاء الشهادة بنجاح");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"فشل في إنشاء الشهادة: {ex.Message}");
-            }
+            return new ApiDataResponse(200, certificate, "Certificate generated successfully");
         }
+
+        // Private method to generate PDF certificate
         private (string filePath, string fileName) GeneratePdfCertificate(string userId, int quizId, AppUser user, Quiz quiz)
         {
+            // 1. Define colors used in the certificate
             var goldColor = Color.FromRGB(218, 165, 32);
             var greyDark = Color.FromRGB(96, 96, 96);
             var blueDark = Color.FromRGB(25, 25, 112);
             var redDark = Color.FromRGB(139, 0, 0);
 
+            // 2. Set up QuestPDF license
             QuestPDF.Settings.License = LicenseType.Community;
 
+            // 3. Create certificates directory if it doesn't exist, which used to store generated certificates
             var certificatesDirectory = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "certificates");
             if (!Directory.Exists(certificatesDirectory))
             {
                 Directory.CreateDirectory(certificatesDirectory);
             }
 
+            // 4. Define certificate file name and paths
             var fileName = $"certificate_{userId}_{quizId}_{Guid.NewGuid()}.pdf";
             var filePath = Path.Combine(certificatesDirectory, fileName);
             var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "certificates", "logo.png");
 
+            // 5. Create and design certificate content using QuestPDF
             Document.Create(container =>
             {
                 container.Page(page =>
@@ -222,8 +225,9 @@ namespace ZadElealm.Service.AppServices
                     });
                 });
             })
-                           .GeneratePdf(filePath);
+            .GeneratePdf(filePath);
 
+            // 6. Verify file creation, to avoid returning invalid file path
             if (!File.Exists(filePath))
             {
                 throw new Exception("Failed to generate PDF file");
