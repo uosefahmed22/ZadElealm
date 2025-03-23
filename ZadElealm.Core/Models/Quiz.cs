@@ -10,7 +10,7 @@ namespace ZadElealm.Core.Models
     {
         public string Name { get; set; }
         public string Description { get; set; }
-        public ICollection<Question> Questions { get; set; }
+        public List<Question> Questions { get; set; }
         public ICollection<Progress> Progresses { get; set; }
         public int CourseId { get; set; } 
         public Course Course { get; set; }

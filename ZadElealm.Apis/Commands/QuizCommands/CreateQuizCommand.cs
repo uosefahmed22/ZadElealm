@@ -8,9 +8,9 @@ namespace ZadElealm.Apis.Commands.QuizCommands
 {
     public record CreateQuizCommand : IRequest<ApiResponse>
     {
-        public QuizDto QuizDto { get; init; }
+        public CreateQuizDto QuizDto { get; init; }
 
-        public CreateQuizCommand(QuizDto quizDto)
+        public CreateQuizCommand(CreateQuizDto quizDto)
         {
             QuizDto = quizDto;
         }

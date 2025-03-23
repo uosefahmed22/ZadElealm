@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ZadElealm.Apis.Dtos;
 
 namespace ZadElealm.Core.ServiceDto
 {
