@@ -47,10 +47,10 @@ namespace ZadElealm.Service.AppServices
             var progress = await _unitOfWork.Repository<Progress>().GetEntityWithSpecAsync(progressSpec);
 
             if (progress == null)
-                return new ApiDataResponse(404, null, "Quiz not found");
+                return new ApiDataResponse(404, null, "لم يتم العثور على الاختبار");
 
             if (!progress.IsCompleted)
-                return new ApiDataResponse(400, null, "Quiz not completed yet");
+                return new ApiDataResponse(400, null, "لم يتم إكمال الاختبار بعد");
 
             // 2. Generate PDF certificate
             var (filePath, fileName) = GeneratePdfCertificate(userId, quizId, user, quiz);
@@ -63,14 +63,14 @@ namespace ZadElealm.Service.AppServices
             var certificate = new Certificate
             {
                 Name = $"Certificate_{user.DisplayName}_{quiz.Name}",
-                Description = $"Certificate for completing {quiz.Name} with score {progress.Score}",
+                Description = $"شهادة لإكمال {quiz.Name} بدرجة {progress.Score}",
                 PdfUrl = pdfUrl,
                 UserId = userId,
                 QuizId = quizId,
                 CreatedAt = DateTime.UtcNow
             };
 
-            return new ApiDataResponse(200, certificate, "Certificate generated successfully");
+            return new ApiDataResponse(200, certificate, "تم إنشاء الشهادة بنجاح");
         }
 
         // Private method to generate PDF certificate
@@ -230,7 +230,7 @@ namespace ZadElealm.Service.AppServices
             // 6. Verify file creation, to avoid returning invalid file path
             if (!File.Exists(filePath))
             {
-                throw new Exception("Failed to generate PDF file");
+                throw new Exception("فشل في إنشاء ملف PDF");
             }
 
             return (filePath, fileName);
