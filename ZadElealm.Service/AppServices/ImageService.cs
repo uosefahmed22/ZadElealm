@@ -58,28 +58,6 @@ namespace ZadElealm.Service.AppServices
                 return new ApiDataResponse(400, null, "فشل في رفع الصورة");
             }
         }
-
-        // Helper method to extract public ID from Cloudinary URL
-        private string GetPublicIdFromUrl(string url)
-        {
-            if (url == null)
-            {
-                throw new ArgumentNullException(nameof(url), "الرابط لا يمكن ان يكون فارغاً");
-            }
-
-            try
-            {
-                var uri = new Uri(url);
-                var segments = uri.Segments;
-                var publicId = segments.Last().Split('.').First();
-                return publicId;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("فشل في استخراج الرقم العام من الرابط");
-            }
-        }
-
         public async Task<ApiDataResponse> DeleteImageAsync(string imageUrl)
         {
             // Validate image URL
@@ -111,6 +89,26 @@ namespace ZadElealm.Service.AppServices
             else
             {
                 return new ApiDataResponse(400, null, "فشل في حذف الصورة");
+            }
+        }
+        // Helper method to extract public ID from Cloudinary URL
+        private string GetPublicIdFromUrl(string url)
+        {
+            if (url == null)
+            {
+                throw new ArgumentNullException(nameof(url), "الرابط لا يمكن ان يكون فارغاً");
+            }
+
+            try
+            {
+                var uri = new Uri(url);
+                var segments = uri.Segments;
+                var publicId = segments.Last().Split('.').First();
+                return publicId;
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("فشل في استخراج الرقم العام من الرابط");
             }
         }
     }

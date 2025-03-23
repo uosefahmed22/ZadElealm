@@ -17,24 +17,21 @@ namespace ZadElealm.Service.AppServices
     public class SendEmailService : ISendEmailService
     {
         private readonly EmailSettings _emailSettings;
-        private readonly ILogger<SendEmailService> _logger;
-
-        public SendEmailService(IOptions<EmailSettings> emailSettings, ILogger<SendEmailService> logger)
+        public SendEmailService(IOptions<EmailSettings> emailSettings)
         {
             _emailSettings = emailSettings.Value;
-            _logger = logger;
         }
 
         public async Task<ApiDataResponse> SendEmailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(emailMessage.To))
-               return new ApiDataResponse(400,null, "To cannot be null or empty.");
+                return new ApiDataResponse(400, null, "إلى لا يمكن أن يكون فارغاً أو خالياً.");
 
             if (string.IsNullOrWhiteSpace(emailMessage.Subject))
-               return new ApiDataResponse(400, null, "Subject cannot be null or empty.");
+                return new ApiDataResponse(400, null, "الموضوع لا يمكن أن يكون فارغاً أو خالياً.");
 
             if (string.IsNullOrWhiteSpace(emailMessage.Body))
-                return new ApiDataResponse(400, null, "Body cannot be null or empty.");
+                return new ApiDataResponse(400, null, "النص لا يمكن أن يكون فارغاً أو خالياً.");
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.DisplayedName, _emailSettings.Email));
@@ -51,11 +48,11 @@ namespace ZadElealm.Service.AppServices
                     await client.SendAsync(message, cancellationToken);
                     await client.DisconnectAsync(true, cancellationToken);
                 }
-                return new ApiDataResponse(200, null, "Email sent successfully");
+                return new ApiDataResponse(200, null, "تم إرسال البريد الإلكتروني بنجاح");
             }
             catch (Exception ex)
             {
-                return new ApiDataResponse(500, null, "Error while sending email");
+                return new ApiDataResponse(500, null, "حدث خطأ أثناء إرسال البريد الإلكتروني");
             }
         }
     }
