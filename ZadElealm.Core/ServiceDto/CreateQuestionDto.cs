@@ -1,13 +1,24 @@
-﻿using ZadElealm.Core.ServiceDto;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace ZadElealm.Apis.Dtos
+namespace ZadElealm.Core.ServiceDto
 {
     public class CreateQuestionDto
     {
-        public int Id { get; set; }
+        [Required]
+        [StringLength(500)]
         public string Text { get; set; }
-        public int CorrectChoiceId { get; set; }
-        public int QuizId { get; set; }
-        public List<ChoiceDto> Choices { get; set; } = new List<ChoiceDto>();
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int CorrectChoiceIndex { get; set; }
+
+        [Required]
+        [MinLength(2, ErrorMessage = "Question must have at least 2 choices")]
+        public List<CreateChoiceDto> Choices { get; set; }
     }
 }

@@ -14,6 +14,7 @@ namespace ZadElealm.Service.AppServices
 {
     public class ImageService : IImageService
     {
+        // Define allowed image file extensions
         private readonly List<string> _allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png" };
         private readonly Cloudinary _cloudinary;
 
@@ -24,52 +25,46 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ApiDataResponse> UploadImageAsync(IFormFile imageFile)
         {
-            if (imageFile == null|| imageFile.Length == 0)
+            // Validate if file exists
+            if (imageFile == null || imageFile.Length == 0|| imageFile.Length > 5 * 1024 * 1024)
             {
-                return new ApiDataResponse(400, null, "لا يوجد ملف للرفع");
+                return new ApiDataResponse(400, null, "لا يمكن رفع الملف");
             }
 
-            if (imageFile.Length > 5 * 1024 * 1024)
-            {
-                return new ApiDataResponse(400, null, "حجم الملف كبير جداً لا يجب ان يتعدى 5 ميجا بايت");
-            }
-
+            // Validate file extension
             var ext = Path.GetExtension(imageFile.FileName).ToLower();
             if (!_allowedExtensions.Contains(ext))
             {
-                return new ApiDataResponse(400, null, "Invalid file type. Only JPG and PNG are allowed.");
+                return new ApiDataResponse(400, null, "امتداد الملف غير مدعوم");
             }
 
-            try
+            // Configure and execute upload to Cloudinary
+            using var stream = imageFile.OpenReadStream();
+            var uploadParams = new ImageUploadParams
             {
-                using var stream = imageFile.OpenReadStream();
-                var uploadParams = new ImageUploadParams
-                {
-                    File = new FileDescription(imageFile.FileName, stream),
-                    Transformation = new Transformation().Quality("auto").FetchFormat("auto")
-                };
+                File = new FileDescription(imageFile.FileName, stream),
+                Transformation = new Transformation().Quality("auto").FetchFormat("auto")
+            };
 
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-                if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
-                {
-                    return new ApiDataResponse(200, uploadResult.Url.AbsoluteUri, "Image uploaded successfully.");
-                }
-                else
-                {
-                    return new ApiDataResponse(400, null, "Failed to upload image.");
-                }
+            // Return response based on upload result
+            if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+            {
+                return new ApiDataResponse(200, uploadResult.Url.AbsoluteUri, "تم رفع الصورة بنجاح");
             }
-            catch (Exception ex)
+            else
             {
-                return new ApiDataResponse(500, null, $"An unexpected error occurred");
+                return new ApiDataResponse(400, null, "فشل في رفع الصورة");
             }
         }
+
+        // Helper method to extract public ID from Cloudinary URL
         private string GetPublicIdFromUrl(string url)
         {
             if (url == null)
             {
-                throw new ArgumentNullException(nameof(url), "URL cannot be null.");
+                throw new ArgumentNullException(nameof(url), "الرابط لا يمكن ان يكون فارغاً");
             }
 
             try
@@ -81,43 +76,41 @@ namespace ZadElealm.Service.AppServices
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Failed to extract public ID from URL.", ex);
+                throw new InvalidOperationException("فشل في استخراج الرقم العام من الرابط");
             }
         }
+
         public async Task<ApiDataResponse> DeleteImageAsync(string imageUrl)
         {
+            // Validate image URL
             if (string.IsNullOrEmpty(imageUrl))
             {
-                throw new ArgumentNullException(nameof(imageUrl), "Image URL cannot be null or empty.");
+                throw new ArgumentNullException(nameof(imageUrl), "الرابط لا يمكن ان يكون فارغا");
             }
 
+            // Get public ID and validate
             var publicId = GetPublicIdFromUrl(imageUrl);
             if (string.IsNullOrEmpty(publicId))
             {
-                return new ApiDataResponse(400, null, "Failed to extract public ID from URL.");
+                return new ApiDataResponse(400, null, "فشل في حذف الصورة");
             }
 
-            try
+            // Configure and execute deletion
+            var deletionParams = new DeletionParams(publicId)
             {
-                var deletionParams = new DeletionParams(publicId)
-                {
-                    Invalidate = true
-                };
+                Invalidate = true
+            };
 
-                var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
+            var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
 
-                if (deletionResult.StatusCode == HttpStatusCode.OK)
-                {
-                    return new ApiDataResponse(200, null, "Image deleted successfully.");
-                }
-                else
-                {
-                    return new ApiDataResponse(400, null, "Failed to delete image.");
-                }
+            // Return response based on deletion result
+            if (deletionResult.StatusCode == HttpStatusCode.OK)
+            {
+                return new ApiDataResponse(200, null, "تم حذف الصورة بنجاح");
             }
-            catch (Exception ex)
+            else
             {
-                return new ApiDataResponse(500, null, $"An unexpected error occurred");
+                return new ApiDataResponse(400, null, "فشل في حذف الصورة");
             }
         }
     }
