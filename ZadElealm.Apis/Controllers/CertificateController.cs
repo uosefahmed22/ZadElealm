@@ -37,6 +37,9 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401));
+
             var query = new GetUserCertificatesQuery(user.Id);
             var response = await _mediator.Send(query);
 

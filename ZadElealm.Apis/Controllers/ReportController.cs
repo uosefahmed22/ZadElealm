@@ -40,7 +40,7 @@ namespace ZadElealm.Apis.Controllers
             var command = new AddReportCommand(user.Id, reportDto);
             var response = await _mediator.Send(command);
 
-            return Ok(new ApiResponse(200, response.Message));
+            return StatusCode(response.StatusCode, response);
         }
     }
 }

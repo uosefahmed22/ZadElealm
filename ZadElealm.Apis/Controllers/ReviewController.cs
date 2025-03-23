@@ -37,6 +37,8 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var command = new AddReviewCommand(request.ReviewText, request.CourseId, user.Id);
             var response = await _mediator.Send(command);
@@ -50,13 +52,18 @@ namespace ZadElealm.Apis.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var command = new ToggleLikeCommand
             {
                 ReviewId = reviewId,
                 UserId = user.Id
             };
 
-            return Ok(await _mediator.Send(command));
+            var response = await _mediator.Send(command);
+
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
@@ -64,21 +71,14 @@ namespace ZadElealm.Apis.Controllers
         public async Task<ActionResult<ApiResponse>> DeleteReview(int reviewId)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
-            if (email == null)
-            {
-                return BadRequest(new ApiResponse(400, "User email not found"));
-            }
-
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-            {
-                return NotFound(new ApiResponse(404, "User not found"));
-            }
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var command = new DeleteReviewCommand(reviewId, user.Id);
             var response = await _mediator.Send(command);
 
-            return Ok(response);
+            return StatusCode(response.StatusCode, response);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
@@ -88,7 +88,7 @@ namespace ZadElealm.Apis.Controllers
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                return NotFound(new ApiResponse(404, "User not found"));
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var query = new GetUserAddRateingBeforeQuery(courseId, user.Id);
             var response = await _mediator.Send(query);
