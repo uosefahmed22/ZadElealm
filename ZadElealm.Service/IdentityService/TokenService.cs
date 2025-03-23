@@ -101,7 +101,7 @@ namespace ZadElealm.Service.IdentityService
                 var tokenInVerification = jwtTokenHandler.ValidateToken(Token, _tokenValidationParameters, out var validatedToken);
                 if (tokenInVerification == null)
                 {
-                    return new AuthResult { Result = false, message = "Invalid token." };
+                    return new AuthResult { Result = false, message = "رمز غير صالح." };
                 }
 
                 var claims = tokenInVerification.Claims.ToDictionary(c => c.Type, c => c.Value);
@@ -110,29 +110,29 @@ namespace ZadElealm.Service.IdentityService
                     !long.TryParse(expValue, out var utcExpiryDate) ||
                     DateTimeOffset.FromUnixTimeSeconds(utcExpiryDate) > DateTime.UtcNow)
                 {
-                    return new AuthResult { Result = false, message = "This token hasn't expired yet." };
+                    return new AuthResult { Result = false, message = "لم تنته صلاحية هذا الرمز بعد." };
                 }
 
                 var storedToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == RefreshToken);
                 if (storedToken == null || storedToken.Used || storedToken.IsRevoked || storedToken.ExpiryDate < DateTime.UtcNow)
                 {
-                    return new AuthResult { Result = false, message = "Invalid refresh token." };
+                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
                 }
                 var user = await _userManager.FindByIdAsync(storedToken.UserId);
                 if (user == null || !user.IsDeleted)
                 {
-                    return new AuthResult { Result = false, message = "Invalid refresh token." };
+                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
                 }
 
                 if (!claims.TryGetValue(JwtRegisteredClaimNames.Jti, out var jti) || storedToken.JwtId != jti)
                 {
-                    return new AuthResult { Result = false, message = "Invalid token." };
+                    return new AuthResult { Result = false, message = "رمز غير صالح." };
                 }
 
                 storedToken.Used = true;
                 _dbContext.RefreshTokens.Update(storedToken);
                 await _dbContext.SaveChangesAsync();
-                return new AuthResult { Result = true, message = "Token refreshed." };
+                return new AuthResult { Result = true, message = "تم تحديث الرمز." };
 
             }
             catch (SecurityTokenException ex)
@@ -150,7 +150,7 @@ namespace ZadElealm.Service.IdentityService
                     return new AuthResult
                     {
                         Result = false,
-                        message = "Invalid refresh token."
+                        message = "رمز تحديث غير صالح."
                     };
                 }
 
@@ -159,7 +159,7 @@ namespace ZadElealm.Service.IdentityService
                     return new AuthResult
                     {
                         Result = false,
-                        message = "Token already revoked."
+                        message = "تم إلغاء الرمز بالفعل."
                     };
                 }
 
@@ -170,7 +170,7 @@ namespace ZadElealm.Service.IdentityService
                 return new AuthResult
                 {
                     Result = true,
-                    message = "Token revoked."
+                    message = "تم إلغاء الرمز."
                 };
             }
             catch (Exception ex)
