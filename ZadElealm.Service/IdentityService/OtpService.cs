@@ -36,7 +36,7 @@ namespace ZadElealm.Service.IdentityService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to generate OTP for {Email}", email);
+                _logger.LogError(ex, "فشل في إنشاء OTP للبريد الإلكتروني {Email}", email);
                 throw;
             }
         }
@@ -51,7 +51,7 @@ namespace ZadElealm.Service.IdentityService
                 var key = RetrieveKeyFromCache(email);
                 if (key is null)
                 {
-                    _logger.LogWarning("No OTP key found for {Email}", email);
+                    _logger.LogWarning("لم يتم العثور على مفتاح OTP للبريد الإلكتروني {Email}", email);
                     return false;
                 }
 
@@ -60,7 +60,7 @@ namespace ZadElealm.Service.IdentityService
                 var isValidOtp = totp.VerifyTotp(otp, out _, new VerificationWindow(1, 1));
                 if (!isValidOtp)
                 {
-                    _logger.LogWarning("Invalid OTP for {Email}", email);
+                    _logger.LogWarning("OTP غير صالح للبريد الإلكتروني {Email}", email);
                     return false;
                 }
 
@@ -71,7 +71,7 @@ namespace ZadElealm.Service.IdentityService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to validate OTP for {Email}", email);
+                _logger.LogError(ex, "فشل في التحقق من صحة OTP للبريد الإلكتروني {Email}", email);
                 throw;
             }
         }

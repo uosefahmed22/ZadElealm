@@ -21,21 +21,14 @@ namespace ZadElealm.Service.IdentityService
 
         public async Task<ApiResponse> CheckPasswordAsync(string Email, string password)
         {
-            try
+            var user = await _userManager.FindByEmailAsync(Email);
+            var result = await _userManager.CheckPasswordAsync(user, password);
+            if (!result)
             {
-                var user = await _userManager.FindByEmailAsync(Email);
-                var result = await _userManager.CheckPasswordAsync(user, password);
-                if (!result)
-                {
-                    return new ApiResponse(401, "Invalid password");
-                }
+                return new ApiResponse(401, "كلمة المرور غير صحيحة");
+            }
 
-                return new ApiResponse(200, "Password verified successfully");
-            }
-            catch (Exception ex)
-            {
-                return new ApiResponse(500, "An error occurred");
-            }
+            return new ApiResponse(200, "تم التحقق من كلمة المرور بنجاح");
         }
     }
 }
