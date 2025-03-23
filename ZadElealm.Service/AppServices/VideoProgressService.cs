@@ -28,20 +28,20 @@ namespace ZadElealm.Service.AppServices
         public async Task<ApiDataResponse> UpdateProgressAsync(string userId, int videoId, TimeSpan watchedDuration)
         {
             if (watchedDuration.TotalSeconds < 0)
-                return new ApiDataResponse(400, null, "Watch duration cannot be negative");
+                return new ApiDataResponse(400, null, "مدة المشاهدة لا يمكن أن تكون سلبية");
 
             var videoSpec = new VideoByIdSpecification(videoId);
             var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
 
             if (video == null)
-                return new ApiDataResponse(404, null, "Video not found");
+                return new ApiDataResponse(404, null, "الفيديو غير موجود");
 
             if (video.CourseId <= 0)
-                return new ApiDataResponse(400, null, "Invalid CourseId associated with the video");
+                return new ApiDataResponse(400, null, "معرف الدورة المرتبط بالفيديو غير صالح");
 
             if (watchedDuration.TotalSeconds > video.VideoDuration.TotalSeconds)
             {
-                return new ApiDataResponse(400, null, $"Watch duration ({watchedDuration.TotalSeconds} seconds) cannot exceed video duration ({video.VideoDuration.TotalSeconds} seconds)");
+                return new ApiDataResponse(400, null, $"مدة المشاهدة ({watchedDuration.TotalSeconds} ثانية) لا يمكن أن تتجاوز مدة الفيديو ({video.VideoDuration.TotalSeconds} ثانية)");
             }
 
             var progressSpec = new VideoProgressSpecification(userId, videoId);
@@ -53,7 +53,7 @@ namespace ZadElealm.Service.AppServices
             if (progress != null)
             {
                 if (progress.WatchedDuration.TotalSeconds > watchedDuration.TotalSeconds)
-                    return new ApiDataResponse(200, progress, "Previously recorded progress is greater");
+                    return new ApiDataResponse(200, progress, "التقدم المسجل سابقًا أكبر");
 
                 progress.WatchedDuration = watchedDuration;
                 progress.IsCompleted = isCompleted;
@@ -77,11 +77,11 @@ namespace ZadElealm.Service.AppServices
             try
             {
                 await _unitOfWork.Complete();
-                return new ApiDataResponse(200, progress, "Progress updated successfully");
+                return new ApiDataResponse(200, progress, "تم تحديث التقدم بنجاح");
             }
             catch (Exception ex)
             {
-                return new ApiDataResponse(500, null, $"Failed to update progress: {ex.Message}");
+                return new ApiDataResponse(500, null, $"فشل في تحديث التقدم: {ex.Message}");
             }
         }
         public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)
@@ -90,13 +90,13 @@ namespace ZadElealm.Service.AppServices
             var course = await _unitOfWork.Repository<Course>().GetEntityWithSpecAsync(spec);
 
             if (course == null)
-                return new ApiDataResponse(404, null, "Course not found");
+                return new ApiDataResponse(404, null, "الدورة غير موجودة");
 
             var enrollmentSpec = new EnrollmentSpecification(courseId, userId);
             var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecAsync(enrollmentSpec);
 
             if (enrollment == null)
-                return new ApiDataResponse(404, null, "User is not enrolled in this course");
+                return new ApiDataResponse(404, null, "المستخدم غير مسجل في هذه الدورة");
 
             var videoProgressSpec = new VideoProgressWithSpec(userId, courseId);
             var videoProgresses = await _unitOfWork.Repository<VideoProgress>().GetAllWithSpecNoTrackingAsync(videoProgressSpec);
@@ -119,7 +119,7 @@ namespace ZadElealm.Service.AppServices
                 TotalVideos = totalVideos,
                 IsEligibleForQuiz = isEligibleForQuiz
             };
-            return new ApiDataResponse(200, courseProgress, "Course progress retrieved successfully");
+            return new ApiDataResponse(200, courseProgress, "تم استرجاع تقدم الدورة بنجاح");
         }
         public async Task<bool> CheckCourseCompletionEligibilityAsync(string userId, int courseId)
         {
@@ -135,7 +135,7 @@ namespace ZadElealm.Service.AppServices
         {
             var spec = new VideoProgressWithSpec(userId, videoId);
             await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(spec);
-            return new ApiDataResponse(200, spec, "Video progress retrieved successfully");
+            return new ApiDataResponse(200, spec, "تم استرجاع تقدم الفيديو بنجاح");
         }
     }
 }
