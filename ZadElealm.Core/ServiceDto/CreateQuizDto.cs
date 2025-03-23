@@ -21,7 +21,6 @@ namespace ZadElealm.Core.ServiceDto
         public int CourseId { get; set; }
 
         [Required]
-        [MinLength(1, ErrorMessage = "Quiz must have at least one question")]
         public List<CreateQuestionDto> Questions { get; set; }
     }
 }

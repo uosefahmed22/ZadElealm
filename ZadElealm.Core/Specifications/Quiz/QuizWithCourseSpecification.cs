@@ -11,7 +11,6 @@ namespace ZadElealm.Core.Specifications.Quiz
         public QuizWithCourseSpecification(int courseId) : base(x => x.CourseId == courseId)
         {
             Includes.Add(q => q.Course);
-
         }
     }
 }

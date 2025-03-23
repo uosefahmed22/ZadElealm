@@ -22,7 +22,7 @@ namespace ZadElealm.Apis.Handlers.CertificateHandler
         public override async Task<ApiResponse> Handle(GetUserCertificatesQuery request, CancellationToken cancellationToken)
         {
 
-            var spec = new CertificatesByUserSpecification(request.UserId);
+            var spec = new CertificateByUserAndQuizSpecification(request.UserId);
             var certificates = await _unitOfWork.Repository<Core.Models.Certificate>()
                 .GetAllWithSpecNoTrackingAsync(spec);
 

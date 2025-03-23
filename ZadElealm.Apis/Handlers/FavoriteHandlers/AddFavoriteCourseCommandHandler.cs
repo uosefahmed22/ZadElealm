@@ -24,7 +24,7 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
             if (course == null)
                 return new ApiResponse(404, "الدورة غير موجودة");
 
-            var spec = new FavoriteWithCourseAndUserSpecification(request.AppUserId);
+            var spec = new FavoriteSpecification(request.AppUserId);
             var existingFavorite = await _unitOfWork.Repository<Favorite>()
                 .GetEntityWithSpecAsync(new FavoriteSpecification(request.AppUserId, request.CourseId));
 

@@ -28,7 +28,7 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
 
         public override async Task<ApiResponse> Handle(GetFavoriteCoursesQuery request, CancellationToken cancellationToken)
         {
-            var spec = new FavoriteWithCourseAndUserSpecification(request.UserId);
+            var spec = new FavoriteSpecification(request.UserId);
             var favoriteCourses = await _unitOfWork.Repository<Favorite>()
                 .GetAllWithSpecNoTrackingAsync(spec);
 
