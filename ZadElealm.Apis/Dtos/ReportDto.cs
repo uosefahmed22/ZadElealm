@@ -16,6 +16,6 @@ namespace ZadElealm.Apis.Dtos
         [Required(ErrorMessage = "نوع التقرير مطلوب")]
         public string reportTypes { get; set; }
         public string? AdminResponse { get; set; }
-        public bool IsSolved { get; set; }
+        public bool? IsSolved { get; set; }
     }
 }
