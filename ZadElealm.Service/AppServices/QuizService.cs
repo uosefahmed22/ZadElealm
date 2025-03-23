@@ -37,55 +37,76 @@ namespace ZadElealm.Service.AppServices
                     return new ApiResponse(400, "الإجابة الصحيحة غير موجودة في الخيارات");
             }
 
-            // Create quiz with all related entities
-            var quiz = new Quiz
-            {
-                Name = quizDto.Name,
-                Description = quizDto.Description,
-                CourseId = quizDto.CourseId,
-                Questions = quizDto.Questions.Select(q => new Question
-                {
-                    Text = q.Text,
-                    Choices = q.Choices.Select(c => new Choice
-                    {
-                        Text = c.Text
-                    }).ToList()
-                }).ToList()
-            };
-
-            // Set correct choices
-            for (int i = 0; i < quiz.Questions.Count; i++)
-            {
-                var question = quiz.Questions[i];
-                var correctChoiceIndex = quizDto.Questions[i].CorrectChoiceIndex;
-                question.CorrectChoiceId = question.Choices[correctChoiceIndex].Id;
-            }
-
-            await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
-            await _unitOfWork.Complete();
-
-            return new ApiResponse(200, "تم إنشاء الاختبار بنجاح");
-        }
-        public async Task<ApiDataResponse> SubmitQuizAsync(string userId, QuizSubmissionDto submission)
-        {
-            if (string.IsNullOrEmpty(userId) || submission == null || !submission.StudentAnswers.Any())
-                return new ApiDataResponse(400, null, "البيانات غير صحيحة أو غير مكتملة");
-
-            // Check for duplicate answers
-            var duplicateQuestions = submission.StudentAnswers
-                .GroupBy(a => a.QuestionId)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToList();
-
-            if (duplicateQuestions.Any())
-                return new ApiDataResponse(400, null, $"تم تقديم إجابتين أو أكثر لنفس السؤال: {string.Join(", ", duplicateQuestions)}");
-
             try
             {
                 await _unitOfWork.BeginTransactionAsync();
 
-                // Get quiz with questions and choices
+                // Create quiz first
+                var quiz = new Quiz
+                {
+                    Name = quizDto.Name,
+                    Description = quizDto.Description,
+                    CourseId = quizDto.CourseId,
+                    Questions = new List<Question>()
+                };
+
+                // Add quiz to get its ID
+                await _unitOfWork.Repository<Quiz>().AddAsync(quiz);
+                await _unitOfWork.Complete();
+
+                // Now create questions and choices
+                for (int i = 0; i < quizDto.Questions.Count; i++)
+                {
+                    var questionDto = quizDto.Questions[i];
+                    var question = new Question
+                    {
+                        Text = questionDto.Text,
+                        QuizId = quiz.Id,
+                        Choices = new List<Choice>()
+                    };
+
+                    // Add question to get its ID
+                    quiz.Questions.Add(question);
+                    await _unitOfWork.Complete();
+
+                    // Create choices
+                    var choices = questionDto.Choices.Select(c => new Choice
+                    {
+                        Text = c.Text,
+                        QuestionId = question.Id
+                    }).ToList();
+
+                    // Add choices
+                    question.Choices.AddRange(choices);
+                    await _unitOfWork.Complete();
+
+                    // Now we can set the correct choice ID
+                    question.CorrectChoiceId = choices[questionDto.CorrectChoiceIndex].Id;
+                    await _unitOfWork.Complete();
+                }
+
+                await _unitOfWork.CommitTransactionAsync();
+                return new ApiResponse(200, "تم إنشاء الاختبار بنجاح");
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                return new ApiResponse(500, "حدث خطأ أثناء إنشاء الاختبار");
+            }
+        }
+        public async Task<ApiDataResponse> SubmitQuizAsync(string userId, QuizSubmissionDto submission)
+        {
+            try
+            {
+                var duplicateQuestions = submission.StudentAnswers
+                    .GroupBy(a => a.QuestionId)
+                    .Where(g => g.Count() > 1)
+                    .Select(g => g.Key)
+                    .ToList();
+
+                if (duplicateQuestions.Any())
+                    return new ApiDataResponse(400, null, $"تم تقديم إجابتين أو أكثر لنفس السؤال: {string.Join(", ", duplicateQuestions)}");
+
                 var quizspec = new QuizWithQuestionsAndChoicesSpecification(submission.QuizId);
                 var quiz = await _unitOfWork.Repository<Quiz>()
                     .GetEntityWithSpecAsync(quizspec);
@@ -93,10 +114,6 @@ namespace ZadElealm.Service.AppServices
                 if (quiz == null)
                     return new ApiDataResponse(404, null, "الاختبار غير موجود");
 
-                if (quiz.Questions.Count == 0)
-                    return new ApiDataResponse(400, null, "الاختبار لا يحتوي على أسئلة");
-
-                // Validate all question IDs exist in quiz
                 var questionIds = quiz.Questions.Select(q => q.Id).ToHashSet();
                 foreach (var answer in submission.StudentAnswers)
                 {
@@ -104,12 +121,6 @@ namespace ZadElealm.Service.AppServices
                         return new ApiDataResponse(400, null, $"السؤال غير موجود: {answer.QuestionId}");
                 }
 
-                // Check course completion eligibility
-                //var isEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(userId, quiz.CourseId);
-                //if (!isEligible)
-                //    return new ApiDataResponse(400, null, "يجب إكمال المحتوى التعليمي أولاً");
-
-                // Check existing progress
                 var spec = new ProgressByQuizAndUserSpecification(submission.QuizId, userId);
                 var existingProgress = await _unitOfWork.Repository<Progress>()
                     .GetEntityWithSpecAsync(spec);
@@ -117,15 +128,6 @@ namespace ZadElealm.Service.AppServices
                 if (existingProgress?.IsCompleted == true)
                     return new ApiDataResponse(400, null, "تم إكمال الاختبار مسبقاً");
 
-                // Validate minimum answer requirement
-                var totalQuestions = quiz.Questions.Count;
-                var answeredQuestions = submission.StudentAnswers.Count;
-                var unansweredCount = totalQuestions - answeredQuestions;
-
-                if (unansweredCount > totalQuestions * 0.2) // More than 20% unanswered
-                    return new ApiDataResponse(400, null, "يجب الإجابة على معظم الأسئلة لإكمال الاختبار");
-
-                // Process answers and calculate results
                 var answerMap = submission.StudentAnswers.DistinctBy(a => a.QuestionId).ToDictionary(a => a.QuestionId);
                 var questionResults = new List<QuestionResultDto>();
                 int correctAnswers = 0;
@@ -146,31 +148,38 @@ namespace ZadElealm.Service.AppServices
                     });
                 }
 
+                int totalQuestions = quiz.Questions.Count;
                 int score = totalQuestions > 0 ? (correctAnswers * 100) / totalQuestions : 0;
+                int unansweredCount = totalQuestions - submission.StudentAnswers.Count;
                 bool isCompleted = score >= 60;
 
-                Progress progress = existingProgress ?? new Progress
-                {
-                    QuizId = submission.QuizId,
-                    AppUserId = userId,
-                    CreatedAt = DateTime.UtcNow
-                };
+                await _unitOfWork.BeginTransactionAsync();
 
-                progress.Score = existingProgress != null ? Math.Max(existingProgress.Score, score) : score;
-                progress.IsCompleted = existingProgress?.IsCompleted ?? false || isCompleted;
-
-                // Save progress
+                Progress progress;
                 if (existingProgress != null)
-                    _unitOfWork.Repository<Progress>().Update(progress);
+                {
+                    existingProgress.Score = Math.Max(existingProgress.Score, score);
+                    existingProgress.IsCompleted = existingProgress.IsCompleted || isCompleted;
+                    progress = existingProgress;
+                    _unitOfWork.Repository<Progress>().Update(existingProgress);
+                }
                 else
+                {
+                    progress = new Progress
+                    {
+                        QuizId = submission.QuizId,
+                        AppUserId = userId,
+                        Score = score,
+                        IsCompleted = isCompleted,
+                        CreatedAt = DateTime.UtcNow
+                    };
                     await _unitOfWork.Repository<Progress>().AddAsync(progress);
+                }
 
                 await _unitOfWork.Complete();
 
-                // Handle successful completion
                 if (isCompleted && (!existingProgress?.IsCompleted ?? true))
                 {
-                    // Generate certificate
                     var certificateResult = await _certificateService.GenerateAndSaveCertificate(userId, submission.QuizId);
                     if (certificateResult.StatusCode != 200)
                     {
@@ -178,8 +187,7 @@ namespace ZadElealm.Service.AppServices
                         return new ApiDataResponse(500, null, "حدث خطأ أثناء إنشاء الشهادة");
                     }
 
-                    // Send completion notification
-                    var notificationServiceDto = new NotificationServiceDto
+                    var notificationDto = new NotificationServiceDto
                     {
                         Title = "مبارك على اجتيازك!",
                         Description = "الحمد لله، لقد اجتزت الامتحان بنجاح! نسأل الله أن يبارك لك في علمك وعملك، وأن يجعلك من النافعين لدينك وأمتك. يمكنك الآن استلام شهادتك من قسم الشهادات. نسأل الله لك التوفيق والسداد في مسيرتك العلمية.",
@@ -187,14 +195,13 @@ namespace ZadElealm.Service.AppServices
                         UserId = userId
                     };
 
-                    await _notificationService.SendNotificationAsync(notificationServiceDto);
+                    await _notificationService.SendNotificationAsync(notificationDto);
                     await _unitOfWork.Repository<Certificate>().AddAsync((Certificate)certificateResult.Data);
                     await _unitOfWork.Complete();
                 }
 
                 await _unitOfWork.CommitTransactionAsync();
 
-                // Prepare final result
                 var result = new QuizResultDto
                 {
                     QuizName = quiz.Name,
@@ -207,12 +214,12 @@ namespace ZadElealm.Service.AppServices
                     QuestionResults = questionResults
                 };
 
-                return new ApiDataResponse(200, result, "تم تسليم الاختبار بنجاح");
+                return new ApiDataResponse(200, result, isCompleted ? "تهانينا! لقد اجتزت الاختبار بنجاح" : "تم تسليم الاختبار");
             }
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return new ApiDataResponse(500, null, "حدث خطأ أثناء حفظ النتائج");
+                return new ApiDataResponse(500, null, $"حدث خطأ أثناء حفظ النتائج: {ex.Message}");
             }
         }
     }
