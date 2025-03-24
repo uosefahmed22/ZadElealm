@@ -1,0 +1,106 @@
+﻿@model IEnumerable<IdentityRole>
+@{
+    ViewData["Title"] = "Roles Management";
+}
+<link href="~/css/getroles.css" rel="stylesheet" />
+<div class="content-wrapper mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-user-shield me-2"></i>Roles Management
+        </h1>
+        <div class="d-flex">
+            <div class="search-box me-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search roles..." id="searchInput">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>@TempData["ErrorMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <partial name="RoleForm" model="new RoleFormViewModel()" />
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover" id="rolesTable">
+                        <thead>
+                            <tr>
+                                <th width="5%"></th>
+                                <th width="30%">Role Name</th>
+                                <th width="45%">Role ID</th>
+                                <th width="20%" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Select((role, index) => new { role, index }))
+                            {
+                                <tr>
+                                    <td>@(item.index + 1)</td>
+                                    <td>
+                                        <span class="fw-medium">@item.role.Name</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">@item.role.Id</span>
+                                    </td>
+                                    <td class="text-center">
+                                        @{
+                                            var isDisabled = item.role.Name == "Admin" || item.role.Name == "User";
+                                        }
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-outline-primary @(isDisabled ? "disabled" : "")"
+                                                    onclick="location.href='@Url.Action("Update", new { id = item.role.Id })'">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger @(isDisabled ? "disabled" : "")"
+                                                    onclick="deleteRole('@item.role.Id')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-folder-open text-muted mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted">No roles found</h5>
+                </div>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,72 @@
+﻿/* General Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header Styles */
+h1 {
+    font-size: 2rem;
+    color: #3C6255;
+    margin-bottom: 20px;
+}
+
+hr {
+    margin-bottom: 20px;
+}
+
+/* Form Styles */
+.container-fluid {
+    padding: 0 15px;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control, .form-control-file {
+    border-radius: 5px;
+}
+
+.form-check {
+    margin-bottom: 0.5rem;
+}
+
+.form-check-input {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.form-check-label {
+    font-size: 1rem;
+    color: #495057;
+    cursor: pointer;
+}
+
+/* Button Styles */
+.btn-primary {
+    margin-right: 10px;
+    background-color: #3C6255;
+    border-color: #3C6255;
+    transition: background-color 0.3s ease;
+}
+
+    .btn-primary:hover {
+        background-color: #2e4a41;
+        border-color: #2e4a41;
+    }
+
+.btn-secondary {
+    transition: background-color 0.3s ease;
+}
+
+    .btn-secondary:hover {
+        background-color: #3C6255;
+    }
+
+/* Validation Styles */
+span[asp-validation-for] {
+    color: #dc3545;
+    font-size: 0.875rem;
+}

@@ -1,6 +1,8 @@
 ﻿using AdminDashboard.Commands;
+using AdminDashboard.Dto;
 using AutoMapper;
 using Org.BouncyCastle.Asn1.Cmp;
+using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Dtos.DtosCategory;
 using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Core.Enums;
@@ -16,30 +18,30 @@ namespace AdminDashboard.Helpers
             CreateMap<Category, CategoryResponseDto>().ReverseMap();
             CreateMap<Category, CategoryWithCoursesDto>();
 
-            CreateMap<Category, CreateCategoryDto>()
+            CreateMap<Category, Dto.CreateCategoryDto>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
 
-            CreateMap<CreateCategoryDto, Category>()
+            CreateMap<Dto.CreateCategoryDto, Category>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
                     src.ImageUrl != null ? src.ImageUrl.FileName : null));
-            CreateMap<CreateCategoryDto, UpdateCategoryCommand>();
+            CreateMap<Dto.CreateCategoryDto, UpdateCategoryCommand>();
 
-            CreateMap<Course, CourseDto>();
+            CreateMap<Course, Dto.CourseDto>();
             CreateMap<Course, CourseResponseWithAllDataDto>();
 
-            CreateMap<CreateCategoryDto, CreateCategoryCommand>();
+            CreateMap<Dto.CreateCategoryDto, CreateCategoryCommand>();
 
-            CreateMap<Report,AdminDashboard.Dto.ReportDto>()
-                .ForMember(dest => dest.reportTypes, opt => opt.MapFrom(src => src.reportTypes.ToString()));
+            CreateMap<Report, ReportDto>()
+    .ForMember(dest => dest.reportTypes, opt => opt.MapFrom(src => src.reportTypes.ToString()));
 
-            CreateMap<Dto.ReportDto, Report>()
+            CreateMap<ReportDto, Report>()
                 .ForMember(dest => dest.reportTypes, opt => opt.MapFrom(src => Enum.Parse<ReportType>(src.reportTypes)));
             CreateMap<AdminDashboard.Dto.HandleReportDto, Report>().ReverseMap();
 
             CreateMap<CreateCategoryCommand, Category>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore()); 
 
-            CreateMap<CreateCategoryDto, Category>()
+            CreateMap<Dto.CreateCategoryDto, Category>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src =>
                     src.ImageUrl != null ? src.ImageUrl.FileName : null));
         }

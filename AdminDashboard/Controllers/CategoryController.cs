@@ -1,11 +1,12 @@
 ﻿using AdminDashboard.Commands;
+using AdminDashboard.Dto;
 using AdminDashboard.Quires;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
-using ZadElealm.Apis.Dtos.DtosCategory;
+using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;

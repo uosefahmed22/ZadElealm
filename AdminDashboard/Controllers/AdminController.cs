@@ -23,15 +23,18 @@ namespace AdminDashboard.Controllers
             private readonly IMediator _mediator;
             private readonly SignInManager<AppUser> _signInManager;
             private readonly UserManager<AppUser> _userManager;
+            private readonly ILogger<AdminController> _logger;
 
             public AdminController(
                 IMediator mediator,
                 SignInManager<AppUser> signInManager,
-                UserManager<AppUser> userManager)
+                UserManager<AppUser> userManager,  
+                ILogger<AdminController> logger)
             {
                 _mediator = mediator;
                 _signInManager = signInManager;
                 _userManager = userManager;
+                _logger = logger;
             }
 
             [HttpGet]
@@ -91,6 +94,7 @@ namespace AdminDashboard.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Error getting admin stats");
                     TempData["ErrorMessage"] = "An error occurred while loading the page.";
                     return RedirectToAction("Index", "Home");
                 }
@@ -145,6 +149,7 @@ namespace AdminDashboard.Controllers
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, "Error adding admin");
                     ModelState.AddModelError("", "An error occurred while adding the administrator.");
                     return View(model);
                 }

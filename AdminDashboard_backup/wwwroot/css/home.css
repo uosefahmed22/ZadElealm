@@ -1,0 +1,36 @@
+﻿/* Reset default margins and paddings */
+.container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Full-screen container */
+.home-container {
+    position: fixed;
+    top: 56px; /* Height of top navbar */
+    left: 225px; /* Width of sidebar */
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    transition: left 0.3s ease;
+}
+
+/* Background image */
+.home-background {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Adjust container when sidebar is toggled */
+body.sb-sidenav-toggled .home-container {
+    left: 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .home-container {
+        left: 0;
+    }
+}
