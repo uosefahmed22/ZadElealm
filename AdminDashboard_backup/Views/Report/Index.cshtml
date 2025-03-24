@@ -1,0 +1,110 @@
+﻿@model IEnumerable<AdminDashboard.Dto.ReportDto>
+<link href="~/css/getallreports.css" rel="stylesheet" />
+
+<div class="reports-container">
+    <div class="reports-header">
+        <h1>التقارير والشكاوى</h1>
+    </div>
+
+    <div class="reports-grid">
+        @foreach (var report in Model)
+        {
+            <div class="report-card @(report.IsSolved ? "solved" : "")" data-report-id="@report.Id">
+                <div class="report-status">
+                    @if (report.IsSolved)
+                    {
+                        <span class="status-badge solved">
+                            <i class="fas fa-check-circle"></i> تم الحل
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="status-badge pending">
+                            <i class="fas fa-clock"></i> قيد المعالجة
+                        </span>
+                    }
+                </div>
+
+                <div class="report-header">
+                    <h3 class="report-title">
+                        <i class="fas fa-file-alt"></i> @report.TitleOfTheIssue
+                    </h3>
+                </div>
+
+                <div class="report-content">
+                    <div class="report-description-container">
+                        <p class="report-description">@report.Description</p>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(report.AdminResponse))
+                    {
+                        <div class="admin-response-section">
+                            <h4>
+                                <i class="fas fa-reply"></i> رد الإدارة:
+                            </h4>
+                            <p class="admin-response-text">@report.AdminResponse</p>
+                        </div>
+                    }
+                </div>
+
+                <div class="report-actions">
+                    @if (!report.IsSolved)
+                    {
+                        <a href="@Url.Action("Details", "Report", new { id = report.Id })" class="btn-action">
+                            <i class="fas fa-tasks"></i> معالجة
+                        </a>
+                    }
+                    <button class="btn-details" onclick="deleteReport(@report.Id)">
+                        <i class="fas fa-trash-alt"></i> حذف
+                    </button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/your-code.js"></script>
+    <script>
+        function deleteReport(id) {
+            if (confirm('هل أنت متأكد من حذف هذا التقرير؟')) {
+                $.ajax({
+                    url: '@Url.Action("DeleteReport", "Report")',
+                    type: 'POST',
+                    data: { id: id },
+                    success: function(response) {
+                        if(response.statusCode === 200) {
+                            $(`[data-report-id="${id}"]`).fadeOut(300, function() {
+                                $(this).remove();
+                            });
+                            alert('تم حذف التقرير بنجاح');
+                            location.reload();
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('حدث خطأ أثناء حذف التقرير');
+                    }
+                });
+            }
+        }
+
+        // تحسين تجربة المستخدم
+        $(document).ready(function() {
+            // تأثير عند التحويم على البطاقات
+            $('.report-card').hover(
+                function() { $(this).addClass('hover'); },
+                function() { $(this).removeClass('hover'); }
+            );
+
+            // تأثير عند الضغط على الأزرار
+            $('.btn-action, .btn-details').click(function() {
+                $(this).addClass('clicked');
+                setTimeout(() => {
+                    $(this).removeClass('clicked');
+                }, 200);
+            });
+        });
+    </script>
+}

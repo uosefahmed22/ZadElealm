@@ -1,6 +1,4 @@
-﻿@using ZadElealm.Apis.Dtos.DtosCourse
-@model IEnumerable<CourseDto>
-
+﻿@model IEnumerable<CourseDto>
 @{
     ViewData["Title"] = "Courses";
 }
@@ -24,9 +22,9 @@
                     <th>@Html.DisplayNameFor(m => m.Description)</th>
                     <th>@Html.DisplayNameFor(m => m.Author)</th>
                     <th>@Html.DisplayNameFor(m => m.CourseLanguage)</th>
-                    <th>@Html.DisplayNameFor(m => m.CourseVideosCount)</th>
+                   @*  <th>@Html.DisplayNameFor(m => m.CourseVideosCount)</th>
                     <th>@Html.DisplayNameFor(m => m.rating)</th>
-                    <th>@Html.DisplayNameFor(m => m.ImageUrl)</th>
+                    <th>@Html.DisplayNameFor(m => m.ImageUrl)</th> *@
                     <th class="text-center">Actions</th>
                 </tr>
             </thead>
@@ -39,11 +37,11 @@
                         <td class="align-middle">@course.Description</td>
                         <td class="align-middle">@course.Author</td>
                         <td class="align-middle">@course.CourseLanguage</td>
-                        <td class="align-middle">@course.CourseVideosCount</td>
-                        <td class="align-middle">@course.rating</td>
+                        @* <td class="align-middle">@course.CourseVideosCount</td> *@
+                       @*  <td class="align-middle">@course.rating</td>
                         <td class="align-middle">
                             <img src="@course.ImageUrl" alt="@course.Name" class="img-thumbnail" style="max-width: 100px;" />
-                        </td>
+                        </td> *@
                         <td class="text-center">
                             <a class="btn btn-sm btn-outline-warning mr-2" asp-action="Edit" asp-route-id="@course.Id">
                                 <i class="fas fa-edit"></i> Edit

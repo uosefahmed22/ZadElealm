@@ -1,11 +1,12 @@
-﻿using AdminDashboard.Models;
+﻿using AdminDashboard.Dto;
+using AdminDashboard.Models;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.Web;
 using System.Xml;
-using ZadElealm.Apis.Dtos.DtosCourse;
+using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;

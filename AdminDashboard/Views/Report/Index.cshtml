@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AdminDashboard.Dto.ReportDto>
+﻿@model IEnumerable<ReportDto>
 <link href="~/css/getallreports.css" rel="stylesheet" />
 
 <div class="reports-container">
@@ -9,21 +9,21 @@
     <div class="reports-grid">
         @foreach (var report in Model)
         {
-            <div class="report-card @(report.IsSolved ? "solved" : "")" data-report-id="@report.Id">
-                <div class="report-status">
-                    @if (report.IsSolved)
-                    {
-                        <span class="status-badge solved">
-                            <i class="fas fa-check-circle"></i> تم الحل
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="status-badge pending">
-                            <i class="fas fa-clock"></i> قيد المعالجة
-                        </span>
-                    }
-                </div>
+            @* <div class="report-card @(report.IsSolved ? "solved" : "")" data-report-id="@report.Id"> *@
+            @*     <div class="report-status"> *@
+            @*         @if (report.IsSolved) *@
+            @*         { *@
+            @*             <span class="status-badge solved"> *@
+            @*                 <i class="fas fa-check-circle"></i> تم الحل *@
+            @*             </span> *@
+            @*         } *@
+            @*         else *@
+            @*         { *@
+            @*             <span class="status-badge pending"> *@
+            @*                 <i class="fas fa-clock"></i> قيد المعالجة *@
+            @*             </span> *@
+            @*         } *@
+            @*     </div> *@
 
                 <div class="report-header">
                     <h3 class="report-title">
@@ -48,17 +48,16 @@
                 </div>
 
                 <div class="report-actions">
-                    @if (!report.IsSolved)
-                    {
-                        <a href="@Url.Action("Details", "Report", new { id = report.Id })" class="btn-action">
-                            <i class="fas fa-tasks"></i> معالجة
-                        </a>
-                    }
+                    @* @if (!report.IsSolved) *@
+                    @* { *@
+                    @*     <a href="@Url.Action("Details", "Report", new { id = report.Id })" class="btn-action"> *@
+                    @*         <i class="fas fa-tasks"></i> معالجة *@
+                    @*     </a> *@
+                    @* } *@
                     <button class="btn-details" onclick="deleteReport(@report.Id)">
                         <i class="fas fa-trash-alt"></i> حذف
                     </button>
                 </div>
-            </div>
         }
     </div>
 </div>

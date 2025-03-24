@@ -1,0 +1,49 @@
+﻿@model AdminDashboard.Dto.ReportDto
+
+<link href="~/css/report-details.css" rel="stylesheet" />
+<div class="report-details">
+    <h2>تفاصيل التقرير</h2>
+
+    <div class="report-info">
+        <h3>@Model.TitleOfTheIssue</h3>
+        <p>@Model.Description</p>
+        <span>نوع التقرير: @Model.reportTypes</span>
+    </div>
+
+    <div class="admin-response">
+        <h4>الرد على التقرير</h4>
+        <form id="handleReportForm">
+            <input type="hidden" name="ReportId" value="@Model.Id" />
+            <textarea name="AdminResponse"
+                      class="form-control"
+                      rows="4"
+                      placeholder="اكتب ردك هنا..."></textarea>
+            <button type="submit" class="btn-submit">إرسال الرد</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $('#handleReportForm').submit(function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                url: '@Url.Action("HandleReport", "Report")',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    if(response.statusCode === 200) {
+                        alert('تم إرسال الرد بنجاح');
+                        window.location.href = '@Url.Action("Index", "Report")';
+                    } else {
+                        alert(response.message);
+                    }
+                },
+                error: function() {
+                    alert('حدث خطأ أثناء معالجة الطلب');
+                }
+            });
+        });
+    </script>
+}

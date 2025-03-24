@@ -1,0 +1,158 @@
+﻿/* الإعدادات الأساسية */
+.reports-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    direction: rtl;
+}
+
+.reports-header {
+    margin-bottom: 30px;
+    text-align: right;
+}
+
+    .reports-header h1 {
+        color: #333;
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+/* شبكة التقارير */
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* بطاقة التقرير */
+.report-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .report-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    }
+
+/* حالة التقرير */
+.report-status {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+    .status-badge.solved {
+        background-color: #4CAF50;
+        color: white;
+    }
+
+    .status-badge.pending {
+        background-color: #FFC107;
+        color: #000;
+    }
+
+/* عنوان التقرير */
+.report-title {
+    font-size: 18px;
+    color: #2c3e50;
+    margin: 15px 0;
+    padding-left: 80px; /* مساحة لشارة الحالة */
+}
+
+/* محتوى التقرير */
+.report-description {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* قسم رد الإدارة */
+.admin-response-section {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+    .admin-response-section h4 {
+        color: #2c3e50;
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    .admin-response-section p {
+        color: #666;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+/* أزرار الإجراءات */
+.report-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-action, .btn-details {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-action {
+    background: #2196F3;
+    color: white;
+    text-decoration: none !important; /* إزالة الخط تحت النص */
+}
+
+    .btn-action:hover {
+        background: #1976D2;
+        color: white;
+    }
+
+.btn-details {
+    background: #dc3545;
+    color: white;
+}
+
+    .btn-details:hover {
+        background: #c82333;
+    }
+
+/* تصميم التقارير المحلولة */
+.report-card.solved {
+    border-right: 4px solid #4CAF50;
+    background-color: #fafafa;
+}
+
+/* تحسينات للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .reports-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reports-container {
+        padding: 10px;
+    }
+
+    .report-card {
+        margin-bottom: 15px;
+    }
+}
