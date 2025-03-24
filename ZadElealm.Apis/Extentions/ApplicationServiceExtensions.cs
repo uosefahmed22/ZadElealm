@@ -40,8 +40,6 @@ namespace ZadElealm.Apis.Extentions
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
             services.AddAutoMapper(typeof(MappingProfiles));
-            
-          
 
             return services;
         }
@@ -113,6 +111,7 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVideoProgressService, VideoProgressService>();
             services.AddScoped<ICheckPasswordService, CheckPasswordService>();
+            services.AddScoped<IUserRankCalculator, UserRankCalculator>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             
