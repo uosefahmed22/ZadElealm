@@ -19,4 +19,9 @@
     <ProjectReference Include="..\ZadElealm.Apis\ZadElealm.Apis.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Handlers\CategoryHandler\" />
+    <Folder Include="Quires\CategoryQuery\" />
+  </ItemGroup>
+
 </Project>
