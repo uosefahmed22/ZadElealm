@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using ZadElealm.Apis.Dtos.Auth;
 using ZadElealm.Core.Models.Identity;
 using MediatR;
 using AdminDashboard.Commands;
@@ -13,6 +12,8 @@ using AdminDashboard.Quires;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using AdminDashboard.Dto;
+using ZadElealm.Apis.Errors;
 
 namespace AdminDashboard.Controllers
 {
@@ -23,18 +24,16 @@ namespace AdminDashboard.Controllers
             private readonly IMediator _mediator;
             private readonly SignInManager<AppUser> _signInManager;
             private readonly UserManager<AppUser> _userManager;
-            private readonly ILogger<AdminController> _logger;
+            private const string BaseEmail = "uosefahmed0022@gmail.com";
 
             public AdminController(
                 IMediator mediator,
                 SignInManager<AppUser> signInManager,
-                UserManager<AppUser> userManager,  
-                ILogger<AdminController> logger)
+                UserManager<AppUser> userManager)
             {
                 _mediator = mediator;
                 _signInManager = signInManager;
                 _userManager = userManager;
-                _logger = logger;
             }
 
             [HttpGet]
@@ -47,112 +46,78 @@ namespace AdminDashboard.Controllers
             [ValidateAntiForgeryToken]
             public async Task<IActionResult> Login(LoginDTO model)
             {
-                try
+                if (!ModelState.IsValid)
                 {
-                    if (!ModelState.IsValid)
-                    {
-                        return View(model);
-                    }
-
-                    var command = new LoginCommand
-                    {
-                        Email = model.Email,
-                        Password = model.Password
-                    };
-
-                    var result = await _mediator.Send(command);
-
-                    if (!result.Succeeded)
-                    {
-                        ModelState.AddModelError("", result.ErrorMessage);
-                        return View(model);
-                    }
-
-                    await SetupUserAuthentication(result.User);
-                    return RedirectToAction("Index", "Home");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error during login");
-                    ModelState.AddModelError("", "An error occurred during login.");
                     return View(model);
                 }
+
+                var command = new LoginCommand
+                {
+                    Email = model.Email,
+                    Password = model.Password
+                };
+
+                var result = await _mediator.Send(command);
+
+                if (!result.Succeeded)
+                {
+                    ModelState.AddModelError("", result.ErrorMessage);
+                    return View(model);
+                }
+
+                await SetupUserAuthentication(result.User);
+                return RedirectToAction("Index", "Home");
             }
 
             public async Task<IActionResult> AddAdmin()
             {
-                try
+                var stats = await _mediator.Send(new GetAdminStatsQuery());
+
+                return View(new AdminDto());
+            }
+
+            [HttpPost]
+            [Authorize(Roles = "Admin")] 
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> AddAdmin(AdminDto model)
+            {
+                if (!ModelState.IsValid)
                 {
                     var stats = await _mediator.Send(new GetAdminStatsQuery());
                     ViewBag.AdminCount = stats.CurrentAdminCount;
                     ViewBag.MaxAdminCount = stats.MaxAdminCount;
-
-                    if (ViewBag.AdminCount == null) ViewBag.AdminCount = 0;
-                    if (ViewBag.MaxAdminCount == null) ViewBag.MaxAdminCount = 1;
-
-                    return View(new AdminDto());
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error getting admin stats");
-                    TempData["ErrorMessage"] = "An error occurred while loading the page.";
-                    return RedirectToAction("Index", "Home");
-                }
-            }
-
-            [HttpPost]
-            [Authorize(Roles = "Admin")]
-            [ValidateAntiForgeryToken]
-            public async Task<IActionResult> AddAdmin(AdminDto model)
-            {
-                try
-                {
-                    if (!ModelState.IsValid)
-                    {
-                        var stats = await _mediator.Send(new GetAdminStatsQuery());
-                        ViewBag.AdminCount = stats.CurrentAdminCount;
-                        ViewBag.MaxAdminCount = stats.MaxAdminCount;
-                        return View(model);
-                    }
-
-                    var command = new AddAdminCommand
-                    {
-                        DisplayName = model.DisplayName,
-                        Email = model.Email,
-                        Password = model.Password
-                    };
-
-                    var result = await _mediator.Send(command);
-
-                    if (!result.Succeeded)
-                    {
-                        if (result.Errors != null)
-                        {
-                            foreach (var error in result.Errors)
-                            {
-                                ModelState.AddModelError("", error.Description);
-                            }
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("", result.ErrorMessage);
-                        }
-
-                        var stats = await _mediator.Send(new GetAdminStatsQuery());
-                        ViewBag.AdminCount = stats.CurrentAdminCount;
-                        ViewBag.MaxAdminCount = stats.MaxAdminCount;
-                        return View(model);
-                    }
-
-                    TempData["SuccessMessage"] = "Administrator added successfully";
-                    return RedirectToAction("Index", "User");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error adding admin");
-                    ModelState.AddModelError("", "An error occurred while adding the administrator.");
                     return View(model);
                 }
+
+                var email = User.FindFirstValue(ClaimTypes.Email);
+
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+                if (email != BaseEmail)
+                {
+                    return BadRequest(new ApiResponse(400, "You are not authorized to perform this action."));
+                }
+
+                var command = new AddAdminCommand
+                {
+                    DisplayName = model.DisplayName,
+                    Email = model.Email,
+                    Password = model.Password
+                };
+
+                var result = await _mediator.Send(command);
+
+                if (result.StatusCode != 200)
+                {
+                    ModelState.AddModelError("", result.Message ?? "An error occurred");
+                    await UpdateStatsViewBag();
+                    return View(model);
+                }
+
+                TempData["SuccessMessage"] = result.Message ?? "Administrator added successfully";
+                return RedirectToAction("Index", "User");
             }
 
             public async Task<IActionResult> Logout()
@@ -161,6 +126,12 @@ namespace AdminDashboard.Controllers
                 return RedirectToAction("Login");
             }
 
+            private async Task UpdateStatsViewBag()
+            {
+                var stats = await _mediator.Send(new GetAdminStatsQuery());
+                ViewBag.AdminCount = stats.CurrentAdminCount;
+                ViewBag.MaxAdminCount = stats.MaxAdminCount;
+            }
             private async Task SetupUserAuthentication(AppUser user)
             {
                 var roles = await _userManager.GetRolesAsync(user);

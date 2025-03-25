@@ -1,9 +1,10 @@
 ﻿using AdminDashboard.Dto;
 using MediatR;
+using ZadElealm.Apis.Errors;
 
 namespace AdminDashboard.Commands
 {
-    public record AddAdminCommand : IRequest<AddAdminResult>
+    public record AddAdminCommand : IRequest<ApiResponse>
     {
         public string DisplayName { get; init; }
         public string Email { get; init; }

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using ZadElealm.Core.Models.Identity;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.AuthHandler
 {
     public class GetAdminStatsQueryHandler : IRequestHandler<GetAdminStatsQuery, AdminStatsResult>
     {

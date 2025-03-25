@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.AuthHandler
 {
     public class GetRolesQueryHandler : IRequestHandler<GetRolesQuery, List<IdentityRole>>
     {
