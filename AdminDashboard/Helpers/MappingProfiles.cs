@@ -1,4 +1,4 @@
-﻿using AdminDashboard.Commands;
+﻿using AdminDashboard.Commands.CategoryCommand;
 using AdminDashboard.Dto;
 using AutoMapper;
 using Org.BouncyCastle.Asn1.Cmp;
@@ -15,8 +15,15 @@ namespace AdminDashboard.Helpers
         public MappingProfiles()
         {
 
+            CreateMap<Category, DashboardCategoryDto>().ReverseMap();
+
+
+
+
+
             CreateMap<Category, CategoryResponseDto>().ReverseMap();
             CreateMap<Category, CategoryWithCoursesDto>();
+
 
             CreateMap<Category, Dto.CreateCategoryDto>()
                 .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());

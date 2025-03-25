@@ -1,4 +1,4 @@
-﻿using AdminDashboard.Commands;
+﻿using AdminDashboard.Commands.CategoryCommand;
 using AdminDashboard.Dto;
 using AdminDashboard.Quires;
 using AutoMapper;
@@ -19,15 +19,13 @@ namespace AdminDashboard.Controllers
         private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IImageService _imageService;
 
         public CategoryController(IMediator mediator,
-            IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService)
+            IUnitOfWork unitOfWork, IMapper mapper)
         {
            _mediator = mediator;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _imageService = imageService;
         }
 
         public async Task<IActionResult> Index()
@@ -37,45 +35,11 @@ namespace AdminDashboard.Controllers
             return View(categories);
         }
 
-        public async Task<IActionResult> Edit(int id)
-        {
-            var query = new GetCategoryByIdQuery { Id = id };
-            var category = await _mediator.Send(query);
 
-            if (category == null)
-                return NotFound();
-
-            var model = _mapper.Map<CreateCategoryDto>(category);
-            return View(model);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(CreateCategoryDto model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var command = _mapper.Map<UpdateCategoryCommand>(model);
-            var result = await _mediator.Send(command);
-
-            if (!result)
-                return NotFound();
-
-            return RedirectToAction("Index");
-        }
-
-        public async Task<IActionResult> Delete(int id)
-        {
-            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(id);
-            _unitOfWork.Repository<Category>().Delete(category);
-            await _unitOfWork.Complete();
-            return RedirectToAction("Index");
-        }
         public IActionResult Create()
         {
             return View(new CreateCategoryDto());
         }
-
         [HttpPost]
         public async Task<IActionResult> Create(CreateCategoryDto model)
         {
@@ -96,6 +60,40 @@ namespace AdminDashboard.Controllers
 
             ModelState.AddModelError("", "Failed to create category");
             return View(model);
+        }
+        
+        public async Task<IActionResult> Edit(int id)
+        {
+            var query = new GetCategoryByIdQuery { Id = id };
+            var category = await _mediator.Send(query);
+
+            if (category == null)
+                return NotFound();
+
+            var model = _mapper.Map<CreateCategoryDto>(category);
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(CreateCategoryDto model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var command = _mapper.Map<UpdateCategoryCommand>(model);
+            var result = await _mediator.Send(command);
+
+            if (!result)
+                return NotFound();
+
+            return RedirectToAction("Index");
+        }
+       
+        public async Task<IActionResult> Delete(int id)
+        {
+            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(id);
+            _unitOfWork.Repository<Category>().Delete(category);
+            await _unitOfWork.Complete();
+            return RedirectToAction("Index");
         }
     }
 }
