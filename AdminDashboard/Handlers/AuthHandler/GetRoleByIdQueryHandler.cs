@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.AuthHandler
 {
     public class GetRoleByIdQueryHandler : IRequestHandler<GetRoleByIdQuery, IdentityRole>
     {

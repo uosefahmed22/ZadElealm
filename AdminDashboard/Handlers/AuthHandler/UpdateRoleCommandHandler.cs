@@ -4,7 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using ZadElealm.Apis.Errors;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.AuthHandler
 {
     public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, ApiResponse>
     {
