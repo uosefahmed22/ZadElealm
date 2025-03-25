@@ -18,15 +18,10 @@ namespace AdminDashboard.Controllers
     public class CategoryController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public CategoryController(IMediator mediator,
-            IUnitOfWork unitOfWork, IMapper mapper)
+        public CategoryController(IMediator mediator)
         {
-           _mediator = mediator;
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<IActionResult> Index()
@@ -35,7 +30,6 @@ namespace AdminDashboard.Controllers
             var categories = await _mediator.Send(query);
             return View(categories);
         }
-
 
         public IActionResult Create()
         {
@@ -51,7 +45,7 @@ namespace AdminDashboard.Controllers
             {
                 Name = model.Name,
                 Description = model.Description,
-                ImageUrl = model.ImageUrl?? null
+                ImageUrl = model.ImageUrl ?? null
             };
 
             var result = await _mediator.Send(command);
@@ -62,38 +56,50 @@ namespace AdminDashboard.Controllers
             ModelState.AddModelError("", "Failed to create category");
             return View(model);
         }
-        
+
         public async Task<IActionResult> Edit(int id)
         {
             var query = new GetCategoryByIdQuery { Id = id };
             var category = await _mediator.Send(query);
 
-            if (category == null)
-                return NotFound();
+            var categoryDto = new CreateCategoryDto
+            {
+                Id = category.Id,
+                Name = category.Name,
+                Description = category.Description,
+            };
 
-            var model = _mapper.Map<CreateCategoryDto>(category);
-            return View(model);
+            return View(categoryDto);
         }
+
         [HttpPost]
         public async Task<IActionResult> Edit(CreateCategoryDto model)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
-            var command = _mapper.Map<UpdateCategoryCommand>(model);
-            var result = await _mediator.Send(command);
+            var command = new UpdateCategoryCommand
+            {
+                Id = model.Id,
+                Name = model.Name,
+                Description = model.Description,
+                ImageUrl = model.ImageUrl
+            };
 
-            if (!result)
-                return NotFound();
+            var result = await _mediator.Send(command);
 
             return RedirectToAction("Index");
         }
-       
+
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _unitOfWork.Repository<Category>().GetEntityAsync(id);
-            _unitOfWork.Repository<Category>().Delete(category);
-            await _unitOfWork.Complete();
+            var query = new DeleteCategoryCommand(id);
+            var result = await _mediator.Send(query);
+
+            if (result)
+                return RedirectToAction("Index");
+
+            ModelState.AddModelError("", "Failed to delete category");
             return RedirectToAction("Index");
         }
     }

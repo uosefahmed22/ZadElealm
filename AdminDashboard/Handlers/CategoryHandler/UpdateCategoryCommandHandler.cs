@@ -1,4 +1,6 @@
 ﻿using AdminDashboard.Commands.CategoryCommand;
+using AdminDashboard.Dto;
+using AutoMapper;
 using MediatR;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
@@ -10,11 +12,13 @@ namespace AdminDashboard.Handlers.CategoryHandler
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IImageService _imageService;
+        private readonly IMapper _mapper;
 
-        public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork, IImageService imageService)
+        public UpdateCategoryCommandHandler(IUnitOfWork unitOfWork, IImageService imageService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _imageService = imageService;
+            _mapper = mapper;
         }
 
         public async Task<bool> Handle(UpdateCategoryCommand request, CancellationToken cancellationToken)
@@ -30,6 +34,8 @@ namespace AdminDashboard.Handlers.CategoryHandler
                 var uploadedImage = await _imageService.UploadImageAsync(request.ImageUrl);
                 category.ImageUrl = uploadedImage.Data as string;
             }
+
+            var mappedCategory = _mapper.Map<CreateCategoryDto>(category);
 
             await _unitOfWork.Complete();
             return true;
