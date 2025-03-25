@@ -7,8 +7,9 @@ using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
 using MediatR;
+using AdminDashboard.Commands.ReportCommand;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.ReportHanlder
 {
     public class HandleReportCommandHandler : IRequestHandler<HandleReportCommand, ApiDataResponse>
     {

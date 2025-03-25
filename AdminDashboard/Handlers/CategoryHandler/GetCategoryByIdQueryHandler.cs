@@ -1,9 +1,9 @@
-﻿using AdminDashboard.Quires;
+﻿using AdminDashboard.Quires.CategoryQuery;
 using MediatR;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.CategoryHandler
 {
     public class GetCategoryByIdQueryHandler : IRequestHandler<GetCategoryByIdQuery, Category>
     {

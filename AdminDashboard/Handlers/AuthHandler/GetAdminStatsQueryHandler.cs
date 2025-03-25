@@ -1,7 +1,7 @@
 ﻿using AdminDashboard.Controllers.AdminDashboard.Controllers;
 using AdminDashboard.Dto;
 using AdminDashboard.Helpers;
-using AdminDashboard.Quires;
+using AdminDashboard.Quires.AdminQuery;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;

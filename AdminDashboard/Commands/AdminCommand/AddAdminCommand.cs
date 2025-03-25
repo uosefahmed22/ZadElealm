@@ -2,7 +2,7 @@
 using MediatR;
 using ZadElealm.Apis.Errors;
 
-namespace AdminDashboard.Commands
+namespace AdminDashboard.Commands.AdminCommand
 {
     public record AddAdminCommand : IRequest<ApiResponse>
     {

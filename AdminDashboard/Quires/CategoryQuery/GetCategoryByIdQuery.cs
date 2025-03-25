@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using ZadElealm.Core.Models;
 
-namespace AdminDashboard.Quires
+namespace AdminDashboard.Quires.CategoryQuery
 {
     public class GetCategoryByIdQuery : IRequest<Category>
     {

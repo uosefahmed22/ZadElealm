@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using ZadElealm.Apis.Errors;
 
-namespace AdminDashboard.Commands
+namespace AdminDashboard.Commands.ReportCommand
 {
     public class DeleteReportCommand : IRequest<ApiDataResponse>
     {
