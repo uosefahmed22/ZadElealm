@@ -16,6 +16,10 @@ namespace AdminDashboard.Helpers
         {
 
             CreateMap<Category, DashboardCategoryDto>().ReverseMap();
+            CreateMap<Course, DashboardCourseDto>()
+                 .ForMember(dest => dest.Image, opt => opt.MapFrom(src => src.ImageUrl))
+                 .ReverseMap()
+                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Image));
 
 
 
@@ -33,7 +37,6 @@ namespace AdminDashboard.Helpers
                     src.ImageUrl != null ? src.ImageUrl.FileName : null));
             CreateMap<Dto.CreateCategoryDto, UpdateCategoryCommand>();
 
-            CreateMap<Course, Dto.CourseDto>();
             CreateMap<Course, CourseResponseWithAllDataDto>();
 
             CreateMap<Dto.CreateCategoryDto, CreateCategoryCommand>();

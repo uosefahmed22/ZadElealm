@@ -39,6 +39,13 @@ namespace AdminDashboard.Controllers
             _imageService = imageService;
             _httpClient = httpClient;
         }
+        public async Task<IActionResult> Index()
+        {
+            var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
+            var mappedCourses = _mapper.Map<IReadOnlyList<Course>, IReadOnlyList<DashboardCourseDto>>(courses);
+
+            return View(mappedCourses);
+        }
 
         [HttpGet]
         public async Task<IActionResult> Create()
@@ -92,16 +99,6 @@ namespace AdminDashboard.Controllers
             }
         }
 
-
-
-        public async Task<IActionResult> Index()
-        {
-            var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
-            var mappedCourses = _mapper.Map<IReadOnlyList<Course>, IReadOnlyList<CourseDto>>(courses);
-
-            return View(mappedCourses);
-        }
-
         public async Task<IActionResult> Edit(int id)
         {
             var course = await _unitOfWork.Repository<Course>().GetEntityAsync(id);
@@ -110,7 +107,7 @@ namespace AdminDashboard.Controllers
                 return NotFound();
             }
 
-            var model = new CourseDto
+            var model = new DashboardCourseDto
             {
                 Name = course.Name,
                 Description = course.Description,
@@ -120,7 +117,7 @@ namespace AdminDashboard.Controllers
             return View(model);
         }
         [HttpPost]
-        public async Task<IActionResult> Edit(Dto.CourseDto model)
+        public async Task<IActionResult> Edit(DashboardCourseDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -141,7 +138,7 @@ namespace AdminDashboard.Controllers
 
             if (model.Image != null)
             {
-                var uploadedImage = await _imageService.UploadImageAsync(model.Image);
+                var uploadedImage = await _imageService.UploadImageAsync(model.formFile);
                 courseExsist.ImageUrl = uploadedImage.Data as string;
             }
 

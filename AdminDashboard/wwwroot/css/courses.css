@@ -1,56 +1,192 @@
-﻿/* General Styles */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+﻿.courses-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-/* Header Styles */
-h1 {
+.courses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header-content h1 {
     font-size: 2.5rem;
-    color: #ffc107; /* Updated color for text-warning */
+    color: #3C6255;
+    margin: 0;
 }
 
-hr {
-    border-top: 2px solid #007bff;
+.courses-count {
+    color: #666;
+    margin-top: 0.5rem;
 }
 
-/* Button Styles */
-.btn-dark {
-    background-color: #343a40;
-    border-color: #343a40;
-    transition: background-color 0.3s ease;
+.btn-add-course {
+    background-color: #3C6255;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
 }
 
-    .btn-dark:hover {
-        background-color: #23272b;
-        border-color: #1d2124;
+    .btn-add-course:hover {
+        background-color: #35594A;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
     }
 
-/* Table Styles */
-.table {
-    margin-top: 20px;
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
 }
 
-    .table th, .table td {
-        vertical-align: middle;
+.course-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+    .course-card:hover {
+        transform: translateY(-5px);
     }
 
-    .table thead th {
-        background-color: #343a40;
-        color: #fff;
+.course-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+    .course-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
-.table-responsive {
-    margin-top: 20px;
+.course-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-/* Alert Styles */
-.alert-warning {
-    background-color: #fff3cd;
-    border-color: #ffeeba;
-    color: #856404;
+.course-card:hover .course-overlay {
+    opacity: 1;
 }
 
-.alert h2 {
-    font-size: 1.75rem;
-    color: #856404;
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-action {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+    .btn-action.edit {
+        background-color: #ffc107;
+    }
+
+    .btn-action.delete {
+        background-color: #dc3545;
+    }
+
+    .btn-action:hover {
+        transform: scale(1.1);
+        color: white;
+    }
+
+.course-details {
+    padding: 1.5rem;
+}
+
+.course-title {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.course-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.course-meta {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+    .meta-item i {
+        color: #3C6255;
+    }
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #3C6255;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h2 {
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #666;
+    }
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .courses-container {
+        padding: 1rem;
+    }
+
+    .courses-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .courses-grid {
+        grid-template-columns: 1fr;
+    }
 }
