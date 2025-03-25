@@ -1,10 +1,11 @@
 ﻿using AdminDashboard.Commands;
+using AdminDashboard.Commands.RoleCommand;
 using AdminDashboard.Middlwares;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using ZadElealm.Apis.Errors;
 
-namespace AdminDashboard.Handlers.AuthHandler
+namespace AdminDashboard.Handlers.RoleHandler
 {
     public class UpdateRoleCommandHandler : IRequestHandler<UpdateRoleCommand, ApiResponse>
     {

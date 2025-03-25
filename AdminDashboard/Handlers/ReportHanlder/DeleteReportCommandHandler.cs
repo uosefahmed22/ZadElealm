@@ -1,10 +1,11 @@
 ﻿using AdminDashboard.Commands;
+using AdminDashboard.Commands.ReportCommand;
 using MediatR;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.ReportHanlder
 {
     public class DeleteReportCommandHandler : IRequestHandler<DeleteReportCommand, ApiDataResponse>
     {

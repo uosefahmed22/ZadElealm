@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Handlers\CreateRoleCommandHandler.cs" />
+    <Compile Remove="Handlers\DeleteRoleCommandHandler.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -17,11 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZadElealm.Apis\ZadElealm.Apis.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Handlers\CategoryHandler\" />
-    <Folder Include="Quires\CategoryQuery\" />
   </ItemGroup>
 
 </Project>

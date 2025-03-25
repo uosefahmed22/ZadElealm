@@ -5,7 +5,7 @@ using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.CategoryHandler
 {
     public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryCommand, bool>
     {

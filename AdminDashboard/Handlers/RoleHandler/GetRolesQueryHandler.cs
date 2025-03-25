@@ -1,9 +1,9 @@
-﻿using AdminDashboard.Quires;
+﻿using AdminDashboard.Quires.AdminQuery;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace AdminDashboard.Handlers.AuthHandler
+namespace AdminDashboard.Handlers.RoleHandler
 {
     public class GetRolesQueryHandler : IRequestHandler<GetRolesQuery, List<IdentityRole>>
     {

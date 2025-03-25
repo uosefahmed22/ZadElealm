@@ -2,7 +2,7 @@
 using MediatR;
 using ZadElealm.Apis.Errors;
 
-namespace AdminDashboard.Commands
+namespace AdminDashboard.Commands.RoleCommand
 {
     public class UpdateRoleCommand : IRequest<ApiResponse>
     {

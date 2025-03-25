@@ -1,5 +1,5 @@
 ﻿using AdminDashboard.Dto;
-using AdminDashboard.Quires;
+using AdminDashboard.Quires.CategoryQuery;
 using AutoMapper;
 using MediatR;
 using ZadElealm.Apis.Dtos;
@@ -7,7 +7,7 @@ using ZadElealm.Apis.Dtos.DtosCategory;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.CategoryHandler
 {
     public class GetAllCategoriesQueryHandler : IRequestHandler<GetAllCategoriesQuery, IReadOnlyList<DashboardCategoryDto>>
     {

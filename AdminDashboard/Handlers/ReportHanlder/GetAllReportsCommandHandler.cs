@@ -1,4 +1,5 @@
 ﻿using AdminDashboard.Commands;
+using AdminDashboard.Commands.ReportCommand;
 using AutoMapper;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Errors;
@@ -6,7 +7,7 @@ using ZadElealm.Apis.Handlers;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
-namespace AdminDashboard.Handlers
+namespace AdminDashboard.Handlers.ReportHanlder
 {
     public class GetAllReportsCommandHandler : BaseCommandHandler<GetAllReportsCommand, ApiDataResponse>
     {

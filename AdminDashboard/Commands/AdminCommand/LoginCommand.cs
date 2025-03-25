@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using ZadElealm.Core.Models.Identity;
 
-namespace AdminDashboard.Commands
+namespace AdminDashboard.Commands.AdminCommand
 {
     public record LoginCommand : IRequest<LoginResult>
     {

@@ -1,4 +1,5 @@
 ﻿using AdminDashboard.Commands;
+using AdminDashboard.Commands.ReportCommand;
 using AdminDashboard.Dto;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
