@@ -3,32 +3,40 @@
 @{
     ViewData["Title"] = "Add New Playlist";
 }
+<link href="~/css/Createcourse.css" rel="stylesheet" />
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Playlist</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <link href="~/css/Createcourse.css" rel="stylesheet" />
-</head>
-<body>
-    <div class="container-fluid d-flex justify-content-center align-items-center vh-100">
-        <div class="form-container">
-            <a href="@Url.Action("Index", "Course")" class="btn btn-secondary mb-3">
+
+<div class="playlist-create-container">
+    <div class="form-wrapper">
+        <div class="header-section">
+            <a href="@Url.Action("Index", "Course")" class="back-button">
                 <i class="fas fa-arrow-left"></i> Back to List
             </a>
-            <h2 class="text-center my-4">Add New Playlist</h2>
-            <form method="post" asp-action="Create" class="needs-validation" novalidate>
-                <div class="form-group">
-                    <label asp-for="PlaylistUrl">Playlist URL</label>
-                    <input asp-for="PlaylistUrl" class="form-control" required />
-                    <span asp-validation-for="PlaylistUrl" class="text-danger"></span>
+            <h2 class="form-title">Add New Playlist</h2>
+        </div>
+
+        <form method="post" asp-action="Create" class="playlist-form needs-validation" novalidate>
+            <div class="form-group">
+                <label asp-for="PlaylistUrl">Playlist URL</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fas fa-link"></i>
+                        </span>
+                    </div>
+                    <input asp-for="PlaylistUrl" class="form-control" required placeholder="Enter playlist URL" />
                 </div>
-                <div class="form-group">
-                    <label asp-for="CategoryId">Category</label>
+                <span asp-validation-for="PlaylistUrl" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CategoryId">Category</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fas fa-folder"></i>
+                        </span>
+                    </div>
                     <select asp-for="CategoryId" class="form-control" required>
                         <option value="">Select a category</option>
                         @foreach (var category in ViewBag.Categories)
@@ -36,45 +44,40 @@
                             <option value="@category.Id">@category.Name</option>
                         }
                     </select>
-                    <span asp-validation-for="CategoryId" class="text-danger"></span>
                 </div>
-                <div class="form-group">
-                    <label asp-for="CourseLanguage">Course Language</label>
-                    <input asp-for="CourseLanguage" class="form-control" />
-                    <span asp-validation-for="CourseLanguage" class="text-danger"></span>
-                </div>
-                <div class="form-group">
-                    <label asp-for="Author">Author</label>
-                    <input asp-for="Author" class="form-control" />
-                    <span asp-validation-for="Author" class="text-danger"></span>
-                </div>
-                <button type="submit" class="btn btn-custom btn-block">
-                    Submit
-                    <span class="spinner-border spinner-border-sm ml-2" role="status" aria-hidden="true" style="display: none;"></span>
-                </button>
-            </form>
-        </div>
-    </div>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
 
-    <script>
-        (function() {
-            'use strict';
-            window.addEventListener('load', function() {
-                var forms = document.getElementsByClassName('needs-validation');
-                var validation = Array.prototype.filter.call(forms, function(form) {
-                    form.addEventListener('submit', function(event) {
-                        if (form.checkValidity() === false) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        } else {
-                            var spinner = form.querySelector('.spinner-border');
-                            spinner.style.display = 'inline-block';
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
-</body>
-</html>
+            <div class="form-group">
+                <label asp-for="CourseLanguage">Course Language</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fas fa-language"></i>
+                        </span>
+                    </div>
+                    <input asp-for="CourseLanguage" class="form-control" placeholder="Enter course language" />
+                </div>
+                <span asp-validation-for="CourseLanguage" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Author">Author</label>
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fas fa-user"></i>
+                        </span>
+                    </div>
+                    <input asp-for="Author" class="form-control" placeholder="Enter author name" />
+                </div>
+                <span asp-validation-for="Author" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-submit">
+                <span class="button-text">Submit</span>
+                <span class="spinner-border spinner-border-sm ml-2" role="status" aria-hidden="true" style="display: none;"></span>
+            </button>
+        </form>
+    </div>
+</div>
