@@ -13,10 +13,27 @@
 
 <div class="card">
     <div class="card-body">
+        <!-- Search and Filter Section -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search categories...">
+                </div>
+            </div>
+            <div class="col-md-2 ms-auto">
+                <button id="resetSearch" class="btn btn-secondary w-100">
+                    <i class="fas fa-undo me-2"></i>Reset
+                </button>
+            </div>
+        </div>
+
         @if (Model.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle" id="categoriesTable">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 5%">ID</th>
@@ -37,14 +54,16 @@
                                 </td>
                                 <td>
                                     <div class="image-container" onclick="showImagePreview('@item.ImageUrl')">
-                                        <img src="@item.ImageUrl" alt="@item.Name" class="img-fluid rounded" />
+                                        <img src="@item.ImageUrl" alt="@item.Name" class="img-fluid rounded category-image" />
                                     </div>
                                 </td>
                                 <td class="text-end">
-                                    <a class="btn btn-sm btn-outline-primary me-2" asp-action="Edit" asp-route-id="@item.Id">
+                                    <a class="btn btn-sm btn-outline-primary me-2" asp-action="Edit" asp-route-id="@item.Id"
+                                       data-bs-toggle="tooltip" title="Edit Category">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">
+                                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id"
+                                       data-bs-toggle="tooltip" title="Delete Category">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </td>
@@ -52,6 +71,12 @@
                         }
                     </tbody>
                 </table>
+            </div>
+
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-4" style="display: none;">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No categories match your search criteria</h5>
             </div>
         }
         else
@@ -63,3 +88,116 @@
         }
     </div>
 </div>
+
+<!-- Image Preview Modal -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Image Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="previewImage" src="" alt="Preview" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .description-text {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .category-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+        .category-image:hover {
+            transform: scale(1.05);
+        }
+
+    .image-container {
+        display: inline-block;
+        position: relative;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+    }
+
+    .input-group-text {
+        border-right: none;
+    }
+
+    .form-control:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .btn-outline-primary:hover, .btn-outline-danger:hover {
+        transform: translateY(-1px);
+        transition: transform 0.2s;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize tooltips
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            });
+
+            function filterTable() {
+                const searchText = $('#searchInput').val().toLowerCase();
+                let visibleRows = 0;
+
+                $('#categoriesTable tbody tr').each(function () {
+                    const $row = $(this);
+                    const name = $row.find('td:eq(1)').text().toLowerCase();
+                    const description = $row.find('td:eq(2)').text().toLowerCase();
+
+                    if (name.includes(searchText) || description.includes(searchText)) {
+                        $row.show();
+                        visibleRows++;
+                    } else {
+                        $row.hide();
+                    }
+                });
+
+                // Toggle visibility of table and no results message
+                if (visibleRows === 0) {
+                    $('#categoriesTable').hide();
+                    $('#noResults').show();
+                } else {
+                    $('#categoriesTable').show();
+                    $('#noResults').hide();
+                }
+            }
+
+            // Search input event handler
+            $('#searchInput').on('keyup', filterTable);
+
+            // Reset search
+            $('#resetSearch').click(function() {
+                $('#searchInput').val('');
+                filterTable();
+            });
+        });
+
+        // Image preview function
+        function showImagePreview(imageUrl) {
+            $('#previewImage').attr('src', imageUrl);
+            $('#imagePreviewModal').modal('show');
+        }
+    </script>
+}
