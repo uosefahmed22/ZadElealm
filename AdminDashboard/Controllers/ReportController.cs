@@ -2,11 +2,13 @@
 using AdminDashboard.Commands.ReportCommand;
 using AdminDashboard.Dto;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZadElealm.Apis.Dtos;
 
 namespace AdminDashboard.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class ReportController : Controller
     {
         private readonly IMediator _mediator;
