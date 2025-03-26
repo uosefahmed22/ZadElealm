@@ -49,7 +49,7 @@ public class RoleController : Controller
         if (currentUser == null || currentUser.Email != _primaryAdminEmail)
         {
             TempData["ErrorMessage"] = "غير مسموح لك بإضافة أدوار للنظام.";
-            return RedirectToAction("AccessDenied", "Account");
+            return RedirectToAction("AccessDenied", "Admin");
         }
 
         var result = await _mediator.Send(new CreateRoleCommand { Name = model.Name });

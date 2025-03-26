@@ -29,7 +29,7 @@ namespace AdminDashboard.Controllers
             if (currentUser == null || currentUser.Email != _primaryAdminEmail)
             {
                 TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
-                return RedirectToAction("AccessDenied", "Account");
+                return RedirectToAction("Login", "Admin");
             }
 
             var users = await _userManager.Users
