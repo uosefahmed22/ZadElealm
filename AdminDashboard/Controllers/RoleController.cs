@@ -32,7 +32,7 @@ public class RoleController : Controller
         if (currentUser == null || currentUser.Email != _primaryAdminEmail)
         {
             TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
-            return RedirectToAction("AccessDenied", "Account");
+            return RedirectToAction("AccessDenied", "Admin");
         }
 
         var roles = await _mediator.Send(new GetRolesQuery());
@@ -70,7 +70,7 @@ public class RoleController : Controller
         if (currentUser == null || currentUser.Email != _primaryAdminEmail)
         {
             TempData["ErrorMessage"] = "غير مسموح لك بحذف الأدوار من النظام.";
-            return RedirectToAction("AccessDenied", "Account");
+            return RedirectToAction("AccessDenied", "Admin");
         }
 
         var result = await _mediator.Send(new DeleteRoleCommand { Id = id });
@@ -93,7 +93,7 @@ public class RoleController : Controller
         if (currentUser == null || currentUser.Email != _primaryAdminEmail)
         {
             TempData["ErrorMessage"] = "غير مسموح لك بتعديل الأدوار في النظام.";
-            return RedirectToAction("AccessDenied", "Account");
+            return RedirectToAction("AccessDenied", "Admin");
         }
 
         var role = await _mediator.Send(new GetRoleByIdQuery { Id = id });
@@ -121,7 +121,7 @@ public class RoleController : Controller
         if (currentUser == null || currentUser.Email != _primaryAdminEmail)
         {
             TempData["ErrorMessage"] = "غير مسموح لك بتعديل الأدوار في النظام.";
-            return RedirectToAction("AccessDenied", "Account");
+            return RedirectToAction("AccessDenied", "Admin");
         }
 
         var result = await _mediator.Send(new UpdateRoleCommand
