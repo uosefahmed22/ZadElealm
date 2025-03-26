@@ -13,10 +13,45 @@
 
 <div class="card">
     <div class="card-body">
+        <!-- Filter Section -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" id="searchInput" class="form-control" placeholder="Search courses...">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select id="languageFilter" class="form-select">
+                    <option value="">All Languages</option>
+                    @foreach (var language in Model.Select(c => c.CourseLanguage).Distinct())
+                    {
+                        <option value="@language">@language</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select id="ratingFilter" class="form-select">
+                    <option value="">All Ratings</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="2">2+ Stars</option>
+                    <option value="1">1+ Star</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button id="resetFilters" class="btn btn-secondary">
+                    <i class="fas fa-undo me-2"></i>Reset Filters
+                </button>
+            </div>
+        </div>
+
         @if (Model.Any())
         {
             <div class="table-responsive">
-                <table class="table table-hover align-middle table-bordered">
+                <table class="table table-hover align-middle table-bordered" id="coursesTable">
                     <thead class="table-light">
                         <tr>
                             <th style="width: 5%">ID</th>
@@ -71,6 +106,10 @@
                     </tbody>
                 </table>
             </div>
+            <div id="noResults" class="text-center py-4" style="display: none;">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No courses match your search criteria</h5>
+            </div>
         }
         else
         {
@@ -111,4 +150,77 @@
         border-bottom: 2px solid #dee2e6;
         background-color: #f8f9fa;
     }
+
+    /* Additional styles for filters */
+    .input-group-text {
+        background-color: #fff;
+    }
+
+    .form-select, .form-control {
+        border-radius: 4px;
+    }
+
+    #resetFilters {
+        width: 100%;
+    }
 </style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            function filterTable() {
+                const searchText = $('#searchInput').val().toLowerCase();
+                const selectedLanguage = $('#languageFilter').val().toLowerCase();
+                const selectedRating = parseFloat($('#ratingFilter').val()) || 0;
+                let visibleRows = 0;
+
+                $('#coursesTable tbody tr').each(function () {
+                    const $row = $(this);
+                    const name = $row.find('td:eq(1)').text().toLowerCase();
+                    const description = $row.find('td:eq(2)').text().toLowerCase();
+                    const author = $row.find('td:eq(3)').text().toLowerCase();
+                    const language = $row.find('td:eq(4)').text().toLowerCase();
+                    const rating = parseFloat($row.find('td:eq(6)').text()) || 0;
+
+                    const matchesSearch = name.includes(searchText) ||
+                                       description.includes(searchText) ||
+                                       author.includes(searchText);
+                    const matchesLanguage = !selectedLanguage || language === selectedLanguage;
+                    const matchesRating = rating >= selectedRating;
+
+                    if (matchesSearch && matchesLanguage && matchesRating) {
+                        $row.show();
+                        visibleRows++;
+                    } else {
+                        $row.hide();
+                    }
+                });
+
+                // Show/hide no results message
+                if (visibleRows === 0) {
+                    $('#coursesTable').hide();
+                    $('#noResults').show();
+                } else {
+                    $('#coursesTable').show();
+                    $('#noResults').hide();
+                }
+            }
+
+            // Reset filters
+            function resetFilters() {
+                $('#searchInput').val('');
+                $('#languageFilter').val('');
+                $('#ratingFilter').val('');
+                filterTable();
+            }
+
+            // Add event listeners
+            $('#searchInput').on('keyup', filterTable);
+            $('#languageFilter, #ratingFilter').on('change', filterTable);
+            $('#resetFilters').on('click', resetFilters);
+
+            // Initialize tooltips
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    </script>
+}
