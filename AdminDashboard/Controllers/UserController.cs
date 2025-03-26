@@ -1,4 +1,5 @@
-﻿using AdminDashboard.Models;
+﻿using AdminDashboard.Commands.UserCommand;
+using AdminDashboard.Models;
 using AdminDashboard.Quires.UserQuery;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.OAuth;
@@ -14,75 +15,10 @@ namespace AdminDashboard.Controllers
     public class UserController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly string _primaryAdminEmail;
-        private readonly int _maxAdminCount;
-
-        public UserController(IMediator mediator,
-            UserManager<AppUser> userManager,IConfiguration configuration ,RoleManager<IdentityRole> roleManager)
+        public UserController(IMediator mediator)
         {
             _mediator = mediator;
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _primaryAdminEmail = configuration["AdminSettings:PrimaryAdminEmail"];
-            _maxAdminCount = int.Parse(configuration["AdminSettings:MaxAdminCount"] ?? "10");
-
         }
-
-        public async Task<IActionResult> Edit(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            var AllRoles = await _roleManager.Roles.ToListAsync();
-            var viewModel = new UserRolesViewModel
-            {
-                UserId = user.Id,
-                UserName = user.DisplayName,
-                IsDeleted = user.IsDeleted,
-                Roles = AllRoles.Select(r => new RoleViewModel
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    IsSelected = _userManager.IsInRoleAsync(user, r.Name).Result
-                }).ToList(),
-            };
-            return View(viewModel);
-        }
-        [HttpPost]
-        public async Task<IActionResult> Edit(UserRolesViewModel model)
-        {
-            var user = await _userManager.FindByIdAsync(model.UserId);
-
-            user.DisplayName = model.UserName;
-            user.IsDeleted = model.IsDeleted;
-
-            var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return View(model);
-            }
-
-            var userRoles = await _userManager.GetRolesAsync(user);
-            foreach (var role in model.Roles)
-            {
-                if (userRoles.Any(r => r == role.Name) && !role.IsSelected)
-                {
-                    await _userManager.RemoveFromRoleAsync(user, role.Name);
-                }
-                if (!userRoles.Any(r => r == role.Name) && role.IsSelected)
-                {
-                    await _userManager.AddToRoleAsync(user, role.Name);
-                }
-            }
-
-            return RedirectToAction(nameof(Index));
-        }
-
-
         public async Task<IActionResult> Index()
         {
             var users = await _mediator.Send(new GetAllUsersQuery());
@@ -94,33 +30,39 @@ namespace AdminDashboard.Controllers
             return View(users);
         }
 
-        public async Task<IActionResult> Delete(string id)
+        public async Task<IActionResult> Edit(string id)
         {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                ModelState.AddModelError("Name", "User not found!");
-                return View("Index", await _userManager.Users.ToListAsync());
-            }
+            var query = new GetUserForEditQuery { UserId = id };
+            var viewModel = await _mediator.Send(query);
+            return View(viewModel);
+        }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if (roles.Contains("Admin"))
-            {
-                ModelState.AddModelError("Name", "Cannot delete a user with the Admin role!");
-                return View("Index", await _userManager.Users.ToListAsync());
-            }
+        [HttpPost]
+        public async Task<IActionResult> Edit(UserRolesViewModel model)
+        {
+            var command = new UpdateUserRolesCommand { Model = model };
+            var result = await _mediator.Send(command);
 
-            var result = await _userManager.DeleteAsync(user);
-            if (!result.Succeeded)
+            if (!result.StatusCode.Equals(200))
             {
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
-                return View("Index", await _userManager.Users.ToListAsync());
+                ModelState.AddModelError(string.Empty, "Failed to update user roles!");
+                return View(model);
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        public async Task<IActionResult> Delete(string id)
+        {
+            var command = new DeleteUserCommand { UserId = id };
+            var result = await _mediator.Send(command);
+
+            if (!result.StatusCode.Equals(200))
+            {
+                TempData["ErrorMessage"] = result.Message;
+            }
+            var users = await _mediator.Send(new GetAllUsersQuery());
+            return View("Index", users);
         }
     }
 }

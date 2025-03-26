@@ -1,73 +1,189 @@
-﻿/* General Styles */
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+﻿/* edituserroles.css */
+:root {
+    --primary-color: #2c3e50;
+    --secondary-color: #3498db;
+    --success-color: #2ecc71;
+    --danger-color: #e74c3c;
+    --text-color: #2c3e50;
+    --border-color: #e0e0e0;
+    --background-color: #f5f6fa;
 }
 
-/* Header Styles */
-h1 {
-    font-size: 2rem;
-    color: #3C6255; /* Updated color */
+.edit-user-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
 }
 
-h3 {
-    font-size: 1.5rem;
-    color: #343a40;
+.page-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
 }
 
-/* Form Styles */
-.container-fluid {
-    padding: 0 15px;
+    .page-header h1 {
+        color: var(--primary-color);
+        font-size: 2rem;
+        margin: 0;
+    }
+
+    .page-header .user-name {
+        color: var(--secondary-color);
+        font-size: 1.2rem;
+        margin: 0.5rem 0 0;
+    }
+
+.alert-box {
+    background-color: var(--danger-color);
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
 }
 
-.form-group {
-    margin-bottom: 1rem;
+.form-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin-bottom: 1.5rem;
 }
 
-.form-check {
-    margin-bottom: 0.5rem;
+    .form-section h2 {
+        color: var(--primary-color);
+        font-size: 1.3rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+.input-group {
+    margin-bottom: 1.5rem;
 }
 
-.form-check-input {
-    margin-right: 10px;
+    .input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+    }
+
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.role-item {
+    position: relative;
+}
+
+.role-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+}
+
+    .role-checkbox:hover {
+        background-color: var(--background-color);
+    }
+
+    .role-checkbox input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+    }
+
+.checkmark {
     width: 20px;
     height: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    margin-right: 0.8rem;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.role-checkbox input[type="checkbox"]:checked ~ .checkmark {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+    .role-checkbox input[type="checkbox"]:checked ~ .checkmark:after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+.role-name {
+    color: var(--text-color);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn-save, .btn-cancel {
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-save {
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
     cursor: pointer;
 }
 
-    .form-check-input:checked {
-        background-color: #3C6255; /* Updated color */
-        border-color: #3C6255; /* Updated color */
+    .btn-save:hover {
+        background-color: #2980b9;
     }
 
-.form-check-label {
-    font-size: 1rem;
-    color: #495057;
-    cursor: pointer;
+.btn-cancel {
+    background-color: #f8f9fa;
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
 }
 
-/* Button Styles */
-.btn-primary {
-    margin-right: 10px;
-    background-color: #3C6255; /* Updated color */
-    border-color: #3C6255; /* Updated color */
-    transition: background-color 0.3s ease;
-}
-
-    .btn-primary:hover {
-        background-color: #2e4a41; /* Darker shade for hover effect */
-        border-color: #2e4a41; /* Darker shade for hover effect */
+    .btn-cancel:hover {
+        background-color: #e9ecef;
     }
 
-.btn-secondary {
-    transition: background-color 0.3s ease;
-}
-
-    .btn-secondary:hover {
-        background-color: #3C6255;
-    }
-
-/* Validation Styles */
-span[asp-validation-for] {
-    color: #dc3545;
+.validation-message {
+    color: var(--danger-color);
     font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
 }
