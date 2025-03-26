@@ -3,6 +3,7 @@ using AdminDashboard.Dto;
 using AdminDashboard.Handlers.CategoryHandler;
 using AdminDashboard.Models;
 using AdminDashboard.Quires.CategoryQuery;
+using AdminDashboard.Quires.CourseQuery;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,29 +23,15 @@ namespace AdminDashboard.Controllers
     public class CourseController : Controller
     {
         private readonly IMediator _mediator;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        private readonly IImageService _imageService;
-        private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "AIzaSyD79T1TuP3_0uEFI7CftLd3bIzmd9PdelE";
-        private const int MaxRetries = 3;
-        private const int MaxResultsPerPage = 50;
 
-        public CourseController(IMediator mediator,
-            IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService, HttpClient httpClient)
+        public CourseController(IMediator mediator)
         {
             _mediator = mediator;
-            _unitOfWork = unitOfWork;
-            _mapper = mapper;
-            _imageService = imageService;
-            _httpClient = httpClient;
         }
         public async Task<IActionResult> Index()
         {
-            var courses = await _unitOfWork.Repository<Course>().GetAllAsync();
-            var mappedCourses = _mapper.Map<IReadOnlyList<Course>, IReadOnlyList<DashboardCourseDto>>(courses);
-
-            return View(mappedCourses);
+            var courses = await _mediator.Send(new GetAllCoursesQuery());
+            return View(courses);
         }
 
         [HttpGet]
@@ -101,21 +88,17 @@ namespace AdminDashboard.Controllers
 
         public async Task<IActionResult> Edit(int id)
         {
-            var course = await _unitOfWork.Repository<Course>().GetEntityAsync(id);
-            if (course == null)
+            var query = new GetCourseByIdQuery { Id = id };
+            var model = await _mediator.Send(query);
+
+            if (model == null)
             {
                 return NotFound();
             }
 
-            var model = new DashboardCourseDto
-            {
-                Name = course.Name,
-                Description = course.Description,
-                Author = course.Author,
-                CourseLanguage = course.CourseLanguage,
-            };
             return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> Edit(DashboardCourseDto model)
         {
@@ -124,33 +107,37 @@ namespace AdminDashboard.Controllers
                 return View(model);
             }
 
-            var courseExsist = await _unitOfWork.Repository<Course>().GetEntityAsync(model.Id);
-            if (courseExsist == null)
+            var command = new UpdateCourseCommand
             {
-                return NotFound();
+                CourseDto = model
+            };
+
+            var result = await _mediator.Send(command);
+
+            if (result)
+            {
+                TempData["Success"] = "Course updated successfully";
+                return RedirectToAction("Index");
             }
 
-            courseExsist.Name = model.Name;
-            courseExsist.Description = model.Description;
-            courseExsist.Author = model.Author;
-            courseExsist.CourseLanguage = model.CourseLanguage;
-
-
-            if (model.Image != null)
-            {
-                var uploadedImage = await _imageService.UploadImageAsync(model.formFile);
-                courseExsist.ImageUrl = uploadedImage.Data as string;
-            }
-
-            await _unitOfWork.Complete();
-            return RedirectToAction("Index");
+            TempData["Error"] = "Failed to update the course.";
+            return View(model);
         }
 
         public async Task<IActionResult> Delete(int id)
         {
-            var category = await _unitOfWork.Repository<Course>().GetEntityAsync(id);
-            _unitOfWork.Repository<Course>().Delete(category);
-            await _unitOfWork.Complete();
+            var command = new DeleteCourseCommand { Id = id };
+            var result = await _mediator.Send(command);
+
+            if (result)
+            {
+                TempData["Success"] = "Course deleted successfully";
+            }
+            else
+            {
+                TempData["Error"] = "Failed to delete the course";
+            }
+
             return RedirectToAction("Index");
         }
     }

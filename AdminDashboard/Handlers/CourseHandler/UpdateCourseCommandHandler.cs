@@ -1,35 +1,45 @@
 ﻿using AdminDashboard.Commands.CourseCommand;
+using AdminDashboard.Dto;
 using AutoMapper;
 using MediatR;
+using System.Net;
 using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 
 namespace AdminDashboard.Handlers.CourseHandler
 {
-    public class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseCommand, ApiDataResponse>
+    public class UpdateCourseCommandHandler : IRequestHandler<UpdateCourseCommand, bool>
     {
-        private readonly IMediator _mediator;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         private readonly IImageService _imageService;
-        private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "AIzaSyD79T1TuP3_0uEFI7CftLd3bIzmd9PdelE";
-        private const int MaxRetries = 3;
-        private const int MaxResultsPerPage = 50;
 
-        public UpdateCourseCommandHandler(IMediator mediator,
-            IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService, HttpClient httpClient)
+        public UpdateCourseCommandHandler(IUnitOfWork unitOfWork, IImageService imageService)
         {
-            _mediator = mediator;
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
             _imageService = imageService;
-            _httpClient = httpClient;
         }
-        public Task<ApiDataResponse> Handle(UpdateCourseCommand request, CancellationToken cancellationToken)
+
+        public async Task<bool> Handle(UpdateCourseCommand command, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var course = await _unitOfWork.Repository<Course>().GetEntityAsync(command.CourseDto.Id);
+            if (course == null)
+                return false;
+
+            course.Name = command.CourseDto.Name;
+            course.Description = command.CourseDto.Description;
+            course.Author = command.CourseDto.Author;
+            course.CourseLanguage = command.CourseDto.CourseLanguage;
+
+            if (command.CourseDto.formFile != null)
+            {
+                var uploadedImage = await _imageService.UploadImageAsync(command.CourseDto.formFile);
+                course.ImageUrl = uploadedImage.Data as string;
+            }
+
+            await _unitOfWork.Complete();
+            return true;
         }
     }
 }
