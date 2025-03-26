@@ -1,76 +1,205 @@
 ﻿@model IEnumerable<UserViewModel>
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "User Management";
 }
 
-<h1 class="text-center my-4">All Users</h1>
-<hr />
 <link href="~/css/getusers.css" rel="stylesheet" />
 
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Users List</h2>
-        <a class="btn btn-custom" asp-action="AddAdmin" asp-controller="Admin">
-            <i class="fas fa-user-plus"></i> Add Admin
-        </a>
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="dashboard-title">User Management</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">Users</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="action-buttons">
+                <a class="btn btn-custom" asp-action="AddAdmin" asp-controller="Admin">
+                    <i class="fas fa-user-plus"></i> Add Admin
+                </a>
+            </div>
+        </div>
     </div>
 
-    @if (Model.Count() > 0)
-    {
-        <table class="table table-hover table-striped table-bordered">
-            <thead class="custom-thead">
-                <tr>
-                    <th></th>
-                    <th>@Html.DisplayNameFor(u => u.UserName)</th>
-                    <th>@Html.DisplayNameFor(u => u.DisplayName)</th>
-                    <th>@Html.DisplayNameFor(u => u.Email)</th>
-                    <th>@Html.DisplayNameFor(u => u.IsDeleted)</th>
-                    <th>Roles</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{
-                    int rowNumber = 1;
-                }
-                @foreach (var user in Model)
-                {
-                    <tr>
-                        <td class="align-middle">@(rowNumber++)</td>
-                        <td>@user.UserName</td>
-                        <td>@user.DisplayName</td>
-                        <td>@user.Email</td>
-                        <td>@user.IsDeleted</td>
-                        <td>@string.Join(", ", user.Roles.ToList())</td>
-                        <td>
-                            @{
-                                var isAdmin = user.Roles.Contains("Admin");
-                            }
-                            <a class="btn btn-outline-success btn-sm @(isAdmin ? "disabled" : "")"
-                               asp-action="Edit" asp-route-id="@user.Id"
-                               aria-disabled="@(isAdmin)">
-                                <i class="fas fa-pen"></i> Edit
-                            </a>
-                            <a class="btn btn-outline-danger btn-sm @(isAdmin ? "disabled" : "")"
-                               asp-action="Delete" asp-route-id="@user.Id"
-                               aria-disabled="@(isAdmin)">
-                                <i class="fas fa-trash-alt"></i> Delete
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <div class="mt-3 p-3 alert alert-warning text-center">
-            <h2>No Records Found</h2>
+    <!-- Search and Filter Section -->
+    <div class="search-filter-container mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="search-box">
+                    <input type="text" id="searchUsers" class="form-control" placeholder="Search users...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="filters d-flex gap-2 justify-content-end">
+                    <select class="form-select w-auto" id="roleFilter">
+                        <option value="">All Roles</option>
+                        <option value="Admin">Admin</option>
+                        <option value="User">User</option>
+                    </select>
+                    <select class="form-select w-auto" id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="active">Active</option>
+                        <option value="deleted">Deleted</option>
+                    </select>
+                    <select class="form-select w-auto" id="confirmedFilter">
+                        <option value="">All Confirmation</option>
+                        <option value="true">Confirmed</option>
+                        <option value="false">Unconfirmed</option>
+                    </select>
+                </div>
+            </div>
         </div>
-    }
+    </div>
+
+    <!-- Main Content -->
+    <div class="card">
+        <div class="card-body">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="custom-thead">
+                            <tr>
+                                <th class="text-center">#</th>
+                                <th>@Html.DisplayNameFor(u => u.UserName)</th>
+                                <th>@Html.DisplayNameFor(u => u.DisplayName)</th>
+                                <th>@Html.DisplayNameFor(u => u.Email)</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">@Html.DisplayNameFor(u => u.IsConfirmed)</th>
+                                <th class="text-center">Roles</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int rowNumber = 1;
+                            }
+                            @foreach (var user in Model)
+                            {
+                                <tr>
+                                    <td class="text-center">@(rowNumber++)</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar">@user.UserName.Substring(0, 1).ToUpper()</div>
+                                            <span class="ms-2">@user.UserName</span>
+                                        </div>
+                                    </td>
+                                    <td>@user.DisplayName</td>
+                                    <td>@user.Email</td>
+                                    <td class="text-center">
+                                        <span class="status-badge @(user.IsDeleted ? "status-deleted" : "status-active")">
+                                            @(user.IsDeleted ? "Deleted" : "Active")
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="status-badge @(user.IsConfirmed ? "status-confirmed" : "status-unconfirmed")">
+                                            @(user.IsConfirmed ? "Confirmed" : "Unconfirmed")
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        @foreach (var role in user.Roles)
+                                        {
+                                            <span class="role-badge">@role</span>
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="action-buttons">
+                                            @{
+                                                var isAdmin = user.Roles.Contains("Admin");
+                                            }
+                                            <button class="btn btn-icon @(isAdmin ? "disabled" : "")"
+                                                    onclick="editUser('@user.Id')"
+                                                    title="Edit"
+                                            @(isAdmin ? "disabled" : "")>
+                                                <i class="fas fa-pen"></i>
+                                            </button>
+                                            <button class="btn btn-icon @(isAdmin ? "disabled" : "")"
+                                                    onclick="deleteUser('@user.Id')"
+                                                    title="Delete"
+                                            @(isAdmin ? "disabled" : "")>
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    <img src="~/images/no-data.svg" alt="No Data" class="empty-state-image">
+                    <h2>No Users Found</h2>
+                    <p>There are no users matching your criteria.</p>
+                </div>
+            }
+        </div>
+    </div>
 </div>
 
-@section Scripts
-{
+@section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Search functionality
+            const searchInput = document.getElementById('searchUsers');
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(searchTerm) ? '' : 'none';
+                });
+            });
+
+            // Filter functionality
+            const roleFilter = document.getElementById('roleFilter');
+            const statusFilter = document.getElementById('statusFilter');
+            const confirmedFilter = document.getElementById('confirmedFilter');
+
+            function applyFilters() {
+                const selectedRole = roleFilter.value.toLowerCase();
+                const selectedStatus = statusFilter.value.toLowerCase();
+                const selectedConfirmed = confirmedFilter.value.toLowerCase();
+                const rows = document.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const roles = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
+                    const status = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
+                    const confirmed = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+
+                    const roleMatch = !selectedRole || roles.includes(selectedRole);
+                    const statusMatch = !selectedStatus || status.includes(selectedStatus);
+                    const confirmedMatch = !selectedConfirmed ||
+                        (selectedConfirmed === 'true' && confirmed.includes('confirmed')) ||
+                        (selectedConfirmed === 'false' && confirmed.includes('unconfirmed'));
+
+                    row.style.display = roleMatch && statusMatch && confirmedMatch ? '' : 'none';
+                });
+            }
+
+            roleFilter.addEventListener('change', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
+            confirmedFilter.addEventListener('change', applyFilters);
+        });
+
+        function editUser(userId) {
+            window.location.href = `/User/Edit/${userId}`;
+        }
+
+        function deleteUser(userId) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                window.location.href = `/User/Delete/${userId}`;
+            }
+        }
+    </script>
 }

@@ -26,18 +26,6 @@ public class RoleController : Controller
         _primaryAdminEmail = configuration["AdminSettings:PrimaryAdminEmail"];
     }
 
-    public async Task<IActionResult> Index()
-    {
-        var currentUser = await _userManager.GetUserAsync(User);
-        if (currentUser == null || currentUser.Email != _primaryAdminEmail)
-        {
-            TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
-            return RedirectToAction("AccessDenied", "Admin");
-        }
-
-        var roles = await _mediator.Send(new GetRolesQuery());
-        return View(roles);
-    }
 
     [HttpPost]
     public async Task<IActionResult> Create(RoleFormViewModel model)
@@ -64,6 +52,18 @@ public class RoleController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    public async Task<IActionResult> Index()
+    {
+        var currentUser = await _userManager.GetUserAsync(User);
+        if (currentUser == null || currentUser.Email != _primaryAdminEmail)
+        {
+            TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
+            return RedirectToAction("AccessDenied", "Admin");
+        }
+
+        var roles = await _mediator.Send(new GetRolesQuery());
+        return View(roles);
+    }
     public async Task<IActionResult> Delete(string id)
     {
         var currentUser = await _userManager.GetUserAsync(User);

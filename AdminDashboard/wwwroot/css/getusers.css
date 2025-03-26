@@ -1,49 +1,176 @@
-﻿body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+﻿:root {
+    --primary-color: #3C6255;
+    --primary-hover: #35594A;
+    --secondary-color: #61876E;
+    --light-bg: #EAE7B1;
+    --white: #ffffff;
 }
 
-h1, h2 {
-    color: #3C6255;
+.dashboard-container {
+    padding: 2rem;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 60px);
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.dashboard-title {
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-filter-container {
+    background-color: var(--white);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
 }
 
 .table {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 0;
 }
 
 .custom-thead {
-    background-color: #3C6255;
-    color: #fff;
+    background-color: var(--primary-color);
 }
 
-.table-hover tbody tr:hover {
-    background-color: #f1f1f1;
+    .custom-thead th {
+        color: var(--white);
+        font-weight: 500;
+        border: none;
+        padding: 1rem;
+    }
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: var(--secondary-color);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.status-badge {
+    padding: 0.5em 1em;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-deleted {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.role-badge {
+    background-color: var(--light-bg);
+    color: var(--primary-color);
+    padding: 0.4em 0.8em;
+    border-radius: 16px;
+    margin: 0 0.2rem;
+    font-size: 0.875rem;
 }
 
 .btn-custom {
-    background-color: #3C6255;
-    border-color: #3C6255;
-    color: #fff;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
     .btn-custom:hover {
-        background-color: #35594A;
-        border-color: #35594A;
+        background-color: var(--primary-hover);
+        color: var(--white);
     }
 
-.btn-outline-success {
-    border-color: #3C6255;
-    color: #3C6255;
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 0.25rem;
+    border: 1px solid #dee2e6;
+    background-color: var(--white);
+    color: #6c757d;
+    transition: all 0.3s ease;
 }
 
-    .btn-outline-success:hover {
-        background-color: #3C6255;
-        color: #fff;
+    .btn-icon:hover {
+        background-color: var(--primary-color);
+        color: var(--white);
     }
 
-.alert-warning {
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+}
+
+.empty-state-image {
+    width: 200px;
+    margin-bottom: 1.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .filters {
+        margin-top: 1rem;
+        justify-content: flex-start !important;
+    }
+
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+.status-confirmed {
+    background-color: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-unconfirmed {
     background-color: #fff3cd;
-    border-color: #ffeeba;
     color: #856404;
 }

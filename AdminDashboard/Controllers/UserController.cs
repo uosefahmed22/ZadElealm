@@ -1,4 +1,7 @@
 ﻿using AdminDashboard.Models;
+using AdminDashboard.Quires.UserQuery;
+using MediatR;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,48 +13,23 @@ namespace AdminDashboard.Controllers
     [Authorize(Roles = "Admin")]
     public class UserController : Controller
     {
+        private readonly IMediator _mediator;
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly string _primaryAdminEmail;
         private readonly int _maxAdminCount;
 
-        public UserController(UserManager<AppUser> userManager,IConfiguration configuration ,RoleManager<IdentityRole> roleManager)
+        public UserController(IMediator mediator,
+            UserManager<AppUser> userManager,IConfiguration configuration ,RoleManager<IdentityRole> roleManager)
         {
+            _mediator = mediator;
             _userManager = userManager;
             _roleManager = roleManager;
             _primaryAdminEmail = configuration["AdminSettings:PrimaryAdminEmail"];
             _maxAdminCount = int.Parse(configuration["AdminSettings:MaxAdminCount"] ?? "10");
 
         }
-        public async Task<IActionResult> Index()
-        {
-            var currentUser = await _userManager.GetUserAsync(User);
-            if (currentUser == null || currentUser.Email != _primaryAdminEmail)
-            {
-                TempData["ErrorMessage"] = "غير مسموح لك بإدارة الأدوار في النظام.";
-                return RedirectToAction("Login", "Admin");
-            }
 
-            var users = await _userManager.Users
-                .Select(u => new UserViewModel
-                {
-                    Id = u.Id,
-                    UserName = u.UserName,
-                    Email = u.Email,
-                    IsDeleted = u.IsDeleted,
-                    DisplayName = u.DisplayName,
-                    Roles = new List<string>()
-                }).ToListAsync();
-
-            foreach (var user in users)
-            {
-                var userEntity = await _userManager.FindByIdAsync(user.Id);
-                user.Roles = (await _userManager.GetRolesAsync(userEntity)).ToList();
-            }
-
-            return View(users);
-        }
-        
         public async Task<IActionResult> Edit(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -102,6 +80,18 @@ namespace AdminDashboard.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+
+        public async Task<IActionResult> Index()
+        {
+            var users = await _mediator.Send(new GetAllUsersQuery());
+            if (users == null)
+            {
+                TempData["ErrorMessage"] = "No users found!";
+                return View(new List<UserViewModel>());
+            }
+            return View(users);
         }
 
         public async Task<IActionResult> Delete(string id)
