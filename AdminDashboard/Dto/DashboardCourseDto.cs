@@ -13,7 +13,7 @@ namespace AdminDashboard.Dto
         public decimal rating { get; set; }
         public string? Image { get; set; }
         public IFormFile? formFile { get; set; }
-        public CategoryResponseDto Category { get; set; }
+        public CategoryResponseDto? Category { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
     }
 }
