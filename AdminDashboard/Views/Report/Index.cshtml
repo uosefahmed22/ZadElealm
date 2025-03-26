@@ -1,108 +1,132 @@
 ﻿@model IEnumerable<ReportDto>
-<link href="~/css/getallreports.css" rel="stylesheet" />
 
-<div class="reports-container">
-    <div class="reports-header">
-        <h1>التقارير والشكاوى</h1>
-    </div>
+<div class="container-fluid reports-page">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header mb-4">
+                <h1 class="display-6 text-primary">
+                    <i class="fas fa-clipboard-list me-2"></i>التقارير والشكاوى
+                </h1>
+                <p class="text-muted">استعراض وإدارة التقارير المقدمة</p>
+            </div>
 
-    <div class="reports-grid">
-        @foreach (var report in Model)
-        {
-            @* <div class="report-card @(report.IsSolved ? "solved" : "")" data-report-id="@report.Id"> *@
-            @*     <div class="report-status"> *@
-            @*         @if (report.IsSolved) *@
-            @*         { *@
-            @*             <span class="status-badge solved"> *@
-            @*                 <i class="fas fa-check-circle"></i> تم الحل *@
-            @*             </span> *@
-            @*         } *@
-            @*         else *@
-            @*         { *@
-            @*             <span class="status-badge pending"> *@
-            @*                 <i class="fas fa-clock"></i> قيد المعالجة *@
-            @*             </span> *@
-            @*         } *@
-            @*     </div> *@
-
-                <div class="report-header">
-                    <h3 class="report-title">
-                        <i class="fas fa-file-alt"></i> @report.TitleOfTheIssue
-                    </h3>
+            @if (!Model.Any())
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    لا توجد تقارير حالياً
                 </div>
-
-                <div class="report-content">
-                    <div class="report-description-container">
-                        <p class="report-description">@report.Description</p>
-                    </div>
-
-                    @if (!string.IsNullOrEmpty(report.AdminResponse))
+            }
+            else
+            {
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    @foreach (var report in Model)
                     {
-                        <div class="admin-response-section">
-                            <h4>
-                                <i class="fas fa-reply"></i> رد الإدارة:
-                            </h4>
-                            <p class="admin-response-text">@report.AdminResponse</p>
+                        <div class="col" data-report-id="@report.Id">
+                            <div class="card report-card shadow-sm @(report.IsSolved == true ? "border-success" : "border-warning")">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0 text-truncate">
+                                        <i class="fas fa-file-alt me-2"></i>@report.TitleOfTheIssue
+                                    </h5>
+                                    <span class="badge @(report.IsSolved == true ? "bg-success" : "bg-warning")">
+                                        @(report.IsSolved == true ? "مُنجز" : "قيد المعالجة")
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text text-muted report-description">
+                                        @(report.Description.Length > 150
+                                            ? report.Description.Substring(0, 150) + "..."
+                                            : report.Description)
+                                    </p>
+
+                                    @if (!string.IsNullOrEmpty(report.AdminResponse))
+                                    {
+                                        <div class="admin-response mt-3 p-2 bg-light rounded">
+                                            <small class="text-muted d-block mb-1">
+                                                <i class="fas fa-reply me-1"></i>رد الإدارة:
+                                            </small>
+                                            <p class="mb-0">@report.AdminResponse</p>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer d-flex justify-content-between">
+                                    <button class="btn btn-sm btn-outline-danger delete-report" data-report-id="@report.Id">
+                                        <i class="fas fa-trash-alt me-1"></i>حذف
+                                    </button>
+                                    @if (report.IsSolved != true)
+                                    {
+                                        <a href="@Url.Action("Details", "Report", new { id = report.Id })" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-tasks me-1"></i>معالجة
+                                        </a>
+                                    }
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
 
-                <div class="report-actions">
-                    @* @if (!report.IsSolved) *@
-                    @* { *@
-                    @*     <a href="@Url.Action("Details", "Report", new { id = report.Id })" class="btn-action"> *@
-                    @*         <i class="fas fa-tasks"></i> معالجة *@
-                    @*     </a> *@
-                    @* } *@
-                    <button class="btn-details" onclick="deleteReport(@report.Id)">
-                        <i class="fas fa-trash-alt"></i> حذف
-                    </button>
+                <div class="text-center mt-4">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        إجمالي التقارير: @Model.Count()
+                    </small>
                 </div>
-        }
+            }
+        </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://kit.fontawesome.com/your-code.js"></script>
     <script>
-        function deleteReport(id) {
-            if (confirm('هل أنت متأكد من حذف هذا التقرير؟')) {
-                $.ajax({
-                    url: '@Url.Action("DeleteReport", "Report")',
-                    type: 'POST',
-                    data: { id: id },
-                    success: function(response) {
-                        if(response.statusCode === 200) {
-                            $(`[data-report-id="${id}"]`).fadeOut(300, function() {
-                                $(this).remove();
-                            });
-                            alert('تم حذف التقرير بنجاح');
-                            location.reload();
-                        } else {
-                            alert(response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('حدث خطأ أثناء حذف التقرير');
+        $(document).ready(function() {
+            $('.delete-report').on('click', function() {
+                const reportId = $(this).data('report-id');
+
+                Swal.fire({
+                    title: 'تأكيد الحذف',
+                    text: 'هل أنت متأكد من حذف هذا التقرير؟',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'نعم، احذف',
+                    cancelButtonText: 'إلغاء'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '@Url.Action("DeleteReport", "Report")',
+                            type: 'POST',
+                            data: { id: reportId },
+                            success: function(response) {
+                                if (response.statusCode === 200) {
+                                    $(`[data-report-id="${reportId}"]`).fadeOut(300, function() {
+                                        $(this).remove();
+                                    });
+
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'تم الحذف',
+                                        text: 'تم حذف التقرير بنجاح',
+                                        timer: 1500
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'خطأ',
+                                        text: response.message || 'حدث خطأ أثناء حذف التقرير'
+                                    });
+                                }
+                            },
+                            error: function() {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'خطأ',
+                                    text: 'حدث خطأ أثناء حذف التقرير'
+                                });
+                            }
+                        });
                     }
                 });
-            }
-        }
-
-        // تحسين تجربة المستخدم
-        $(document).ready(function() {
-            // تأثير عند التحويم على البطاقات
-            $('.report-card').hover(
-                function() { $(this).addClass('hover'); },
-                function() { $(this).removeClass('hover'); }
-            );
-
-            // تأثير عند الضغط على الأزرار
-            $('.btn-action, .btn-details').click(function() {
-                $(this).addClass('clicked');
-                setTimeout(() => {
-                    $(this).removeClass('clicked');
-                }, 200);
             });
         });
     </script>
