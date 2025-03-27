@@ -12,9 +12,10 @@ public static class MiddlewareExtensions
     {
         app.UseMiddleware<ExceptionMiddleware>();
         app.UseMiddleware<RateLimitingMiddleware>();
+       //app.UseMiddleware<CsrfJwtMiddleware>();
         //app.UseMiddleware<SwaggerBasicAuthMiddleware>();
         app.UseStatusCodePagesWithRedirects("/errors/{0}");
-        app.UseCors("Open");
+        app.UseCors("AllowSpecificOrigin");
         app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();

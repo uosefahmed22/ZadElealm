@@ -41,12 +41,15 @@ namespace ZadElealm.Service.IdentityService
 
             var roles = await _userManager.GetRolesAsync(user);
 
+            //var csrfToken = Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
+                new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+               // new Claim("csrf-token", csrfToken)
             };
 
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -80,7 +83,8 @@ namespace ZadElealm.Service.IdentityService
                 DisplayName = user.DisplayName,
                 Token = jwtToken,
                 Email = user.Email,
-                RefreshToken = refreshToken.Token
+                RefreshToken = refreshToken.Token,
+                //CsrfToken = csrfToken
             };
         }
         private string GenerateRefreshToken()

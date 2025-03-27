@@ -7,11 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using QuestPDF.Infrastructure;
+using System.Collections.Concurrent;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json.Serialization;
 using ZadElealm.Apis.Errors;
 using ZadElealm.Apis.Helpers;
+using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
@@ -91,12 +93,15 @@ namespace ZadElealm.Apis.Extentions
         {
             services.AddCors(options =>
             {
-                options.AddPolicy("Open", builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyMethod()
-                           .AllowAnyHeader();
-                });
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder =>
+                    {
+                        builder
+                            .WithOrigins("https://zad-elealm.netlify.app")
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                            //.WithExposedHeaders("X-CSRF-TOKEN");
+                    });
             });
         }
         private static void ConfigureDependencyInjection(IServiceCollection services, IConfiguration configuration)
@@ -114,19 +119,23 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<IUserRankCalculator, UserRankCalculator>();
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-            
+
+
             ///services.AddAntiforgery(options =>
             ///{
             ///    options.HeaderName = "X-XSRF-TOKEN";
             ///    options.Cookie.Name = "XSRF-TOKEN";
             ///});
-            ///services.AddControllersWithViews(options =>
+            /// services.AddControllersWithViews(options =>
             ///{
             ///    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
             ///});
 
+
             services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
             services.AddMemoryCache();
+            services.AddSingleton<ConcurrentDictionary<string, ClientStatistics>>();
+            services.AddHostedService<RateLimitCleanupService>();
 
             var cloudName = configuration["CloudinarySetting:CloudName"];
             var apiKey = configuration["CloudinarySetting:ApiKey"];
