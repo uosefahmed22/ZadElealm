@@ -52,20 +52,7 @@ pie
 
 ### Installation
 # Clone repository
-git clone (https://github.com/uosefahmed22/ZadElealm)
-
-# API Setup
-cd api
-dotnet restore
-dotnet ef database update
-dotnet run
+git clone https://github.com/uosefahmed22/ZadElealm
 
 ## ✉️ Contact  
 Email: uosefahmed0022@gmail.com
-
-Would you like me to:
-1. Add a more detailed security section?
-2. Include API endpoint examples?
-3. Add screenshots of the admin dashboard?
-4. Include a development roadmap?
-5. Add a FAQ section?
