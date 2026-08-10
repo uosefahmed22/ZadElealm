@@ -1,4 +1,4 @@
-﻿using AdminDashboard.Commands.CourseCommand;
+using AdminDashboard.Commands.CourseCommand;
 using AdminDashboard.Models;
 using AutoMapper;
 using MediatR;
@@ -23,18 +23,21 @@ namespace AdminDashboard.Controllers
         private readonly IMapper _mapper;
         private readonly IImageService _imageService;
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "";
+        private readonly string _apiKey;
         private const int MaxRetries = 3;
         private const int MaxResultsPerPage = 50;
 
         public CourseController(IMediator mediator,
-            IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService, HttpClient httpClient)
+            IUnitOfWork unitOfWork, IMapper mapper, IImageService imageService, HttpClient httpClient,
+            IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _imageService = imageService;
             _httpClient = httpClient;
             _mediator = mediator;
+            _apiKey = configuration["YouTube:ApiKey"]
+                ?? throw new InvalidOperationException("YouTube:ApiKey is not configured.");
         }
 
         [HttpGet]

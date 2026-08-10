@@ -1,4 +1,4 @@
-﻿using AdminDashboard.Commands.CourseCommand;
+using AdminDashboard.Commands.CourseCommand;
 using AutoMapper;
 using MediatR;
 using Newtonsoft.Json.Linq;
@@ -16,16 +16,18 @@ namespace AdminDashboard.Handlers.CourseHandler
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey = "";
+        private readonly string _apiKey;
         private const int MaxRetries = 3;
         private const int MaxResultsPerPage = 50;
 
         public CreateCourseCommandHandler(IUnitOfWork unitOfWork, IMapper mapper,
-             HttpClient httpClient)
+             HttpClient httpClient, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _httpClient = httpClient;
+            _apiKey = configuration["YouTube:ApiKey"]
+                ?? throw new InvalidOperationException("YouTube:ApiKey is not configured.");
         }
 
         public async Task<ApiResponse> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
