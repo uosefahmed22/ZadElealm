@@ -12,12 +12,12 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         builder.Services.ConfigureApplicationServices(builder.Configuration);
-        builder.Services.AddService();
+        builder.Services.AddSwaggerService();
        
         var app = builder.Build();
         
         await app.ConfigureMiddlewareAsync();
-        app.UseConfiguration(app.Configuration);
+        app.UseSwaggerConfiguration(app.Configuration);
         
         app.Run();
     }

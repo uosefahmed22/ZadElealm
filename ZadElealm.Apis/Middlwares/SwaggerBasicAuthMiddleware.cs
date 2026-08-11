@@ -2,12 +2,12 @@
 
 namespace ZadElealm.Apis.Middlwares
 {
-    public class BasicAuthMiddleware
+    public class SwaggerBasicAuthMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly IConfiguration _configuration;
 
-        public BasicAuthMiddleware(RequestDelegate next, IConfiguration configuration)
+        public SwaggerBasicAuthMiddleware(RequestDelegate next, IConfiguration configuration)
         {
             _next = next;
             _configuration = configuration;
@@ -42,8 +42,8 @@ namespace ZadElealm.Apis.Middlwares
 
         private bool IsAuthorized(string username, string password)
         {
-            var configUsername = _configuration["Settings:Username"];
-            var configPassword = _configuration["Settings:Password"];
+            var configUsername = _configuration["SwaggerSettings:Username"];
+            var configPassword = _configuration["SwaggerSettings:Password"];
             return username == configUsername && password == configPassword;
         }
     }

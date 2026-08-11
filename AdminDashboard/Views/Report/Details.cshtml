@@ -13,6 +13,7 @@
     <div class="admin-response">
         <h4>الرد على التقرير</h4>
         <form id="handleReportForm">
+            @Html.AntiForgeryToken()
             <input type="hidden" name="ReportId" value="@Model.Id" />
             <textarea name="AdminResponse"
                       class="form-control"

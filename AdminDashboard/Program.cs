@@ -1,5 +1,6 @@
 using AdminDashboard.Extentions;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.AspNetCore.Mvc;
 
 public class Program
 {
@@ -7,7 +8,10 @@ public class Program
     {
       var builder = WebApplication.CreateBuilder(args);
 
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews(options =>
+        {
+            options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
+        });
         builder.Services.ConfigureApplicationServices(builder.Configuration);
         builder.Services.AddRateLimiting(builder.Configuration);
 

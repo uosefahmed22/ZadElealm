@@ -1,6 +1,7 @@
 ﻿@model IEnumerable<ReportDto>
 
 <div class="container-fluid reports-page">
+    @Html.AntiForgeryToken()
     <div class="row">
         <div class="col-12">
             <div class="page-header mb-4">
@@ -96,7 +97,10 @@
                         $.ajax({
                             url: '@Url.Action("DeleteReport", "Report")',
                             type: 'POST',
-                            data: { id: reportId },
+                            data: {
+                                id: reportId,
+                                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                            },
                             success: function(response) {
                                 if (response.statusCode === 200) {
                                     $(`[data-report-id="${reportId}"]`).fadeOut(300, function() {
