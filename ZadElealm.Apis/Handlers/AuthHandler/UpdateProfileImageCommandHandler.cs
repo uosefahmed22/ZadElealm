@@ -1,9 +1,8 @@
-﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Commands.Auth;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Auth;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;

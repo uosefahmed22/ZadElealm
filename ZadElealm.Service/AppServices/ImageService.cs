@@ -8,7 +8,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Service;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Service.AppServices
 {

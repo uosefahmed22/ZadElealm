@@ -1,4 +1,4 @@
-﻿using ZadElealm.Apis.Errors;
+﻿using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries;
 
 namespace ZadElealm.Apis.Commands.Auth

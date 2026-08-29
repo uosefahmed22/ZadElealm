@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Commands.Notification;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;

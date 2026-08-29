@@ -1,5 +1,5 @@
 ﻿using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Apis.Commands.Report
 {

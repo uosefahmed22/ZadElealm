@@ -6,7 +6,7 @@ using AdminDashboard.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 
 namespace AdminDashboard.Handlers.AuthHandler

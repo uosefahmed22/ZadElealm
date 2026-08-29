@@ -1,9 +1,8 @@
-﻿using AdminDashboard.Commands.CourseCommand;
+using AdminDashboard.Commands.CourseCommand;
 using AdminDashboard.Dto;
-using AutoMapper;
 using MediatR;
 using System.Net;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;

@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Service.AppServices
 {

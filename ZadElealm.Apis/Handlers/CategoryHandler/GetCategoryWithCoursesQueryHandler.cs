@@ -1,7 +1,7 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos.DtosCourse;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Helpers;
 using ZadElealm.Apis.Quaries.Category;
 using ZadElealm.Core.Repositories;
@@ -12,14 +12,11 @@ namespace ZadElealm.Apis.Handlers.Category
     public class GetCategoryWithCoursesQueryHandler : BaseQueryHandler<GetCategoryWithCoursesQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetCategoryWithCoursesQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetCategoryWithCoursesQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
-
 
         public override async Task<ApiResponse> Handle(GetCategoryWithCoursesQuery request, CancellationToken cancellationToken)
         {
@@ -32,7 +29,7 @@ namespace ZadElealm.Apis.Handlers.Category
             var spec = new CategoryWithCoursesSpecification(request.SpecParams);
             var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecNoTrackingAsync(spec);
 
-            var coursesDto = _mapper.Map<IReadOnlyList<CourseDto>>(courses);
+            var coursesDto = courses.ToDtos();
 
             var metaData = new MetaData
             {

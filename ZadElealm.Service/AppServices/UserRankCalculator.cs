@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using Org.BouncyCastle.Crypto;
 using System;
 using System.Collections.Generic;
@@ -12,18 +11,17 @@ using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.UserRank;
+using ZadElealm.Service.Mappers;
 
 namespace ZadElealm.Service.AppServices
 {
     public class UserRankCalculator : IUserRankCalculator
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public UserRankCalculator(IUnitOfWork unitOfWork, IMapper mapper)
+        public UserRankCalculator(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public async Task<int> CalculatePoints(string userId)
@@ -72,6 +70,7 @@ namespace ZadElealm.Service.AppServices
 
             return totalPoints;
         }
+
         public UserRankEnum DetermineRank(int points)
         {
             return points switch
@@ -83,13 +82,14 @@ namespace ZadElealm.Service.AppServices
                 _ => UserRankEnum.Diamond
             };
         }
+
         public async Task<UserRankDto> GetUserRank(string userId)
         {
             var spec = new UserRankWithUserSpecification(userId);
             var userRank = await _unitOfWork.Repository<UserRank>()
                 .GetEntityWithSpecNoTrackingAsync(spec);
 
-            return _mapper.Map<UserRankDto>(userRank);
+            return userRank?.ToDto();
         }
     }
 }

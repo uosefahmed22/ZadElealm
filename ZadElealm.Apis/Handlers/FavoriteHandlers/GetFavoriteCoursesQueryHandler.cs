@@ -1,9 +1,9 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Commands.FavoriteCommand;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Dtos.DtosCourse;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Favorite;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
@@ -16,14 +16,10 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
     public class GetFavoriteCoursesQueryHandler : BaseQueryHandler<GetFavoriteCoursesQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetFavoriteCoursesQueryHandler(
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public GetFavoriteCoursesQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public override async Task<ApiResponse> Handle(GetFavoriteCoursesQuery request, CancellationToken cancellationToken)
@@ -35,7 +31,7 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
             if (!favoriteCourses.Any())
                 return new ApiResponse(200, "لا توجد دورات مفضلة");
 
-            var mappedCourses = _mapper.Map<IEnumerable<CourseDto>>(favoriteCourses.Select(e => e.Course));
+            var mappedCourses = favoriteCourses.Select(e => e.Course).ToDtos();
 
             var response = new AllFavoriteCoursesData()
             {

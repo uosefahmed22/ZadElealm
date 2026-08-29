@@ -1,4 +1,4 @@
-﻿namespace ZadElealm.Apis.Errors
+﻿namespace ZadElealm.Core.Errors
 {
     public class ApiDataResponse : ApiResponse
     {

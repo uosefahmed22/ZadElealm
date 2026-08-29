@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Apis.Commands.Auth
 {

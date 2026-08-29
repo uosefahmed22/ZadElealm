@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Auth;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;

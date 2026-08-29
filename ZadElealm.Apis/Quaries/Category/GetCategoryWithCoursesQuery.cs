@@ -1,4 +1,4 @@
-﻿using ZadElealm.Apis.Errors;
+﻿using ZadElealm.Core.Errors;
 using ZadElealm.Core.Specifications.Course;
 
 namespace ZadElealm.Apis.Quaries.Category

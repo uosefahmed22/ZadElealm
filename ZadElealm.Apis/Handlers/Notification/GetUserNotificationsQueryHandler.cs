@@ -1,7 +1,7 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Notification;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
@@ -14,14 +14,10 @@ namespace ZadElealm.Apis.Handlers.Notification
     public class GetUserNotificationsQueryHandler : BaseQueryHandler<GetUserNotificationsQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetUserNotificationsQueryHandler(
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public GetUserNotificationsQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public override async Task<ApiResponse> Handle(GetUserNotificationsQuery request, CancellationToken cancellationToken)
@@ -35,7 +31,7 @@ namespace ZadElealm.Apis.Handlers.Notification
 
             var response = new NotificationsResponse
             {
-                Notifications = _mapper.Map<IReadOnlyList<NotificationDto>>(notifications.Select(n => n.Notification)),
+                Notifications = notifications.ToDtos(),
                 UnreadCount = notifications.Count(n => !n.IsRead),
                 TotalCount = notifications.Count
             };
@@ -44,18 +40,17 @@ namespace ZadElealm.Apis.Handlers.Notification
 
             return new ApiDataResponse(200, response);
         }
-    
 
         private async Task UpdateNotificationsReadStatus(IEnumerable<UserNotification> notifications)
         {
-            var unreadNotifications = notifications.Where(n => !n.IsRead);
+            var unreadNotifications = notifications.Where(n => !n.IsRead).ToList();
             foreach (var notification in unreadNotifications)
             {
                 notification.IsRead = true;
             }
 
-            if (unreadNotifications.Any())
-            await _unitOfWork.Complete();
+            if (unreadNotifications.Count > 0)
+                await _unitOfWork.Complete();
         }
     }
 }

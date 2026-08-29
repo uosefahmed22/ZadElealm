@@ -1,5 +1,5 @@
 ﻿using ZadElealm.Apis.Commands;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace AdminDashboard.Commands.ReportCommand
 {

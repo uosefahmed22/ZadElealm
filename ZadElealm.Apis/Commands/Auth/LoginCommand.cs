@@ -1,5 +1,5 @@
 ﻿using ZadElealm.Apis.Dtos.Auth;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 
 namespace ZadElealm.Apis.Commands.Auth

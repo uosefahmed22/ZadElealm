@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Apis.Controllers
 {

@@ -1,4 +1,4 @@
-﻿using ZadElealm.Apis.Errors;
+﻿using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Handlers;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.ServiceDto;

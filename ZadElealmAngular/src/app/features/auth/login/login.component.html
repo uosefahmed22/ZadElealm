@@ -1,0 +1,64 @@
+<div class="auth-card">
+  <div class="card-header">
+    <p class="tag">تسجيل الدخول</p>
+    <h2>أهلًا بعودتك</h2>
+    <p>ادخل بياناتك للوصول إلى حسابك ومتابعة التعلم.</p>
+  </div>
+
+  @if (successMessage()) {
+    <div class="alert success">{{ successMessage() }}</div>
+  }
+
+  @if (serverMessage()) {
+    <div class="alert error">
+      <p>{{ serverMessage() }}</p>
+      @if (serverErrors().length) {
+        <ul>
+          @for (error of serverErrors(); track error) {
+            <li>{{ error }}</li>
+          }
+        </ul>
+      }
+    </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <label class="field">
+      <span>البريد الإلكتروني</span>
+      <input type="email" formControlName="email" placeholder="name@example.com" autocomplete="email" />
+      @if (getError('email')) {
+        <small class="field-error">{{ getError('email') }}</small>
+      }
+    </label>
+
+    <label class="field">
+      <span>كلمة المرور</span>
+      <div class="password-field">
+        <input
+          [type]="hidePassword() ? 'password' : 'text'"
+          formControlName="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+        />
+        <button type="button" class="text-button" (click)="togglePasswordVisibility()">
+          {{ hidePassword() ? 'إظهار' : 'إخفاء' }}
+        </button>
+      </div>
+      @if (getError('password')) {
+        <small class="field-error">{{ getError('password') }}</small>
+      }
+    </label>
+
+    <div class="form-actions">
+      <a routerLink="/forgot-password">نسيت كلمة المرور؟</a>
+      <button type="submit" class="primary-button" [disabled]="submitDisabled()">
+        {{ isSubmitting() ? 'جارٍ تسجيل الدخول...' : 'دخول' }}
+      </button>
+    </div>
+  </form>
+
+  <p class="form-footer">
+    ليس لديك حساب؟
+    <a routerLink="/register">أنشئ حسابًا جديدًا</a>
+  </p>
+</div>

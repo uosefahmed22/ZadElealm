@@ -1,6 +1,6 @@
 ﻿using AdminDashboard.Middlwares;
 using MediatR;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace AdminDashboard.Commands.RoleCommand
 {

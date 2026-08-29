@@ -10,5 +10,6 @@ namespace ZadElealm.Core.Models.Identity
     {
         public bool Result { get; set; }
         public string message { get; set; }
+        public UserDTO UserData { get; set; }
     }
 }

@@ -1,4 +1,4 @@
-﻿using AdminDashboard.Controllers;
+using AdminDashboard.Controllers;
 using AdminDashboard.Helpers;
 using AdminDashboard.Middlwares;
 using CloudinaryDotNet;
@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Configuration;
 using System.Text;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Helpers;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
@@ -32,7 +32,6 @@ namespace AdminDashboard.Extentions
             ConfigureCors(services, configuration);
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
-            services.AddAutoMapper(typeof(AdminDashboard.Helpers.MappingProfiles));
             services.AddMemoryCache();
             services.AddHttpClient();
             services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
@@ -51,6 +50,7 @@ namespace AdminDashboard.Extentions
 
             return services;
         }
+
         private static void ConfigureAuthentication(IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -85,6 +85,7 @@ namespace AdminDashboard.Extentions
 
             services.AddControllersWithViews().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
+
         private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
@@ -92,6 +93,7 @@ namespace AdminDashboard.Extentions
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
         }
+
         private static void ConfigureCors(IServiceCollection services, IConfiguration configuration)
         {
             services.AddCors(options =>
@@ -104,6 +106,7 @@ namespace AdminDashboard.Extentions
                 });
             });
         }
+
         private static void ConfigureDependencyInjection(IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -120,6 +123,7 @@ namespace AdminDashboard.Extentions
             services.Configure<AdminSettings>(configuration.GetSection("AdminSettings"));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ApplicationServiceExtensions).Assembly));
         }
+
         private static void ConfigureValidationErrorHandling(IServiceCollection services)
         {
             services.Configure<ApiBehaviorOptions>(options =>

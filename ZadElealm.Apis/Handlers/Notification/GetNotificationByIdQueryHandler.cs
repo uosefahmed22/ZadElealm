@@ -1,7 +1,7 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Notification;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
@@ -13,11 +13,10 @@ namespace ZadElealm.Apis.Handlers.Notification
     public class GetNotificationByIdQueryHandler : BaseQueryHandler<GetNotificationByIdQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
-        public GetNotificationByIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+
+        public GetNotificationByIdQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public override async Task<ApiResponse> Handle(GetNotificationByIdQuery request, CancellationToken cancellationToken)
@@ -29,8 +28,7 @@ namespace ZadElealm.Apis.Handlers.Notification
             if (userNotification == null)
                 return new ApiResponse(404, "الإشعار غير موجود");
 
-            var mappedNotification = _mapper.Map<NotificationDto>(userNotification.Notification);
-            mappedNotification.IsRead = userNotification.IsRead;
+            var mappedNotification = userNotification.ToDto();
 
             if (!userNotification.IsRead)
             {

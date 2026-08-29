@@ -1,5 +1,5 @@
 ﻿using MediatR;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Apis.Commands.UserRankCommand
 {

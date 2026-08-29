@@ -1,0 +1,85 @@
+:root {
+  color-scheme: light;
+  --color-primary: #3c6255;
+  --color-primary-dark: #35594a;
+  --color-secondary: #61876e;
+  --color-soft-green: #a6bb8d;
+  --color-accent: #eae7b1;
+  --color-accent-soft: rgba(234, 231, 177, 0.34);
+  --color-page: #f5f3ec;
+  --color-surface: #ffffff;
+  --color-surface-soft: #fbfaf5;
+  --color-border: rgba(60, 98, 85, 0.15);
+  --color-border-strong: rgba(60, 98, 85, 0.25);
+  --color-text: #16211d;
+  --color-text-muted: #556761;
+  --color-text-subtle: #7f9089;
+  --color-on-primary: #ffffff;
+  --color-danger: #b94b4b;
+  --color-danger-soft: rgba(185, 75, 75, 0.1);
+  --color-success: #2e6b53;
+  --color-success-soft: rgba(46, 107, 83, 0.12);
+  --color-warning: #8a6b1b;
+  --shadow-lg: 0 20px 60px rgba(39, 59, 51, 0.12);
+  --radius-md: 0.75rem;
+  --radius-xl: 1.5rem;
+  --focus-ring: 0 0 0 0.22rem rgba(166, 187, 141, 0.4);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--color-page);
+  color: var(--color-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Tahoma,
+    Arial,
+    sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+a {
+  color: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

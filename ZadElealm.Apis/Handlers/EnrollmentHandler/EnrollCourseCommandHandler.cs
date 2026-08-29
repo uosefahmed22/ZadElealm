@@ -1,8 +1,7 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Commands.EnrollmentCommands;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.EnrollmentQuery;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models;
@@ -43,16 +42,27 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _unitOfWork.Repository<Enrollment>().AddAsync(enrollment);
-            await _unitOfWork.Complete();
-
-            await _notificationService.SendNotificationAsync(new NotificationServiceDto
+            await _unitOfWork.BeginTransactionAsync();
+            try
             {
-                UserId = request.UserId,
-                Type = NotificationType.Enrollment,
-                Title = "تهانينا على التسجيل!",
-                Description = "نسأل الله أن يبارك لك في علمك وعملك. لقد تم تسجيلك بنجاح في الدورة. نتمنى لك رحلة علمية مليئة بالفائدة والنور. نسأل الله لك التوفيق والسداد."
-            });
+                await _unitOfWork.Repository<Enrollment>().AddAsync(enrollment);
+                await _unitOfWork.Complete();
+
+                await _notificationService.SendNotificationAsync(new NotificationServiceDto
+                {
+                    UserId = request.UserId,
+                    Type = NotificationType.Enrollment,
+                    Title = "تهانينا على التسجيل!",
+                    Description = "نسأل الله أن يبارك لك في علمك وعملك. لقد تم تسجيلك بنجاح في الدورة. نتمنى لك رحلة علمية مليئة بالفائدة والنور. نسأل الله لك التوفيق والسداد."
+                });
+
+                await _unitOfWork.CommitTransactionAsync();
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw;
+            }
 
             return new ApiResponse(200, "تم التسجيل في الدورة بنجاح");
         }

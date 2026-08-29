@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Text.Json;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace AdminDashboard.Middlwares
 {

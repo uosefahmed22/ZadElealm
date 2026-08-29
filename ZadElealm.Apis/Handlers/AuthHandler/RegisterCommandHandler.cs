@@ -2,7 +2,8 @@
 using System.Net;
 using System.Text;
 using ZadElealm.Apis.Commands.Auth;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Helpers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
 
@@ -13,15 +14,18 @@ namespace ZadElealm.Apis.Handlers.Auth
         private readonly UserManager<AppUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ISendEmailService _sendEmailService;
+        private readonly IConfiguration _configuration;
 
         public RegisterCommandHandler(
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager,
-            ISendEmailService sendEmailService)
+            ISendEmailService sendEmailService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _sendEmailService = sendEmailService;
+            _configuration = configuration;
         }
 
         public override async Task<ApiResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -102,7 +106,8 @@ namespace ZadElealm.Apis.Handlers.Auth
             var encodedToken = Convert.ToBase64String(Encoding.UTF8.GetBytes(token));
             var encodedUserId = WebUtility.UrlEncode(userId);
 
-            return $"https://zadelealm.runasp.net/api/Account/confirm-email?userId={encodedUserId}&token={encodedToken}";
+            var apiBaseUrl = _configuration["BaseUrl"] ?? "https://zadelealm.runasp.net";
+            return AuthUrlBuilder.BuildConfirmEmailUrl(apiBaseUrl, encodedUserId, encodedToken);
         }
     }
 }

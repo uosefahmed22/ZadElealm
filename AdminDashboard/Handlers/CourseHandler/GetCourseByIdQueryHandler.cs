@@ -1,6 +1,5 @@
-﻿using AdminDashboard.Dto;
+using AdminDashboard.Dto;
 using AdminDashboard.Quires.CourseQuery;
-using AutoMapper;
 using MediatR;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;

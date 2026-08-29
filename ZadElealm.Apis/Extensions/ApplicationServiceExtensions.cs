@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet;
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +11,7 @@ using System.Collections.Concurrent;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json.Serialization;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Helpers;
 using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
@@ -33,18 +33,20 @@ namespace ZadElealm.Apis.Extentions
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
+            services.AddProblemDetails();
+            services.AddExceptionHandler<GlobalExceptionHandler>();
 
             QuestPDF.Settings.License = LicenseType.Community;
 
             ConfigureAuthentication(services, configuration);
             ConfigureDatabase(services, configuration);
-            ConfigureCors(services);
+            ConfigureCors(services, configuration);
             ConfigureDependencyInjection(services, configuration);
             ConfigureValidationErrorHandling(services);
-            services.AddAutoMapper(typeof(MappingProfiles));
 
             return services;
         }
+
         private static void ConfigureAuthentication(IServiceCollection services, IConfiguration configuration)
         {
             services.AddIdentity<AppUser, IdentityRole>(options =>
@@ -82,6 +84,7 @@ namespace ZadElealm.Apis.Extentions
 
             services.AddSingleton(tokenValidationParameters);
         }
+
         private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
@@ -89,21 +92,25 @@ namespace ZadElealm.Apis.Extentions
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
         }
-        private static void ConfigureCors(IServiceCollection services)
+
+        private static void ConfigureCors(IServiceCollection services, IConfiguration configuration)
         {
+            var allowedOrigins = configuration.GetSection("CorsSettings:AllowedOrigins").Get<string[]>()
+                ?? new[] { "https://zad-elealm.netlify.app" };
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowSpecificOrigin",
                     builder =>
                     {
                         builder
-                            .WithOrigins("https://zad-elealm.netlify.app")
+                            .WithOrigins(allowedOrigins)
                             .AllowAnyMethod()
                             .AllowAnyHeader();
-                            //.WithExposedHeaders("X-CSRF-TOKEN");
                     });
             });
         }
+
         private static void ConfigureDependencyInjection(IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -120,18 +127,6 @@ namespace ZadElealm.Apis.Extentions
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
-
-            ///services.AddAntiforgery(options =>
-            ///{
-            ///    options.HeaderName = "X-XSRF-TOKEN";
-            ///    options.Cookie.Name = "XSRF-TOKEN";
-            ///});
-            /// services.AddControllersWithViews(options =>
-            ///{
-            ///    options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
-            ///});
-
-
             services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
             services.AddMemoryCache();
             services.AddSingleton<ConcurrentDictionary<string, ClientStatistics>>();
@@ -147,6 +142,7 @@ namespace ZadElealm.Apis.Extentions
 
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ApplicationServiceExtensions).Assembly));
         }
+
         private static void ConfigureValidationErrorHandling(IServiceCollection services)
         {
             services.Configure<ApiBehaviorOptions>(options =>

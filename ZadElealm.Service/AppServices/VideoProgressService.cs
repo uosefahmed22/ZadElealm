@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
@@ -81,7 +81,7 @@ namespace ZadElealm.Service.AppServices
             }
             catch (Exception ex)
             {
-                return new ApiDataResponse(500, null, $"فشل في تحديث التقدم: {ex.Message}");
+                return new ApiDataResponse(500, null, "فشل في تحديث التقدم");
             }
         }
         public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)

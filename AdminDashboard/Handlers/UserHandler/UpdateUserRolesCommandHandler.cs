@@ -1,7 +1,7 @@
 ﻿using AdminDashboard.Commands.UserCommand;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 
 namespace AdminDashboard.Handlers.UserHandler

@@ -100,9 +100,14 @@ namespace ZadElealm.Service.IdentityService
 
             try
             {
-                _tokenValidationParameters.ValidateLifetime = false;
+                var refreshValidationParameters = _tokenValidationParameters.Clone();
+                refreshValidationParameters.ValidateLifetime = false;
 
-                var tokenInVerification = jwtTokenHandler.ValidateToken(Token, _tokenValidationParameters, out var validatedToken);
+                var tokenInVerification = jwtTokenHandler.ValidateToken(
+                    Token,
+                    refreshValidationParameters,
+                    out var validatedToken);
+
                 if (tokenInVerification == null)
                 {
                     return new AuthResult { Result = false, message = "رمز غير صالح." };
@@ -110,38 +115,62 @@ namespace ZadElealm.Service.IdentityService
 
                 var claims = tokenInVerification.Claims.ToDictionary(c => c.Type, c => c.Value);
 
-                if (!claims.TryGetValue(JwtRegisteredClaimNames.Exp, out var expValue) ||
-                    !long.TryParse(expValue, out var utcExpiryDate) ||
-                    DateTimeOffset.FromUnixTimeSeconds(utcExpiryDate) > DateTime.UtcNow)
-                {
-                    return new AuthResult { Result = false, message = "لم تنته صلاحية هذا الرمز بعد." };
-                }
-
-                var storedToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(x => x.Token == RefreshToken);
-                if (storedToken == null || storedToken.Used || storedToken.IsRevoked || storedToken.ExpiryDate < DateTime.UtcNow)
-                {
-                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
-                }
-                var user = await _userManager.FindByIdAsync(storedToken.UserId);
-                if (user == null || !user.IsDeleted)
-                {
-                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
-                }
-
-                if (!claims.TryGetValue(JwtRegisteredClaimNames.Jti, out var jti) || storedToken.JwtId != jti)
+                if (!claims.TryGetValue(JwtRegisteredClaimNames.Jti, out var jti))
                 {
                     return new AuthResult { Result = false, message = "رمز غير صالح." };
                 }
 
-                storedToken.Used = true;
-                _dbContext.RefreshTokens.Update(storedToken);
-                await _dbContext.SaveChangesAsync();
-                return new AuthResult { Result = true, message = "تم تحديث الرمز." };
+                var now = DateTime.UtcNow;
+                var storedToken = await _dbContext.RefreshTokens
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Token == RefreshToken);
+
+                if (storedToken == null ||
+                    storedToken.Used ||
+                    storedToken.IsRevoked ||
+                    storedToken.Invalidated ||
+                    storedToken.ExpiryDate < now)
+                {
+                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
+                }
+                var user = await _userManager.FindByIdAsync(storedToken.UserId);
+                if (user == null || user.IsDeleted)
+                {
+                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
+                }
+
+                if (storedToken.JwtId != jti)
+                {
+                    return new AuthResult { Result = false, message = "رمز غير صالح." };
+                }
+
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+                var redeemedTokens = await _dbContext.RefreshTokens
+                    .Where(x => x.Id == storedToken.Id &&
+                                !x.Used &&
+                                !x.IsRevoked &&
+                                !x.Invalidated &&
+                                x.ExpiryDate >= now)
+                    .ExecuteUpdateAsync(setters => setters
+                        .SetProperty(x => x.Used, true)
+                        .SetProperty(x => x.IsRevoked, true));
+
+                if (redeemedTokens != 1)
+                {
+                    await transaction.RollbackAsync();
+                    return new AuthResult { Result = false, message = "رمز تحديث غير صالح." };
+                }
+
+                var newToken = await CreateToken(user);
+                await transaction.CommitAsync();
+
+                return new AuthResult { Result = true, message = "تم تحديث الرمز.", UserData = newToken };
 
             }
-            catch (SecurityTokenException ex)
+            catch (SecurityTokenException)
             {
-                return new AuthResult { Result = false, message = ex.Message };
+                return new AuthResult { Result = false, message = "رمز غير صالح." };
             }
         }
         public async Task<AuthResult> RevokeToken(string Token, string RefreshToken)
@@ -177,12 +206,12 @@ namespace ZadElealm.Service.IdentityService
                     message = "تم إلغاء الرمز."
                 };
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new AuthResult
                 {
                     Result = false,
-                    message = ex.Message
+                    message = "حدث خطأ أثناء إلغاء الرمز."
                 };
             }
         }

@@ -10,11 +10,11 @@ public static class MiddlewareExtensions
 {
     public static async Task ConfigureMiddlewareAsync(this WebApplication app)
     {
-        app.UseMiddleware<ExceptionMiddleware>();
+        app.UseExceptionHandler();
         app.UseMiddleware<RateLimitingMiddleware>();
        //app.UseMiddleware<CsrfJwtMiddleware>();
         //app.UseMiddleware<SwaggerBasicAuthMiddleware>();
-        app.UseStatusCodePagesWithRedirects("/errors/{0}");
+        app.UseStatusCodePages();
         app.UseCors("AllowSpecificOrigin");
         app.UseStaticFiles();
         app.UseHttpsRedirection();
@@ -29,9 +29,17 @@ public static class MiddlewareExtensions
         try
         {
             var appDbContext = services.GetRequiredService<AppDbContext>();
-            await appDbContext.Database.MigrateAsync().ConfigureAwait(false);
-            await AppDbContextSeed.SeedAsync(appDbContext, logger).ConfigureAwait(false);
-            logger.LogInformation("AppDbContext migrated and seeded successfully.");
+            if (app.Environment.IsEnvironment("Testing"))
+            {
+                await appDbContext.Database.EnsureCreatedAsync().ConfigureAwait(false);
+                logger.LogInformation("Integration-test database created successfully.");
+            }
+            else
+            {
+                await appDbContext.Database.MigrateAsync().ConfigureAwait(false);
+                await AppDbContextSeed.SeedAsync(appDbContext, logger).ConfigureAwait(false);
+                logger.LogInformation("AppDbContext migrated and seeded successfully.");
+            }
 
         }
         catch (Exception ex)

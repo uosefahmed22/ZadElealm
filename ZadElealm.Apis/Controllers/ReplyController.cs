@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.ReplyCommand;
 using ZadElealm.Apis.Commands.Review;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Review;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
@@ -19,14 +18,11 @@ namespace ZadElealm.Apis.Controllers
     {
         private readonly IMediator _mediator;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IMapper _mapper;
         public ReplyController(IMediator mediator, 
-            UserManager<AppUser> userManager,   
-            IMapper mapper)
+            UserManager<AppUser> userManager)
         {
             _mediator = mediator;
             _userManager = userManager;
-            _mapper = mapper;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.UserRankCommand;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.UserRankquery;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models.Identity;
@@ -97,14 +97,7 @@ namespace ZadElealm.Apis.Controllers
         [ProducesResponseType(typeof(Dictionary<UserRankEnum, int>), StatusCodes.Status200OK)]
         public async Task<ActionResult<Dictionary<UserRankEnum, int>>> GetRankStats()
         {
-            var stats = new Dictionary<UserRankEnum, int>
-            {
-                { UserRankEnum.Bronze, 0 },
-                { UserRankEnum.Silver, 0 },
-                { UserRankEnum.Gold, 0 },
-                { UserRankEnum.Platinum, 0 },
-                { UserRankEnum.Diamond, 0 }
-            };
+            var stats = await _mediator.Send(new GetRankStatsQuery());
             return Ok(stats);
         }
     }

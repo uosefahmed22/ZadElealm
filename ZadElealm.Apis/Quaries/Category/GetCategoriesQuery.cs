@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using ZadElealm.Apis.Commands;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Apis.Quaries.Category
 {

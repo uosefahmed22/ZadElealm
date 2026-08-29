@@ -1,5 +1,5 @@
 ﻿using ZadElealm.Apis.Commands.QuizCommands;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Service;
 
 namespace ZadElealm.Apis.Handlers.QuizHandler

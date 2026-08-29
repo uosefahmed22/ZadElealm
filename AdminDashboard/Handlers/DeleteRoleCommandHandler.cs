@@ -1,8 +1,7 @@
-﻿using AdminDashboard.Commands;
-using AdminDashboard.Middlwares;
+﻿using AdminDashboard.Commands.RoleCommand;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace AdminDashboard.Handlers
 {
@@ -25,9 +24,9 @@ namespace AdminDashboard.Handlers
             if (role.Name == "Admin" || role.Name == "User")
                 return new ApiResponse(400,"لا يمكن حذف هذا الدور!");
 
-            var ApiResponse = await _roleManager.DeleteAsync(role);
-            return ApiResponse.Succeeded
-                ? new ApiResponse(400, "تم حذف الدور بنجاح.")
+            var result = await _roleManager.DeleteAsync(role);
+            return result.Succeeded
+                ? new ApiResponse(200, "تم حذف الدور بنجاح.")
                 : new ApiResponse(400, "حدث خطأ أثناء حذف الدور.");
         }
     }

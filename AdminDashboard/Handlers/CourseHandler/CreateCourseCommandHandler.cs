@@ -1,11 +1,10 @@
-﻿using AdminDashboard.Commands.CourseCommand;
+using AdminDashboard.Commands.CourseCommand;
 using AdminDashboard.Models;
-using AutoMapper;
 using MediatR;
 using Newtonsoft.Json.Linq;
 using System.Web;
 using System.Xml;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;

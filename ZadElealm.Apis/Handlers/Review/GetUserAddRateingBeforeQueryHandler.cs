@@ -1,4 +1,4 @@
-﻿using ZadElealm.Apis.Errors;
+﻿using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Review;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications.Rating;

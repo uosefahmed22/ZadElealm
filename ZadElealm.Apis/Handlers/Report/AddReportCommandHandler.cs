@@ -1,6 +1,6 @@
-﻿using AutoMapper;
 using ZadElealm.Apis.Commands.Report;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Repositories;
 
 namespace ZadElealm.Apis.Handlers.Report
@@ -8,17 +8,15 @@ namespace ZadElealm.Apis.Handlers.Report
     public class AddReportCommandHandler : BaseCommandHandler<AddReportCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public AddReportCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public AddReportCommandHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public override async Task<ApiResponse> Handle(AddReportCommand request, CancellationToken cancellationToken)
         {
-            var mappedReport = _mapper.Map<Core.Models.Report>(request.ReportDto);
+            var mappedReport = request.ReportDto.ToEntity();
             mappedReport.AppUserId = request.UserId;
 
             await _unitOfWork.Repository<Core.Models.Report>().AddAsync(mappedReport);

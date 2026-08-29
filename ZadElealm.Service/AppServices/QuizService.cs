@@ -5,7 +5,7 @@ using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Specifications.Quiz;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.ServiceDto;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace ZadElealm.Service.AppServices
 {
@@ -128,6 +128,10 @@ namespace ZadElealm.Service.AppServices
                 if (existingProgress?.IsCompleted == true)
                     return new ApiDataResponse(400, null, "تم إكمال الاختبار مسبقاً");
 
+                var isEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(userId, quiz.CourseId);
+                if (!isEligible)
+                    return new ApiDataResponse(403, null, "الرجاء إكمال 80% من الدورة للدخول للإختبار");
+
                 var answerMap = submission.StudentAnswers.DistinctBy(a => a.QuestionId).ToDictionary(a => a.QuestionId);
                 var questionResults = new List<QuestionResultDto>();
                 int correctAnswers = 0;
@@ -219,7 +223,7 @@ namespace ZadElealm.Service.AppServices
             catch (Exception ex)
             {
                 await _unitOfWork.RollbackTransactionAsync();
-                return new ApiDataResponse(500, null, $"حدث خطأ أثناء حفظ النتائج: {ex.Message}");
+                return new ApiDataResponse(500, null, "حدث خطأ أثناء حفظ النتائج");
             }
         }
     }

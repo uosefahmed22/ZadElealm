@@ -1,0 +1,4 @@
+interface:
+  display_name: ".NET Backend Mentor"
+  short_description: "Learn, trace, build, and review .NET backends"
+  default_prompt: "Use $guide-dotnet-backend to trace this feature and guide me through implementing it."

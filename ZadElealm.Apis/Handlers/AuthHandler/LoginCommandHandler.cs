@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Identity;
 using ZadElealm.Apis.Commands.Auth;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
 

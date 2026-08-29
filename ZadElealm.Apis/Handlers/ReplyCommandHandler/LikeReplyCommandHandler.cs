@@ -1,5 +1,5 @@
 ﻿using ZadElealm.Apis.Commands.ReplyCommand;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications.ReplySpecifications;

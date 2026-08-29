@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Text.Json;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Helpers;
 
 namespace ZadElealm.Apis.Middlwares

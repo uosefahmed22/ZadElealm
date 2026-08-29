@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ZadElealm.Apis.Commands.Auth;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 
 namespace ZadElealm.Apis.Handlers.AuthHandler
@@ -19,6 +19,11 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
             if (user == null)
             {
                 return new ApiResponse(404, "المستخدم غير موجود");
+            }
+
+            if (string.IsNullOrEmpty(request.Password) || !await _userManager.CheckPasswordAsync(user, request.Password))
+            {
+                return new ApiResponse(400, "كلمة المرور غير صحيحة");
             }
 
             user.IsDeleted = true;

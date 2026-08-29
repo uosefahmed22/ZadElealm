@@ -1,7 +1,7 @@
-﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Memory;
 using ZadElealm.Apis.Dtos.DtosCourse;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Course;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
@@ -14,14 +14,10 @@ namespace ZadElealm.Apis.Handlers.Course
     public class GetCourseWithAllDataQueryHandler : BaseQueryHandler<GetCourseWithAllDataQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetCourseWithAllDataQueryHandler(
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public GetCourseWithAllDataQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public override async Task<ApiResponse> Handle(GetCourseWithAllDataQuery request, CancellationToken cancellationToken)
@@ -33,7 +29,7 @@ namespace ZadElealm.Apis.Handlers.Course
             if (course == null)
                 return new ApiResponse(404, "الدورة غير موجودة");
 
-            var mappedCourse = _mapper.Map<CourseResponseWithAllDataDto>(course);
+            var mappedCourse = course.ToDetailsDto();
 
             if (!string.IsNullOrEmpty(request.UserId))
             {
@@ -41,7 +37,7 @@ namespace ZadElealm.Apis.Handlers.Course
                 var videoProgress = await _unitOfWork.Repository<VideoProgress>()
                     .GetAllWithSpecNoTrackingAsync(specvideoProgress);
 
-                foreach (var video in mappedCourse. Videos)
+                foreach (var video in mappedCourse.Videos)
                 {
                     var progress = videoProgress.FirstOrDefault(vp => vp.VideoId == video.Id);
                     if (progress != null)

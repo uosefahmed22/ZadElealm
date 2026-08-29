@@ -3,7 +3,7 @@ using AdminDashboard.Commands.RoleCommand;
 using AdminDashboard.Middlwares;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace AdminDashboard.Handlers.RoleHandler
 {

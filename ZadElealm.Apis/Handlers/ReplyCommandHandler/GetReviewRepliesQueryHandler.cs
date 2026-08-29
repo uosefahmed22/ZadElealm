@@ -1,7 +1,7 @@
-﻿using AutoMapper;
 using MediatR;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Apis.Mappers;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Review;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
@@ -12,14 +12,10 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
     public class GetReviewRepliesQueryHandler : BaseQueryHandler<GetReviewRepliesQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetReviewRepliesQueryHandler(
-            IUnitOfWork unitOfWork,
-            IMapper mapper)
+        public GetReviewRepliesQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public async override Task<ApiResponse> Handle(GetReviewRepliesQuery request, CancellationToken cancellationToken)
@@ -37,7 +33,7 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
             if (!replies.Any())
                 return new ApiResponse(404, "لا توجد ردود لهذه المراجعة");
 
-            var repliesDto = _mapper.Map<IReadOnlyList<ReplyDto>>(replies);
+            var repliesDto = replies.ToDtos();
 
             return new ApiDataResponse(200, repliesDto, "تم جلب الردود بنجاح");
         }

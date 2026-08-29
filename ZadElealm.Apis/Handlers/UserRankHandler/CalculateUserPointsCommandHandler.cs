@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using ZadElealm.Apis.Commands.UserRankCommand;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Service;
 
 namespace ZadElealm.Apis.Handlers.UserRankHandler

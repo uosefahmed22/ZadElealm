@@ -1,9 +1,8 @@
-﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ZadElealm.Apis.Dtos.DtosCourse;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Helpers;
 using ZadElealm.Apis.Quaries.Category;
 using ZadElealm.Core.Models;

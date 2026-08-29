@@ -1,0 +1,45 @@
+<div class="auth-card">
+  <div class="card-header">
+    <p class="tag">تأكيد البريد الإلكتروني</p>
+    <h2>فعّل حسابك</h2>
+    <p>
+      @if (justLoggedIn()) {
+        حسابك مسجل دخول، لكن يلزم أن يكون البريد الإلكتروني مؤكّدًا للاستفادة من تدفق التفعيل بشكل كامل.
+      } @else {
+        راجع بريدك الإلكتروني واضغط على رابط التفعيل الذي وصلك بعد التسجيل.
+      }
+    </p>
+  </div>
+
+  @if (registered()) {
+    <div class="alert success">تم إنشاء الحساب. الخطوة التالية هي تأكيد البريد الإلكتروني.</div>
+  }
+
+  @if (successMessage()) {
+    <div class="alert success">{{ successMessage() }}</div>
+  }
+
+  @if (serverMessage()) {
+    <div class="alert error">{{ serverMessage() }}</div>
+  }
+
+  @if (confirmationUrl()) {
+    <a class="secondary-button link-button" [href]="confirmationUrl()">فتح رابط التفعيل مباشرة</a>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="resend()" novalidate>
+    <label class="field">
+      <span>البريد الإلكتروني</span>
+      <input type="email" formControlName="email" autocomplete="email" />
+    </label>
+
+    <button type="submit" class="primary-button" [disabled]="isSubmitting() || form.invalid">
+      {{ isSubmitting() ? 'جارٍ إعادة الإرسال...' : 'إعادة إرسال رسالة التفعيل' }}
+    </button>
+  </form>
+
+  <p class="form-footer">
+    تريد الرجوع؟
+    <a routerLink="/login">تسجيل الدخول</a>
+  </p>
+</div>

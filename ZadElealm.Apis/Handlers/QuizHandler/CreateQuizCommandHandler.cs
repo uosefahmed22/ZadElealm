@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using ZadElealm.Apis.Commands.QuizCommands;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications.Quiz;

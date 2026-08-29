@@ -1,6 +1,6 @@
 ﻿using ZadElealm.Apis.Commands.VideoProgressCommands;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;

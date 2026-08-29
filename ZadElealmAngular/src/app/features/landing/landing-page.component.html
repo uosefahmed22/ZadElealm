@@ -1,0 +1,381 @@
+<div class="landing-page" id="top">
+  <header class="site-header">
+    <div class="header-shell">
+      <a class="brand-link" routerLink="/" aria-label="العودة إلى الرئيسية">
+        <span class="brand-mark">
+          <img src="/assets/brand/logo.png" alt="شعار زاد العلم" />
+        </span>
+        <span class="brand-name">زاد العلم</span>
+      </a>
+
+      <nav class="site-nav" aria-label="التنقل الرئيسي">
+        @for (item of navItems; track item.fragment) {
+          <a
+            class="nav-link"
+            [class.is-active]="item.fragment === 'top'"
+            [href]="'#' + item.fragment"
+          >
+            {{ item.label }}
+          </a>
+        }
+      </nav>
+
+      <div class="header-actions">
+        <a class="ghost-button" routerLink="/login">تسجيل الدخول</a>
+        <a class="primary-button" routerLink="/register">سجّل الآن</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-section section-shell" aria-labelledby="landing-title">
+      <div class="hero-copy">
+        <p class="hero-kicker">زاد العلم</p>
+        <h1 id="landing-title">تعلّم العلوم الإسلامية بخطوات واضحة</h1>
+        <p class="hero-description">
+          دورات منظمة، متابعة لتقدمك، اختبارات تفاعلية، وشهادات تساعدك على إكمال رحلتك بثبات
+          وطمأنينة.
+        </p>
+
+        <div class="hero-actions">
+          <a class="primary-button hero-primary" routerLink="/register">ابدأ رحلتك</a>
+          <a class="ghost-button hero-secondary" href="#paths">استكشف الدورات</a>
+        </div>
+      </div>
+
+      <div class="hero-visual" aria-hidden="true">
+        <div class="pattern pattern-top"></div>
+        <div class="pattern pattern-side"></div>
+
+        <div class="hero-arch"></div>
+
+        <article class="status-card course-card">
+          <div class="lantern-frame">
+            <div class="lantern-glow"></div>
+            <svg viewBox="0 0 48 72" role="presentation">
+              <path d="M18 10h12l-2 8h6l-4 10v30c0 4-3 7-6 7s-6-3-6-7V28l-4-10h6z" />
+              <path d="M24 0c4 3 6 6 6 10H18c0-4 2-7 6-10z" />
+              <path d="M19 30h10M19 38h10M19 46h10" />
+            </svg>
+          </div>
+          <div class="status-copy">
+            <h2>مدخل إلى علوم القرآن</h2>
+            <p>تقدّم الدورة</p>
+            <div class="mini-progress">
+              <span></span>
+            </div>
+            <small>40%</small>
+          </div>
+        </article>
+
+        <article class="status-card progress-card">
+          <p>تقدمك العام</p>
+          <div class="progress-ring">
+            <span>75%</span>
+          </div>
+        </article>
+
+        <div class="laptop-scene">
+          <div class="leaf-cluster leaf-cluster-right">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <div class="leaf-cluster leaf-cluster-left">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+
+          <div class="laptop-base"></div>
+          <div class="laptop-screen">
+            <div class="book book-right">
+              <span class="page-lines"></span>
+            </div>
+            <div class="book book-left">
+              <span class="page-lines"></span>
+            </div>
+            <div class="book-spine"></div>
+          </div>
+        </div>
+
+        <article class="status-card certificate-card">
+          <p class="certificate-title">شهادة إتمام</p>
+          <p class="certificate-name">لإتمام طريق الدروس المنظمة</p>
+          <div class="certificate-seal"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="challenge-strip section-shell" aria-label="التحدي والحل">
+      <article class="strip-card strip-copy">
+        <h2>التحدي</h2>
+        <p>كثرة المعلومات وتشتت المصادر يسببان الحيرة وصعوبة الاستمرار.</p>
+      </article>
+
+      <div class="strip-badge" aria-hidden="true">
+        <div class="badge-star">
+          <img src="/assets/brand/logo.png" alt="" />
+        </div>
+      </div>
+
+      <article class="strip-card strip-copy">
+        <h2>الحل</h2>
+        <p>منصة تقدم لك الطريق الواضح من تعلم، ومتابعة، وتطبيق في تجربة واحدة هادئة.</p>
+      </article>
+    </section>
+
+    <section class="features-section section-shell" id="features" aria-labelledby="features-title">
+      <div class="section-title">
+        <h2 id="features-title">المميزات</h2>
+      </div>
+
+      <div class="feature-grid">
+        @for (feature of featureCards; track feature.title) {
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">
+              @switch (feature.icon) {
+                @case ('courses') {
+                  <svg viewBox="0 0 32 32"><path d="M6 7h20v18H6zM11 7v18M16 12h6M16 17h6" /></svg>
+                }
+                @case ('progress') {
+                  <svg viewBox="0 0 32 32"><path d="M8 24V14M16 24V9M24 24V18M6 26h20" /></svg>
+                }
+                @case ('quiz') {
+                  <svg viewBox="0 0 32 32">
+                    <path d="M9 6h14l3 3v17H9zM13 13h9M13 18h9M13 23h6" />
+                  </svg>
+                }
+                @case ('certificate') {
+                  <svg viewBox="0 0 32 32">
+                    <path d="M16 6a7 7 0 1 1 0 14a7 7 0 0 1 0-14zm-4 14l-1 6l5-3l5 3l-1-6" />
+                  </svg>
+                }
+              }
+            </div>
+            <h3>{{ feature.title }}</h3>
+            <p>{{ feature.description }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="journey-section section-shell" id="journey" aria-labelledby="journey-title">
+      <div class="section-title">
+        <h2 id="journey-title">رحلتك في طلب العلم</h2>
+      </div>
+
+      <div class="journey-grid">
+        @for (step of journeySteps; track step.number) {
+          <article class="journey-step">
+            <span class="step-number">{{ step.number }}</span>
+            <div class="step-icon" aria-hidden="true">
+              @switch (step.icon) {
+                @case ('account') {
+                  <svg viewBox="0 0 32 32">
+                    <path d="M16 7a5 5 0 1 1 0 10a5 5 0 0 1 0-10zM8 25c0-4 4-6 8-6s8 2 8 6" />
+                  </svg>
+                }
+                @case ('book') {
+                  <svg viewBox="0 0 32 32">
+                    <path d="M7 8h8c2 0 4 1 5 3c1-2 3-3 5-3h0v16h0c-2 0-4 1-5 3c-1-2-3-3-5-3H7z" />
+                  </svg>
+                }
+                @case ('screen') {
+                  <svg viewBox="0 0 32 32">
+                    <path d="M6 8h20v13H6zM12 26h8M16 21v5M14 14l2 2l4-4" />
+                  </svg>
+                }
+                @case ('award') {
+                  <svg viewBox="0 0 32 32">
+                    <path
+                      d="M16 7l2 4l4 .6l-3 3l.7 4.4L16 17l-3.7 2l.7-4.4l-3-3l4-.6zM10 20v6l6-3l6 3v-6"
+                    />
+                  </svg>
+                }
+              }
+            </div>
+            <h3>{{ step.title }}</h3>
+            <p>{{ step.description }}</p>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="paths-section section-shell" id="paths" aria-labelledby="paths-title">
+      <div class="paths-copy">
+        <h2 id="paths-title">محتوى علمي موثوق لمسارات متنوعة</h2>
+        <p>
+          أمثلة لمسارات تعليمية يمكن تنظيمها داخل المنصة بما يناسب المستويات المختلفة وأهداف التعلم.
+        </p>
+        <a class="primary-button paths-button" routerLink="/register">استكشف جميع الدورات</a>
+      </div>
+
+      <div class="paths-grid">
+        @for (path of coursePaths; track path.title) {
+          <article
+            class="path-card"
+            [class.path-card-sand]="path.accent === 'sand'"
+            [class.path-card-olive]="path.accent === 'olive'"
+          >
+            <div class="path-visual">
+              <span class="path-level">{{ path.level }}</span>
+              <div
+                class="path-illustration"
+                [class.path-illustration-sand]="path.accent === 'sand'"
+                [class.path-illustration-olive]="path.accent === 'olive'"
+              >
+                @if (path.accent === 'green') {
+                  <div class="dome-shape"></div>
+                } @else if (path.accent === 'sand') {
+                  <div class="calligraphy-card"></div>
+                } @else {
+                  <div class="book-stand">
+                    <span></span>
+                    <span></span>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="path-body">
+              <h3>{{ path.title }}</h3>
+              <p>{{ path.description }}</p>
+              <span class="path-line"></span>
+            </div>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="progress-section section-shell" aria-labelledby="progress-title">
+      <article class="certificate-preview">
+        <div class="certificate-paper">
+          <p class="certificate-heading">شهادة إتمام</p>
+          <p>تمنح هذه الشهادة لإتمام طريق الدروس المنظمة في المنصة.</p>
+          <div class="certificate-medal"></div>
+        </div>
+      </article>
+
+      <article class="progress-summary">
+        <p class="progress-label">تقدمك العام</p>
+        <div class="progress-ring progress-ring-large">
+          <span>75%</span>
+        </div>
+        <ul class="progress-list">
+          @for (item of progressChecklist; track item) {
+            <li>{{ item }}</li>
+          }
+        </ul>
+      </article>
+
+      <article class="progress-copy">
+        <h2 id="progress-title">تابع تقدمك واحتفل بإنجازك</h2>
+        <p>
+          لوحة واضحة تساعدك على رؤية ما أنجزته داخل كل مسار حتى تبقى رحلتك التعليمية ثابتة وواثقة.
+        </p>
+        <a class="primary-button" routerLink="/register">ابدأ رحلتك الآن</a>
+      </article>
+    </section>
+
+    <section class="faq-section section-shell" id="faq" aria-labelledby="faq-title">
+      <div class="faq-visual" aria-hidden="true">
+        <div class="faq-arch"></div>
+        <div class="faq-books">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="faq-plant">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+
+      <div class="faq-content">
+        <div class="section-title section-title-left">
+          <h2 id="faq-title">الأسئلة الشائعة</h2>
+        </div>
+
+        <div class="faq-list">
+          @for (item of faqItems; track item.question; let index = $index) {
+            <article class="faq-item">
+              <h3>
+                <button
+                  type="button"
+                  class="faq-trigger"
+                  [attr.aria-expanded]="openFaqIndex() === index"
+                  [attr.aria-controls]="'faq-panel-' + index"
+                  (click)="toggleFaq(index)"
+                >
+                  <span>{{ item.question }}</span>
+                  <span
+                    class="faq-chevron"
+                    [class.is-open]="openFaqIndex() === index"
+                    aria-hidden="true"
+                  ></span>
+                </button>
+              </h3>
+              <div
+                class="faq-panel"
+                [id]="'faq-panel-' + index"
+                [hidden]="openFaqIndex() !== index"
+              >
+                <p>{{ item.answer }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <section class="footer-cta section-shell">
+      <div class="footer-lantern" aria-hidden="true">
+        <div class="footer-lantern-arch"></div>
+        <div class="footer-lantern-book"></div>
+      </div>
+
+      <div class="footer-copy">
+        <h2>ابدأ رحلتك في طلب العلم اليوم</h2>
+        <p>انضم إلى بيئة تعليمية إسلامية هادئة تساعدك على التعلم والنمو بخطوات واضحة.</p>
+      </div>
+
+      <a class="footer-brand" routerLink="/" aria-label="زاد العلم">
+        <img src="/assets/brand/logo.png" alt="شعار زاد العلم" />
+        <span>زاد العلم</span>
+      </a>
+
+      <div class="footer-links">
+        <div>
+          <h3>روابط سريعة</h3>
+          <a href="#top">الرئيسية</a>
+          <a href="#features">المميزات</a>
+          <a href="#journey">كيف تبدأ</a>
+          <a href="#faq">الأسئلة الشائعة</a>
+        </div>
+
+        <div>
+          <h3>المصدر</h3>
+          <a routerLink="/register">جميع الدورات</a>
+          <a routerLink="/login">تسجيل الدخول</a>
+          <a routerLink="/forgot-password">مركز المساعدة</a>
+        </div>
+
+        <div>
+          <h3>تابعنا</h3>
+          <div class="social-list" aria-label="روابط اجتماعية توضيحية">
+            <span>يوتيوب</span>
+            <span>تلجرام</span>
+            <span>انستغرام</span>
+            <span>فيسبوك</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="footer-note">© زاد العلم. جميع الحقوق محفوظة.</p>
+    </section>
+  </footer>
+</div>

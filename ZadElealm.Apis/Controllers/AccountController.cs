@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.Auth;
 using ZadElealm.Apis.Dtos.Auth;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.Auth;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
@@ -126,22 +126,15 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("update-email")]
         public async Task<ActionResult<ApiResponse>> UpdateEmail([FromBody] UpdateEmailDto request)
         {
-            try
-            {
-                var email = User.FindFirstValue(ClaimTypes.Email);
-                var user = await _userManager.FindByEmailAsync(email);
-                if (user == null)
-                    return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
-                var command = new UpdateEmailCommand(user.Id, request.NewEmail, request.Token);
-                var response = await _mediator.Send(command);
+            var command = new UpdateEmailCommand(user.Id, request.NewEmail, request.Token);
+            var response = await _mediator.Send(command);
 
-                return StatusCode(response.StatusCode, response);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new ApiResponse(400, "An error occurred"));
-            }
+            return StatusCode(response.StatusCode, response);
         }
        
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]

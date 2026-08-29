@@ -1,7 +1,7 @@
 ﻿using AdminDashboard.Commands;
 using AdminDashboard.Commands.ReportCommand;
 using MediatR;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 

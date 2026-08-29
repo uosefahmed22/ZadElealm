@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.QuizCommands;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Quaries.QuizQuery;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
@@ -61,7 +60,7 @@ namespace ZadElealm.Apis.Controllers
             return StatusCode(response.StatusCode, response);
         }
 
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpPost("create")]
         public async Task<ActionResult<ApiResponse>> CreateQuiz([FromBody] CreateQuizDto quizDto)
         {

@@ -1,7 +1,7 @@
 ﻿using AdminDashboard.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 
 namespace AdminDashboard.Commands.UserCommand
 {

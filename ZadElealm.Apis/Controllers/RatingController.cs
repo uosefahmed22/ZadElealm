@@ -1,4 +1,3 @@
-﻿using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.Rating;
 using ZadElealm.Apis.Dtos;
-using ZadElealm.Apis.Errors;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
