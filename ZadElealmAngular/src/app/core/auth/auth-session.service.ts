@@ -18,6 +18,15 @@ export class AuthSessionService {
     sessionStorage.setItem(sessionStorageKey, JSON.stringify(user));
   }
 
+  getTokenRequest(): { token: string; refreshToken: string } | null {
+    const user = this.userState();
+    if (!user?.token || !user.refreshToken) {
+      return null;
+    }
+
+    return { token: user.token, refreshToken: user.refreshToken };
+  }
+
   clearSession(): void {
     this.userState.set(null);
     sessionStorage.removeItem(sessionStorageKey);
@@ -30,7 +39,19 @@ export class AuthSessionService {
     }
 
     try {
-      return JSON.parse(serialized) as UserDto;
+      const candidate = JSON.parse(serialized) as Partial<UserDto>;
+      if (
+        typeof candidate.displayName !== 'string' ||
+        typeof candidate.email !== 'string' ||
+        typeof candidate.token !== 'string' ||
+        typeof candidate.refreshToken !== 'string' ||
+        !candidate.token ||
+        !candidate.refreshToken
+      ) {
+        throw new Error('Invalid stored auth session.');
+      }
+
+      return candidate as UserDto;
     } catch {
       sessionStorage.removeItem(sessionStorageKey);
       return null;

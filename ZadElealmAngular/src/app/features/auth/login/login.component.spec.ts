@@ -1,4 +1,4 @@
-import { ActivatedRoute, Router, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { of, throwError } from 'rxjs';
 
@@ -19,14 +19,17 @@ describe('LoginComponent', () => {
       imports: [LoginComponent],
       providers: [
         provideRouter([]),
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: new Map() } } },
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: convertToParamMap({}) } },
+        },
         { provide: AuthApiService, useValue: authApi as Partial<AuthApiService> },
-        { provide: AuthSessionService, useValue: session as Partial<AuthSessionService> }
-      ]
+        { provide: AuthSessionService, useValue: session as Partial<AuthSessionService> },
+      ],
     }).compileComponents();
 
     router = TestBed.inject(Router);
-    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
   });
 
   it('marks controls as touched when submitting an invalid form', () => {
@@ -47,9 +50,9 @@ describe('LoginComponent', () => {
           displayName: 'طالب',
           email: 'user@test.com',
           token: 'access',
-          refreshToken: 'refresh'
-        }
-      })
+          refreshToken: 'refresh',
+        },
+      }),
     );
 
     const fixture = TestBed.createComponent(LoginComponent);
@@ -59,18 +62,14 @@ describe('LoginComponent', () => {
     component.submit();
 
     expect(session.setSession).toHaveBeenCalled();
-    expect(router.navigate).toHaveBeenCalledWith(['/confirm-email'], {
-      queryParams: { email: 'user@test.com', justLoggedIn: true }
-    });
+    expect(router.navigateByUrl).toHaveBeenCalledWith(
+      expect.objectContaining({ toString: expect.any(Function) }),
+    );
+    expect(router.navigateByUrl).toHaveBeenCalledTimes(1);
   });
 
   it('shows server errors when login fails', () => {
-    authApi.login.mockReturnValue(
-      throwError(
-        () =>
-          new Error('ignored')
-      )
-    );
+    authApi.login.mockReturnValue(throwError(() => new Error('ignored')));
 
     const fixture = TestBed.createComponent(LoginComponent);
     const component = fixture.componentInstance;

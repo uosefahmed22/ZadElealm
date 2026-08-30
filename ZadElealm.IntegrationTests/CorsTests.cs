@@ -32,5 +32,18 @@ namespace ZadElealm.IntegrationTests
             Assert.Contains("https://zad-elealm.netlify.app", response.Headers.GetValues("Access-Control-Allow-Origin"));
             Assert.Contains("POST", response.Headers.GetValues("Access-Control-Allow-Methods"));
         }
+
+        [Fact]
+        public async Task PreflightRequest_FromLocalAngularOrigin_ReturnsNoContentWithCorsHeaders()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Options, "/api/Account/login");
+            request.Headers.Add("Origin", "http://localhost:4200");
+            request.Headers.Add("Access-Control-Request-Method", "POST");
+
+            var response = await _client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            Assert.Contains("http://localhost:4200", response.Headers.GetValues("Access-Control-Allow-Origin"));
+        }
     }
 }

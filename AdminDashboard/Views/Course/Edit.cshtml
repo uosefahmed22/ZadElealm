@@ -1,71 +1,77 @@
-﻿@model DashboardCourseDto
-
+@model DashboardCourseDto
 @{
-    ViewData["Title"] = "Edit Course";
+    ViewData["Title"] = "تعديل الكورس";
 }
 
-<link href="~/css/editcourse.css" rel="stylesheet" />
+<section class="page-heading course-form-heading">
+    <div><span class="eyebrow">الكورسات</span><h1>تعديل الكورس</h1><p>حدّث بيانات «@Model.Name» ثم احفظ التغييرات.</p></div>
+    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-right ms-2"></i>العودة للكورسات</a>
+</section>
 
-<div class="container-fluid">
-    <h1 class="text-center my-4">Edit @Model.Name</h1>
-    <hr />
+<div class="course-form-layout course-edit-layout">
+    <section class="surface-card course-form-card">
+        <form method="post" asp-action="Edit" enctype="multipart/form-data">
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-    @if (!ViewData.ModelState.IsValid)
-    {
-        <div class="alert alert-danger">
-            @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <p>@modelError.ErrorMessage</p>
-            }
-        </div>
-    }
+            <div class="row g-4">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label">اسم الكورس</label>
+                    <div class="input-group"><span class="input-group-text"><i class="fas fa-book-open"></i></span><input asp-for="Name" class="form-control" placeholder="اسم الكورس" /></div>
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label">وصف الكورس</label>
+                    <textarea asp-for="Description" class="form-control" rows="5" placeholder="اكتب وصفاً واضحاً لمحتوى الكورس"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Author" class="form-label">المحاضر</label>
+                    <div class="input-group"><span class="input-group-text"><i class="fas fa-chalkboard-user"></i></span><input asp-for="Author" class="form-control" /></div>
+                    <span asp-validation-for="Author" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="CourseLanguage" class="form-label">اللغة</label>
+                    <div class="input-group"><span class="input-group-text"><i class="fas fa-language"></i></span><input asp-for="CourseLanguage" class="form-control" /></div>
+                    <span asp-validation-for="CourseLanguage" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="formFile" class="form-label">تغيير صورة الكورس</label>
+                    <input asp-for="formFile" type="file" class="form-control" accept="image/*" id="courseImageInput" />
+                    <span asp-validation-for="formFile" class="text-danger small"></span>
+                    <small class="form-hint">اترك الحقل فارغاً للاحتفاظ بالصورة الحالية.</small>
+                </div>
+            </div>
 
-    <form method="post" asp-action="Edit" enctype="multipart/form-data" class="w-100">
-        <input asp-for="Id" hidden />
-        <div class="form-group row">
-            <label asp-for="Name" class="col-sm-2 col-form-label">Course Name</label>
-            <div class="col-sm-10">
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
+            <div class="course-form-actions">
+                <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-floppy-disk ms-2"></i>حفظ التغييرات</button>
             </div>
-        </div>
-        <div class="form-group row">
-            <label asp-for="Description" class="col-sm-2 col-form-label">Description</label>
-            <div class="col-sm-10">
-                <textarea asp-for="Description" class="form-control"></textarea>
-                <span asp-validation-for="Description" class="text-danger"></span>
+        </form>
+    </section>
+
+    <aside class="course-form-aside">
+        <div class="course-preview-card">
+            <span class="eyebrow">معاينة الصورة</span>
+            <div class="course-edit-preview" id="courseImagePreview">
+                @if (!string.IsNullOrWhiteSpace(Model.Image))
+                {<img src="@Url.Content(Model.Image)" alt="الصورة الحالية لكورس @Model.Name" />}
+                else
+                {<div><i class="fas fa-book-quran"></i><span>لا توجد صورة</span></div>}
             </div>
+            <h2>@Model.Name</h2><p>@Model.Author</p>
         </div>
-        <div class="form-group row">
-            <label asp-for="Author" class="col-sm-2 col-form-label">Author</label>
-            <div class="col-sm-10">
-                <input asp-for="Author" class="form-control" />
-                <span asp-validation-for="Author" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label asp-for="CourseLanguage" class="col-sm-2 col-form-label">Language</label>
-            <div class="col-sm-10">
-                <input asp-for="CourseLanguage" class="form-control" />
-                <span asp-validation-for="CourseLanguage" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label asp-for="Image" class="col-sm-2 col-form-label">Upload Image</label>
-            <div class="col-sm-10">
-                <input type="file" asp-for="Image" class="form-control-file" />
-                <span asp-validation-for="Image" class="text-danger"></span>
-            </div>
-        </div>
-        <div class="form-group mt-4">
-            <input type="submit" value="Save" class="btn btn-primary" />
-            <a asp-action="Index" class="btn btn-secondary">Back To List</a>
-        </div>
-    </form>
+    </aside>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById('courseImageInput')?.addEventListener('change', event => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const preview = document.getElementById('courseImagePreview');
+            preview.innerHTML = `<img src="${URL.createObjectURL(file)}" alt="معاينة الصورة الجديدة" />`;
+        });
+    </script>
 }

@@ -1,84 +1,87 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string ActiveFor(string controller) =>
+        string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "active" : string.Empty;
+}
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Admin Panel</title>
+    <title>@ViewData["Title"] - زاد العلم</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
     <link rel="stylesheet" href="~/css/styles.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@600;700;800&family=Tajawal:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://use.fontawesome.com/releases/v6.1.0/js/all.js" crossorigin="anonymous"></script>
 </head>
 <body class="sb-nav-fixed">
     <header>
-        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-            <a class="navbar-brand ps-3" asp-action="Index" asp-controller="Home">
-                <i class="fas fa-graduation-cap me-2"></i>Zad Elealm
-            </a>
-            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
-                    <li class="nav-item dropdown">
-                        <button class="btn btn-link nav-link dropdown-toggle" id="navbarDropdown"
-                                data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user fa-fw"></i>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#!"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                            <li><a class="dropdown-item" href="#!"><i class="fas fa-list me-2"></i>Activity Log</a></li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li>
-                                <a class="dropdown-item" asp-controller="Admin" asp-action="Logout">
-                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
+        <nav class="sb-topnav navbar navbar-expand navbar-dark">
+            <div class="topnav-primary">
+                <a class="navbar-brand" asp-action="Index" asp-controller="Home" aria-label="الرئيسية - زاد العلم">
+                    <span class="brand-mark"><i class="fas fa-graduation-cap"></i></span>
+                    <span class="brand-copy">
+                        <strong>زاد العلم</strong>
+                        <small>لوحة الإدارة</small>
+                    </span>
+                </a>
+                <span class="topnav-divider" aria-hidden="true"></span>
+                <button class="sidebar-toggle" id="sidebarToggle" type="button" aria-label="فتح أو إغلاق القائمة" aria-controls="layoutSidenav_nav" aria-expanded="true">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <div class="topnav-actions">
+                <div class="dropdown">
+                    <button class="account-button dropdown-toggle" id="navbarDropdown" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="فتح قائمة الحساب">
+                        <span class="profile-avatar"><i class="fas fa-user"></i></span>
+                        <span class="admin-copy d-none d-sm-flex">
+                            <strong>مسؤول النظام</strong>
+                            <small>@(User.Identity?.Name ?? "حساب الإدارة")</small>
+                        </span>
+                        <i class="fas fa-chevron-down account-chevron" aria-hidden="true"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li class="dropdown-account-summary">
+                            <span>مسؤول النظام</span>
+                            <small>@(User.Identity?.Name ?? "حساب الإدارة")</small>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Logout"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+                    </ul>
+                </div>
             </div>
         </nav>
     </header>
 
     <div id="layoutSidenav">
         <div id="layoutSidenav_nav">
-            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <nav class="sb-sidenav" id="sidenavAccordion" aria-label="القائمة الرئيسية">
                 <div class="sb-sidenav-menu">
                     <div class="nav">
-                        <div class="sb-sidenav-menu-heading">Security</div>
-                        <a class="nav-link" asp-controller="Role" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></div>
-                            Roles
-                        </a>
-                        <a class="nav-link" asp-controller="User" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
-                            Users
-                        </a>
-
-                        <div class="sb-sidenav-menu-heading">Business</div>
-                        <a class="nav-link" asp-controller="Category" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-folder"></i></div>
-                            Categories
-                        </a>
-                        <a class="nav-link" asp-controller="Course" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
-                            Courses
-                        </a>
-                        <a class="nav-link" asp-controller="Report" asp-action="Index">
-                            <div class="sb-nav-link-icon"><i class="fas fa-book"></i></div>
-                            Reports
-                        </a>
+                        <a class="nav-link @ActiveFor("Home")" asp-controller="Home" asp-action="Index"><span class="sb-nav-link-icon"><i class="fas fa-chart-pie"></i></span><span>نظرة عامة</span></a>
+                        <div class="sb-sidenav-menu-heading">الإدارة</div>
+                        <a class="nav-link @ActiveFor("User")" asp-controller="User" asp-action="Index"><span class="sb-nav-link-icon"><i class="fas fa-users"></i></span><span>المستخدمون</span></a>
+                        <a class="nav-link @ActiveFor("Role")" asp-controller="Role" asp-action="Index"><span class="sb-nav-link-icon"><i class="fas fa-user-shield"></i></span><span>الأدوار والصلاحيات</span></a>
+                        <div class="sb-sidenav-menu-heading">المحتوى التعليمي</div>
+                        <a class="nav-link @ActiveFor("Category")" asp-controller="Category" asp-action="Index"><span class="sb-nav-link-icon"><i class="fas fa-layer-group"></i></span><span>التصنيفات</span></a>
+                        <a class="nav-link @ActiveFor("Course")" asp-controller="Course" asp-action="Index"><span class="sb-nav-link-icon"><i class="fas fa-book-open"></i></span><span>الكورسات</span></a>
+                        <div class="sb-sidenav-menu-heading">الدعم</div>
+                        <a class="nav-link @ActiveFor("Report")" asp-controller="Report" asp-action="Index"><span class="sb-nav-link-icon"><i class="fas fa-clipboard-list"></i></span><span>التقارير والشكاوى</span></a>
                     </div>
+                </div>
+                <div class="sidebar-footer">
+                    <span class="sidebar-footer-icon"><i class="fas fa-shield-alt"></i></span>
+                    <span><small>منطقة إدارة آمنة</small><strong>زاد العلم</strong></span>
                 </div>
             </nav>
         </div>
         <div id="layoutSidenav_content">
-            <main>
-                <div class="container-fluid px-4">
-                    @RenderBody()
-                </div>
+            <main class="dashboard-main">
+                <div class="container-fluid dashboard-shell">@RenderBody()</div>
             </main>
         </div>
     </div>

@@ -5,11 +5,13 @@ using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Repository.Data.Datbases;
 using ZadElealm.Repository.Data.SeedData;
+using Serilog;
 
 public static class MiddlewareExtensions
 {
     public static async Task ConfigureMiddlewareAsync(this WebApplication app)
     {
+        app.UseSerilogRequestLogging();
         app.UseExceptionHandler();
         app.UseMiddleware<RateLimitingMiddleware>();
        //app.UseMiddleware<CsrfJwtMiddleware>();

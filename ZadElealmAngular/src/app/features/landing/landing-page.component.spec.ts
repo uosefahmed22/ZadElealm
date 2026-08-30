@@ -1,57 +1,97 @@
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+import { Subject, of, throwError } from 'rxjs';
 
 import { routes } from '../../app.routes';
+import { CatalogApiService } from '../../core/catalog/catalog-api.service';
+import { PaginatedCoursesResponse } from '../../core/catalog/catalog.models';
 import { LandingPageComponent } from './landing-page.component';
 
 describe('LandingPageComponent', () => {
+  let catalogApi: { getCourses: ReturnType<typeof vi.fn> };
+
   beforeEach(async () => {
+    catalogApi = { getCourses: vi.fn(() => of(coursesResponse())) };
+
     await TestBed.configureTestingModule({
       imports: [LandingPageComponent],
-      providers: [provideRouter(routes)],
+      providers: [provideRouter(routes), { provide: CatalogApiService, useValue: catalogApi }],
     }).compileComponents();
   });
 
-  it('renders the landing page headline', () => {
-    const fixture = TestBed.createComponent(LandingPageComponent);
-    fixture.detectChanges();
-
-    const headline = fixture.nativeElement.querySelector('h1') as HTMLHeadingElement | null;
-    expect(headline?.textContent).toContain('تعلّم العلوم الإسلامية');
-  });
-
-  it('renders visible headings for every navigation target', () => {
-    const fixture = TestBed.createComponent(LandingPageComponent);
-    fixture.detectChanges();
-
-    const targets = ['home', 'features', 'how-it-works', 'faq'];
-    const headings = targets.map((target) =>
-      fixture.nativeElement.querySelector(`section#${target} h1, section#${target} h2`),
+  it('renders the source-of-truth headline and one header primary CTA', () => {
+    const fixture = createFixture();
+    const headline = fixture.nativeElement.querySelector('h1') as HTMLHeadingElement;
+    const headerPrimaryCtas = fixture.nativeElement.querySelectorAll(
+      '.site-header .zad-btn--primary',
     );
 
-    expect(headings.every(Boolean)).toBe(true);
-    expect(fixture.nativeElement.querySelector('#features-title')?.textContent).toContain(
-      'المميزات',
+    expect(headline.textContent?.trim()).toBe('تعلّم العلوم الإسلامية بخطوات واضحة');
+    expect(headerPrimaryCtas).toHaveLength(1);
+    expect(headerPrimaryCtas[0].textContent.trim()).toBe('ابدأ رحلتك');
+  });
+
+  it('renders API course data without invented duration, rating, author, or progress', () => {
+    const fixture = createFixture();
+    const text = fixture.nativeElement.textContent as string;
+
+    expect(text).toContain('أساسيات التجويد');
+    expect(text).toContain('12 درسًا');
+    expect(text).not.toContain('أحمد محمود');
+    expect(text).not.toContain('4.8');
+    expect(fixture.nativeElement.querySelector('.course-progress')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  it('uses responsive lazy course images and a canonical YouTube srcset', () => {
+    const fixture = createFixture();
+    const image = fixture.nativeElement.querySelector('.course-media img') as HTMLImageElement;
+
+    expect(image.getAttribute('loading')).toBe('lazy');
+    expect(image.getAttribute('decoding')).toBe('async');
+    expect(image.getAttribute('width')).toBe('480');
+    expect(image.getAttribute('height')).toBe('270');
+    expect(image.getAttribute('srcset')).toContain('mqdefault.jpg 320w');
+    expect(image.getAttribute('srcset')).toContain('hqdefault.jpg 480w');
+  });
+
+  it('shows box-matched skeleton cards while the catalog request is pending', () => {
+    const pending = new Subject<PaginatedCoursesResponse>();
+    catalogApi.getCourses.mockReturnValue(pending.asObservable());
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.querySelectorAll('.course-card--skeleton')).toHaveLength(3);
+    expect(fixture.nativeElement.querySelector('.course-region').getAttribute('aria-busy')).toBe(
+      'true',
     );
-    expect(fixture.nativeElement.textContent).toContain('كل ما تحتاجه لرحلة تعليمية منظمة وواضحة');
   });
 
-  it('marks the home navigation link as current initially', () => {
-    const fixture = TestBed.createComponent(LandingPageComponent);
-    fixture.detectChanges();
+  it('shows a clear empty state', () => {
+    catalogApi.getCourses.mockReturnValue(of(coursesResponse([])));
+    const fixture = createFixture();
 
-    const currentLink = fixture.nativeElement.querySelector(
-      '.nav-link[aria-current="page"]',
-    ) as HTMLAnchorElement | null;
-
-    expect(currentLink?.getAttribute('href')).toBe('#home');
-    expect(currentLink?.textContent).toContain('الرئيسية');
+    expect(fixture.nativeElement.textContent).toContain('لا توجد دورات متاحة الآن');
+    expect(fixture.nativeElement.querySelectorAll('.course-card')).toHaveLength(0);
   });
 
-  it('opens and closes the mobile navigation menu', () => {
-    const fixture = TestBed.createComponent(LandingPageComponent);
+  it('shows an Arabic error state and retries the real catalog request', () => {
+    catalogApi.getCourses.mockReturnValue(throwError(() => new Error('offline')));
+    const fixture = createFixture();
+
+    expect(fixture.nativeElement.textContent).toContain('تعذر تحميل الدورات');
+    const retry = fixture.nativeElement.querySelector(
+      '.course-message button',
+    ) as HTMLButtonElement;
+    catalogApi.getCourses.mockReturnValue(of(coursesResponse()));
+    retry.click();
     fixture.detectChanges();
 
+    expect(catalogApi.getCourses).toHaveBeenCalledTimes(2);
+    expect(fixture.nativeElement.textContent).toContain('أساسيات التجويد');
+  });
+
+  it('opens the mobile navigation, closes it with Escape, and restores the trigger', async () => {
+    const fixture = createFixture();
     const menuButton = fixture.nativeElement.querySelector(
       '.mobile-menu-toggle',
     ) as HTMLButtonElement;
@@ -59,43 +99,69 @@ describe('LandingPageComponent', () => {
     menuButton.click();
     fixture.detectChanges();
     expect(menuButton.getAttribute('aria-expanded')).toBe('true');
-    expect(fixture.nativeElement.querySelector('.site-nav')?.classList).toContain('is-open');
+    expect(document.body.classList).toContain('menu-open');
 
-    menuButton.click();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
     fixture.detectChanges();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
     expect(menuButton.getAttribute('aria-expanded')).toBe('false');
+    expect(document.body.classList).not.toContain('menu-open');
+    expect(document.activeElement).toBe(menuButton);
   });
 
-  it('renders the footer after the FAQ section', () => {
-    const fixture = TestBed.createComponent(LandingPageComponent);
-    fixture.detectChanges();
+  it('keeps FAQ controls connected to labelled regions', () => {
+    const fixture = createFixture();
+    const trigger = fixture.nativeElement.querySelector('.faq-trigger') as HTMLButtonElement;
+    const panel = fixture.nativeElement.querySelector(
+      `#${trigger.getAttribute('aria-controls')}`,
+    ) as HTMLElement;
 
-    const footer = fixture.nativeElement.querySelector(
-      'main + footer.site-footer',
-    ) as HTMLElement | null;
-
-    expect(footer).toBeTruthy();
-    expect(footer?.textContent).toContain('ابدأ رحلتك في طلب العلم اليوم');
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(panel.getAttribute('role')).toBe('region');
+    expect(panel.getAttribute('aria-labelledby')).toBe(trigger.id);
   });
 
   it('maps the root route directly to the landing page', () => {
     const rootRoute = routes.find((route) => route.path === '' && route.pathMatch === 'full');
-
     expect(rootRoute?.component).toBe(LandingPageComponent);
   });
-
-  it('points the primary calls to action to auth routes', () => {
-    const fixture = TestBed.createComponent(LandingPageComponent);
-    fixture.detectChanges();
-
-    const loginLink = fixture.nativeElement.querySelector(
-      'a[routerlink="/login"]',
-    ) as HTMLAnchorElement | null;
-    const registerLinks = Array.from(
-      fixture.nativeElement.querySelectorAll('a[routerlink="/register"]'),
-    ) as HTMLAnchorElement[];
-
-    expect(loginLink?.getAttribute('href')).toBe('/login');
-    expect(registerLinks.some((link) => link.getAttribute('href') === '/register')).toBe(true);
-  });
 });
+
+function createFixture() {
+  const fixture = TestBed.createComponent(LandingPageComponent);
+  fixture.detectChanges();
+  return fixture;
+}
+
+function coursesResponse(
+  data: PaginatedCoursesResponse['data'] = [course()],
+): PaginatedCoursesResponse {
+  return {
+    statusCode: 200,
+    data,
+    metaData: {
+      pageSize: 3,
+      currentPage: 1,
+      totalMatchedItems: data.length,
+      nextPage: null,
+      previousPage: null,
+      numberOfPages: data.length > 0 ? 1 : 0,
+    },
+  };
+}
+
+function course(): PaginatedCoursesResponse['data'][number] {
+  return {
+    id: 10,
+    name: 'أساسيات التجويد',
+    description: 'مدخل عملي إلى أحكام التجويد',
+    author: 'أحمد محمود',
+    courseLanguage: 'العربية',
+    courseVideosCount: 12,
+    rating: 4.8,
+    imageUrl: 'https://i.ytimg.com/vi/test-video/hqdefault.jpg',
+    category: { id: 3, name: 'القرآن الكريم', description: 'دورات القرآن', imageUrl: '' },
+    createdAt: '2026-01-10T00:00:00',
+  };
+}

@@ -1,25 +1,23 @@
 ﻿@model IEnumerable<UserViewModel>
 @{
-    ViewData["Title"] = "User Management";
+    ViewData["Title"] = "إدارة المستخدمين";
 }
-
-<link href="~/css/getusers.css" rel="stylesheet" />
 
 <div class="dashboard-container">
     <div class="dashboard-header">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="dashboard-title">User Management</h1>
+                <h1 class="dashboard-title">إدارة المستخدمين</h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="/">Home</a></li>
-                        <li class="breadcrumb-item active">Users</li>
+                        <li class="breadcrumb-item"><a href="/">الرئيسية</a></li>
+                        <li class="breadcrumb-item active">المستخدمون</li>
                     </ol>
                 </nav>
             </div>
             <div class="action-buttons">
                 <a class="btn btn-custom" asp-action="AddAdmin" asp-controller="Admin">
-                    <i class="fas fa-user-plus"></i> Add Admin
+                    <i class="fas fa-user-plus"></i> إضافة مسؤول
                 </a>
             </div>
         </div>
@@ -29,26 +27,26 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="search-box">
-                    <input type="text" id="searchUsers" class="form-control" placeholder="Search users...">
+                    <input type="text" id="searchUsers" class="form-control" placeholder="ابحث عن مستخدم...">
                     <i class="fas fa-search search-icon"></i>
                 </div>
             </div>
             <div class="col-md-8">
                 <div class="filters d-flex gap-2 justify-content-end">
                     <select class="form-select w-auto" id="roleFilter">
-                        <option value="">All Roles</option>
-                        <option value="Admin">Admin</option>
-                        <option value="User">User</option>
+                        <option value="">كل الأدوار</option>
+                        <option value="Admin">مسؤول</option>
+                        <option value="User">مستخدم</option>
                     </select>
                     <select class="form-select w-auto" id="statusFilter">
-                        <option value="">All Status</option>
-                        <option value="active">Active</option>
-                        <option value="deleted">Deleted</option>
+                        <option value="">كل الحالات</option>
+                        <option value="active">نشط</option>
+                        <option value="deleted">محذوف</option>
                     </select>
                     <select class="form-select w-auto" id="confirmedFilter">
-                        <option value="">All Confirmation</option>
-                        <option value="true">Confirmed</option>
-                        <option value="false">Unconfirmed</option>
+                        <option value="">حالة تأكيد البريد</option>
+                        <option value="true">مؤكد</option>
+                        <option value="false">غير مؤكد</option>
                     </select>
                 </div>
             </div>
@@ -64,13 +62,13 @@
                         <thead class="custom-thead">
                             <tr>
                                 <th class="text-center">#</th>
-                                <th>@Html.DisplayNameFor(u => u.UserName)</th>
-                                <th>@Html.DisplayNameFor(u => u.DisplayName)</th>
-                                <th>@Html.DisplayNameFor(u => u.Email)</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">@Html.DisplayNameFor(u => u.IsConfirmed)</th>
-                                <th class="text-center">Roles</th>
-                                <th class="text-center">Actions</th>
+                                <th>اسم المستخدم</th>
+                                <th>الاسم المعروض</th>
+                                <th>البريد الإلكتروني</th>
+                                <th class="text-center">الحالة</th>
+                                <th class="text-center">تأكيد البريد</th>
+                                <th class="text-center">الأدوار</th>
+                                <th class="text-center">الإجراءات</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,24 +77,24 @@
                             }
                             @foreach (var user in Model)
                             {
-                                <tr>
+                                <tr data-user-row
+                                    data-roles="@string.Join(" ", user.Roles).ToLowerInvariant()"
+                                    data-status="@(user.IsDeleted ? "deleted" : "active")"
+                                    data-confirmed="@user.IsConfirmed.ToString().ToLowerInvariant()">
                                     <td class="text-center">@(rowNumber++)</td>
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar">@user.UserName.Substring(0, 1).ToUpper()</div>
-                                            <span class="ms-2">@user.UserName</span>
-                                        </div>
+                                        <span>@user.UserName</span>
                                     </td>
                                     <td>@user.DisplayName</td>
                                     <td>@user.Email</td>
                                     <td class="text-center">
                                         <span class="status-badge @(user.IsDeleted ? "status-deleted" : "status-active")">
-                                            @(user.IsDeleted ? "Deleted" : "Active")
+                                            @(user.IsDeleted ? "محذوف" : "نشط")
                                         </span>
                                     </td>
                                     <td class="text-center">
                                         <span class="status-badge @(user.IsConfirmed ? "status-confirmed" : "status-unconfirmed")">
-                                            @(user.IsConfirmed ? "Confirmed" : "Unconfirmed")
+                                            @(user.IsConfirmed ? "مؤكد" : "غير مؤكد")
                                         </span>
                                     </td>
                                     <td class="text-center">
@@ -112,13 +110,13 @@
                                             }
                                             <button class="btn btn-icon @(isAdmin ? "disabled" : "")"
                                                     onclick="editUser('@user.Id')"
-                                                    title="Edit"
+                                                    title="تعديل"
                                             @(isAdmin ? "disabled" : "")>
                                                 <i class="fas fa-pen"></i>
                                             </button>
                                             <button class="btn btn-icon @(isAdmin ? "disabled" : "")"
                                                     onclick="deleteUser('@user.Id')"
-                                                    title="Delete"
+                                                    title="حذف"
                                             @(isAdmin ? "disabled" : "")>
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
@@ -132,10 +130,10 @@
             }
             else
             {
-                <div class="empty-state">
-                    <img src="~/images/no-data.svg" alt="No Data" class="empty-state-image">
-                    <h2>No Users Found</h2>
-                    <p>There are no users matching your criteria.</p>
+                <div class="compact-empty py-5">
+                    <i class="fas fa-users"></i>
+                    <h2>لا يوجد مستخدمون</h2>
+                    <p>لا توجد حسابات مطابقة لمعايير البحث.</p>
                 </div>
             }
         </div>
@@ -147,41 +145,28 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('searchUsers');
-            searchInput.addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
-
-                rows.forEach(row => {
-                    const text = row.textContent.toLowerCase();
-                    row.style.display = text.includes(searchTerm) ? '' : 'none';
-                });
-            });
-
             const roleFilter = document.getElementById('roleFilter');
             const statusFilter = document.getElementById('statusFilter');
             const confirmedFilter = document.getElementById('confirmedFilter');
 
             function applyFilters() {
+                const searchTerm = searchInput.value.trim().toLocaleLowerCase('ar');
                 const selectedRole = roleFilter.value.toLowerCase();
                 const selectedStatus = statusFilter.value.toLowerCase();
                 const selectedConfirmed = confirmedFilter.value.toLowerCase();
-                const rows = document.querySelectorAll('tbody tr');
+                const rows = document.querySelectorAll('[data-user-row]');
 
                 rows.forEach(row => {
-                    const roles = row.querySelector('td:nth-child(7)').textContent.toLowerCase();
-                    const status = row.querySelector('td:nth-child(5)').textContent.toLowerCase();
-                    const confirmed = row.querySelector('td:nth-child(6)').textContent.toLowerCase();
+                    const searchMatch = !searchTerm || row.textContent.toLocaleLowerCase('ar').includes(searchTerm);
+                    const roleMatch = !selectedRole || row.dataset.roles.includes(selectedRole);
+                    const statusMatch = !selectedStatus || row.dataset.status === selectedStatus;
+                    const confirmedMatch = !selectedConfirmed || row.dataset.confirmed === selectedConfirmed;
 
-                    const roleMatch = !selectedRole || roles.includes(selectedRole);
-                    const statusMatch = !selectedStatus || status.includes(selectedStatus);
-                    const confirmedMatch = !selectedConfirmed ||
-                        (selectedConfirmed === 'true' && confirmed.includes('confirmed')) ||
-                        (selectedConfirmed === 'false' && confirmed.includes('unconfirmed'));
-
-                    row.style.display = roleMatch && statusMatch && confirmedMatch ? '' : 'none';
+                    row.hidden = !(searchMatch && roleMatch && statusMatch && confirmedMatch);
                 });
             }
 
+            searchInput.addEventListener('input', applyFilters);
             roleFilter.addEventListener('change', applyFilters);
             statusFilter.addEventListener('change', applyFilters);
             confirmedFilter.addEventListener('change', applyFilters);
@@ -192,7 +177,7 @@
         }
 
         function deleteUser(userId) {
-            if (confirm('Are you sure you want to delete this user?')) {
+            if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
                 window.location.href = `/User/Delete/${userId}`;
             }
         }

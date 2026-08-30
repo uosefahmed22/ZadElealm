@@ -1,226 +1,143 @@
-﻿@model IEnumerable<DashboardCourseDto>
-
+@model CourseIndexViewModel
 @{
-    ViewData["Title"] = "Courses";
+    ViewData["Title"] = "الكورسات";
+    var firstItem = Model.TotalItems == 0 ? 0 : ((Model.PageNumber - 1) * CourseIndexViewModel.CoursesPerPage) + 1;
+    var lastItem = Math.Min(Model.PageNumber * CourseIndexViewModel.CoursesPerPage, Model.TotalItems);
+    var firstVisiblePage = Math.Max(1, Model.PageNumber - 2);
+    var lastVisiblePage = Math.Min(Model.TotalPages, Model.PageNumber + 2);
 }
 
-<div class="d-flex justify-content-between align-items-center mt-4 mb-4">
-    <h1 class="h3 text-dark">All Courses</h1>
-    <a asp-action="Create" asp-controller="Course" class="btn btn-primary">
-        <i class="fas fa-plus-circle me-2"></i>Add Course
-    </a>
-</div>
+<section class="page-heading courses-page-heading">
+    <div><span class="eyebrow">المحتوى التعليمي</span><h1>إدارة الكورسات</h1><p>راجع محتوى المنصة وعدّله أو أضف كورساً جديداً.</p></div>
+    <a asp-action="Create" asp-controller="Course" class="btn btn-primary"><i class="fas fa-plus ms-2"></i>إضافة كورس جديد</a>
+</section>
 
-<div class="card">
-    <div class="card-body">
-        <!-- Filter Section -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="input-group">
-                    <span class="input-group-text">
-                        <i class="fas fa-search"></i>
-                    </span>
-                    <input type="text" id="searchInput" class="form-control" placeholder="Search courses...">
-                </div>
-            </div>
-            <div class="col-md-2">
-                <select id="languageFilter" class="form-select">
-                    <option value="">All Languages</option>
-                    @foreach (var language in Model.Select(c => c.CourseLanguage).Distinct())
-                    {
-                        <option value="@language">@language</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-2">
-                <select id="ratingFilter" class="form-select">
-                    <option value="">All Ratings</option>
-                    <option value="4">4+ Stars</option>
-                    <option value="3">3+ Stars</option>
-                    <option value="2">2+ Stars</option>
-                    <option value="1">1+ Star</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button id="resetFilters" class="btn btn-secondary">
-                    <i class="fas fa-undo me-2"></i>Reset Filters
-                </button>
-            </div>
-        </div>
+<section class="course-summary" aria-label="ملخص الكورسات">
+    <div><span class="summary-icon"><i class="fas fa-book-open"></i></span><p><strong>@Model.TotalCourses.ToString("N0")</strong><small>إجمالي الكورسات</small></p></div>
+    <div><span class="summary-icon"><i class="fas fa-circle-play"></i></span><p><strong>@Model.TotalVideos.ToString("N0")</strong><small>إجمالي الفيديوهات</small></p></div>
+    <div><span class="summary-icon"><i class="fas fa-star"></i></span><p><strong>@Model.AverageRating.ToString("0.0")</strong><small>متوسط التقييم</small></p></div>
+</section>
 
-        @if (Model.Any())
+<form asp-action="Index" method="get" class="courses-toolbar surface-card" aria-label="البحث والتصفية">
+    <div class="course-search">
+        <i class="fas fa-search"></i>
+        <input type="search" name="search" value="@Model.Search" class="form-control" placeholder="ابحث باسم الكورس أو المؤلف..." aria-label="البحث في الكورسات">
+    </div>
+    <select name="language" class="form-select" aria-label="تصفية حسب اللغة">
+        <option value="">كل اللغات</option>
+        @foreach (var language in Model.Languages)
         {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle table-bordered" id="coursesTable">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 5%">ID</th>
-                            <th style="width: 15%">Name</th>
-                            <th style="width: 20%">Description</th>
-                            <th style="width: 10%">Author</th>
-                            <th style="width: 10%">Language</th>
-                            <th style="width: 8%">Videos</th>
-                            <th style="width: 8%">Rating</th>
-                            <th style="width: 14%">Image</th>
-                            <th style="width: 10%" class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var course in Model)
+            <option value="@language" selected="@(Model.Language == language ? "selected" : null)">@language</option>
+        }
+    </select>
+    <select name="category" class="form-select" aria-label="تصفية حسب التصنيف">
+        <option value="">كل التصنيفات</option>
+        @foreach (var category in Model.Categories)
+        {
+            <option value="@category" selected="@(Model.Category == category ? "selected" : null)">@category</option>
+        }
+    </select>
+    <select name="minimumRating" class="form-select" aria-label="تصفية حسب التقييم">
+        <option value="">كل التقييمات</option>
+        <option value="4" selected="@(Model.MinimumRating == 4 ? "selected" : null)">4 نجوم فأكثر</option>
+        <option value="3" selected="@(Model.MinimumRating == 3 ? "selected" : null)">3 نجوم فأكثر</option>
+        <option value="2" selected="@(Model.MinimumRating == 2 ? "selected" : null)">نجمتان فأكثر</option>
+    </select>
+    <div class="course-filter-actions">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-filter ms-2"></i>تطبيق</button>
+        <a asp-action="Index" class="btn btn-secondary" aria-label="إعادة ضبط عوامل التصفية"><i class="fas fa-rotate-right"></i></a>
+    </div>
+</form>
+
+@if (Model.Courses.Count > 0)
+{
+    <section class="courses-card-grid" aria-live="polite">
+        @foreach (var course in Model.Courses)
+        {
+            var categoryName = course.Category?.Name ?? "غير مصنف";
+            <article class="course-management-card">
+                <div class="course-card-media">
+                    @if (!string.IsNullOrWhiteSpace(course.Image))
+                    {
+                        <img src="@Url.Content(course.Image)" alt="صورة كورس @course.Name" loading="lazy" />
+                    }
+                    else
+                    {
+                        <div class="course-image-placeholder"><i class="fas fa-book-quran"></i><span>زاد العلم</span></div>
+                    }
+                    <span class="course-category-badge">@categoryName</span>
+                    <span class="course-id-badge">#@course.Id</span>
+                </div>
+                <div class="course-card-content">
+                    <div class="course-card-title-row">
+                        <div><h2>@course.Name</h2><p><i class="fas fa-chalkboard-user"></i> @course.Author</p></div>
+                        <span class="course-rating"><i class="fas fa-star"></i>@course.rating.ToString("0.0")</span>
+                    </div>
+                    <p class="course-card-description">@course.Description</p>
+                    <div class="course-meta-row">
+                        <span><i class="fas fa-language"></i>@course.CourseLanguage</span>
+                        <span><i class="fas fa-circle-play"></i>@course.CourseVideosCount فيديو</span>
+                        <span><i class="far fa-calendar"></i>@course.CreatedAt.ToString("yyyy/MM/dd")</span>
+                    </div>
+                </div>
+                <div class="course-card-actions">
+                    <a asp-action="Edit" asp-route-id="@course.Id" class="btn course-edit-button"><i class="fas fa-pen ms-2"></i>تعديل الكورس</a>
+                    <a asp-action="Delete" asp-route-id="@course.Id" class="btn course-delete-button" onclick="return confirm('هل أنت متأكد من حذف هذا الكورس؟');" aria-label="حذف كورس @course.Name"><i class="fas fa-trash"></i></a>
+                </div>
+            </article>
+        }
+    </section>
+
+    <div class="courses-pagination surface-card">
+        <p>عرض @firstItem–@lastItem من @Model.TotalItems كورس</p>
+        @if (Model.TotalPages > 1)
+        {
+            <nav aria-label="صفحات الكورسات">
+                <ul class="pagination mb-0">
+                    <li class="page-item @(!Model.HasPreviousPage ? "disabled" : null)">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageNumber - 1)" asp-route-search="@Model.Search" asp-route-language="@Model.Language" asp-route-category="@Model.Category" asp-route-minimumRating="@Model.MinimumRating" aria-label="الصفحة السابقة"><i class="fas fa-chevron-right"></i></a>
+                    </li>
+                    @if (firstVisiblePage > 1)
+                    {
+                        <li class="page-item"><a class="page-link" asp-action="Index" asp-route-page="1" asp-route-search="@Model.Search" asp-route-language="@Model.Language" asp-route-category="@Model.Category" asp-route-minimumRating="@Model.MinimumRating">1</a></li>
+                        @if (firstVisiblePage > 2)
                         {
-                            <tr>
-                                <td class="align-middle">@course.Id</td>
-                                <td class="align-middle">@course.Name</td>
-                                <td class="align-middle">
-                                    <div class="description-text">@course.Description</div>
-                                </td>
-                                <td class="align-middle">@course.Author</td>
-                                <td class="align-middle">@course.CourseLanguage</td>
-                                <td class="align-middle text-center">@course.CourseVideosCount</td>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <i class="fas fa-star text-warning me-1"></i>
-                                        @course.rating
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center">
-                                    @if (!string.IsNullOrEmpty(course.Image))
-                                    {
-                                        <img src="@Url.Content(course.Image)" alt="@course.Name" class="course-image" />
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">No image</span>
-                                    }
-                                </td>
-                                <td class="align-middle text-center">
-                                    <a class="btn btn-sm btn-outline-warning me-2" asp-action="Edit" asp-route-id="@course.Id">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@course.Id">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
                         }
-                    </tbody>
-                </table>
-            </div>
-            <div id="noResults" class="text-center py-4" style="display: none;">
-                <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">No courses match your search criteria</h5>
-            </div>
+                    }
+                    @for (var pageItem = firstVisiblePage; pageItem <= lastVisiblePage; pageItem++)
+                    {
+                        <li class="page-item @(pageItem == Model.PageNumber ? "active" : null)">
+                            <a class="page-link" asp-action="Index" asp-route-page="@pageItem" asp-route-search="@Model.Search" asp-route-language="@Model.Language" asp-route-category="@Model.Category" asp-route-minimumRating="@Model.MinimumRating" aria-current="@(pageItem == Model.PageNumber ? "page" : null)">@pageItem</a>
+                        </li>
+                    }
+                    @if (lastVisiblePage < Model.TotalPages)
+                    {
+                        @if (lastVisiblePage < Model.TotalPages - 1)
+                        {
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        }
+                        <li class="page-item"><a class="page-link" asp-action="Index" asp-route-page="@Model.TotalPages" asp-route-search="@Model.Search" asp-route-language="@Model.Language" asp-route-category="@Model.Category" asp-route-minimumRating="@Model.MinimumRating">@Model.TotalPages</a></li>
+                    }
+                    <li class="page-item @(!Model.HasNextPage ? "disabled" : null)">
+                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.PageNumber + 1)" asp-route-search="@Model.Search" asp-route-language="@Model.Language" asp-route-category="@Model.Category" asp-route-minimumRating="@Model.MinimumRating" aria-label="الصفحة التالية"><i class="fas fa-chevron-left"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+}
+else
+{
+    <div class="courses-empty surface-card">
+        <span><i class="fas fa-magnifying-glass"></i></span><h2>@(Model.TotalCourses == 0 ? "لا توجد كورسات بعد" : "لا توجد نتائج مطابقة")</h2><p>@(Model.TotalCourses == 0 ? "ابدأ بإضافة أول كورس إلى المنصة." : "جرّب تغيير كلمة البحث أو عوامل التصفية.")</p>
+        @if (Model.TotalCourses == 0)
+        {
+            <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus ms-2"></i>إضافة أول كورس</a>
         }
         else
         {
-            <div class="text-center py-4">
-                <i class="fas fa-book fa-3x text-muted mb-3"></i>
-                <h5 class="text-muted">No courses found</h5>
-            </div>
+            <a asp-action="Index" class="btn btn-secondary">مسح عوامل التصفية</a>
         }
     </div>
-</div>
-
-<style>
-    .description-text {
-        max-width: 300px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .course-image {
-        max-width: 120px;
-        height: 70px;
-        object-fit: contain;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        padding: 2px;
-    }
-
-    .table td, .table th {
-        vertical-align: middle;
-    }
-
-    .table-bordered td, .table-bordered th {
-        border: 1px solid #dee2e6;
-    }
-
-    .table thead th {
-        border-bottom: 2px solid #dee2e6;
-        background-color: #f8f9fa;
-    }
-
-    /* Additional styles for filters */
-    .input-group-text {
-        background-color: #fff;
-    }
-
-    .form-select, .form-control {
-        border-radius: 4px;
-    }
-
-    #resetFilters {
-        width: 100%;
-    }
-</style>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            function filterTable() {
-                const searchText = $('#searchInput').val().toLowerCase();
-                const selectedLanguage = $('#languageFilter').val().toLowerCase();
-                const selectedRating = parseFloat($('#ratingFilter').val()) || 0;
-                let visibleRows = 0;
-
-                $('#coursesTable tbody tr').each(function () {
-                    const $row = $(this);
-                    const name = $row.find('td:eq(1)').text().toLowerCase();
-                    const description = $row.find('td:eq(2)').text().toLowerCase();
-                    const author = $row.find('td:eq(3)').text().toLowerCase();
-                    const language = $row.find('td:eq(4)').text().toLowerCase();
-                    const rating = parseFloat($row.find('td:eq(6)').text()) || 0;
-
-                    const matchesSearch = name.includes(searchText) ||
-                                       description.includes(searchText) ||
-                                       author.includes(searchText);
-                    const matchesLanguage = !selectedLanguage || language === selectedLanguage;
-                    const matchesRating = rating >= selectedRating;
-
-                    if (matchesSearch && matchesLanguage && matchesRating) {
-                        $row.show();
-                        visibleRows++;
-                    } else {
-                        $row.hide();
-                    }
-                });
-
-                // Show/hide no results message
-                if (visibleRows === 0) {
-                    $('#coursesTable').hide();
-                    $('#noResults').show();
-                } else {
-                    $('#coursesTable').show();
-                    $('#noResults').hide();
-                }
-            }
-
-            // Reset filters
-            function resetFilters() {
-                $('#searchInput').val('');
-                $('#languageFilter').val('');
-                $('#ratingFilter').val('');
-                filterTable();
-            }
-
-            // Add event listeners
-            $('#searchInput').on('keyup', filterTable);
-            $('#languageFilter, #ratingFilter').on('change', filterTable);
-            $('#resetFilters').on('click', resetFilters);
-
-            // Initialize tooltips
-            $('[data-bs-toggle="tooltip"]').tooltip();
-        });
-    </script>
 }

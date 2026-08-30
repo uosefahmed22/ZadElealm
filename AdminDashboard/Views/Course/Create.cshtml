@@ -1,83 +1,58 @@
-﻿@model PlaylistViewModel
-
+@model PlaylistViewModel
 @{
-    ViewData["Title"] = "Add New Playlist";
+    ViewData["Title"] = "إضافة كورس";
 }
-<link href="~/css/Createcourse.css" rel="stylesheet" />
 
+<section class="page-heading course-form-heading">
+    <div><span class="eyebrow">الكورسات</span><h1>إضافة كورس جديد</h1><p>أضف رابط قائمة التشغيل وسيتم تجهيز محتوى الكورس للمنصة.</p></div>
+    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-right ms-2"></i>العودة للكورسات</a>
+</section>
 
-<div class="playlist-create-container">
-    <div class="form-wrapper">
-        <div class="header-section">
-            <a href="@Url.Action("Index", "Course")" class="back-button">
-                <i class="fas fa-arrow-left"></i> Back to List
-            </a>
-            <h2 class="form-title">Add New Playlist</h2>
-        </div>
+<div class="course-form-layout">
+    <section class="surface-card course-form-card">
+        <form method="post" asp-action="Create" class="needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-        <form method="post" asp-action="Create" class="playlist-form needs-validation" novalidate>
-            <div class="form-group">
-                <label asp-for="PlaylistUrl">Playlist URL</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fas fa-link"></i>
-                        </span>
-                    </div>
-                    <input asp-for="PlaylistUrl" class="form-control" required placeholder="Enter playlist URL" />
-                </div>
-                <span asp-validation-for="PlaylistUrl" class="text-danger"></span>
+            <div class="course-form-section-heading"><span><i class="fas fa-link"></i></span><div><h2>بيانات قائمة التشغيل</h2><p>استخدم رابط قائمة تشغيل صالحاً من يوتيوب.</p></div></div>
+            <div class="mb-4">
+                <label asp-for="PlaylistUrl" class="form-label">رابط قائمة التشغيل</label>
+                <div class="input-group"><span class="input-group-text"><i class="fab fa-youtube"></i></span><input asp-for="PlaylistUrl" class="form-control" required placeholder="https://www.youtube.com/playlist?list=..." dir="ltr" /></div>
+                <span asp-validation-for="PlaylistUrl" class="text-danger small"></span>
             </div>
 
-            <div class="form-group">
-                <label asp-for="CategoryId">Category</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fas fa-folder"></i>
-                        </span>
-                    </div>
-                    <select asp-for="CategoryId" class="form-control" required>
-                        <option value="">Select a category</option>
+            <div class="course-form-section-heading"><span><i class="fas fa-sliders"></i></span><div><h2>تفاصيل الكورس</h2><p>حدد التصنيف واللغة واسم المحاضر.</p></div></div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="CategoryId" class="form-label">التصنيف</label>
+                    <select asp-for="CategoryId" class="form-select" required>
+                        <option value="">اختر التصنيف</option>
                         @foreach (var category in ViewBag.Categories)
-                        {
-                            <option value="@category.Id">@category.Name</option>
-                        }
+                        {<option value="@category.Id">@category.Name</option>}
                     </select>
+                    <span asp-validation-for="CategoryId" class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
+                <div class="col-md-6">
+                    <label asp-for="CourseLanguage" class="form-label">لغة الكورس</label>
+                    <div class="input-group"><span class="input-group-text"><i class="fas fa-language"></i></span><input asp-for="CourseLanguage" class="form-control" placeholder="مثال: العربية" /></div>
+                    <span asp-validation-for="CourseLanguage" class="text-danger small"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Author" class="form-label">اسم المحاضر</label>
+                    <div class="input-group"><span class="input-group-text"><i class="fas fa-chalkboard-user"></i></span><input asp-for="Author" class="form-control" placeholder="اكتب اسم المحاضر" /></div>
+                    <span asp-validation-for="Author" class="text-danger small"></span>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label asp-for="CourseLanguage">Course Language</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fas fa-language"></i>
-                        </span>
-                    </div>
-                    <input asp-for="CourseLanguage" class="form-control" placeholder="Enter course language" />
-                </div>
-                <span asp-validation-for="CourseLanguage" class="text-danger"></span>
+            <div class="course-form-actions">
+                <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+                <button type="submit" class="btn btn-primary"><i class="fas fa-cloud-arrow-down ms-2"></i>استيراد وإنشاء الكورس</button>
             </div>
-
-            <div class="form-group">
-                <label asp-for="Author">Author</label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text">
-                            <i class="fas fa-user"></i>
-                        </span>
-                    </div>
-                    <input asp-for="Author" class="form-control" placeholder="Enter author name" />
-                </div>
-                <span asp-validation-for="Author" class="text-danger"></span>
-            </div>
-
-            <button type="submit" class="btn btn-submit">
-                <span class="button-text">Submit</span>
-                <span class="spinner-border spinner-border-sm ml-2" role="status" aria-hidden="true" style="display: none;"></span>
-            </button>
         </form>
-    </div>
+    </section>
+
+    <aside class="course-form-aside">
+        <div class="course-tip-card"><span><i class="fas fa-lightbulb"></i></span><div><h2>قبل الإضافة</h2><ul><li>تأكد أن قائمة التشغيل متاحة للعامة.</li><li>اختر التصنيف الصحيح لتسهيل الوصول.</li><li>راجع اسم المحاضر ولغة المحتوى.</li></ul></div></div>
+    </aside>
 </div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

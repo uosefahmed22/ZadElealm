@@ -23,13 +23,13 @@ namespace ZadElealm.Apis.Handlers.Category
             var countSpec = new CategoryWithCoursesSpecification(request.SpecParams, true);
             var totalItems = await _unitOfWork.Repository<Core.Models.Course>().CountAsync(countSpec);
 
-            if (totalItems == 0)
-                return new ApiResponse(404, "لا توجد دورات في هذه الفئة");
-
-            var spec = new CategoryWithCoursesSpecification(request.SpecParams);
-            var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecNoTrackingAsync(spec);
-
-            var coursesDto = courses.ToDtos();
+            IReadOnlyList<CourseDto> coursesDto = [];
+            if (totalItems > 0)
+            {
+                var spec = new CategoryWithCoursesSpecification(request.SpecParams);
+                var courses = await _unitOfWork.Repository<Core.Models.Course>().GetAllWithSpecNoTrackingAsync(spec);
+                coursesDto = courses.ToDtos();
+            }
 
             var metaData = new MetaData
             {

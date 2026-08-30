@@ -11,6 +11,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using ZadElealm.Core.Models.Identity;
+using ZadElealm.Core.Models;
+using ZadElealm.Core.Errors;
+using ZadElealm.Core.Service;
 using ZadElealm.Repository.Data.Datbases;
 
 namespace ZadElealm.IntegrationTests
@@ -19,6 +22,7 @@ namespace ZadElealm.IntegrationTests
     {
         private const string TestJwtKey = "integration-test-key-0123456789abcdef0123456789abcdef";
         private const string TestUserEmail = "user@test.com";
+        public const string TestUserPassword = "IntegrationTest123!";
         private readonly SqliteConnection _connection;
 
         public ZadElealmApiFactory()
@@ -36,13 +40,17 @@ namespace ZadElealm.IntegrationTests
             builder.UseSetting("CloudinarySetting:CloudName", "integration-test-cloud");
             builder.UseSetting("CloudinarySetting:ApiKey", "integration-test-key");
             builder.UseSetting("CloudinarySetting:ApiSecret", "integration-test-secret");
+            builder.UseSetting("CorsSettings:AllowedOrigins:0", "https://zad-elealm.netlify.app");
+            builder.UseSetting("CorsSettings:AllowedOrigins:1", "http://localhost:4200");
             builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore.Database.Command", "Warning");
 
             builder.ConfigureServices(services =>
             {
                 services.RemoveAll<DbContextOptions<AppDbContext>>();
                 services.RemoveAll<AppDbContext>();
+                services.RemoveAll<ISendEmailService>();
                 services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
+                services.AddSingleton<ISendEmailService, SuccessfulEmailService>();
             });
         }
 
@@ -51,7 +59,7 @@ namespace ZadElealm.IntegrationTests
             var host = base.CreateHost(builder);
 
             using var scope = host.Services.CreateScope();
-            SeedTestIdentityAsync(scope.ServiceProvider).GetAwaiter().GetResult();
+            SeedTestDataAsync(scope.ServiceProvider).GetAwaiter().GetResult();
 
             return host;
         }
@@ -120,7 +128,7 @@ namespace ZadElealm.IntegrationTests
                 EmailConfirmed = true
             };
 
-            var userResult = await userManager.CreateAsync(user);
+            var userResult = await userManager.CreateAsync(user, TestUserPassword);
             if (!userResult.Succeeded)
             {
                 throw new InvalidOperationException("Failed to create the integration-test user.");
@@ -130,6 +138,74 @@ namespace ZadElealm.IntegrationTests
             if (!addToRoleResult.Succeeded)
             {
                 throw new InvalidOperationException("Failed to assign the integration-test User role.");
+            }
+        }
+
+        private static async Task SeedTestDataAsync(IServiceProvider services)
+        {
+            await SeedTestIdentityAsync(services);
+            await SeedTestCatalogAsync(services);
+        }
+
+        private static async Task SeedTestCatalogAsync(IServiceProvider services)
+        {
+            var dbContext = services.GetRequiredService<AppDbContext>();
+            if (await dbContext.Courses.AnyAsync())
+            {
+                return;
+            }
+
+            var quran = new Category
+            {
+                Name = "القرآن الكريم",
+                Description = "دورات القرآن الكريم",
+                ImageUrl = "https://example.test/quran-category.jpg",
+                Courses = []
+            };
+            var seerah = new Category
+            {
+                Name = "السيرة النبوية",
+                Description = "دورات السيرة النبوية",
+                ImageUrl = "https://example.test/seerah-category.jpg",
+                Courses = []
+            };
+
+            dbContext.Courses.AddRange(
+                new Course
+                {
+                    Name = "أساسيات التجويد",
+                    Description = "مدخل عملي إلى أحكام التجويد",
+                    Author = "أحمد محمود",
+                    CourseLanguage = "العربية",
+                    CourseVideosCount = 12,
+                    ImageUrl = "https://example.test/tajweed.jpg",
+                    rating = 4.8m,
+                    CreatedAt = new DateTime(2026, 1, 10),
+                    Category = quran
+                },
+                new Course
+                {
+                    Name = "مواقف من السيرة",
+                    Description = "دراسة مواقف مختارة من السيرة النبوية",
+                    Author = "محمد علي",
+                    CourseLanguage = "العربية",
+                    CourseVideosCount = 8,
+                    ImageUrl = "https://example.test/seerah.jpg",
+                    rating = 4.5m,
+                    CreatedAt = new DateTime(2026, 2, 15),
+                    Category = seerah
+                });
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        private sealed class SuccessfulEmailService : ISendEmailService
+        {
+            public Task<ApiDataResponse> SendEmailAsync(
+                EmailMessage emailMessage,
+                CancellationToken cancellationToken = default)
+            {
+                return Task.FromResult(new ApiDataResponse(200));
             }
         }
     }

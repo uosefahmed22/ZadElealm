@@ -1,10 +1,9 @@
 ﻿@model RoleFormViewModel
 <form method="post" asp-action="Create">
     <div class="input-group mb-2">
-        <input asp-for="Name" class="form-control" />
-        <div class="input-group-append">
-            <button type="submit" class="btn btn-success">Add New Role</button>
-        </div>
+        <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
+        <input asp-for="Name" class="form-control" placeholder="اكتب اسم الدور" aria-label="اسم الدور" />
+        <button type="submit" class="btn btn-success"><i class="fas fa-plus ms-2"></i>إضافة دور</button>
     </div>
     <span asp-validation-for="Name" class="text-danger"></span>
 </form>

@@ -12,7 +12,7 @@ namespace ZadElealm.Core.Specifications
     public class CategoryWithCoursesSpecification : BaseSpecification<Core.Models.Course>
     {
         public CategoryWithCoursesSpecification(CourseSpecParams specParams, bool countOnly = false)
-            : base(x => x.CategoryId == specParams.CategoryId &&
+            : base(x => (specParams.CategoryId <= 0 || x.CategoryId == specParams.CategoryId) &&
                 (string.IsNullOrEmpty(specParams.Search) ||
                 x.Name.ToLower().Contains(specParams.Search) ||
                 x.Description.ToLower().Contains(specParams.Search))

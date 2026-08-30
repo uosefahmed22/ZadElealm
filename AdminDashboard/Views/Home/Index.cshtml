@@ -1,9 +1,55 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DashboardHomeViewModel
+@{
+    ViewData["Title"] = "نظرة عامة";
+    var arabicCulture = System.Globalization.CultureInfo.GetCultureInfo("ar-EG");
 }
-<head>
-    <link rel="stylesheet" href="~/css/home.css" />
-</head>
-<div class="home-container">
-    <img src="~/home.jpg" alt="Welcome" class="home-background" />
-</div>
+
+<section class="page-heading home-heading">
+    <div><span class="eyebrow">لوحة التحكم</span><h1>أهلاً بعودتك</h1><p>إليك ملخص ما يحدث داخل منصة زاد العلم.</p></div>
+    <div class="heading-date"><i class="far fa-calendar"></i><span>@DateTime.Now.ToString("dddd، dd MMMM yyyy", arabicCulture)</span></div>
+</section>
+
+<section class="metrics-grid" aria-label="إجماليات المنصة">
+    <a class="metric-card metric-card-primary" asp-controller="User" asp-action="Index"><span class="metric-icon"><i class="fas fa-users"></i></span><span class="metric-copy"><small>إجمالي المستخدمين</small><strong>@Model.UsersCount.ToString("N0")</strong><span>إدارة الحسابات</span></span><i class="fas fa-arrow-left metric-arrow"></i></a>
+    <a class="metric-card" asp-controller="Course" asp-action="Index"><span class="metric-icon"><i class="fas fa-book-open"></i></span><span class="metric-copy"><small>الكورسات المنشورة</small><strong>@Model.CoursesCount.ToString("N0")</strong><span>عرض مكتبة الكورسات</span></span><i class="fas fa-arrow-left metric-arrow"></i></a>
+    <a class="metric-card" asp-controller="Category" asp-action="Index"><span class="metric-icon"><i class="fas fa-layer-group"></i></span><span class="metric-copy"><small>التصنيفات</small><strong>@Model.CategoriesCount.ToString("N0")</strong><span>تنظيم المحتوى</span></span><i class="fas fa-arrow-left metric-arrow"></i></a>
+    <div class="metric-card"><span class="metric-icon"><i class="fas fa-user-graduate"></i></span><span class="metric-copy"><small>الاشتراكات</small><strong>@Model.EnrollmentsCount.ToString("N0")</strong><span>اشتراكات الكورسات النشطة</span></span></div>
+</section>
+
+<section class="dashboard-grid">
+    <article class="surface-card quick-actions-card">
+        <div class="section-heading"><div><span class="eyebrow">اختصارات</span><h2>إجراءات سريعة</h2></div></div>
+        <div class="quick-actions">
+            <a asp-controller="Course" asp-action="Create"><span><i class="fas fa-plus"></i></span><div><strong>إضافة كورس</strong><small>نشر قائمة تشغيل جديدة</small></div><i class="fas fa-chevron-left"></i></a>
+            <a asp-controller="Category" asp-action="Create"><span><i class="fas fa-folder-plus"></i></span><div><strong>إضافة تصنيف</strong><small>تنظيم المحتوى التعليمي</small></div><i class="fas fa-chevron-left"></i></a>
+            <a asp-controller="Admin" asp-action="AddAdmin"><span><i class="fas fa-user-plus"></i></span><div><strong>إضافة مسؤول</strong><small>منح صلاحية دخول لوحة التحكم</small></div><i class="fas fa-chevron-left"></i></a>
+        </div>
+    </article>
+
+    <article class="surface-card support-card">
+        <div class="section-heading"><div><span class="eyebrow">قائمة الدعم</span><h2>التقارير والشكاوى</h2></div><a asp-controller="Report" asp-action="Index">عرض الكل</a></div>
+        <div class="support-total"><span class="metric-icon"><i class="fas fa-inbox"></i></span><div><strong>@Model.OpenReportsCount.ToString("N0")</strong><span>تقارير تحتاج إلى مراجعة</span></div></div>
+        <div class="compact-list">
+            @if (Model.RecentReports.Count == 0)
+            {<div class="compact-empty"><i class="far fa-circle-check"></i><span>لا توجد تقارير مقدمة حالياً.</span></div>}
+            else
+            {
+                @foreach (var report in Model.RecentReports)
+                {<a asp-controller="Report" asp-action="Details" asp-route-id="@report.Id"><span class="status-dot @(report.IsSolved ? "is-solved" : "is-open")"></span><div><strong>@report.Title</strong><small>@report.CreatedAt.ToString("dd MMM yyyy", arabicCulture)</small></div><span class="status-pill @(report.IsSolved ? "solved" : "open")">@(report.IsSolved ? "تم الحل" : "مفتوح")</span></a>}
+            }
+        </div>
+    </article>
+
+    <article class="surface-card recent-courses-card">
+        <div class="section-heading"><div><span class="eyebrow">أحدث المحتوى</span><h2>أحدث الكورسات</h2></div><a asp-controller="Course" asp-action="Index">عرض الكل</a></div>
+        <div class="course-list">
+            @if (Model.RecentCourses.Count == 0)
+            {<div class="compact-empty"><i class="fas fa-book-open"></i><span>لم تتم إضافة كورسات بعد.</span></div>}
+            else
+            {
+                @foreach (var course in Model.RecentCourses)
+                {<a asp-controller="Course" asp-action="Edit" asp-route-id="@course.Id"><span class="course-monogram">@(string.IsNullOrWhiteSpace(course.Name) ? "ك" : course.Name[..1].ToUpperInvariant())</span><div><strong>@course.Name</strong><small>@course.Author · @course.Language</small></div><time datetime="@course.CreatedAt.ToString("yyyy-MM-dd")">@course.CreatedAt.ToString("dd MMM", arabicCulture)</time></a>}
+            }
+        </div>
+    </article>
+</section>

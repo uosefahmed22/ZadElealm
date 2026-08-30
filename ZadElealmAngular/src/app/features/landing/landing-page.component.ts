@@ -1,15 +1,24 @@
-import { CommonModule, ViewportScroller } from '@angular/common';
+import { ViewportScroller } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   HostListener,
   inject,
   OnDestroy,
+  OnInit,
   signal,
   ViewChild,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
+
+import { CatalogApiService } from '../../core/catalog/catalog-api.service';
+import { CourseDto } from '../../core/catalog/catalog.models';
+import { formatLatinNumber } from '../../shared/utils/latin-number-format.util';
 
 interface NavItem {
   readonly label: string;
@@ -29,12 +38,15 @@ interface JourneyStep {
   readonly icon: string;
 }
 
-interface CoursePath {
-  readonly level: string;
+interface LandingCourse {
+  readonly id: number;
   readonly title: string;
   readonly description: string;
+  readonly category: string;
+  readonly videoCountLabel: string;
   readonly image: string;
   readonly imageAlt: string;
+  readonly imageSrcSet: string | null;
 }
 
 interface FaqItem {
@@ -42,19 +54,47 @@ interface FaqItem {
   readonly answer: string;
 }
 
+type CourseRegionState = 'loading' | 'success' | 'empty' | 'error';
+
 @Component({
   selector: 'app-landing-page',
-  imports: [CommonModule, RouterLink],
+  imports: [RouterLink],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LandingPageComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('navbar', { static: true }) private navbarRef!: ElementRef<HTMLElement>;
+export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild('navbar', { static: true }) private navbarRef?: ElementRef<HTMLElement>;
+  @ViewChild('menuToggle', { static: true }) private menuToggleRef?: ElementRef<HTMLButtonElement>;
+  @ViewChild('mainNavigation', { static: true })
+  private mainNavigationRef?: ElementRef<HTMLElement>;
 
   private readonly viewportScroller = inject(ViewportScroller);
+  private readonly router = inject(Router);
+  private readonly catalogApi = inject(CatalogApiService);
+  private readonly destroyRef = inject(DestroyRef);
   private resizeObserver?: ResizeObserver;
   private sectionObserver?: IntersectionObserver;
+  private readonly routerSubscription: Subscription;
   private observedNavHeight = 0;
+  private scrollFrame?: number;
+  private readonly fallbackImage = 'assets/brand/course-placeholder.svg';
+
+  private readonly handleWindowScroll = (): void => {
+    if (this.scrollFrame !== undefined) return;
+
+    this.scrollFrame = requestAnimationFrame(() => {
+      this.scrollFrame = undefined;
+      this.updateScrolledState();
+      this.updateActiveSectionFromPosition();
+    });
+  };
+
+  constructor() {
+    this.routerSubscription = this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe(() => this.setMobileMenu(false));
+  }
 
   readonly navItems: readonly NavItem[] = [
     { label: 'الرئيسية', fragment: 'home' },
@@ -67,81 +107,50 @@ export class LandingPageComponent implements AfterViewInit, OnDestroy {
     {
       title: 'دورات منظمة',
       description: 'مناهج مرتبة من الأساس إلى المتقدم في تجربة واضحة ومنظمة.',
-      icon: 'assets/icons/book-open.svg',
+      icon: 'book',
     },
     {
       title: 'متابعة التقدم',
       description: 'تتبع مستواك خطوة بخطوة لتصل إلى أهدافك بثبات.',
-      icon: 'assets/icons/trending-up.svg',
+      icon: 'trend',
     },
     {
       title: 'اختبارات تفاعلية',
       description: 'اختبر فهمك وتأكد من استيعابك للمفاهيم بعد كل درس.',
-      icon: 'assets/icons/clipboard-check.svg',
+      icon: 'clipboard',
     },
     {
       title: 'شهادات إتمام',
       description: 'احصل على شهادة إتمام تحفظ إنجازك وتعزز رحلتك العلمية.',
-      icon: 'assets/icons/award.svg',
+      icon: 'award',
     },
   ];
 
   readonly journeySteps: readonly JourneyStep[] = [
     {
-      number: '1',
+      number: formatLatinNumber(1),
       title: 'سجل حسابك',
       description: 'أنشئ حسابك الآن وانضم إلى مجتمع المتعلمين.',
-      icon: 'assets/icons/user-plus.svg',
+      icon: 'user-plus',
     },
     {
-      number: '2',
+      number: formatLatinNumber(2),
       title: 'اختر مساراتك',
       description: 'اختر الدورة المناسبة لمستواك وهدفك.',
-      icon: 'assets/icons/book-open.svg',
+      icon: 'book',
     },
     {
-      number: '3',
+      number: formatLatinNumber(3),
       title: 'تعلّم وتدرّب',
       description: 'شاهد الدروس، ونفذ الأنشطة، وحل الاختبارات.',
-      icon: 'assets/icons/monitor-play.svg',
+      icon: 'play-screen',
     },
     {
-      number: '4',
+      number: formatLatinNumber(4),
       title: 'أكمل واحصل على شهادتك',
       description: 'أتم متطلبات الدورة واحصل على شهادتك.',
-      icon: 'assets/icons/award.svg',
+      icon: 'award',
     },
-  ];
-
-  readonly coursePaths: readonly CoursePath[] = [
-    {
-      level: 'مبتدئ',
-      title: 'أحكام التلاوة',
-      description: 'مثال لمسار منظم يبدأ من القواعد الأساسية وينتقل بك إلى قراءة أكثر صحة.',
-      image: 'assets/illustrations/course-quran.svg',
-      imageAlt: 'مصحف مفتوح على حامل خشبي',
-    },
-    {
-      level: 'مبتدئ',
-      title: 'اللغة العربية',
-      description: 'تعلم أساسيات النحو والصرف بطريقة واضحة ومبسطة.',
-      image: 'assets/illustrations/course-arabic.svg',
-      imageAlt: 'مخطوطة عربية وقلم',
-    },
-    {
-      level: 'متوسط',
-      title: 'السيرة النبوية',
-      description: 'مثال لمسار يربط بين التعلم والمعنى التربوي في رحلة متسلسلة ومريحة.',
-      image: 'assets/illustrations/course-seerah.svg',
-      imageAlt: 'القبة الخضراء في المدينة المنورة',
-    },
-  ];
-
-  readonly progressChecklist = [
-    { label: 'استكمال الدروس المنظمة', completed: true },
-    { label: 'حل الاختبارات التفاعلية', completed: true },
-    { label: 'متابعة التقدم داخل المسار', completed: true },
-    { label: 'الحصول على الشهادة بعد الإنجاز', completed: false },
   ];
 
   readonly faqItems: readonly FaqItem[] = [
@@ -167,48 +176,117 @@ export class LandingPageComponent implements AfterViewInit, OnDestroy {
     },
   ];
 
+  readonly courseSkeletons = [1, 2, 3] as const;
+  readonly courses = signal<readonly LandingCourse[]>([]);
+  readonly courseRegionState = signal<CourseRegionState>('loading');
   readonly openFaqIndex = signal(0);
   readonly activeSection = signal('home');
   readonly mobileMenuOpen = signal(false);
   readonly isScrolled = signal(false);
 
+  ngOnInit(): void {
+    this.loadCourses();
+  }
+
   ngAfterViewInit(): void {
     this.updateNavMetrics();
 
-    if (typeof ResizeObserver !== 'undefined') {
+    const navbar = this.navbarRef?.nativeElement;
+    if (navbar && typeof ResizeObserver !== 'undefined') {
       this.resizeObserver = new ResizeObserver(() => this.updateNavMetrics());
-      this.resizeObserver.observe(this.navbarRef.nativeElement);
+      this.resizeObserver.observe(navbar);
     }
 
     this.updateScrolledState();
+    window.addEventListener('scroll', this.handleWindowScroll, { passive: true });
   }
 
   ngOnDestroy(): void {
     this.resizeObserver?.disconnect();
     this.sectionObserver?.disconnect();
+    this.routerSubscription.unsubscribe();
+    window.removeEventListener('scroll', this.handleWindowScroll);
+    if (this.scrollFrame !== undefined) cancelAnimationFrame(this.scrollFrame);
+    document.body.classList.remove('menu-open');
   }
 
-  @HostListener('window:scroll')
-  onWindowScroll(): void {
-    this.updateScrolledState();
-    this.updateActiveSectionFromPosition();
+  loadCourses(): void {
+    this.courseRegionState.set('loading');
+
+    this.catalogApi
+      .getCourses({
+        categoryId: 0,
+        search: '',
+        author: '',
+        language: '',
+        minRating: 0,
+        sortBy: 'date',
+        sortDirection: 'desc',
+        pageNumber: 1,
+        pageSize: 3,
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const courses = response.data.slice(0, 3).map((course) => this.toLandingCourse(course));
+          this.courses.set(courses);
+          this.courseRegionState.set(courses.length > 0 ? 'success' : 'empty');
+        },
+        error: () => {
+          this.courses.set([]);
+          this.courseRegionState.set('error');
+        },
+      });
   }
 
   toggleMobileMenu(): void {
-    this.mobileMenuOpen.update((isOpen) => !isOpen);
+    this.setMobileMenu(!this.mobileMenuOpen(), this.mobileMenuOpen());
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleDocumentKeydown(event: KeyboardEvent): void {
+    if (!this.mobileMenuOpen()) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.setMobileMenu(false, true);
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+
+    const focusableElements = this.getMenuFocusableElements();
+    if (focusableElements.length === 0) return;
+
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+    const active = document.activeElement;
+
+    if (event.shiftKey && active === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  @HostListener('window:resize')
+  closeMobileMenuAtDesktopWidth(): void {
+    if (window.innerWidth >= 1024) this.setMobileMenu(false);
   }
 
   navigateToSection(event: Event, fragment: string): void {
     event.preventDefault();
-    this.mobileMenuOpen.set(false);
+    this.setMobileMenu(false);
 
     requestAnimationFrame(() => {
       this.updateNavMetrics();
       const target = document.getElementById(fragment);
-      if (!target) return;
+      const navbar = this.navbarRef?.nativeElement;
+      if (!target || !navbar) return;
 
-      const navHeight = this.navbarRef.nativeElement.offsetHeight;
-      const top = target.getBoundingClientRect().top + window.scrollY - navHeight - 24;
+      const top = target.getBoundingClientRect().top + window.scrollY - navbar.offsetHeight - 24;
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       window.scrollTo({ top: Math.max(0, top), behavior: reducedMotion ? 'auto' : 'smooth' });
@@ -221,8 +299,41 @@ export class LandingPageComponent implements AfterViewInit, OnDestroy {
     this.openFaqIndex.update((current) => (current === index ? -1 : index));
   }
 
+  useCourseImageFallback(event: Event): void {
+    if (!(event.target instanceof HTMLImageElement)) return;
+    if (event.target.src.endsWith(this.fallbackImage)) return;
+
+    event.target.removeAttribute('srcset');
+    event.target.src = this.fallbackImage;
+  }
+
+  private toLandingCourse(course: CourseDto): LandingCourse {
+    const image = course.imageUrl?.trim() || this.fallbackImage;
+    return {
+      id: course.id,
+      title: course.name,
+      description: course.description,
+      category: course.category?.name || 'دورة تعليمية',
+      videoCountLabel: `${formatLatinNumber(course.courseVideosCount)} درسًا`,
+      image,
+      imageAlt: `صورة دورة ${course.name}`,
+      imageSrcSet: this.createYouTubeSrcSet(image),
+    };
+  }
+
+  private createYouTubeSrcSet(imageUrl: string): string | null {
+    const match = imageUrl.match(/i\.ytimg\.com\/vi\/([^/]+)\//i);
+    const videoId = match?.[1];
+    if (!videoId) return null;
+
+    return `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg 320w, https://i.ytimg.com/vi/${videoId}/hqdefault.jpg 480w`;
+  }
+
   private updateNavMetrics(): void {
-    const navHeight = this.navbarRef.nativeElement.offsetHeight;
+    const navbar = this.navbarRef?.nativeElement;
+    if (!navbar) return;
+
+    const navHeight = navbar.offsetHeight;
     document.documentElement.style.setProperty('--nav-h', `${navHeight}px`);
     this.viewportScroller.setOffset([0, navHeight + 24]);
 
@@ -248,11 +359,35 @@ export class LandingPageComponent implements AfterViewInit, OnDestroy {
   }
 
   private updateScrolledState(): void {
-    this.isScrolled.set(window.scrollY > 8);
+    this.isScrolled.set(window.scrollY > 40);
+  }
+
+  private setMobileMenu(isOpen: boolean, restoreFocus = false): void {
+    const wasOpen = this.mobileMenuOpen();
+    this.mobileMenuOpen.set(isOpen);
+    document.body.classList.toggle('menu-open', isOpen);
+
+    if (isOpen) {
+      requestAnimationFrame(() => this.getMenuFocusableElements()[0]?.focus());
+    } else if (restoreFocus && wasOpen) {
+      requestAnimationFrame(() => this.menuToggleRef?.nativeElement.focus());
+    }
+  }
+
+  private getMenuFocusableElements(): HTMLElement[] {
+    const navigation = this.mainNavigationRef?.nativeElement;
+    if (!navigation) return [];
+
+    return Array.from(
+      navigation.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]'),
+    ).filter((element) => element.getAttribute('aria-hidden') !== 'true');
   }
 
   private updateActiveSectionFromPosition(): void {
-    const marker = this.navbarRef.nativeElement.offsetHeight + 40;
+    const navbar = this.navbarRef?.nativeElement;
+    if (!navbar) return;
+
+    const marker = navbar.offsetHeight + 40;
     let currentSection = this.navItems[0].fragment;
 
     for (const item of this.navItems) {

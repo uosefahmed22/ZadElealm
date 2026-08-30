@@ -12,7 +12,7 @@ import {
   RegisterResponse,
   ResetPasswordRequest,
   TokenRequest,
-  UserDto
+  UserDto,
 } from './auth.models';
 
 @Injectable({ providedIn: 'root' })
@@ -24,28 +24,36 @@ export class AuthApiService {
     return this.http.post<LoginResponse>(`${this.accountUrl}/login`, payload);
   }
 
+  currentUser(): Observable<LoginResponse> {
+    return this.http.get<LoginResponse>(`${this.accountUrl}/current-user`);
+  }
+
   register(payload: RegisterRequest): Observable<RegisterResponse> {
     return this.http.post<RegisterResponse>(`${this.accountUrl}/register`, payload);
   }
 
   resendConfirmationEmail(email: string): Observable<AuthMessageResponse> {
     const params = new HttpParams().set('email', email);
-    return this.http.post<AuthMessageResponse>(`${this.accountUrl}/resend-confirmation-email`, null, {
-      params
-    });
+    return this.http.post<AuthMessageResponse>(
+      `${this.accountUrl}/resend-confirmation-email`,
+      null,
+      {
+        params,
+      },
+    );
   }
 
   forgotPassword(email: string): Observable<AuthMessageResponse> {
     const params = new HttpParams().set('email', email);
     return this.http.post<AuthMessageResponse>(`${this.accountUrl}/forget-password`, null, {
-      params
+      params,
     });
   }
 
   verifyOtp(email: string, otp: string): Observable<AuthMessageResponse> {
     const params = new HttpParams().set('email', email).set('otp', otp);
     return this.http.post<AuthMessageResponse>(`${this.accountUrl}/verify-otp`, null, {
-      params
+      params,
     });
   }
 
@@ -54,7 +62,10 @@ export class AuthApiService {
   }
 
   refreshToken(payload: TokenRequest): Observable<ApiDataResponseEnvelope<UserDto>> {
-    return this.http.post<ApiDataResponseEnvelope<UserDto>>(`${this.accountUrl}/refresh-token`, payload);
+    return this.http.post<ApiDataResponseEnvelope<UserDto>>(
+      `${this.accountUrl}/refresh-token`,
+      payload,
+    );
   }
 
   revokeToken(payload: TokenRequest): Observable<AuthMessageResponse> {

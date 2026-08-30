@@ -1,12 +1,12 @@
 ﻿@model UserRolesViewModel
 @{
-    ViewData["Title"] = "Edit User";
+    ViewData["Title"] = "تعديل المستخدم";
 }
 <link href="~/css/edituserroles.css" rel="stylesheet" />
 
 <div class="card mb-4 mt-4">
     <div class="card-header">
-        <h1 class="mt-2">Edit User Profile</h1>
+        <h1 class="mt-2">تعديل بيانات المستخدم</h1>
         <p class="text-muted mb-0">@Model.UserName</p>
     </div>
     <div class="card-body">
@@ -21,33 +21,41 @@
             </div>
         }
 
-        <form method="post" asp-action="Edit">
+        <form method="post" asp-action="Edit" autocomplete="off">
             <input asp-for="UserId" type="hidden" />
 
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Basic Information</h5>
+                    <h5 class="mb-0">البيانات الأساسية</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label asp-for="UserName" class="form-label">Username</label>
+                        <label asp-for="UserName" class="form-label">اسم المستخدم</label>
                         <input asp-for="UserName" class="form-control" />
                         <span asp-validation-for="UserName" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="IsDeleted" class="form-label">Account Status</label>
+                        <label asp-for="IsDeleted" class="form-label">حالة الحساب</label>
                         <select asp-for="IsDeleted" class="form-select">
-                            <option value="false">Active</option>
-                            <option value="true">Inactive</option>
+                            <option value="false">نشط</option>
+                            <option value="true">غير نشط</option>
                         </select>
+                    </div>
+
+                    <div class="email-confirmation-control">
+                        <div class="form-check form-switch">
+                            <input asp-for="IsConfirmed" class="form-check-input" type="checkbox" role="switch" />
+                            <label asp-for="IsConfirmed" class="form-check-label">البريد الإلكتروني مؤكد</label>
+                        </div>
+                        <p class="mb-0">فعّل هذا الخيار لتأكيد البريد الإلكتروني للمستخدم، أو ألغِه لإعادته إلى غير مؤكد.</p>
                     </div>
                 </div>
             </div>
 
             <div class="card mb-4">
                 <div class="card-header">
-                    <h5 class="mb-0">Role Management</h5>
+                    <h5 class="mb-0">إدارة الأدوار</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -55,9 +63,9 @@
                         {
                             <div class="col-md-4">
                                 <div class="form-check">
-                                    <input type="hidden" asp-for="@Model.Roles[i].Id" />
-                                    <input type="hidden" asp-for="@Model.Roles[i].Name" />
-                                    <input type="checkbox" class="form-check-input" asp-for="@Model.Roles[i].IsSelected" id="role_@i" />
+                                    <input type="hidden" asp-for="Roles[i].Id" />
+                                    <input type="hidden" asp-for="Roles[i].Name" />
+                                    <input type="checkbox" class="form-check-input" asp-for="Roles[i].IsSelected" id="role_@i" autocomplete="off" />
                                     <label class="form-check-label" for="role_@i">
                                         @Model.Roles[i].Name
                                     </label>
@@ -68,12 +76,12 @@
                 </div>
             </div>
 
-            <div class="text-end">
+            <div class="text-start">
                 <a asp-action="Index" class="btn btn-secondary">
-                    <i class="fas fa-times me-2"></i>Cancel
+                    <i class="fas fa-times ms-2"></i>إلغاء
                 </a>
                 <button type="submit" class="btn btn-primary ms-2">
-                    <i class="fas fa-save me-2"></i>Save Changes
+                    <i class="fas fa-save ms-2"></i>حفظ التغييرات
                 </button>
             </div>
         </form>

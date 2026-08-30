@@ -21,6 +21,7 @@ namespace AdminDashboard.Handlers.UserHandler
 
             user.DisplayName = request.Model.UserName;
             user.IsDeleted = request.Model.IsDeleted;
+            user.EmailConfirmed = request.Model.IsConfirmed;
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)

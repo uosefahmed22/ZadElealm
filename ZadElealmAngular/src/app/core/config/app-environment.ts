@@ -1,4 +1,4 @@
 export const appEnvironment = {
   production: false,
-  apiBaseUrl: 'https://zadelealm.runasp.net/api'
+  apiBaseUrl: 'https://localhost:7054/api',
 } as const;

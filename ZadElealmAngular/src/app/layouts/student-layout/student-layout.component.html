@@ -1,0 +1,48 @@
+<header class="app-header">
+  <div class="header-inner">
+    <a class="brand" routerLink="/app" aria-label="زاد العلم - مساحة التعلّم" (click)="closeMenu()">
+      <img src="assets/icons/logo-dark.svg" alt="" width="150" height="45" />
+    </a>
+
+    <button
+      type="button"
+      class="menu-button"
+      aria-label="فتح قائمة التنقل"
+      aria-controls="student-navigation"
+      [attr.aria-expanded]="isMenuOpen()"
+      (click)="toggleMenu()"
+    >
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav
+      id="student-navigation"
+      class="student-nav"
+      [class.open]="isMenuOpen()"
+      aria-label="التنقل الرئيسي"
+    >
+      <a
+        routerLink="/app"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active"
+        (click)="closeMenu()"
+        >الرئيسية</a
+      >
+      <a routerLink="/app/courses" routerLinkActive="active" (click)="closeMenu()">الدورات</a>
+    </nav>
+
+    <div class="account">
+      <span class="account-copy">
+        <strong>{{ session.user()?.displayName }}</strong>
+        <small>{{ session.user()?.email }}</small>
+      </span>
+      <button type="button" class="logout-button" (click)="logout()" [disabled]="isLoggingOut()">
+        {{ isLoggingOut() ? 'جارٍ الخروج…' : 'تسجيل الخروج' }}
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="app-main">
+  <router-outlet />
+</main>

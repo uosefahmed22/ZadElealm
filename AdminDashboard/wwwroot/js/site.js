@@ -1,66 +1,50 @@
-﻿// التأكد من تحميل الصفحة بالكامل
-document.addEventListener("DOMContentLoaded", function () {
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const layoutSidenav = document.getElementById('layoutSidenav');
-    const layoutSidenavNav = document.getElementById('layoutSidenav_nav');
-    const layoutSidenavContent = document.getElementById('layoutSidenav_content');
+document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('sidebarToggle');
+    const sidebar = document.getElementById('layoutSidenav_nav');
+    const content = document.getElementById('layoutSidenav_content');
+    const mobileQuery = window.matchMedia('(max-width: 991.98px)');
+    if (!toggle || !sidebar || !content) return;
 
-    // حالة القائمة (مفتوحة/مغلقة)
-    let isSidebarOpen = true;
+    const syncAccessibilityState = () => {
+        const isOpen = mobileQuery.matches
+            ? document.body.classList.contains('sb-sidenav-toggled')
+            : !document.body.classList.contains('sb-sidenav-toggled');
+        toggle.setAttribute('aria-expanded', isOpen.toString());
+    };
 
-    sidebarToggle.addEventListener('click', function () {
-        isSidebarOpen = !isSidebarOpen;
-
-        if (!isSidebarOpen) {
-            // إخفاء القائمة
-            layoutSidenavNav.style.transform = 'translateX(-225px)';
-            layoutSidenavContent.style.marginLeft = '0';
-            layoutSidenavContent.style.width = '100%';
-        } else {
-            // إظهار القائمة
-            layoutSidenavNav.style.transform = 'translateX(0)';
-            layoutSidenavContent.style.marginLeft = '225px';
-        }
+    toggle.addEventListener('click', event => {
+        event.preventDefault();
+        document.body.classList.toggle('sb-sidenav-toggled');
+        syncAccessibilityState();
     });
-});
-document.addEventListener('DOMContentLoaded', function () {
-    // Toggle sidebar functionality
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.body.classList.toggle('sb-sidenav-toggled');
-        });
-    }
-});
-// في نفس الملف site.js
-document.addEventListener('DOMContentLoaded', function () {
-    // Search functionality
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('keyup', function () {
-            const searchText = this.value.toLowerCase();
-            const table = document.getElementById('rolesTable');
-            const rows = table.getElementsByTagName('tr');
 
-            for (let i = 1; i < rows.length; i++) {
-                const roleNameCell = rows[i].getElementsByTagName('td')[1];
-                if (roleNameCell) {
-                    const roleName = roleNameCell.textContent || roleNameCell.innerText;
-                    if (roleName.toLowerCase().indexOf(searchText) > -1) {
-                        rows[i].style.display = '';
-                    } else {
-                        rows[i].style.display = 'none';
-                    }
-                }
+    sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => {
+            if (mobileQuery.matches) {
+                document.body.classList.remove('sb-sidenav-toggled');
+                syncAccessibilityState();
             }
         });
-    }
-});
+    });
 
-// Delete role function
-function deleteRole(roleId) {
-    if (confirm('Are you sure you want to delete this role?')) {
-        window.location.href = `/Role/Delete/${roleId}`;
-    }
-}
+    content.addEventListener('click', () => {
+        if (mobileQuery.matches && document.body.classList.contains('sb-sidenav-toggled')) {
+            document.body.classList.remove('sb-sidenav-toggled');
+            syncAccessibilityState();
+        }
+    });
+
+    document.addEventListener('keydown', event => {
+        if (event.key === 'Escape' && mobileQuery.matches) {
+            document.body.classList.remove('sb-sidenav-toggled');
+            syncAccessibilityState();
+            toggle.focus();
+        }
+    });
+
+    mobileQuery.addEventListener('change', () => {
+        document.body.classList.remove('sb-sidenav-toggled');
+        syncAccessibilityState();
+    });
+    syncAccessibilityState();
+});

@@ -1,6 +1,6 @@
 ﻿@model CreateCategoryDto
 @{
-    ViewData["Title"] = "Create Category";
+    ViewData["Title"] = "إضافة تصنيف";
 }
 
 <div class="row mt-4">
@@ -8,7 +8,7 @@
         <div class="card">
             <div class="card-header bg-white">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Create New Category</h4>
+                    <h4 class="mb-0">إضافة تصنيف جديد</h4>
                     <a asp-action="Index" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left me-2"></i>Back to List
                     </a>
@@ -27,19 +27,19 @@
                     }
 
                     <div class="mb-3">
-                        <label asp-for="Name" class="form-label">Category Name</label>
+                        <label asp-for="Name" class="form-label">اسم التصنيف</label>
                         <input asp-for="Name" class="form-control" required />
                         <span asp-validation-for="Name" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="Description" class="form-label">Description</label>
+                        <label asp-for="Description" class="form-label">الوصف</label>
                         <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
                         <span asp-validation-for="Description" class="text-danger"></span>
                     </div>
 
                     <div class="mb-3">
-                        <label asp-for="ImageUrl" class="form-label">Category Image</label>
+                        <label asp-for="ImageUrl" class="form-label">صورة التصنيف</label>
                         <input type="file" asp-for="ImageUrl" class="form-control" accept="image/*"
                                onchange="previewImage(event)" required />
                         <div id="imagePreview" class="mt-2 d-none">
@@ -50,7 +50,7 @@
 
                     <div class="mt-4">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save me-2"></i>Create Category
+                            <i class="fas fa-save ms-2"></i>حفظ التصنيف
                         </button>
                     </div>
                 </form>

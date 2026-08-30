@@ -1,10 +1,64 @@
 <div class="landing-page" dir="rtl">
-  <header #navbar class="site-header" [class.is-scrolled]="isScrolled()">
-    <div class="section-shell header-shell">
-      <a class="brand-link" routerLink="/" aria-label="زاد تعلم - الرئيسية"
-        ><img src="assets/icons/logo-dark.svg" alt="شعار زاد تعلم" width="64" height="64"
-      /></a>
+  <a class="skip-link" href="#main-content">انتقل إلى المحتوى الرئيسي</a>
+
+  <header
+    #navbar
+    class="site-header on-ink"
+    [class.is-scrolled]="isScrolled()"
+    [class.menu-active]="mobileMenuOpen()"
+  >
+    <div class="zad-container header-shell">
+      <a class="brand-link" routerLink="/" aria-label="زاد تعلم - الرئيسية">
+        <svg viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <path
+            d="M33 5h12v29H33c-5 0-9 4-9 9V14c0-5 4-9 9-9Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          <path
+            d="M15 5H3v29h12c5 0 9 4 9 9V14c0-5-4-9-9-9Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          />
+          <path
+            d="M24 14v29M7 12h6M35 12h6M7 18h6M35 18h6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          />
+        </svg>
+        <span>زاد تعلم</span>
+      </a>
+
+      <nav
+        #mainNavigation
+        id="main-navigation"
+        class="site-nav"
+        [class.is-open]="mobileMenuOpen()"
+        aria-label="التنقل الرئيسي"
+      >
+        <div class="nav-links">
+          @for (item of navItems; track item.fragment) {
+            <a
+              class="nav-link"
+              [class.is-active]="activeSection() === item.fragment"
+              [attr.aria-current]="activeSection() === item.fragment ? 'page' : null"
+              [href]="'#' + item.fragment"
+              (click)="navigateToSection($event, item.fragment)"
+              >{{ item.label }}</a
+            >
+          }
+        </div>
+        <div class="nav-actions">
+          <a class="zad-btn zad-btn--link" routerLink="/login">تسجيل الدخول</a>
+          <a class="zad-btn zad-btn--primary" routerLink="/register">ابدأ رحلتك</a>
+        </div>
+      </nav>
+
       <button
+        #menuToggle
         class="mobile-menu-toggle"
         type="button"
         [attr.aria-label]="mobileMenuOpen() ? 'إغلاق قائمة التنقل' : 'فتح قائمة التنقل'"
@@ -14,274 +68,375 @@
       >
         <span></span><span></span><span></span>
       </button>
-      <nav
-        id="main-navigation"
-        class="site-nav"
-        [class.is-open]="mobileMenuOpen()"
-        aria-label="التنقل الرئيسي"
-      >
-        @for (item of navItems; track item.fragment) {
-          <a
-            class="nav-link"
-            [class.is-active]="activeSection() === item.fragment"
-            [attr.aria-current]="activeSection() === item.fragment ? 'page' : null"
-            [href]="'#' + item.fragment"
-            (click)="navigateToSection($event, item.fragment)"
-            >{{ item.label }}</a
-          >
-        }
-      </nav>
-      <div class="header-actions">
-        <a class="button button-outline" routerLink="/login">تسجيل الدخول</a
-        ><a class="button button-primary" routerLink="/register">سجّل الآن</a>
-      </div>
     </div>
   </header>
 
-  <main>
-    <section id="home" class="hero-section section-shell" aria-labelledby="landing-title">
-      <div class="hero-copy">
-        <p class="hero-kicker">زاد تعلم</p>
-        <h1 id="landing-title">تعلّم العلوم الإسلامية بخطوات واضحة</h1>
-        <p class="hero-description">
-          دورات منظمة، متابعة لتقدمك، اختبارات وشهادات تساعدك تكمل رحلتك.
-        </p>
-        <div class="hero-actions">
-          <a class="button button-primary" routerLink="/register">ابدأ رحلتك</a
-          ><a class="button button-outline" href="#paths">استكشف الدورات</a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <img
-          src="assets/illustrations/hero-learning.svg"
-          alt="مصحف مفتوح على حاسوب مع بطاقة دورة وشهادة ومؤشر تقدم"
+  <main id="main-content">
+    <section
+      id="home"
+      class="zad-section zad-section--ink hero-section on-ink"
+      aria-labelledby="landing-title"
+    >
+      <svg class="section-ornament" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+        <path
+          d="m120 8 31 65 81 47-81 47-31 65-31-65-81-47 81-47Z"
+          fill="none"
+          stroke="currentColor"
         />
-      </div>
-    </section>
-
-    <section class="challenge-strip section-shell" aria-label="التحدي والحل">
-      <article class="strip-copy">
-        <span class="strip-symbol" aria-hidden="true">؟</span>
-        <div>
-          <h2>التحدي</h2>
-          <p>كثرة المعلومات وتشتت المصادر يسببان الحيرة وصعوبة الاستمرار.</p>
+        <circle cx="120" cy="120" r="78" fill="none" stroke="currentColor" />
+        <path
+          d="M42 120h156M120 42v156M65 65l110 110M175 65 65 175"
+          fill="none"
+          stroke="currentColor"
+        />
+      </svg>
+      <div class="zad-container hero-layout">
+        <div class="hero-copy">
+          <span class="eyebrow">زاد تعلم</span>
+          <h1 id="landing-title">تعلّم العلوم الإسلامية بخطوات واضحة</h1>
+          <p>دورات منظمة، ومتابعة لتقدمك، واختبارات وشهادات تساعدك على إكمال رحلتك بثبات.</p>
+          <div class="hero-actions">
+            <a class="zad-btn zad-btn--primary" routerLink="/register">ابدأ رحلتك</a
+            ><a
+              class="zad-btn zad-btn--ghost"
+              href="#courses"
+              (click)="navigateToSection($event, 'courses')"
+              >استكشف الدورات</a
+            >
+          </div>
+          <div class="trust-strip" aria-label="مزايا المنصة">
+            <span
+              ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <use href="assets/icons/sprite.svg#check"></use></svg
+              >دورات منظمة</span
+            >
+            <span
+              ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <use href="assets/icons/sprite.svg#check"></use></svg
+              >اختبارات تفاعلية</span
+            >
+            <span
+              ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <use href="assets/icons/sprite.svg#check"></use></svg
+              >شهادات إتمام</span
+            >
+          </div>
         </div>
-      </article>
-      <img
-        class="strip-medallion"
-        src="assets/icons/medallion.svg"
-        alt="شعار زاد تعلم"
-        width="88"
-        height="88"
-      />
-      <article class="strip-copy">
-        <span class="strip-symbol strip-symbol-check" aria-hidden="true">✓</span>
-        <div>
-          <h2>الحل</h2>
-          <p>منصة موثوقة تجمع لك الطريق الواضح من تعلم، ومتابعة، وتطبيق.</p>
-        </div>
-      </article>
-    </section>
-
-    <section class="features-section section-shell" id="features" aria-labelledby="features-title">
-      <div class="section-intro">
-        <h2 class="section-title" id="features-title">المميزات</h2>
-        <p>كل ما تحتاجه لرحلة تعليمية منظمة وواضحة</p>
-      </div>
-      <div class="feature-grid">
-        @for (feature of featureCards; track feature.title) {
-          <article class="feature-card">
-            <span class="round-icon"
-              ><img [src]="feature.icon" alt="" width="28" height="28"
-            /></span>
-            <h3>{{ feature.title }}</h3>
-            <p>{{ feature.description }}</p>
+        <div class="learning-preview" aria-label="نموذج توضيحي لتجربة التعلم">
+          <article class="zad-card preview-card preview-card--lesson">
+            <span class="preview-label">مسار تعليمي</span
+            ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <use href="assets/icons/sprite.svg#book"></use>
+            </svg>
+            <h2>تعلم من محتوى مرتب وواضح</h2>
+            <p>انتقل بين الدروس والاختبارات في تجربة واحدة هادئة.</p>
           </article>
-        }
+          <article class="zad-card preview-card preview-card--quiz">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <use href="assets/icons/sprite.svg#clipboard"></use></svg
+            ><span>اختبارات بعد كل مرحلة</span>
+          </article>
+          <article class="zad-card preview-card preview-card--certificate">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <use href="assets/icons/sprite.svg#award"></use></svg
+            ><span>شهادة عند الإتمام</span>
+          </article>
+        </div>
       </div>
     </section>
 
     <section
-      class="journey-section section-shell"
-      id="how-it-works"
-      aria-labelledby="journey-title"
+      class="zad-section zad-section--paper challenge-section"
+      aria-labelledby="challenge-title"
     >
-      <h2 class="section-title" id="journey-title">رحلتك في طلب العلم</h2>
-      <div class="journey-grid">
-        @for (step of journeySteps; track step.number) {
-          <article class="journey-step">
-            <span class="step-number">{{ step.number }}</span
-            ><span class="journey-icon"
-              ><img [src]="step.icon" alt="" width="32" height="32"
-            /></span>
-            <h3>{{ step.title }}</h3>
-            <p>{{ step.description }}</p>
+      <div class="zad-container">
+        <div class="section-heading section-heading--center challenge-heading">
+          <span class="eyebrow">رحلة أوضح</span>
+          <h2 id="challenge-title">من التشتت إلى طريق تعلم منظم</h2>
+          <p>نرتب لك خطوات الرحلة حتى تعرف أين تبدأ، وماذا تتعلم بعد ذلك.</p>
+        </div>
+        <div class="challenge-grid">
+          <article class="zad-card challenge-copy">
+            <span class="challenge-icon" aria-hidden="true">؟</span>
+            <div>
+              <span class="eyebrow">التحدي</span>
+              <h3>المعرفة موجودة، لكن الطريق قد يبدو مشتتًا</h3>
+              <p>كثرة المصادر وتفاوت ترتيبها قد يصعّبان معرفة نقطة البداية والخطوة التالية.</p>
+            </div>
           </article>
-        }
+          <article class="zad-card solution-copy">
+            <span class="challenge-icon" aria-hidden="true"
+              ><svg viewBox="0 0 24 24" focusable="false">
+                <use href="assets/icons/sprite.svg#check"></use></svg
+            ></span>
+            <div>
+              <span class="eyebrow">الحل</span>
+              <h3>رحلة تعلم منظمة تجمع لك ما تحتاجه</h3>
+              <p>مسارات واضحة ودروس واختبارات مترابطة، لتبقى خطوتك القادمة معروفة.</p>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
 
-    <section class="paths-section" id="paths" aria-labelledby="paths-title">
-      <div class="section-shell paths-layout">
-        <div class="paths-copy">
-          <h2 id="paths-title">محتوى علمي موثوق لمسارات متنوعة</h2>
-          <p>
-            أمثلة لمسارات تعليمية يمكن تنظيمها داخل المنصة بما يناسب المستويات المختلفة وأهداف
-            التعلم.
-          </p>
-          <a class="button button-primary" routerLink="/register">استكشف جميع الدورات</a>
+    <section
+      id="features"
+      class="zad-section zad-section--paper-muted"
+      aria-labelledby="features-title"
+    >
+      <div class="zad-container">
+        <div class="section-heading section-heading--center">
+          <span class="eyebrow">تجربة متكاملة</span>
+          <h2 id="features-title">كل ما تحتاجه في رحلة تعلمك</h2>
+          <p>أدوات متوازنة تخدم الفهم والتطبيق والمتابعة من دون تشتيت.</p>
         </div>
-        <div class="paths-grid">
-          @for (path of coursePaths; track path.title) {
-            <article class="path-card">
-              <div class="path-image-wrap">
-                <img [src]="path.image" [alt]="path.imageAlt" /><span class="path-level">{{
-                  path.level
-                }}</span>
-              </div>
-              <div class="path-body">
-                <h3>{{ path.title }}</h3>
-                <p>{{ path.description }}</p>
-                <span class="path-line"></span>
-              </div>
+        <div class="feature-grid">
+          @for (feature of featureCards; track feature.title) {
+            <article class="zad-card feature-card">
+              <span class="feature-icon" aria-hidden="true"
+                ><svg viewBox="0 0 24 24" focusable="false">
+                  <use [attr.href]="'assets/icons/sprite.svg#' + feature.icon"></use></svg
+              ></span>
+              <h3>{{ feature.title }}</h3>
+              <p>{{ feature.description }}</p>
             </article>
           }
-          <button class="slider-arrow" type="button" aria-label="المسار السابق">
-            <img src="assets/icons/arrow-left.svg" alt="" width="24" height="24" />
-          </button>
         </div>
       </div>
     </section>
 
-    <section class="progress-section section-shell" aria-labelledby="progress-title">
-      <article class="progress-copy">
-        <h2 id="progress-title">تابع تقدمك واحتفل بإنجازك</h2>
-        <p>لوحة متابعة واضحة تساعدك على رؤية تقدمك وإتمام دراستك بثقة.</p>
-        <a class="button button-primary" routerLink="/register">ابدأ رحلتك الآن</a>
-      </article>
-      <article class="progress-summary">
-        <div class="progress-meter">
-          <p>تقدمك العام</p>
-          <img src="assets/illustrations/progress-75.svg" alt="نسبة التقدم 75 بالمئة" />
+    <section
+      id="how-it-works"
+      class="zad-section zad-section--paper journey-section"
+      aria-labelledby="journey-title"
+    >
+      <div class="zad-container journey-layout">
+        <div class="section-heading section-heading--center">
+          <span class="eyebrow">كيف تبدأ</span>
+          <h2 id="journey-title">رحلتك في طلب العلم</h2>
+          <p>أربع خطوات بسيطة تنقلك من اختيار المسار إلى إتمامه.</p>
         </div>
-        <ul class="progress-list">
-          @for (item of progressChecklist; track item.label) {
-            <li>
-              <img
-                [src]="
-                  item.completed ? 'assets/icons/check-filled.svg' : 'assets/icons/check-empty.svg'
-                "
-                alt=""
-                width="20"
-                height="20"
-              />{{ item.label }}
+        <ol class="journey-list">
+          @for (step of journeySteps; track step.number) {
+            <li class="journey-step">
+              <span class="step-number" aria-hidden="true">{{ step.number }}</span
+              ><span class="journey-icon" aria-hidden="true"
+                ><svg viewBox="0 0 24 24" focusable="false">
+                  <use [attr.href]="'assets/icons/sprite.svg#' + step.icon"></use></svg
+              ></span>
+              <div>
+                <h3>{{ step.title }}</h3>
+                <p>{{ step.description }}</p>
+              </div>
             </li>
           }
-        </ul>
-      </article>
-      <img
-        class="certificate-preview"
-        src="assets/illustrations/certificate.svg"
-        alt="نموذج شهادة إتمام بإطار ذهبي وختم"
-      /><img class="progress-leaves" src="assets/illustrations/leaves.svg" alt="" />
+        </ol>
+      </div>
     </section>
 
-    <section class="faq-section section-shell" id="faq" aria-labelledby="faq-title">
-      <div class="faq-content">
-        <h2 class="section-title" id="faq-title">الأسئلة الشائعة</h2>
+    <section
+      id="courses"
+      class="zad-section zad-section--ink courses-section on-ink"
+      aria-labelledby="courses-title"
+    >
+      <div class="zad-container">
+        <div class="courses-heading">
+          <div class="section-heading">
+            <span class="eyebrow">المسارات التعليمية</span>
+            <h2 id="courses-title">ابدأ من دورة تناسب رحلتك</h2>
+            <p>أحدث الدورات المتاحة من كتالوج المنصة.</p>
+          </div>
+          <a class="zad-btn zad-btn--ghost" routerLink="/app/courses">استكشف جميع الدورات</a>
+        </div>
+        <div
+          class="course-region"
+          aria-live="polite"
+          [attr.aria-busy]="courseRegionState() === 'loading'"
+        >
+          @switch (courseRegionState()) {
+            @case ('loading') {
+              <span class="sr-only">جارٍ تحميل الدورات</span>
+              <div class="course-grid" aria-hidden="true">
+                @for (skeleton of courseSkeletons; track skeleton) {
+                  <article class="zad-card course-card course-card--skeleton">
+                    <div class="zad-skeleton skeleton-media"></div>
+                    <div class="course-body">
+                      <span class="zad-skeleton skeleton-line skeleton-line--short"></span
+                      ><span class="zad-skeleton skeleton-line"></span
+                      ><span class="zad-skeleton skeleton-line"></span
+                      ><span class="zad-skeleton skeleton-line skeleton-line--medium"></span>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+            @case ('success') {
+              <div class="course-grid">
+                @for (course of courses(); track course.id) {
+                  <article class="zad-card course-card">
+                    <div class="course-media">
+                      <img
+                        [src]="course.image"
+                        [attr.srcset]="course.imageSrcSet"
+                        sizes="(min-width: 1024px) 352px, (min-width: 768px) 46vw, 92vw"
+                        [alt]="course.imageAlt"
+                        width="480"
+                        height="270"
+                        loading="lazy"
+                        decoding="async"
+                        (error)="useCourseImageFallback($event)"
+                      />
+                    </div>
+                    <div class="course-body">
+                      <span class="course-category">{{ course.category }}</span>
+                      <h3>{{ course.title }}</h3>
+                      <p>{{ course.description }}</p>
+                      <div class="course-meta">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <use href="assets/icons/sprite.svg#play-screen"></use></svg
+                        ><span>{{ course.videoCountLabel }}</span>
+                      </div>
+                    </div>
+                  </article>
+                }
+              </div>
+            }
+            @case ('empty') {
+              <div class="course-message" role="status">
+                <h3>لا توجد دورات متاحة الآن</h3>
+                <p>نعمل على إضافة محتوى جديد. يمكنك العودة لاحقًا.</p>
+              </div>
+            }
+            @case ('error') {
+              <div class="course-message" role="alert">
+                <h3>تعذر تحميل الدورات</h3>
+                <p>حدثت مشكلة مؤقتة أثناء جلب المحتوى.</p>
+                <button class="zad-btn zad-btn--primary" type="button" (click)="loadCourses()">
+                  إعادة المحاولة
+                </button>
+              </div>
+            }
+          }
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="zad-section zad-section--paper-muted certificate-section"
+      aria-labelledby="certificate-title"
+    >
+      <div class="zad-container certificate-layout">
+        <div class="certificate-copy">
+          <span class="eyebrow">وثّق إنجازك</span>
+          <h2 id="certificate-title">شهادة إتمام واضحة ومحترمة</h2>
+          <p>عند استيفاء متطلبات الدورة، تعرض المنصة شهادة الإتمام ببيانات الإنجاز الأساسية.</p>
+          <a class="zad-btn zad-btn--primary" routerLink="/register">ابدأ رحلتك الآن</a>
+        </div>
+        <article class="zad-card certificate-preview" aria-label="نموذج توضيحي لشهادة الإتمام">
+          <span class="certificate-seal" aria-hidden="true"
+            ><svg viewBox="0 0 24 24" focusable="false">
+              <use href="assets/icons/sprite.svg#award"></use></svg
+          ></span>
+          <span class="preview-note">نموذج توضيحي</span>
+          <div class="certificate-brand" aria-label="زاد تعلم">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <use href="assets/icons/sprite.svg#book"></use></svg
+            ><span>زاد تعلم</span>
+          </div>
+          <h3>شهادة إتمام دورة</h3>
+          <dl>
+            <div>
+              <dt>اسم المتعلم</dt>
+              <dd>يظهر هنا اسم المتعلم</dd>
+            </div>
+            <div>
+              <dt>اسم الدورة</dt>
+              <dd>يظهر هنا اسم الدورة</dd>
+            </div>
+            <div>
+              <dt>نتيجة الاختبار</dt>
+              <dd>تظهر هنا النتيجة</dd>
+            </div>
+            <div>
+              <dt>تاريخ الإتمام</dt>
+              <dd>يظهر هنا التاريخ</dd>
+            </div>
+            <div>
+              <dt>الرقم المرجعي</dt>
+              <dd>يظهر هنا الرقم المرجعي</dd>
+            </div>
+          </dl>
+        </article>
+      </div>
+    </section>
+
+    <section
+      id="faq"
+      class="zad-section zad-section--paper faq-section"
+      aria-labelledby="faq-title"
+    >
+      <div class="zad-container faq-layout">
+        <div class="section-heading section-heading--center">
+          <span class="eyebrow">إجابات مختصرة</span>
+          <h2 id="faq-title">الأسئلة الشائعة</h2>
+          <p>أهم ما قد تحتاج معرفته قبل أن تبدأ.</p>
+        </div>
         <div class="faq-list">
-          @for (item of faqItems; track item.question; let index = $index) {
-            <article class="faq-item">
+          @for (faq of faqItems; track faq.question; let index = $index) {
+            <article class="faq-item" [class.is-open]="openFaqIndex() === index">
               <h3>
                 <button
-                  type="button"
                   class="faq-trigger"
+                  [id]="'faq-trigger-' + index"
+                  type="button"
                   [attr.aria-expanded]="openFaqIndex() === index"
                   [attr.aria-controls]="'faq-panel-' + index"
                   (click)="toggleFaq(index)"
                 >
-                  <span>{{ item.question }}</span
-                  ><img
-                    class="faq-chevron"
-                    [class.is-open]="openFaqIndex() === index"
-                    src="assets/icons/chevron-down.svg"
-                    alt=""
-                    width="18"
-                    height="18"
-                  />
+                  <span>{{ faq.question }}</span
+                  ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <use href="assets/icons/sprite.svg#chevron"></use>
+                  </svg>
                 </button>
               </h3>
               <div
                 class="faq-panel"
                 [id]="'faq-panel-' + index"
+                role="region"
+                [attr.aria-labelledby]="'faq-trigger-' + index"
                 [hidden]="openFaqIndex() !== index"
               >
-                <p>{{ item.answer }}</p>
+                <p>{{ faq.answer }}</p>
               </div>
             </article>
           }
         </div>
       </div>
-      <img
-        class="faq-visual"
-        src="assets/illustrations/faq-books.svg"
-        alt="كتب ونبات أمام نافذة بنقوش إسلامية"
-      />
     </section>
   </main>
 
-  <footer class="site-footer">
-    <section class="footer-cta section-shell">
-      <img
-        class="footer-illustration"
-        src="assets/illustrations/footer-learning.svg"
-        alt="مصحف وفانوس داخل محراب"
-      />
-      <div class="footer-copy">
-        <h2>ابدأ رحلتك في طلب العلم اليوم</h2>
-        <p>انضم إلى بيئة تعليمية إسلامية هادئة وابدأ خطوة جديدة في مسيرتك العلمية.</p>
+  <footer class="site-footer on-ink">
+    <div class="footer-watermark" aria-hidden="true">زاد تعلم</div>
+    <div class="zad-container footer-grid">
+      <div class="footer-about">
+        <div class="footer-brand">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <use href="assets/icons/sprite.svg#book"></use></svg
+          ><span>زاد تعلم</span>
+        </div>
+        <p>منصة تعليمية عربية لتنظيم رحلتك في تعلم العلوم الإسلامية.</p>
       </div>
-      <a routerLink="/" aria-label="زاد تعلم"
-        ><img
-          class="footer-cta-logo"
-          src="assets/icons/logo-light.svg"
-          alt="شعار زاد تعلم"
-          width="64"
-          height="64"
-      /></a>
-    </section>
-    <div class="footer-main">
-      <div class="footer-grid section-shell">
-        <div class="footer-about">
-          <img src="assets/icons/logo-light.svg" alt="شعار زاد تعلم" width="64" height="64" />
-          <p>منصة تعليمية إسلامية موثوقة تساعدك على التعلم والنمو بخطوات واضحة.</p>
-        </div>
-        <div>
-          <h3>روابط سريعة</h3>
-          <a href="#home" (click)="navigateToSection($event, 'home')">الرئيسية</a
-          ><a href="#features" (click)="navigateToSection($event, 'features')">المميزات</a
-          ><a href="#how-it-works" (click)="navigateToSection($event, 'how-it-works')">كيف تبدأ</a
-          ><a href="#faq" (click)="navigateToSection($event, 'faq')">الأسئلة الشائعة</a>
-        </div>
-        <div>
-          <h3>المصادر</h3>
-          <a routerLink="/register">جميع الدورات</a><a href="#features">التطبيقات</a
-          ><a routerLink="/forgot-password">مركز المساعدة</a
-          ><a href="#how-it-works" (click)="navigateToSection($event, 'how-it-works')"
-            >سياسة الاستخدام</a
-          >
-        </div>
-        <div>
-          <h3>تابعنا</h3>
-          <div class="social-list" aria-label="قنوات التواصل">
-            <a href="#" aria-label="فيسبوك"><img src="assets/icons/facebook.svg" alt="" /></a
-            ><a href="#" aria-label="إنستغرام"><img src="assets/icons/instagram.svg" alt="" /></a
-            ><a href="#" aria-label="تلجرام"><img src="assets/icons/telegram.svg" alt="" /></a
-            ><a href="#" aria-label="يوتيوب"><img src="assets/icons/youtube.svg" alt="" /></a>
-          </div>
-        </div>
-        <p class="footer-note">© زاد تعلم. جميع الحقوق محفوظة.</p>
+      <div class="footer-column">
+        <h2>روابط سريعة</h2>
+        <a href="#home" (click)="navigateToSection($event, 'home')">الرئيسية</a
+        ><a routerLink="/app/courses">الدورات</a
+        ><a href="#faq" (click)="navigateToSection($event, 'faq')">الأسئلة الشائعة</a>
       </div>
+      <div class="footer-column">
+        <h2>الحساب</h2>
+        <a routerLink="/login">تسجيل الدخول</a><a routerLink="/register">إنشاء حساب</a>
+      </div>
+      <p class="footer-note">جميع الحقوق محفوظة لزاد تعلم</p>
     </div>
   </footer>
 </div>

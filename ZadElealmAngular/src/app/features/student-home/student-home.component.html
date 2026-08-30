@@ -1,0 +1,9 @@
+<section class="welcome-card" aria-labelledby="welcome-title">
+  <span class="eyebrow">مساحة التعلّم</span>
+  <h1 id="welcome-title">أهلًا {{ session.user()?.displayName }}</h1>
+  <p>حسابك متصل بنجاح. استكشف مكتبة الدورات واختر المسار المناسب لرحلة تعلّم واضحة ومنظمة.</p>
+  <div class="welcome-actions">
+    <a routerLink="/app/courses" class="back-link">استكشف الدورات</a>
+    <a routerLink="/" class="home-link">الصفحة التعريفية</a>
+  </div>
+</section>

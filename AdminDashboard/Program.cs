@@ -1,17 +1,29 @@
 using AdminDashboard.Extentions;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Mvc;
+using Scalar.AspNetCore;
+using Serilog;
+using Serilog.Events;
 
 public class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
-      var builder = WebApplication.CreateBuilder(args);
+        var builder = WebApplication.CreateBuilder(args);
+        builder.Services.AddSerilog((services, configuration) => configuration
+            .MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .WriteTo.Console());
 
         builder.Services.AddControllersWithViews(options =>
         {
             options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute());
         });
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
         builder.Services.ConfigureApplicationServices(builder.Configuration);
         builder.Services.AddRateLimiting(builder.Configuration);
 
@@ -25,6 +37,7 @@ public class Program
             app.UseExceptionHandler("/Home/Error");
             app.UseHsts();
         }
+
         app.UseHsts();
         app.UseCookiePolicy(new CookiePolicyOptions
         {
@@ -34,15 +47,20 @@ public class Program
         });
         app.UseHttpsRedirection();
         app.UseStaticFiles();
-
+        app.UseSerilogRequestLogging();
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseSwagger();
+        app.MapScalarApiReference("/scalar", options => options
+            .WithTitle("Zad Elealm Dashboard")
+            .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+            .DisableAgent());
 
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Admin}/{action=Login}/{id?}");
 
-        app.Run();
+        await app.RunAsync();
     }
 }

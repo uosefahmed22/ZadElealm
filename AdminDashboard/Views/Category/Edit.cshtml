@@ -1,14 +1,14 @@
 ﻿@model CreateCategoryDto
 
 @{
-    ViewData["Title"] = "Edit Category";
+    ViewData["Title"] = "تعديل التصنيف";
 }
 
 <link href="~/css/editcategory.css" rel="stylesheet" />
 
 <div class="card">
     <div class="card-header">
-        <h1 class="card-title">Edit Category: @Model.Name</h1>
+        <h1 class="card-title">تعديل التصنيف: @Model.Name</h1>
     </div>
     <div class="card-body">
         @if (!ViewData.ModelState.IsValid)
@@ -26,20 +26,20 @@
             <input asp-for="Id" hidden />
 
             <div class="form-group mb-4">
-                <label asp-for="Name" class="form-label">Category Name</label>
-                <input asp-for="Name" class="form-control" placeholder="Enter category name" />
+                <label asp-for="Name" class="form-label">اسم التصنيف</label>
+                <input asp-for="Name" class="form-control" placeholder="اكتب اسم التصنيف" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-4">
-                <label asp-for="Description" class="form-label">Description</label>
+                <label asp-for="Description" class="form-label">الوصف</label>
                 <textarea asp-for="Description" class="form-control" rows="4"
-                          placeholder="Enter category description"></textarea>
+                          placeholder="اكتب وصف التصنيف"></textarea>
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
 
             <div class="form-group mb-4">
-                <label asp-for="ImageUrl" class="form-label">Category Image</label>
+                <label asp-for="ImageUrl" class="form-label">صورة التصنيف</label>
                 <div class="custom-file-upload">
                     <input type="file" asp-for="ImageUrl" class="form-control"
                            accept="image/*" onchange="previewImage(event)" />
@@ -52,10 +52,10 @@
 
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save me-2"></i>Save Changes
+                    <i class="fas fa-save ms-2"></i>حفظ التغييرات
                 </button>
                 <a asp-action="Index" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Back to List
+                    <i class="fas fa-arrow-right ms-2"></i>العودة للقائمة
                 </a>
             </div>
         </form>

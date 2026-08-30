@@ -23,17 +23,25 @@ namespace AdminDashboard.Handlers.UserHandler
             var user = await _userManager.FindByIdAsync(request.UserId);
             var allRoles = await _roleManager.Roles.ToListAsync(cancellationToken);
 
+            var roles = new List<RoleViewModel>(allRoles.Count);
+            foreach (var role in allRoles)
+            {
+                var roleName = role.Name ?? string.Empty;
+                roles.Add(new RoleViewModel
+                {
+                    Id = role.Id,
+                    Name = roleName,
+                    IsSelected = await _userManager.IsInRoleAsync(user, roleName)
+                });
+            }
+
             return new UserRolesViewModel
             {
                 UserId = user.Id,
                 UserName = user.DisplayName,
                 IsDeleted = user.IsDeleted,
-                Roles = allRoles.Select(r => new RoleViewModel
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    IsSelected = _userManager.IsInRoleAsync(user, r.Name).Result
-                }).ToList()
+                IsConfirmed = user.EmailConfirmed,
+                Roles = roles
             };
         }
     }

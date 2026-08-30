@@ -2,21 +2,26 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using AdminDashboard.Models;
 using Microsoft.AspNetCore.Authorization;
+using AdminDashboard.Queries.HomeQuery;
+using MediatR;
 
 namespace AdminDashboard.Controllers;
 [Authorize(Roles = "Admin")]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IMediator _mediator;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IMediator mediator)
     {
         _logger = logger;
+        _mediator = mediator;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
-        return View();
+        var overview = await _mediator.Send(new GetDashboardOverviewQuery(), cancellationToken);
+        return View(overview);
     }
 
     public IActionResult Privacy()

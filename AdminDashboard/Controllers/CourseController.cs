@@ -27,10 +27,22 @@ namespace AdminDashboard.Controllers
         {
             _mediator = mediator;
         }
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            int page = 1,
+            string? search = null,
+            string? language = null,
+            string? category = null,
+            decimal? minimumRating = null)
         {
-            var courses = await _mediator.Send(new GetAllCoursesQuery());
-            return View(courses);
+            var model = await _mediator.Send(new GetAllCoursesQuery
+            {
+                PageNumber = page,
+                Search = search,
+                Language = language,
+                Category = category,
+                MinimumRating = minimumRating
+            });
+            return View(model);
         }
 
         [HttpGet]

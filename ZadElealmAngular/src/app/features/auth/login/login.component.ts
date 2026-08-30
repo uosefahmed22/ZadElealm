@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { normalizeApiError } from '../../../core/api/api-error.utils';
@@ -12,13 +12,14 @@ import { AuthSessionService } from '../../../core/auth/auth-session.service';
   selector: 'app-login',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.scss'
+  styleUrl: './login.component.scss',
 })
 export class LoginComponent {
   private readonly formBuilder = inject(FormBuilder);
   private readonly authApi = inject(AuthApiService);
   private readonly session = inject(AuthSessionService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly hidePassword = signal(true);
   readonly isSubmitting = signal(false);
@@ -28,7 +29,7 @@ export class LoginComponent {
 
   readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required]]
+    password: ['', [Validators.required]],
   });
 
   readonly submitDisabled = computed(() => this.isSubmitting() || this.form.invalid);
@@ -50,16 +51,20 @@ export class LoginComponent {
         next: (response) => {
           this.session.setSession(response.data);
           this.successMessage.set('تم تسجيل الدخول بنجاح.');
-          void this.router.navigate(['/confirm-email'], {
-            queryParams: { email: response.data.email, justLoggedIn: true }
-          });
+          const returnUrl = this.router.parseUrl(this.getSafeReturnUrl());
+          void this.router.navigateByUrl(returnUrl);
         },
         error: (error: unknown) => {
           const normalized = normalizeApiError(error);
           this.serverMessage.set(normalized.message);
           this.serverErrors.set(normalized.errors);
-        }
+        },
       });
+  }
+
+  private getSafeReturnUrl(): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    return returnUrl?.startsWith('/') && !returnUrl.startsWith('//') ? returnUrl : '/app';
   }
 
   togglePasswordVisibility(): void {
