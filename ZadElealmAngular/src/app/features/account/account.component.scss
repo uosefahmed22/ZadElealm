@@ -1,0 +1,335 @@
+:host {
+  display: block;
+}
+
+.page-heading {
+  margin-block-end: var(--space-8);
+}
+
+.page-heading h1,
+.card-heading h2,
+.profile-summary h2 {
+  margin-block: var(--space-1) 0;
+}
+
+.page-heading p,
+.card-heading p,
+.profile-summary p {
+  margin-block: var(--space-2) 0;
+  color: var(--text-muted);
+}
+
+.eyebrow,
+.card-heading > span {
+  color: var(--accent-on-paper);
+  font-family: var(--font-kufi);
+}
+
+.account-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.account-card,
+.state-card {
+  padding: clamp(var(--space-5), 3vw, var(--space-8));
+  border: var(--rule-hairline);
+  border-radius: var(--radius-sm);
+  background: var(--surface-paper-raised);
+}
+
+.profile-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.avatar {
+  inline-size: 6rem;
+  block-size: 6rem;
+  border: var(--rule-accent);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  color: var(--text-on-ink);
+  background: var(--ink-700);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-sm);
+}
+
+.avatar img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.image-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.profile-summary > small {
+  grid-column: 1 / -1;
+  color: var(--text-muted);
+}
+
+#profile-image {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.file-picker,
+.primary-button,
+.text-button,
+.danger-button {
+  min-block-size: var(--target-min);
+  padding-inline: var(--space-5);
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-weight-bold);
+  cursor: pointer;
+}
+
+.file-picker,
+.text-button {
+  border: var(--rule-hairline);
+  color: var(--text-strong);
+  background: transparent;
+}
+
+.primary-button {
+  border: 1px solid var(--ink-700);
+  color: var(--text-on-ink);
+  background: var(--ink-700);
+}
+
+.text-button--danger {
+  color: var(--gold-800);
+}
+
+.danger-zone {
+  border-inline-start: 4px solid var(--gold-800);
+  background: var(--gold-50);
+}
+
+.danger-zone .card-heading {
+  margin-block-end: var(--space-4);
+}
+
+.danger-button {
+  border: 1px solid var(--gold-800);
+  color: var(--paper-100);
+  background: var(--gold-800);
+  font: inherit;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  z-index: 60;
+  inset: 0;
+  padding: var(--space-5);
+  display: grid;
+  place-items: center;
+  background: rgb(5 26 19 / 0.72);
+}
+
+.confirmation-dialog {
+  inline-size: min(31rem, 100%);
+  max-block-size: calc(100vh - var(--space-10));
+  padding: clamp(var(--space-5), 5vw, var(--space-8));
+  border: 1px solid var(--gold-700);
+  border-radius: var(--radius-sm);
+  overflow-y: auto;
+  background: var(--surface-paper-raised);
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 0.3);
+}
+
+.dialog-icon {
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--paper-100);
+  background: var(--gold-800);
+  font-weight: var(--font-weight-bold);
+}
+
+.confirmation-dialog h2 {
+  margin-block: var(--space-4) var(--space-2);
+}
+
+.confirmation-dialog > p {
+  color: var(--text-muted);
+}
+
+.dialog-actions {
+  margin-block-start: var(--space-5);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.dialog-actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.primary-button:disabled,
+.text-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.file-name {
+  max-inline-size: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card-heading {
+  margin-block-end: var(--space-6);
+}
+
+form {
+  display: grid;
+  gap: var(--space-3);
+}
+
+label {
+  margin-block-start: var(--space-2);
+  color: var(--text-strong);
+  font-weight: var(--font-weight-bold);
+}
+
+label small {
+  color: var(--text-muted);
+  font-weight: var(--font-weight-regular);
+}
+
+input {
+  inline-size: 100%;
+  min-block-size: var(--target-min);
+  padding-inline: var(--space-4);
+  border: var(--rule-hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-strong);
+  background: var(--surface-paper);
+}
+
+input:focus {
+  border-color: var(--accent-on-paper);
+}
+
+form > .primary-button,
+.button-row {
+  margin-block-start: var(--space-4);
+  justify-self: start;
+}
+
+.field-error,
+.message--error {
+  color: var(--gold-800);
+}
+
+.message {
+  margin-block-end: var(--space-5);
+  padding: var(--space-4);
+  border: var(--rule-hairline);
+  border-inline-start: 4px solid currentcolor;
+  background: var(--surface-paper-raised);
+}
+
+.message--success {
+  color: var(--ink-700);
+}
+
+.skeleton-card {
+  min-block-size: 20rem;
+}
+
+.email-fields {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.email-fields > div {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.otp-note {
+  margin-block-end: var(--space-2);
+}
+
+.otp-input {
+  max-inline-size: 13rem;
+  font-size: var(--fs-card-emphasis);
+  letter-spacing: 0.4em;
+  text-align: center;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (min-width: 48rem) {
+  .account-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-summary,
+  .account-card--wide {
+    grid-column: 1 / -1;
+  }
+
+  .profile-summary {
+    grid-template-columns: auto minmax(12rem, 1fr) auto;
+  }
+
+  .image-actions {
+    grid-column: auto;
+    justify-content: end;
+  }
+
+  .profile-summary > small {
+    grid-column: 2 / -1;
+  }
+
+  .email-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 24rem) {
+  .profile-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .avatar {
+    inline-size: 5rem;
+    block-size: 5rem;
+  }
+
+  .image-actions,
+  .profile-summary > small {
+    grid-column: auto;
+  }
+
+  .image-actions > * {
+    inline-size: 100%;
+  }
+}

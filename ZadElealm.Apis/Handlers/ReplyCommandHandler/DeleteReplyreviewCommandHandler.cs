@@ -10,20 +10,16 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
     {
 
         private readonly IUnitOfWork _unitOfWork;
-        private readonly UserManager<AppUser> _userManager;
-
-        public DeleteReplyreviewCommandHandler(IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+        public DeleteReplyreviewCommandHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _userManager = userManager;
         }
         public override async Task<ApiResponse> Handle(DeleteReplyreviewCommand request, CancellationToken cancellationToken)
         {
             var existingReply = await _unitOfWork.Repository<Core.Models.Reply>()
                 .GetEntityAsync(request.ReplyId);
 
-            var user = await _userManager.FindByIdAsync(request.UserId);
-            if (existingReply == null || user == null)
+            if (existingReply == null)
             {
                 return new ApiResponse(404, "Reply not found");
             }

@@ -1,5 +1,6 @@
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 
 import { AuthApiService } from '../../../core/auth/auth-api.service';
@@ -42,6 +43,20 @@ describe('LoginComponent', () => {
     expect(authApi.login).not.toHaveBeenCalled();
   });
 
+  it('keeps the login button actionable so invalid fields can explain the problem', () => {
+    const fixture = TestBed.createComponent(LoginComponent);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    button.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('هذا الحقل مطلوب');
+  });
+
   it('stores the session and navigates after a successful login', () => {
     authApi.login.mockReturnValue(
       of({
@@ -78,5 +93,48 @@ describe('LoginComponent', () => {
     component.submit();
 
     expect(component.serverMessage()).toContain('ignored');
+  });
+
+  it('offers the confirmation route only when the API reports an unconfirmed email', () => {
+    authApi.login.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 401,
+            error: { statusCode: 401, message: 'لم يتم تأكيد البريد الإلكتروني' },
+          }),
+      ),
+    );
+    const fixture = TestBed.createComponent(LoginComponent);
+    fixture.componentInstance.form.setValue({
+      email: 'student@test.com',
+      password: 'Password123!',
+    });
+
+    fixture.componentInstance.submit();
+    fixture.detectChanges();
+
+    const link = fixture.nativeElement.querySelector('.confirmation-link') as HTMLAnchorElement;
+    expect(link).not.toBeNull();
+    expect(link.getAttribute('href')).toContain('/confirm-email');
+    expect(link.getAttribute('href')).toContain('email=student@test.com');
+  });
+
+  it('exposes accessible password visibility and server alert states', () => {
+    authApi.login.mockReturnValue(throwError(() => new Error('بيانات غير صحيحة')));
+    const fixture = TestBed.createComponent(LoginComponent);
+    const component = fixture.componentInstance;
+    component.form.setValue({ email: 'user@test.com', password: '12345678' });
+    fixture.detectChanges();
+
+    const toggle = fixture.nativeElement.querySelector('.password-toggle') as HTMLButtonElement;
+    expect(toggle.getAttribute('aria-label')).toBe('إظهار كلمة المرور');
+    toggle.click();
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-label')).toBe('إخفاء كلمة المرور');
+
+    component.submit();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]')).not.toBeNull();
   });
 });

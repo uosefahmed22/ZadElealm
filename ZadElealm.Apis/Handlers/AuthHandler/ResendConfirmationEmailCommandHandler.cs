@@ -59,12 +59,17 @@ namespace ZadElealm.Apis.Handlers.Auth
 
             var emailBody = BuildEmailBody(user.DisplayName, callbackUrl);
 
-            await _sendEmailService.SendEmailAsync(new EmailMessage
+            var emailResult = await _sendEmailService.SendEmailAsync(new EmailMessage
             {
                 To = user.Email,
                 Subject = "تأكيد البريد الإلكتروني",
                 Body = emailBody
-            });
+            }, cancellationToken);
+
+            if (emailResult.StatusCode != 200)
+            {
+                return new ApiResponse(503, "تعذر إرسال رسالة التأكيد حاليًا، حاول مرة أخرى لاحقًا");
+            }
 
             _rateLimiter.RecordAttempt(request.Email);
 

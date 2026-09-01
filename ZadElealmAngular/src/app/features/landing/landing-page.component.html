@@ -122,25 +122,48 @@
             >
           </div>
         </div>
-        <div class="learning-preview" aria-label="نموذج توضيحي لتجربة التعلم">
-          <article class="zad-card preview-card preview-card--lesson">
-            <span class="preview-label">مسار تعليمي</span
-            ><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <use href="assets/icons/sprite.svg#book"></use>
-            </svg>
-            <h2>تعلم من محتوى مرتب وواضح</h2>
-            <p>انتقل بين الدروس والاختبارات في تجربة واحدة هادئة.</p>
-          </article>
-          <article class="zad-card preview-card preview-card--quiz">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <use href="assets/icons/sprite.svg#clipboard"></use></svg
-            ><span>اختبارات بعد كل مرحلة</span>
-          </article>
-          <article class="zad-card preview-card preview-card--certificate">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <use href="assets/icons/sprite.svg#award"></use></svg
-            ><span>شهادة عند الإتمام</span>
-          </article>
+        <div class="learning-preview">
+          @if (featuredCourse(); as course) {
+            <figure class="video-spotlight">
+              <a
+                class="video-window"
+                [href]="course.videoUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                [attr.aria-label]="'شاهد مقتطفًا من دورة ' + course.title + ' على يوتيوب'"
+              >
+                <img
+                  [src]="course.image"
+                  [attr.srcset]="course.imageSrcSet"
+                  sizes="(min-width: 1024px) 520px, 90vw"
+                  [alt]="course.imageAlt"
+                  width="480"
+                  height="360"
+                  decoding="async"
+                  (error)="useCourseImageFallback($event)"
+                />
+                <span class="video-shade" aria-hidden="true"></span>
+                <span class="play-mark" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="m9 7 8 5-8 5Z" fill="currentColor" />
+                  </svg>
+                </span>
+                <span class="video-callout">
+                  <span class="video-kicker">شاهد من محتوى المنصة</span>
+                  <strong>{{ course.title }}</strong>
+                  <span>{{ course.author }} · {{ course.videoCountLabel }}</span>
+                </span>
+              </a>
+              <figcaption>
+                <span class="live-dot" aria-hidden="true"></span>
+                معاينة حقيقية من إحدى دورات زاد تعلم
+              </figcaption>
+            </figure>
+          } @else {
+            <div class="video-spotlight video-spotlight--loading" aria-hidden="true">
+              <div class="video-window"></div>
+            </div>
+          }
         </div>
       </div>
     </section>
@@ -199,6 +222,34 @@
               ></span>
               <h3>{{ feature.title }}</h3>
               <p>{{ feature.description }}</p>
+            </article>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section
+      class="zad-section zad-section--paper audience-section"
+      aria-labelledby="audience-title"
+    >
+      <div class="zad-container">
+        <div class="section-heading section-heading--center">
+          <span class="eyebrow">مساحة للجميع</span>
+          <h2 id="audience-title">لمن هذه المنصة؟</h2>
+          <p>واجهة واحدة مرنة تساعد مختلف الأعمار على الوصول إلى المحتوى بوضوح.</p>
+        </div>
+        <div class="audience-grid">
+          @for (audience of audienceCards; track audience.title) {
+            <article class="zad-card audience-card">
+              <span class="audience-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false">
+                  <use [attr.href]="'assets/icons/sprite.svg#' + audience.icon"></use>
+                </svg>
+              </span>
+              <div>
+                <h3>{{ audience.title }}</h3>
+                <p>{{ audience.description }}</p>
+              </div>
             </article>
           }
         </div>
@@ -273,31 +324,7 @@
             @case ('success') {
               <div class="course-grid">
                 @for (course of courses(); track course.id) {
-                  <article class="zad-card course-card">
-                    <div class="course-media">
-                      <img
-                        [src]="course.image"
-                        [attr.srcset]="course.imageSrcSet"
-                        sizes="(min-width: 1024px) 352px, (min-width: 768px) 46vw, 92vw"
-                        [alt]="course.imageAlt"
-                        width="480"
-                        height="270"
-                        loading="lazy"
-                        decoding="async"
-                        (error)="useCourseImageFallback($event)"
-                      />
-                    </div>
-                    <div class="course-body">
-                      <span class="course-category">{{ course.category }}</span>
-                      <h3>{{ course.title }}</h3>
-                      <p>{{ course.description }}</p>
-                      <div class="course-meta">
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <use href="assets/icons/sprite.svg#play-screen"></use></svg
-                        ><span>{{ course.videoCountLabel }}</span>
-                      </div>
-                    </div>
-                  </article>
+                  <app-course-card [course]="course.source" tone="ink" />
                 }
               </div>
             }
@@ -328,45 +355,21 @@
       <div class="zad-container certificate-layout">
         <div class="certificate-copy">
           <span class="eyebrow">وثّق إنجازك</span>
-          <h2 id="certificate-title">شهادة إتمام واضحة ومحترمة</h2>
-          <p>عند استيفاء متطلبات الدورة، تعرض المنصة شهادة الإتمام ببيانات الإنجاز الأساسية.</p>
+          <h2 id="certificate-title">شهادة اجتياز واضحة ومحترمة</h2>
+          <p>بعد اجتياز الاختبار، يصدر النظام شهادة PDF موثقة بالنتيجة والتاريخ والمرجع.</p>
           <a class="zad-btn zad-btn--primary" routerLink="/register">ابدأ رحلتك الآن</a>
         </div>
-        <article class="zad-card certificate-preview" aria-label="نموذج توضيحي لشهادة الإتمام">
-          <span class="certificate-seal" aria-hidden="true"
-            ><svg viewBox="0 0 24 24" focusable="false">
-              <use href="assets/icons/sprite.svg#award"></use></svg
-          ></span>
-          <span class="preview-note">نموذج توضيحي</span>
-          <div class="certificate-brand" aria-label="زاد تعلم">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <use href="assets/icons/sprite.svg#book"></use></svg
-            ><span>زاد تعلم</span>
-          </div>
-          <h3>شهادة إتمام دورة</h3>
-          <dl>
-            <div>
-              <dt>اسم المتعلم</dt>
-              <dd>يظهر هنا اسم المتعلم</dd>
-            </div>
-            <div>
-              <dt>اسم الدورة</dt>
-              <dd>يظهر هنا اسم الدورة</dd>
-            </div>
-            <div>
-              <dt>نتيجة الاختبار</dt>
-              <dd>تظهر هنا النتيجة</dd>
-            </div>
-            <div>
-              <dt>تاريخ الإتمام</dt>
-              <dd>يظهر هنا التاريخ</dd>
-            </div>
-            <div>
-              <dt>الرقم المرجعي</dt>
-              <dd>يظهر هنا الرقم المرجعي</dd>
-            </div>
-          </dl>
-        </article>
+        <figure class="certificate-document">
+          <img
+            src="assets/brand/certificate-preview.png"
+            alt="نموذج فعلي لشهادة اجتياز صادرة من نظام زاد تعلم"
+            width="1853"
+            height="1309"
+            loading="lazy"
+            decoding="async"
+          />
+          <figcaption>نموذج فعلي مطابق للشهادة التي يصدرها النظام</figcaption>
+        </figure>
       </div>
     </section>
 
@@ -424,7 +427,7 @@
             <use href="assets/icons/sprite.svg#book"></use></svg
           ><span>زاد تعلم</span>
         </div>
-        <p>منصة تعليمية عربية لتنظيم رحلتك في تعلم العلوم الإسلامية.</p>
+        <p>مشروع خيري مجاني ينظّم رحلتك في تعلم العلوم الإسلامية.</p>
       </div>
       <div class="footer-column">
         <h2>روابط سريعة</h2>
@@ -433,10 +436,17 @@
         ><a href="#faq" (click)="navigateToSection($event, 'faq')">الأسئلة الشائعة</a>
       </div>
       <div class="footer-column">
-        <h2>الحساب</h2>
+        <h2>التصنيفات</h2>
+        @for (category of categories(); track category.id) {
+          <a routerLink="/app/courses">{{ category.name }}</a>
+        } @empty {
+          <span class="footer-muted">تظهر التصنيفات عند توفرها</span>
+        }
+      </div>
+      <div class="footer-column">
+        <h2>الحساب والتواصل</h2>
         <a routerLink="/login">تسجيل الدخول</a><a routerLink="/register">إنشاء حساب</a>
       </div>
-      <p class="footer-note">جميع الحقوق محفوظة لزاد تعلم</p>
     </div>
   </footer>
 </div>

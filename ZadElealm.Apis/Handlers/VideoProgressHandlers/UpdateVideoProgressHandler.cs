@@ -40,7 +40,7 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
             var previousVideosProgress = await _unitOfWork.Repository<VideoProgress>()
                 .GetAllWithSpecAsync(previousVideosSpec);
 
-            var canAccessVideo = await CanAccessVideo(video, previousVideosProgress);
+            var canAccessVideo = CanAccessVideo(video, enrollment, previousVideosProgress);
             if (!canAccessVideo)
                 return new ApiDataResponse(403, "يجب عليك إكمال الفيديوهات السابقة أولاً");
 
@@ -69,16 +69,25 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
 
             return new ApiDataResponse(200, videoDto);
         }
-        private async Task<bool> CanAccessVideo(Video video, IEnumerable<VideoProgress> previousVideosProgress)
+        private static bool CanAccessVideo(
+            Video video,
+            Enrollment enrollment,
+            IEnumerable<VideoProgress> videoProgress)
         {
             if (video.OrderInCourse == 1)
                 return true;
 
-            var previousVideos = previousVideosProgress
-                .Where(p => p.Video.OrderInCourse < video.OrderInCourse)
-                .OrderBy(p => p.Video.OrderInCourse);
+            var previousVideoIds = enrollment.Course?.Videos
+                .Where(previousVideo => previousVideo.OrderInCourse < video.OrderInCourse)
+                .Select(previousVideo => previousVideo.Id)
+                .ToArray() ?? [];
 
-            return previousVideos.All(p => p.IsCompleted);
+            var completedVideoIds = videoProgress
+                .Where(progress => progress.IsCompleted)
+                .Select(progress => progress.VideoId)
+                .ToHashSet();
+
+            return previousVideoIds.All(completedVideoIds.Contains);
         }
     }
 }

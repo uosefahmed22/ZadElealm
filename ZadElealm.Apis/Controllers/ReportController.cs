@@ -1,16 +1,13 @@
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using ZadElealm.Apis.Commands.Report;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Errors;
-using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
-using ZadElealm.Core.Repositories;
 
 namespace ZadElealm.Apis.Controllers
 {
@@ -29,9 +26,12 @@ namespace ZadElealm.Apis.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpPost]
-        public async Task<ActionResult<ApiResponse>> AddReport([FromBody] ReportDto reportDto)
+        public async Task<ActionResult<ApiResponse>> AddReport([FromBody] CreateReportDto reportDto)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ApiResponse(401, "المستخدم غير مصرح"));
+
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير مصرح"));
@@ -41,5 +41,6 @@ namespace ZadElealm.Apis.Controllers
 
             return StatusCode(response.StatusCode, response);
         }
+
     }
 }

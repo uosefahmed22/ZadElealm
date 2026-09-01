@@ -1,16 +1,16 @@
 <div class="auth-card">
   <div class="card-header">
     <p class="tag">إنشاء حساب</p>
-    <h2>ابدأ رحلتك التعليمية</h2>
+    <h1>ابدأ رحلتك في طلب العلم</h1>
     <p>أنشئ حساب الطالب ثم فعّل بريدك الإلكتروني للمتابعة.</p>
   </div>
 
   @if (successMessage()) {
-    <div class="alert success">{{ successMessage() }}</div>
+    <div class="alert success" role="status">{{ successMessage() }}</div>
   }
 
   @if (serverMessage()) {
-    <div class="alert error">
+    <div class="alert error" role="alert">
       <p>{{ serverMessage() }}</p>
       @if (serverErrors().length) {
         <ul>
@@ -25,7 +25,12 @@
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <label class="field">
       <span>الاسم</span>
-      <input type="text" formControlName="displayName" placeholder="اكتب اسمك بالعربية" autocomplete="name" />
+      <input
+        type="text"
+        formControlName="displayName"
+        placeholder="اكتب اسمك بالعربية"
+        autocomplete="name"
+      />
       @if (getError('displayName')) {
         <small class="field-error">{{ getError('displayName') }}</small>
       }
@@ -33,7 +38,12 @@
 
     <label class="field">
       <span>البريد الإلكتروني</span>
-      <input type="email" formControlName="email" placeholder="name@example.com" autocomplete="email" />
+      <input
+        type="email"
+        formControlName="email"
+        placeholder="name@example.com"
+        autocomplete="email"
+      />
       @if (getError('email')) {
         <small class="field-error">{{ getError('email') }}</small>
       }
@@ -48,17 +58,37 @@
           placeholder="8 أحرف أو أكثر"
           autocomplete="new-password"
         />
-        <button type="button" class="text-button" (click)="togglePasswordVisibility()">
-          {{ hidePassword() ? 'إظهار' : 'إخفاء' }}
+        <button
+          type="button"
+          class="text-button password-toggle"
+          [attr.aria-label]="hidePassword() ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور'"
+          [attr.aria-pressed]="!hidePassword()"
+          (click)="togglePasswordVisibility()"
+        >
+          <span aria-hidden="true">{{ hidePassword() ? '◉' : '◌' }}</span>
         </button>
+      </div>
+      <div
+        class="password-strength"
+        [attr.data-strength]="passwordStrength()"
+        [attr.aria-label]="'قوة كلمة المرور: ' + passwordStrengthLabel()"
+      >
+        <span aria-hidden="true"></span><span aria-hidden="true"></span
+        ><span aria-hidden="true"></span>
+        <small>{{ passwordStrengthLabel() }}</small>
       </div>
       @if (getError('password')) {
         <small class="field-error">{{ getError('password') }}</small>
       }
     </label>
 
-    <button type="submit" class="primary-button" [disabled]="submitDisabled()">
-      {{ isSubmitting() ? 'جارٍ إنشاء الحساب...' : 'إنشاء الحساب' }}
+    <button type="submit" class="primary-button" [disabled]="isSubmitting()">
+      @if (isSubmitting()) {
+        <span class="button-spinner" aria-hidden="true"></span>
+        <span>جارٍ إنشاء الحساب...</span>
+      } @else {
+        <span>إنشاء الحساب</span>
+      }
     </button>
   </form>
 

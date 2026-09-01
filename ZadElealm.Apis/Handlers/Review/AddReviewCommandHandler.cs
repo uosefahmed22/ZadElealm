@@ -31,12 +31,20 @@ namespace ZadElealm.Apis.Handlers.Review
             if (enrollment == null)
                 return new ApiResponse(400, "يجب التسجيل في الدورة أولاً قبل إضافة مراجعة");
 
-            if (string.IsNullOrWhiteSpace(request.ReviewText))
-                return new ApiResponse(400, "نص المراجعة مطلوب");
+            var existingReview = await _unitOfWork.Repository<Core.Models.Review>()
+                .GetEntityWithSpecNoTrackingAsync(
+                    new ReviewSpecification(request.UserId, request.CourseId));
+
+            if (existingReview != null)
+                return new ApiResponse(400, "لقد أضفت مراجعة لهذه الدورة من قبل");
+
+            var reviewText = request.ReviewText?.Trim();
+            if (string.IsNullOrWhiteSpace(reviewText) || reviewText.Length < 10 || reviewText.Length > 1000)
+                return new ApiResponse(400, "نص المراجعة يجب أن يكون بين 10 أحرف وألف حرف");
 
             var review = new Core.Models.Review
             {
-                Text = request.ReviewText.Trim(),
+                Text = reviewText,
                 CourseId = request.CourseId,
                 AppUserId = request.UserId,
                 CreatedAt = DateTime.UtcNow,

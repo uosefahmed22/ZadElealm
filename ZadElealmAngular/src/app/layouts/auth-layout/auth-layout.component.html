@@ -1,15 +1,18 @@
+<a class="skip-link" href="#auth-content">تخطَّ إلى المحتوى</a>
 <div class="auth-shell">
   <section class="brand-panel">
-    <a class="brand-link" routerLink="/" aria-label="زاد العلم">
-      <img src="/assets/brand/logo.png" alt="Zad Elealm logo" class="brand-logo" />
-      <span>زاد العلم</span>
-    </a>
+    <div class="brand-navigation">
+      <a class="brand-link" routerLink="/" aria-label="زاد تعلم - الرئيسية">
+        <img src="assets/brand/logo-full-light.svg" alt="زاد تعلم" class="brand-logo" />
+      </a>
+      <a class="back-link" routerLink="/">العودة للرئيسية</a>
+    </div>
 
     <div class="brand-copy">
       <p class="eyebrow">منصة زاد العلم التعليمية</p>
-      <h1>رحلة تعلّم أبسط، وتقدّم تراه كل يوم.</h1>
+      <blockquote>{{ knowledgeQuote }}</blockquote>
       <p class="supporting-text">
-        تابع دروسك واختباراتك وإنجازاتك من مكان واحد، بتجربة عربية واضحة ومريحة.
+        تعلّم بخطوات واضحة، وتابع دروسك واختباراتك وإنجازاتك من مكان واحد.
       </p>
 
       <ul class="trust-list">
@@ -18,9 +21,14 @@
         }
       </ul>
     </div>
+    <svg class="auth-ornament" viewBox="0 0 240 240" aria-hidden="true" focusable="false">
+      <path d="m120 8 31 65 81 47-81 47-31 65-31-65-81-47 81-47Z" />
+      <circle cx="120" cy="120" r="78" />
+      <path d="M42 120h156M120 42v156M65 65l110 110M175 65 65 175" />
+    </svg>
   </section>
 
-  <section class="form-panel">
+  <main id="auth-content" class="form-panel">
     <router-outlet />
-  </section>
+  </main>
 </div>

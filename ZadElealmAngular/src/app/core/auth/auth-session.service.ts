@@ -18,6 +18,13 @@ export class AuthSessionService {
     sessionStorage.setItem(sessionStorageKey, JSON.stringify(user));
   }
 
+  updateIdentity(displayName: string, email: string): void {
+    const user = this.userState();
+    if (!user) return;
+
+    this.setSession({ ...user, displayName, email });
+  }
+
   getTokenRequest(): { token: string; refreshToken: string } | null {
     const user = this.userState();
     if (!user?.token || !user.refreshToken) {

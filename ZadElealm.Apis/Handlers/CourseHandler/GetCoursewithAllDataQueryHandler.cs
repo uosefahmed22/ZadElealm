@@ -30,8 +30,21 @@ namespace ZadElealm.Apis.Handlers.Course
                 return new ApiResponse(404, "الدورة غير موجودة");
 
             var mappedCourse = course.ToDetailsDto();
+            var enrollment = await _unitOfWork.Repository<Enrollment>()
+                .GetEntityWithSpecNoTrackingAsync(
+                    new EnrollmentExistsSpecification(request.CourseId, request.UserId));
+            mappedCourse.IsEnrolled = enrollment != null;
+            foreach (var review in mappedCourse.Review)
+            {
+                review.IsOwnedByCurrentUser = review.AppUserId == request.UserId;
+            }
+            foreach (var review in mappedCourse.Review)
+            {
+                var sourceReview = course.Review.First(source => source.Id == review.Id);
+                review.IsLikedByCurrentUser = sourceReview.Likes.Any(like => like.AppUserId == request.UserId);
+            }
 
-            if (!string.IsNullOrEmpty(request.UserId))
+            if (mappedCourse.IsEnrolled)
             {
                 var specvideoProgress = new VideoProgressWithCourseAndUserSpecification(request.UserId, request.CourseId);
                 var videoProgress = await _unitOfWork.Repository<VideoProgress>()
@@ -47,6 +60,14 @@ namespace ZadElealm.Apis.Handlers.Course
                     }
                 }
             }
+            else
+            {
+                foreach (var video in mappedCourse.Videos)
+                {
+                    video.VideoUrl = string.Empty;
+                }
+            }
+
             return new ApiDataResponse(200, mappedCourse);
         }
     }

@@ -25,6 +25,8 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
         public override async Task<ApiResponse> Handle(UpdateProfileImageCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+                return new ApiResponse(404, "المستخدم غير موجود");
 
             if (request.File == null)
             {
@@ -33,22 +35,33 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
                 if (!string.IsNullOrEmpty(user.ImageUrl))
                 {
-                    await _imageService.DeleteImageAsync(user.ImageUrl);
+                    var deleteResult = await _imageService.DeleteImageAsync(user.ImageUrl);
+                    if (deleteResult.StatusCode != 200)
+                        return new ApiResponse(deleteResult.StatusCode, deleteResult.Message);
                     user.ImageUrl = null;
-                    await _userManager.UpdateAsync(user);
+                    var updateResult = await _userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                        return new ApiResponse(400, "تعذر تحديث صورة الملف الشخصي");
                 }
 
                 return new ApiResponse(200, "تم حذف صورة الملف الشخصي بنجاح");
             }
 
-            if (!string.IsNullOrEmpty(user.ImageUrl))
+            var imageUrl = await _imageService.UploadImageAsync(request.File);
+            if (imageUrl.StatusCode != 200 || imageUrl.Data is not string uploadedUrl)
+                return new ApiResponse(imageUrl.StatusCode, imageUrl.Message ?? "فشل في رفع الصورة");
+
+            var oldImageUrl = user.ImageUrl;
+            user.ImageUrl = uploadedUrl;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
             {
-                await _imageService.DeleteImageAsync(user.ImageUrl);
+                await _imageService.DeleteImageAsync(uploadedUrl);
+                return new ApiResponse(400, "تعذر تحديث صورة الملف الشخصي");
             }
 
-            var imageUrl = await _imageService.UploadImageAsync(request.File);
-            user.ImageUrl = imageUrl.Data as string;
-            await _userManager.UpdateAsync(user);
+            if (!string.IsNullOrEmpty(oldImageUrl))
+                await _imageService.DeleteImageAsync(oldImageUrl);
 
             return new ApiResponse(200, "تم رفع الصورة بنجاح");
         }

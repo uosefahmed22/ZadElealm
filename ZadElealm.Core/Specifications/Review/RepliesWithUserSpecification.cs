@@ -14,6 +14,7 @@ namespace ZadElealm.Core.Specifications.Review
         {
             Includes.Add(x => x.User);
             Includes.Add(x => x.ReplyLikes);
+            AddOrderBy(x => x.CreatedAt);
         }
     }
 }

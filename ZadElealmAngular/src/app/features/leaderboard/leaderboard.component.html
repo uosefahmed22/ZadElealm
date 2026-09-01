@@ -1,0 +1,122 @@
+<header class="page-heading">
+  <span>رحلتك في زاد العلم</span>
+  <h1>النقاط ولوحة المتصدرين</h1>
+  <p>تتحدث نقاطك من إنجاز الدورات والشهادات ونتائج الاختبارات الفعلية.</p>
+</header>
+
+@if (isLoading()) {
+  <div class="loading-grid" aria-label="جارٍ تحميل الترتيب" aria-busy="true">
+    <div class="zad-skeleton summary-skeleton"></div>
+    <div class="zad-skeleton board-skeleton"></div>
+  </div>
+} @else if (errorMessage()) {
+  <section class="state-card" role="alert">
+    <span aria-hidden="true">!</span>
+    <h2>تعذر تحميل ترتيبك</h2>
+    <p>{{ errorMessage() }}</p>
+    <button type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
+} @else if (dashboard(); as data) {
+  <section class="rank-summary" aria-labelledby="current-rank-title">
+    <div class="rank-seal" aria-hidden="true">✦</div>
+    <div class="summary-copy">
+      <span>تصنيفك الحالي</span>
+      <h2 id="current-rank-title">{{ rankLabel(data.currentUser.rank) }}</h2>
+      <strong>{{ data.currentUser.totalPoints | number }} نقطة</strong>
+
+      <div class="rank-progress">
+        <div class="progress-copy">
+          @if (pointsToNext(data.currentUser.rank, data.currentUser.totalPoints); as remaining) {
+            <span>متبقي {{ remaining | number }} نقطة للتصنيف التالي</span>
+          } @else {
+            <span>وصلت إلى أعلى تصنيف</span>
+          }
+          <small
+            >{{
+              progressPercentage(data.currentUser.rank, data.currentUser.totalPoints)
+                | number: '1.0-0'
+            }}%</small
+          >
+        </div>
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="التقدم داخل التصنيف"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          [attr.aria-valuenow]="
+            progressPercentage(data.currentUser.rank, data.currentUser.totalPoints)
+          "
+        >
+          <span
+            [style.inline-size.%]="
+              progressPercentage(data.currentUser.rank, data.currentUser.totalPoints)
+            "
+          ></span>
+        </div>
+      </div>
+    </div>
+
+    <dl class="rank-stats">
+      <div>
+        <dt>دورات مكتملة</dt>
+        <dd>{{ data.currentUser.completedCoursesCount | number }}</dd>
+      </div>
+      <div>
+        <dt>شهادات</dt>
+        <dd>{{ data.currentUser.certificatesCount | number }}</dd>
+      </div>
+      <div>
+        <dt>متوسط الاختبارات</dt>
+        <dd>{{ data.currentUser.averageQuizScore | number: '1.0-1' }}%</dd>
+      </div>
+    </dl>
+    <small class="updated-at"
+      >آخر تحديث: {{ data.currentUser.lastUpdated | date: 'd MMM y، h:mm a' }}</small
+    >
+  </section>
+
+  <section class="leaderboard" aria-labelledby="leaderboard-title">
+    <header>
+      <div>
+        <span>أهل الهمة</span>
+        <h2 id="leaderboard-title">أعلى الطلاب نقاطًا</h2>
+      </div>
+      <small>يظهر أول {{ data.leaders.length }} طلاب فقط</small>
+    </header>
+
+    @if (data.leaders.length === 0) {
+      <div class="empty-board">
+        <h3>لا يوجد ترتيب حتى الآن</h3>
+        <p>ابدأ بإكمال دورة ليظهر تقدمك هنا.</p>
+      </div>
+    } @else {
+      <ol class="leader-list">
+        @for (entry of data.leaders; track entry.position) {
+          <li [class.current-user]="entry.isCurrentUser">
+            <strong class="position" [attr.aria-label]="'المركز ' + entry.position">{{
+              entry.position
+            }}</strong>
+            <div class="avatar" aria-hidden="true">
+              @if (imageIsAvailable(entry)) {
+                <img [src]="entry.imageUrl" alt="" (error)="hideBrokenImage(entry.position)" />
+              } @else {
+                <span>{{ initials(entry) }}</span>
+              }
+            </div>
+            <div class="student-copy">
+              <strong>{{ entry.displayName }}</strong>
+              <small
+                >{{ rankLabel(entry.rank) }} · {{ entry.completedCoursesCount }} دورة مكتملة</small
+              >
+            </div>
+            @if (entry.isCurrentUser) {
+              <span class="you-badge">أنت</span>
+            }
+            <strong class="points">{{ entry.totalPoints | number }} <small>نقطة</small></strong>
+          </li>
+        }
+      </ol>
+    }
+  </section>
+}

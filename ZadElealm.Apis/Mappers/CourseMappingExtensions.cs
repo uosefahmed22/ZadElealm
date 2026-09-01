@@ -55,7 +55,10 @@ namespace ZadElealm.Apis.Mappers
                     ? entity.Videos.Select(v => v.ToVideoWithUserProgressDto()).ToList()
                     : new List<VideoWithUserProgressDto>(),
                 Review = entity.Review != null
-                    ? entity.Review.Select(r => r.ToReviewWithReviwerDataDto()).ToList()
+                    ? entity.Review
+                        .OrderByDescending(review => review.CreatedAt)
+                        .Select(r => r.ToReviewWithReviwerDataDto())
+                        .ToList()
                     : new List<ReviewWithReviwerDataDto>(),
                 Quizzes = entity.Quizzes != null
                     ? entity.Quizzes.Select(q => q.ToCourseQuizDto()).ToList()

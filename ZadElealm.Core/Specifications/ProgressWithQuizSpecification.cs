@@ -12,7 +12,6 @@ namespace ZadElealm.Core.Specifications
         public ProgressWithQuizSpecification(string userId, bool isCompleted) : base(x => x.AppUserId == userId && x.IsCompleted == isCompleted)
         {
             Includes.Add(x => x.Quiz);
-            Includes.Add(x => x.Quiz.Course);
         }
     }
 }

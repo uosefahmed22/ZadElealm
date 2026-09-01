@@ -15,7 +15,15 @@ namespace ZadElealm.Service.AppServices
     public class ImageService : IImageService
     {
         // Define allowed image file extensions
-        private readonly List<string> _allowedExtensions = new List<string> { ".jpg", ".jpeg", ".png" };
+        private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png"
+        };
+
+        private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "image/jpeg", "image/png"
+        };
         private readonly Cloudinary _cloudinary;
 
         public ImageService(Cloudinary cloudinary)
@@ -33,7 +41,7 @@ namespace ZadElealm.Service.AppServices
 
             // Validate file extension
             var ext = Path.GetExtension(imageFile.FileName).ToLower();
-            if (!_allowedExtensions.Contains(ext))
+            if (!AllowedExtensions.Contains(ext) || !AllowedContentTypes.Contains(imageFile.ContentType))
             {
                 return new ApiDataResponse(400, null, "امتداد الملف غير مدعوم");
             }
@@ -49,9 +57,9 @@ namespace ZadElealm.Service.AppServices
             var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
             // Return response based on upload result
-            if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+            if (uploadResult.StatusCode == HttpStatusCode.OK && uploadResult.SecureUrl != null)
             {
-                return new ApiDataResponse(200, uploadResult.Url.AbsoluteUri, "تم رفع الصورة بنجاح");
+                return new ApiDataResponse(200, uploadResult.SecureUrl.AbsoluteUri, "تم رفع الصورة بنجاح");
             }
             else
             {
@@ -61,10 +69,8 @@ namespace ZadElealm.Service.AppServices
         public async Task<ApiDataResponse> DeleteImageAsync(string imageUrl)
         {
             // Validate image URL
-            if (string.IsNullOrEmpty(imageUrl))
-            {
-                throw new ArgumentNullException(nameof(imageUrl), "الرابط لا يمكن ان يكون فارغا");
-            }
+            if (string.IsNullOrWhiteSpace(imageUrl))
+                return new ApiDataResponse(400, null, "الرابط لا يمكن ان يكون فارغا");
 
             // Get public ID and validate
             var publicId = GetPublicIdFromUrl(imageUrl);
@@ -92,24 +98,32 @@ namespace ZadElealm.Service.AppServices
             }
         }
         // Helper method to extract public ID from Cloudinary URL
-        private string GetPublicIdFromUrl(string url)
+        private static string? GetPublicIdFromUrl(string url)
         {
-            if (url == null)
-            {
-                throw new ArgumentNullException(nameof(url), "الرابط لا يمكن ان يكون فارغاً");
-            }
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                (!uri.Host.Equals("cloudinary.com", StringComparison.OrdinalIgnoreCase) &&
+                 !uri.Host.EndsWith(".cloudinary.com", StringComparison.OrdinalIgnoreCase)))
+                return null;
 
-            try
-            {
-                var uri = new Uri(url);
-                var segments = uri.Segments;
-                var publicId = segments.Last().Split('.').First();
-                return publicId;
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException("فشل في استخراج الرقم العام من الرابط");
-            }
+            var segments = uri.AbsolutePath.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            var uploadIndex = Array.FindIndex(segments,
+                segment => segment.Equals("upload", StringComparison.OrdinalIgnoreCase));
+            if (uploadIndex < 0 || uploadIndex == segments.Length - 1)
+                return null;
+
+            var assetSegments = segments.Skip(uploadIndex + 1).ToList();
+            var versionIndex = assetSegments.FindIndex(segment =>
+                segment.Length > 1 && segment[0] == 'v' && segment[1..].All(char.IsDigit));
+            if (versionIndex >= 0)
+                assetSegments = assetSegments.Skip(versionIndex + 1).ToList();
+
+            if (assetSegments.Count == 0)
+                return null;
+
+            assetSegments[^1] = Path.GetFileNameWithoutExtension(assetSegments[^1]);
+            return assetSegments.Any(string.IsNullOrWhiteSpace)
+                ? null
+                : string.Join('/', assetSegments);
         }
     }
 }

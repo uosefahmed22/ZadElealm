@@ -30,6 +30,11 @@ namespace ZadElealm.Repository.Data.Config
 
             builder.Ignore("AppUserId1");
             builder.Ignore("CourseId1");
+
+            builder.HasIndex(review => new { review.AppUserId, review.CourseId })
+                .IsUnique()
+                .HasDatabaseName("UX_Reviews_AppUserId_CourseId")
+                .HasFilter("[IsDeleted] = 0");
         }
     }
 }

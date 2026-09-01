@@ -225,6 +225,11 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasIndex("UserId");
 
+                    b.HasIndex("UserId", "QuizId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Certificates_UserId_QuizId")
+                        .HasFilter("[IsDeleted] = 0");
+
                     b.ToTable("Certificates");
                 });
 
@@ -550,6 +555,11 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasIndex("QuizId");
 
+                    b.HasIndex("AppUserId", "QuizId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Progresses_AppUserId_QuizId")
+                        .HasFilter("[IsDeleted] = 0");
+
                     b.ToTable("Progresses");
                 });
 
@@ -647,6 +657,11 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasIndex("AppUserId");
 
+                    b.HasIndex("AppUserId", "courseId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Ratings_AppUserId_courseId")
+                        .HasFilter("[IsDeleted] = 0");
+
                     b.HasIndex("courseId");
 
                     b.ToTable("Ratings");
@@ -715,6 +730,10 @@ namespace ZadElealm.Repository.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("ReplyId");
+
+                    b.HasIndex("AppUserId", "ReplyId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_ReplyLike_AppUserId_ReplyId");
 
                     b.ToTable("ReplyLike");
                 });
@@ -793,6 +812,11 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasIndex("AppUserId");
 
+                    b.HasIndex("AppUserId", "CourseId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Reviews_AppUserId_CourseId")
+                        .HasFilter("[IsDeleted] = 0");
+
                     b.HasIndex("CourseId");
 
                     b.ToTable("Reviews", (string)null);
@@ -824,6 +848,10 @@ namespace ZadElealm.Repository.Migrations
                     b.HasIndex("AppUserId");
 
                     b.HasIndex("ReviewId");
+
+                    b.HasIndex("AppUserId", "ReviewId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_ReviewLikes_AppUserId_ReviewId");
 
                     b.ToTable("ReviewLikes");
                 });
@@ -987,6 +1015,11 @@ namespace ZadElealm.Repository.Migrations
                     b.HasIndex("VideoId");
 
                     b.HasIndex("UserId", "CourseId");
+
+                    b.HasIndex("UserId", "VideoId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_VideoProgresses_UserId_VideoId")
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("VideoProgresses");
                 });

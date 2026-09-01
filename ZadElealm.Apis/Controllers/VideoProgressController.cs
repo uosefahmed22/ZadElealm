@@ -42,7 +42,7 @@ namespace ZadElealm.Apis.Controllers
             };
 
             var result = await _mediator.Send(command);
-            return Ok(result);
+            return StatusCode(result.StatusCode, result);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]

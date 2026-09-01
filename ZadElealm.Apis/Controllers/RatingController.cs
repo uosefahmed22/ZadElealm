@@ -12,6 +12,7 @@ using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Apis.Quaries.Review;
 
 namespace ZadElealm.Apis.Controllers
 {
@@ -41,6 +42,19 @@ namespace ZadElealm.Apis.Controllers
             var response = await _mediator.Send(command);
 
             return StatusCode(response.StatusCode, response);
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [HttpGet("can-rate/{courseId}")]
+        public async Task<ActionResult<ApiResponse>> CanRate(int courseId)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var canRate = await _mediator.Send(new GetUserAddRateingBeforeQuery(courseId, user.Id));
+            return Ok(new ApiDataResponse(200, canRate));
         }
     }
 }

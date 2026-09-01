@@ -57,6 +57,47 @@ describe('AuthApiService', () => {
     request.flush({ statusCode: 200, message: 'ok' });
   });
 
+  it('sends OTP verification values as query params expected by the backend', () => {
+    service.verifyOtp('user@test.com', '1234').subscribe();
+
+    const request = httpMock.expectOne(
+      (candidate) =>
+        candidate.url === `${appEnvironment.apiBaseUrl}/Account/verify-otp` &&
+        candidate.params.get('email') === 'user@test.com' &&
+        candidate.params.get('otp') === '1234',
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toBeNull();
+    request.flush({ statusCode: 200, message: 'ok' });
+  });
+
+  it('posts the complete reset password payload', () => {
+    const payload = {
+      email: 'user@test.com',
+      newPassword: 'Password123!',
+      confirmPassword: 'Password123!',
+    };
+    service.resetPassword(payload).subscribe();
+
+    const request = httpMock.expectOne(`${appEnvironment.apiBaseUrl}/Account/reset-password`);
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual(payload);
+    request.flush({ statusCode: 200, message: 'ok' });
+  });
+
+  it('resends confirmation to the email query expected by the backend', () => {
+    service.resendConfirmationEmail('student@test.com').subscribe();
+
+    const request = httpMock.expectOne(
+      (candidate) =>
+        candidate.url === `${appEnvironment.apiBaseUrl}/Account/resend-confirmation-email` &&
+        candidate.params.get('email') === 'student@test.com',
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toBeNull();
+    request.flush({ statusCode: 200, message: 'تم إرسال رسالة التأكيد بنجاح' });
+  });
+
   it('gets the current user from the protected account route', () => {
     service.currentUser().subscribe();
 

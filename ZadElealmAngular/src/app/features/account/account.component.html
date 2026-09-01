@@ -1,0 +1,295 @@
+<header class="page-heading">
+  <span class="eyebrow">إعدادات الحساب</span>
+  <h1>بيانات حسابك</h1>
+  <p>حدّث بياناتك ووسائل الأمان من مكان واحد.</p>
+</header>
+
+@if (statusMessage()) {
+  <p class="message message--success" role="status">{{ statusMessage() }}</p>
+}
+@if (errorMessage()) {
+  <p class="message message--error" role="alert">{{ errorMessage() }}</p>
+}
+
+@if (isLoading()) {
+  <div class="account-grid" aria-label="جارٍ تحميل بيانات الحساب" aria-busy="true">
+    <div class="zad-skeleton skeleton-card"></div>
+    <div class="zad-skeleton skeleton-card"></div>
+  </div>
+} @else if (loadError()) {
+  <section class="state-card" role="alert">
+    <h2>تعذر تحميل بيانات الحساب</h2>
+    <p>{{ loadError() }}</p>
+    <button class="primary-button" type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
+} @else if (profile(); as currentProfile) {
+  <div class="account-grid">
+    <section class="account-card profile-summary">
+      <div class="avatar" aria-hidden="true">
+        @if (currentProfile.imageUrl && !imageError()) {
+          <img
+            [src]="currentProfile.imageUrl"
+            [alt]="'الصورة الشخصية لـ ' + currentProfile.displayName"
+            (error)="imageError.set(true)"
+          />
+        } @else {
+          <span>{{ initials() }}</span>
+        }
+      </div>
+      <div>
+        <h2>{{ currentProfile.displayName }}</h2>
+        <p dir="ltr">{{ currentProfile.email }}</p>
+      </div>
+      <div class="image-actions">
+        <label class="file-picker" for="profile-image">اختيار صورة</label>
+        <input
+          id="profile-image"
+          type="file"
+          accept="image/png,image/jpeg"
+          (change)="selectImage($event)"
+        />
+        @if (selectedImageName()) {
+          <span class="file-name" dir="auto">{{ selectedImageName() }}</span>
+          <button
+            class="primary-button"
+            type="button"
+            [disabled]="activeAction() !== null"
+            (click)="uploadImage()"
+          >
+            {{ activeAction() === 'image' ? 'جارٍ الرفع…' : 'رفع الصورة' }}
+          </button>
+        }
+        @if (currentProfile.imageUrl) {
+          <button
+            class="text-button text-button--danger"
+            type="button"
+            [disabled]="activeAction() !== null"
+            (click)="removeImage()"
+          >
+            حذف الصورة
+          </button>
+        }
+      </div>
+      <small>PNG أو JPG، بحد أقصى 5 ميجابايت.</small>
+    </section>
+
+    <section class="account-card">
+      <div class="card-heading">
+        <span>الملف الشخصي</span>
+        <h2>البيانات الأساسية</h2>
+      </div>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+        <label for="display-name">الاسم باللغة العربية</label>
+        <input id="display-name" type="text" formControlName="displayName" autocomplete="name" />
+        @if (profileForm.controls.displayName.touched && profileForm.controls.displayName.invalid) {
+          <small class="field-error">أدخل اسمًا عربيًا من حرفين على الأقل.</small>
+        }
+
+        <label for="phone-number">رقم الهاتف <small>(اختياري)</small></label>
+        <input
+          id="phone-number"
+          type="tel"
+          formControlName="phoneNumber"
+          autocomplete="tel"
+          dir="ltr"
+        />
+
+        <button class="primary-button" type="submit" [disabled]="activeAction() !== null">
+          {{ activeAction() === 'profile' ? 'جارٍ الحفظ…' : 'حفظ البيانات' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="account-card">
+      <div class="card-heading">
+        <span>الأمان</span>
+        <h2>تغيير كلمة المرور</h2>
+      </div>
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" novalidate>
+        <label for="current-password">كلمة المرور الحالية</label>
+        <input
+          id="current-password"
+          type="password"
+          formControlName="currentPassword"
+          autocomplete="current-password"
+        />
+
+        <label for="new-password">كلمة المرور الجديدة</label>
+        <input
+          id="new-password"
+          type="password"
+          formControlName="newPassword"
+          autocomplete="new-password"
+        />
+        @if (
+          passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid
+        ) {
+          <small class="field-error">يجب أن تكون 8 أحرف على الأقل.</small>
+        }
+
+        <label for="confirm-password">تأكيد كلمة المرور الجديدة</label>
+        <input
+          id="confirm-password"
+          type="password"
+          formControlName="confirmPassword"
+          autocomplete="new-password"
+        />
+
+        <button class="primary-button" type="submit" [disabled]="activeAction() !== null">
+          {{ activeAction() === 'password' ? 'جارٍ التغيير…' : 'تغيير كلمة المرور' }}
+        </button>
+      </form>
+    </section>
+
+    <section class="account-card account-card--wide">
+      <div class="card-heading">
+        <span>البريد الإلكتروني</span>
+        <h2>تغيير بريد تسجيل الدخول</h2>
+        <p>سنرسل رمزًا من 6 أرقام إلى البريد الجديد. بعد التأكيد ستسجّل الدخول به مرة أخرى.</p>
+      </div>
+      <form [formGroup]="emailForm" novalidate>
+        @if (!emailOtpSent()) {
+          <div class="email-fields">
+            <div>
+              <label for="new-email">البريد الإلكتروني الجديد</label>
+              <input
+                id="new-email"
+                type="email"
+                formControlName="newEmail"
+                autocomplete="email"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <label for="email-password">كلمة المرور الحالية</label>
+              <input
+                id="email-password"
+                type="password"
+                formControlName="password"
+                autocomplete="current-password"
+              />
+            </div>
+          </div>
+          <button
+            class="primary-button"
+            type="button"
+            [disabled]="activeAction() !== null"
+            (click)="sendEmailOtp()"
+          >
+            {{ activeAction() === 'email' ? 'جارٍ الإرسال…' : 'إرسال رمز التحقق' }}
+          </button>
+        } @else {
+          <p class="otp-note">
+            أدخل الرمز المرسل إلى <bdi>{{ pendingEmail() }}</bdi>
+          </p>
+          <label for="email-token">رمز التحقق</label>
+          <input
+            class="otp-input"
+            id="email-token"
+            type="text"
+            inputmode="numeric"
+            maxlength="6"
+            formControlName="token"
+            autocomplete="one-time-code"
+            dir="ltr"
+          />
+          @if (emailForm.controls.token.touched && emailForm.controls.token.invalid) {
+            <small class="field-error">أدخل الرمز المكوّن من 6 أرقام.</small>
+          }
+          <div class="button-row">
+            <button
+              class="primary-button"
+              type="button"
+              [disabled]="activeAction() !== null"
+              (click)="confirmEmail()"
+            >
+              {{ activeAction() === 'email' ? 'جارٍ التأكيد…' : 'تأكيد البريد الجديد' }}
+            </button>
+            <button
+              class="text-button"
+              type="button"
+              [disabled]="activeAction() !== null"
+              (click)="resetEmailChange()"
+            >
+              استخدام بريد آخر
+            </button>
+          </div>
+        }
+      </form>
+    </section>
+
+    <section class="account-card account-card--wide danger-zone" aria-labelledby="danger-title">
+      <div class="card-heading">
+        <span>منطقة الخطر</span>
+        <h2 id="danger-title">إغلاق الحساب</h2>
+        <p>
+          سيُغلق حسابك ولن تتمكن من تسجيل الدخول إليه بعد ذلك. لن يحدث شيء قبل إدخال كلمة المرور
+          والتأكيد الصريح.
+        </p>
+      </div>
+      <button class="danger-button" type="button" (click)="openDeleteConfirmation()">
+        إغلاق حسابي
+      </button>
+    </section>
+  </div>
+}
+
+@if (deleteConfirmationOpen()) {
+  <div class="dialog-backdrop">
+    <section
+      class="confirmation-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="delete-dialog-title"
+      aria-describedby="delete-dialog-description"
+    >
+      <span class="dialog-icon" aria-hidden="true">!</span>
+      <h2 id="delete-dialog-title">هل تريد إغلاق الحساب نهائيًا؟</h2>
+      <p id="delete-dialog-description">
+        أدخل كلمة المرور، ثم اكتب <strong>«{{ deleteConfirmationText }}»</strong> لإتمام الإغلاق.
+      </p>
+
+      @if (errorMessage()) {
+        <p class="message message--error" role="alert">{{ errorMessage() }}</p>
+      }
+
+      <form [formGroup]="deleteAccountForm" (ngSubmit)="deleteAccount()" novalidate>
+        <label for="delete-password">كلمة المرور الحالية</label>
+        <input
+          id="delete-password"
+          type="password"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        @if (
+          deleteAccountForm.controls.password.touched && deleteAccountForm.controls.password.invalid
+        ) {
+          <small class="field-error">كلمة المرور مطلوبة.</small>
+        }
+
+        <label for="delete-confirmation">تأكيد الإغلاق</label>
+        <input
+          id="delete-confirmation"
+          type="text"
+          formControlName="confirmation"
+          autocomplete="off"
+          [placeholder]="deleteConfirmationText"
+        />
+
+        <div class="dialog-actions">
+          <button class="danger-button" type="submit" [disabled]="activeAction() === 'delete'">
+            {{ activeAction() === 'delete' ? 'جارٍ إغلاق الحساب…' : 'تأكيد إغلاق الحساب' }}
+          </button>
+          <button
+            class="text-button"
+            type="button"
+            [disabled]="activeAction() === 'delete'"
+            (click)="closeDeleteConfirmation()"
+          >
+            تراجع
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}

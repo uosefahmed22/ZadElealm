@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { Observable, Subject, of, throwError } from 'rxjs';
 
 import { ApiDataResponseEnvelope } from '../../core/api/api-error.models';
@@ -9,11 +10,17 @@ import {
   PaginatedCoursesResponse,
 } from '../../core/catalog/catalog.models';
 import { CourseCatalogComponent } from './course-catalog.component';
+import { LearningApiService } from '../../core/learning/learning-api.service';
 
 describe('CourseCatalogComponent', () => {
   let catalogApi: {
     getCategories: ReturnType<typeof vi.fn>;
     getCourses: ReturnType<typeof vi.fn>;
+  };
+  let learningApi: {
+    getFavorites: ReturnType<typeof vi.fn>;
+    addFavorite: ReturnType<typeof vi.fn>;
+    removeFavorite: ReturnType<typeof vi.fn>;
   };
 
   beforeEach(async () => {
@@ -21,10 +28,21 @@ describe('CourseCatalogComponent', () => {
       getCategories: vi.fn(() => of(categoriesResponse())),
       getCourses: vi.fn(() => of(coursesResponse())),
     };
+    learningApi = {
+      getFavorites: vi.fn(() =>
+        of({ statusCode: 200, data: { courses: [], allFavoriteCourses: 0 } }),
+      ),
+      addFavorite: vi.fn(() => of({ statusCode: 200 })),
+      removeFavorite: vi.fn(() => of({ statusCode: 200 })),
+    };
 
     await TestBed.configureTestingModule({
       imports: [CourseCatalogComponent],
-      providers: [{ provide: CatalogApiService, useValue: catalogApi }],
+      providers: [
+        provideRouter([]),
+        { provide: CatalogApiService, useValue: catalogApi },
+        { provide: LearningApiService, useValue: learningApi },
+      ],
     }).compileComponents();
   });
 
@@ -91,7 +109,7 @@ describe('CourseCatalogComponent', () => {
     const fixture = TestBed.createComponent(CourseCatalogComponent);
     fixture.detectChanges();
 
-    expect(fixture.nativeElement.textContent).toContain('لا توجد دورات مطابقة');
+    expect(fixture.nativeElement.textContent).toContain('لا توجد دورات في هذا التصنيف حاليًا');
     expect(fixture.nativeElement.textContent).toContain('عرض كل الدورات');
   });
 
@@ -101,7 +119,40 @@ describe('CourseCatalogComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('catalog unavailable');
-    expect(fixture.nativeElement.textContent).toContain('حاول مرة أخرى');
+    expect(fixture.nativeElement.textContent).toContain('إعادة المحاولة');
+  });
+
+  it('debounces search for 300ms and keeps the selected category', () => {
+    vi.useFakeTimers();
+    const fixture = TestBed.createComponent(CourseCatalogComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.selectCategory(3);
+    const callsAfterCategory = catalogApi.getCourses.mock.calls.length;
+
+    component.filterForm.controls.search.setValue('تجويد');
+    vi.advanceTimersByTime(299);
+    expect(catalogApi.getCourses).toHaveBeenCalledTimes(callsAfterCategory);
+    vi.advanceTimersByTime(1);
+
+    const filters = catalogApi.getCourses.mock.calls.at(-1)?.[0] as CourseCatalogFilters;
+    expect(filters).toMatchObject({ categoryId: 3, search: 'تجويد' });
+    vi.useRealTimers();
+  });
+
+  it('adds and removes a course from favorites using the real course id', () => {
+    const fixture = TestBed.createComponent(CourseCatalogComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const selectedCourse = coursesResponse().data[0];
+
+    component.toggleFavorite(selectedCourse);
+    expect(learningApi.addFavorite).toHaveBeenCalledWith(selectedCourse.id);
+    expect(component.favoriteIds().has(selectedCourse.id)).toBe(true);
+
+    component.toggleFavorite(selectedCourse);
+    expect(learningApi.removeFavorite).toHaveBeenCalledWith(selectedCourse.id);
+    expect(component.favoriteIds().has(selectedCourse.id)).toBe(false);
   });
 });
 

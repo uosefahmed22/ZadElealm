@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using QuestPDF.Fluent;
 using ZadElealm.Core.Errors;
@@ -13,39 +12,39 @@ namespace ZadElealm.Service.AppServices;
 
 public class CertificateService : ICertificateService
 {
-    private readonly UserManager<AppUser> _userManager;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConfiguration _configuration;
 
     public CertificateService(
-        UserManager<AppUser> userManager,
         IUnitOfWork unitOfWork,
         IConfiguration configuration)
     {
-        _userManager = userManager;
         _unitOfWork = unitOfWork;
         _configuration = configuration;
     }
 
     public async Task<ApiDataResponse> GenerateAndSaveCertificate(string userId, int quizId)
     {
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user == null)
-            return new ApiDataResponse(404, message: "لم يتم العثور على المستخدم");
-
-        var quiz = await _unitOfWork.Repository<Quiz>().GetEntityAsync(quizId);
-        if (quiz == null)
-            return new ApiDataResponse(404, message: "لم يتم العثور على الاختبار");
+        if (string.IsNullOrWhiteSpace(userId) || quizId <= 0)
+            return new ApiDataResponse(400, message: "بيانات المستخدم أو الاختبار غير صالحة");
 
         var progressSpec = new ProgressWithUserDataAndQuiz(userId, quizId);
         var progress = await _unitOfWork.Repository<Progress>()
-            .GetEntityWithSpecAsync(progressSpec);
+            .GetEntityWithSpecNoTrackingAsync(progressSpec);
 
         if (progress == null)
             return new ApiDataResponse(404, message: "لم يتم العثور على نتيجة الاختبار");
 
         if (!progress.IsCompleted)
             return new ApiDataResponse(400, message: "لم يتم إكمال الاختبار بعد");
+
+        var user = progress.AppUser;
+        var quiz = progress.Quiz;
+
+        var baseUrl = _configuration["BaseUrl"]?.TrimEnd('/');
+        if (string.IsNullOrWhiteSpace(baseUrl) ||
+            !Uri.TryCreate(baseUrl, UriKind.Absolute, out _))
+            return new ApiDataResponse(500, message: "إعداد BaseUrl غير صالح");
 
         var issuedAtUtc = DateTime.UtcNow;
         var certificateReference = CreateCertificateReference(issuedAtUtc);
@@ -56,7 +55,6 @@ public class CertificateService : ICertificateService
             issuedAtUtc,
             certificateReference);
 
-        var baseUrl = _configuration["BaseUrl"]?.TrimEnd('/');
         var pdfUrl = $"{baseUrl}/certificates/{fileName}";
 
         var certificate = new Certificate

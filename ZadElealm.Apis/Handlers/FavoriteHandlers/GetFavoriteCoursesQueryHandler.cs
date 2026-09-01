@@ -28,9 +28,6 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
             var favoriteCourses = await _unitOfWork.Repository<Favorite>()
                 .GetAllWithSpecNoTrackingAsync(spec);
 
-            if (!favoriteCourses.Any())
-                return new ApiResponse(200, "لا توجد دورات مفضلة");
-
             var mappedCourses = favoriteCourses.Select(e => e.Course).ToDtos();
 
             var response = new AllFavoriteCoursesData()
@@ -39,7 +36,10 @@ namespace ZadElealm.Apis.Handlers.FavoriteHandlers
                 AllFavoriteCourses = favoriteCourses.Count()
             };
 
-            return new ApiDataResponse(200, response);
+            return new ApiDataResponse(
+                200,
+                response,
+                favoriteCourses.Any() ? "تم جلب الدورات المفضلة بنجاح" : "لا توجد دورات مفضلة");
         }
     }
 }

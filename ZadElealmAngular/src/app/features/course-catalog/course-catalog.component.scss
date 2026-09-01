@@ -39,9 +39,39 @@ h1 {
   font-weight: 800;
 }
 
+.category-strip {
+  margin-block: var(--space-6);
+  padding-block-end: var(--space-2);
+  display: flex;
+  gap: var(--space-3);
+  overflow-x: auto;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: thin;
+}
+
+.category-strip button {
+  min-block-size: var(--target-min);
+  flex: 0 0 auto;
+  padding-inline: var(--space-5);
+  border: var(--rule-accent);
+  border-radius: var(--radius-sm);
+  scroll-snap-align: start;
+  color: var(--ink-800);
+  background: var(--surface-paper);
+  cursor: pointer;
+  font-weight: var(--font-weight-bold);
+}
+
+.category-strip button.active,
+.category-strip button:hover {
+  border-color: var(--ink-700);
+  color: var(--text-on-ink);
+  background: var(--ink-700);
+}
+
 .filters {
   display: grid;
-  grid-template-columns: minmax(14rem, 2fr) repeat(5, minmax(8rem, 1fr));
+  grid-template-columns: minmax(14rem, 2fr) repeat(4, minmax(8rem, 1fr));
   gap: 1rem;
   padding: 1.25rem;
   background: var(--color-surface);
@@ -129,6 +159,41 @@ h1 {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.4rem;
   margin-top: 2rem;
+}
+
+.course-tile {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: var(--space-3);
+}
+
+.favorite-message {
+  margin: var(--space-4) 0 0;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+}
+
+.favorite-button {
+  min-height: var(--target-min);
+  padding-inline: var(--space-4);
+  color: var(--color-primary-dark);
+  background: var(--surface-paper);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.favorite-button.active,
+.favorite-button:hover:not(:disabled) {
+  color: var(--color-on-primary);
+  background: var(--color-primary-dark);
+}
+
+.favorite-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
 }
 
 .course-card {

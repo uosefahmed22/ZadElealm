@@ -15,6 +15,11 @@ namespace ZadElealm.Repository.Data.Config
         {
             builder.Property(x => x.Value).HasColumnType("decimal(18,2)");
 
+            builder.HasIndex(rating => new { rating.AppUserId, rating.courseId })
+                .IsUnique()
+                .HasDatabaseName("UX_Ratings_AppUserId_courseId")
+                .HasFilter("[IsDeleted] = 0");
+
         }
     }
 }

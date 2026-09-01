@@ -1,11 +1,32 @@
 <section class="catalog-heading" aria-labelledby="catalog-title">
   <div>
-    <span class="eyebrow">مكتبة زاد العلم</span>
-    <h1 id="catalog-title">استكشف الدورات</h1>
-    <p>اختر مسارك وابحث في الدورات المتاحة من بيانات المنصة مباشرة.</p>
+    <span class="eyebrow">مكتبة زاد تعلم</span>
+    <h1 id="catalog-title">المسارات التعليمية</h1>
+    <p>اختر التصنيف المناسب وابحث في الدورات المتاحة من المنصة مباشرة.</p>
   </div>
   <div class="result-count" aria-live="polite">{{ resultSummary() }}</div>
 </section>
+
+<nav class="category-strip" aria-label="تصنيفات الدورات">
+  <button
+    type="button"
+    [class.active]="filterForm.controls.categoryId.value === 0"
+    [attr.aria-pressed]="filterForm.controls.categoryId.value === 0"
+    (click)="selectCategory(0)"
+  >
+    الكل
+  </button>
+  @for (category of categories(); track category.id) {
+    <button
+      type="button"
+      [class.active]="filterForm.controls.categoryId.value === category.id"
+      [attr.aria-pressed]="filterForm.controls.categoryId.value === category.id"
+      (click)="selectCategory(category.id)"
+    >
+      {{ category.name }}
+    </button>
+  }
+</nav>
 
 <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
   <div class="field field-search">
@@ -15,24 +36,13 @@
       type="search"
       formControlName="search"
       placeholder="اسم الدورة أو وصفها"
+      autocomplete="off"
     />
   </div>
-
-  <div class="field">
-    <label for="course-category">التصنيف</label>
-    <select id="course-category" formControlName="categoryId">
-      <option [ngValue]="0">كل التصنيفات</option>
-      @for (category of categories(); track category.id) {
-        <option [ngValue]="category.id">{{ category.name }}</option>
-      }
-    </select>
-  </div>
-
   <div class="field">
     <label for="course-author">المحاضر</label>
     <input id="course-author" type="text" formControlName="author" placeholder="اسم المحاضر" />
   </div>
-
   <div class="field">
     <label for="course-language">اللغة</label>
     <select id="course-language" formControlName="language">
@@ -41,7 +51,6 @@
       <option value="الإنجليزية">الإنجليزية</option>
     </select>
   </div>
-
   <div class="field">
     <label for="course-rating">التقييم</label>
     <select id="course-rating" formControlName="minRating">
@@ -50,7 +59,6 @@
       <option [ngValue]="3">3 فأكثر</option>
     </select>
   </div>
-
   <div class="field">
     <label for="course-sort">الترتيب</label>
     <select id="course-sort" formControlName="sort">
@@ -59,7 +67,6 @@
       <option value="name-asc">الاسم أبجديًا</option>
     </select>
   </div>
-
   <div class="filter-actions">
     <button class="button button-primary" type="submit" [disabled]="isLoading()">تطبيق</button>
     <button class="button button-secondary" type="button" (click)="resetFilters()">
@@ -70,6 +77,9 @@
 
 @if (categoriesError()) {
   <p class="inline-warning" role="status">{{ categoriesError() }}</p>
+}
+@if (favoriteMessage()) {
+  <p class="favorite-message" role="status">{{ favoriteMessage() }}</p>
 }
 
 @if (isLoading()) {
@@ -91,53 +101,39 @@
     <span class="state-icon">!</span>
     <h2>تعذر تحميل الدورات</h2>
     <p>{{ errorMessage() }}</p>
-    <button class="button button-primary" type="button" (click)="retry()">حاول مرة أخرى</button>
+    <button class="button button-primary" type="button" (click)="retry()">إعادة المحاولة</button>
   </section>
 } @else if (courses().length === 0) {
   <section class="state-card">
     <img src="assets/icons/book-open.svg" alt="" width="44" height="44" />
-    <h2>لا توجد دورات مطابقة</h2>
-    <p>غيّر كلمات البحث أو أعد ضبط الفلاتر لعرض كل الدورات.</p>
-    <button class="button button-primary" type="button" (click)="resetFilters()">
+    <h2>لا توجد دورات في هذا التصنيف حاليًا</h2>
+    <p>اختر تصنيفًا آخر أو اعرض كل الدورات المتاحة.</p>
+    <button class="button button-primary" type="button" (click)="selectCategory(0)">
       عرض كل الدورات
     </button>
   </section>
 } @else {
   <div class="courses-grid">
     @for (course of courses(); track course.id) {
-      <article class="course-card">
-        <div class="course-image-wrap">
-          @if (course.imageUrl && !failedImageIds().has(course.id)) {
-            <img
-              class="course-image"
-              [src]="course.imageUrl"
-              [alt]="'غلاف دورة ' + course.name"
-              loading="lazy"
-              (error)="markImageFailed(course.id)"
-            />
-          } @else {
-            <div class="image-fallback" aria-hidden="true">
-              <img src="assets/icons/book-open.svg" alt="" width="40" height="40" />
-            </div>
-          }
-          <span class="category-badge">{{ course.category.name }}</span>
-        </div>
-
-        <div class="course-body">
-          <div class="course-meta">
-            <span class="rating" [attr.aria-label]="'التقييم ' + course.rating + ' من 5'">
-              <span aria-hidden="true">★</span> {{ course.rating | number: '1.0-1' }}
-            </span>
-            <span>{{ course.courseVideosCount }} درس</span>
-          </div>
-          <h2>{{ course.name }}</h2>
-          <p class="description">{{ course.description }}</p>
-          <footer>
-            <span class="author">{{ course.author }}</span>
-            <span class="language">{{ course.courseLanguage }}</span>
-          </footer>
-        </div>
-      </article>
+      <div class="course-tile">
+        <app-course-card [course]="course" />
+        <button
+          class="favorite-button"
+          type="button"
+          [class.active]="favoriteIds().has(course.id)"
+          [disabled]="pendingFavoriteIds().has(course.id)"
+          [attr.aria-pressed]="favoriteIds().has(course.id)"
+          (click)="toggleFavorite(course)"
+        >
+          {{
+            pendingFavoriteIds().has(course.id)
+              ? 'جارٍ التحديث…'
+              : favoriteIds().has(course.id)
+                ? 'إزالة من المفضلة'
+                : 'إضافة إلى المفضلة'
+          }}
+        </button>
+      </div>
     }
   </div>
 
@@ -151,7 +147,6 @@
       >
         السابق
       </button>
-
       @for (page of visiblePages(); track page) {
         <button
           type="button"
@@ -162,7 +157,6 @@
           {{ page }}
         </button>
       }
-
       <button
         type="button"
         (click)="changePage(pageNumber() + 1)"

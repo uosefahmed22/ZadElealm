@@ -1,7 +1,7 @@
 using ZadElealm.Apis.Commands.Report;
-using ZadElealm.Apis.Mappers;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Core.Enums;
 
 namespace ZadElealm.Apis.Handlers.Report
 {
@@ -16,8 +16,20 @@ namespace ZadElealm.Apis.Handlers.Report
 
         public override async Task<ApiResponse> Handle(AddReportCommand request, CancellationToken cancellationToken)
         {
-            var mappedReport = request.ReportDto.ToEntity();
-            mappedReport.AppUserId = request.UserId;
+            if (!Enum.TryParse<ReportType>(request.ReportDto.ReportType, out var reportType))
+            {
+                return new ApiResponse(400, "نوع البلاغ غير صالح");
+            }
+
+            var mappedReport = new Core.Models.Report
+            {
+                AppUserId = request.UserId,
+                TitleOfTheIssue = request.ReportDto.TitleOfTheIssue.Trim(),
+                Description = request.ReportDto.Description.Trim(),
+                reportTypes = reportType,
+                AdminResponse = null,
+                IsSolved = false
+            };
 
             await _unitOfWork.Repository<Core.Models.Report>().AddAsync(mappedReport);
             await _unitOfWork.Complete();

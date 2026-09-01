@@ -6,9 +6,9 @@ namespace ZadElealm.Apis.Commands.Report
     public class AddReportCommand : BaseCommand<ApiResponse>
     {
         public string UserId { get; }
-        public ReportDto ReportDto { get; }
+        public CreateReportDto ReportDto { get; }
 
-        public AddReportCommand(string userId, ReportDto reportDto)
+        public AddReportCommand(string userId, CreateReportDto reportDto)
         {
             UserId = userId;
             ReportDto = reportDto;

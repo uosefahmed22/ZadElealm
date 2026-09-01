@@ -23,6 +23,11 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ApiDataResponse> SendNotificationAsync(NotificationServiceDto notificationServiceDto)
         {
+            if (notificationServiceDto == null || string.IsNullOrWhiteSpace(notificationServiceDto.UserId) ||
+                string.IsNullOrWhiteSpace(notificationServiceDto.Title) ||
+                string.IsNullOrWhiteSpace(notificationServiceDto.Description))
+                return new ApiDataResponse(400, null, "بيانات الإشعار غير مكتملة");
+
             var notification = new Notification
             {
                 Title = notificationServiceDto.Title,
@@ -36,9 +41,6 @@ namespace ZadElealm.Service.AppServices
                 AppUserId = notificationServiceDto.UserId,
                 IsRead = false
             };
-
-            if (notification.UserNotifications == null)
-                return new ApiDataResponse(400, null, "لا يمكن إضافة الإشعار للمستخدم");
 
             notification.UserNotifications.Add(userNotification);
 

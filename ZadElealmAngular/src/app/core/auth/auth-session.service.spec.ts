@@ -32,4 +32,23 @@ describe('AuthSessionService', () => {
     expect(service.isAuthenticated()).toBe(false);
     expect(sessionStorage.getItem('zad-elealm.auth.session')).toBeNull();
   });
+
+  it('updates visible identity without losing either token', () => {
+    const service = TestBed.inject(AuthSessionService);
+    service.setSession({
+      displayName: 'طالب',
+      email: 'user@test.com',
+      token: 'access',
+      refreshToken: 'refresh',
+    });
+
+    service.updateIdentity('طالب جديد', 'new@test.com');
+
+    expect(service.user()).toEqual({
+      displayName: 'طالب جديد',
+      email: 'new@test.com',
+      token: 'access',
+      refreshToken: 'refresh',
+    });
+  });
 });

@@ -1,0 +1,78 @@
+@if (isLoading()) {
+  <section class="quiz-loading" aria-label="جارٍ تحميل الاختبار" aria-busy="true">
+    <div class="zad-skeleton skeleton-title"></div>
+    <div class="zad-skeleton skeleton-question"></div>
+    <div class="zad-skeleton skeleton-question"></div>
+  </section>
+} @else if (errorMessage() && !quiz()) {
+  <section class="state-card" role="alert">
+    <h1>تعذر فتح الاختبار</h1>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retryLoad()">إعادة المحاولة</button>
+  </section>
+} @else if (result(); as quizResult) {
+  <section class="result-card" [class.passed]="quizResult.isCompleted" aria-labelledby="result-title">
+    <span class="eyebrow">نتيجة الاختبار</span>
+    <h1 id="result-title">
+      {{ quizResult.isCompleted ? 'مبارك، اجتزت الاختبار بنجاح' : 'خطوة طيبة، راجع الدروس وحاول مجددًا' }}
+    </h1>
+    <div class="score-circle" [attr.aria-label]="'درجتك ' + quizResult.score + ' بالمئة'">
+      <strong>{{ quizResult.score }}%</strong>
+      <span>درجتك</span>
+    </div>
+    <p>{{ quizResult.correctAnswers }} إجابة صحيحة من {{ quizResult.totalQuestions }}</p>
+    <div class="result-actions">
+      @if (quizResult.isCompleted) {
+        <a class="zad-btn zad-btn--primary" routerLink="/app/certificates">عرض الشهادة</a>
+      } @else {
+        <button class="zad-btn zad-btn--primary" type="button" (click)="retryQuiz()">إعادة الاختبار</button>
+      }
+      <a class="zad-btn zad-btn--ghost" [routerLink]="['/app/courses', courseId]">مراجعة الدروس</a>
+    </div>
+  </section>
+} @else if (quiz(); as currentQuiz) {
+  <header class="quiz-header">
+    <span class="eyebrow">اختبار الدورة</span>
+    <h1>{{ currentQuiz.name }}</h1>
+    <p>{{ currentQuiz.description }}</p>
+    <div class="quiz-progress-copy">
+      <span>أجبت عن {{ answeredCount() }} من {{ currentQuiz.questions.length }}</span>
+      <span>{{ currentQuiz.questions.length }} سؤالًا</span>
+    </div>
+    <div class="quiz-progress" role="progressbar" aria-label="تقدم الإجابة" aria-valuemin="0" [attr.aria-valuemax]="currentQuiz.questions.length" [attr.aria-valuenow]="answeredCount()">
+      <span [style.width.%]="currentQuiz.questions.length ? answeredCount() / currentQuiz.questions.length * 100 : 0"></span>
+    </div>
+  </header>
+
+  <form class="questions" (ngSubmit)="submit()">
+    @for (question of currentQuiz.questions; track question.id; let index = $index) {
+      <fieldset class="question-card">
+        <legend><span>السؤال {{ index + 1 }}</span>{{ question.text }}</legend>
+        <div class="choices">
+          @for (choice of question.choices; track choice.id) {
+            <label [class.selected]="answers()[question.id] === choice.id">
+              <input
+                type="radio"
+                [name]="'question-' + question.id"
+                [value]="choice.id"
+                [checked]="answers()[question.id] === choice.id"
+                (change)="selectAnswer(question.id, choice.id)"
+              />
+              <span>{{ choice.text }}</span>
+            </label>
+          }
+        </div>
+      </fieldset>
+    }
+
+    @if (errorMessage()) {
+      <div class="submit-error" role="alert">{{ errorMessage() }}</div>
+    }
+    <div class="submit-bar">
+      <span>{{ allAnswered() ? 'الإجابات مكتملة ويمكنك الإرسال.' : 'أجب عن كل الأسئلة لتفعيل الإرسال.' }}</span>
+      <button class="zad-btn zad-btn--primary" type="submit" [disabled]="submitDisabled()">
+        {{ isSubmitting() ? 'جارٍ إرسال الإجابات...' : 'إرسال الإجابات' }}
+      </button>
+    </div>
+  </form>
+}

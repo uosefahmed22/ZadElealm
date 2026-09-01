@@ -1,48 +1,248 @@
+<a class="skip-link" href="#student-content">تخطَّ إلى المحتوى</a>
 <header class="app-header">
   <div class="header-inner">
-    <a class="brand" routerLink="/app" aria-label="زاد العلم - مساحة التعلّم" (click)="closeMenu()">
+    <a class="brand" routerLink="/app" aria-label="زاد العلم - مساحة التعلّم">
       <img src="assets/icons/logo-dark.svg" alt="" width="150" height="45" />
     </a>
 
-    <button
-      type="button"
-      class="menu-button"
-      aria-label="فتح قائمة التنقل"
-      aria-controls="student-navigation"
-      [attr.aria-expanded]="isMenuOpen()"
-      (click)="toggleMenu()"
-    >
-      <span></span><span></span><span></span>
-    </button>
-
-    <nav
-      id="student-navigation"
-      class="student-nav"
-      [class.open]="isMenuOpen()"
-      aria-label="التنقل الرئيسي"
-    >
+    <nav id="student-navigation" class="student-nav" aria-label="التنقل الرئيسي">
       <a
         routerLink="/app"
         [routerLinkActiveOptions]="{ exact: true }"
         routerLinkActive="active"
-        (click)="closeMenu()"
+        ariaCurrentWhenActive="page"
         >الرئيسية</a
       >
-      <a routerLink="/app/courses" routerLinkActive="active" (click)="closeMenu()">الدورات</a>
+      <a routerLink="/app/courses" routerLinkActive="active" ariaCurrentWhenActive="page"
+        >استكشف الدورات</a
+      >
+      <a routerLink="/app/my-courses" routerLinkActive="active" ariaCurrentWhenActive="page"
+        >دوراتي</a
+      >
+      <a routerLink="/app/favorites" routerLinkActive="active" ariaCurrentWhenActive="page"
+        >المفضلة</a
+      >
     </nav>
 
     <div class="account">
-      <span class="account-copy">
-        <strong>{{ session.user()?.displayName }}</strong>
-        <small>{{ session.user()?.email }}</small>
-      </span>
-      <button type="button" class="logout-button" (click)="logout()" [disabled]="isLoggingOut()">
-        {{ isLoggingOut() ? 'جارٍ الخروج…' : 'تسجيل الخروج' }}
-      </button>
+      <div class="notification-center">
+        <button
+          type="button"
+          class="notification-trigger"
+          aria-label="الإشعارات"
+          [attr.aria-expanded]="notificationOpen()"
+          aria-controls="notification-panel"
+          (click)="toggleNotifications()"
+        >
+          <svg class="notification-bell" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />
+          </svg>
+          @if (unreadCount() > 0) {
+            <span class="notification-badge" aria-label="إشعارات غير مقروءة">{{
+              unreadCount() > 99 ? '99+' : unreadCount()
+            }}</span>
+          }
+        </button>
+
+        @if (notificationOpen()) {
+          <section
+            id="notification-panel"
+            class="notification-panel"
+            aria-labelledby="notification-title"
+          >
+            <header class="notification-heading">
+              <div>
+                <strong id="notification-title">الإشعارات</strong>
+                <small>{{ notifications().length }} إشعار</small>
+              </div>
+              <div class="notification-heading-actions">
+                @if (unreadCount() > 0) {
+                  <button type="button" [disabled]="isMarkingAll()" (click)="markAllAsRead()">
+                    {{ isMarkingAll() ? 'جارٍ التحديث…' : 'تحديد الكل كمقروء' }}
+                  </button>
+                }
+                <button type="button" class="notification-close" (click)="closeNotifications()">
+                  إغلاق
+                </button>
+              </div>
+            </header>
+
+            @if (notificationError()) {
+              <p class="notification-state notification-state--error" role="alert">
+                {{ notificationError() }}
+              </p>
+            }
+
+            @if (isLoadingNotifications()) {
+              <p class="notification-state" aria-live="polite">جارٍ تحميل الإشعارات…</p>
+            } @else if (notifications().length === 0) {
+              <div class="notification-empty">
+                <span aria-hidden="true">✓</span>
+                <strong>أنت على اطلاع بكل شيء</strong>
+                <p>لا توجد إشعارات حاليًا.</p>
+              </div>
+            } @else {
+              <ol class="notification-list">
+                @for (notification of notifications(); track notification.id) {
+                  <li [class.unread]="!notification.isRead">
+                    <span
+                      class="notification-icon"
+                      [attr.data-type]="notification.type"
+                      aria-hidden="true"
+                    >
+                      <svg viewBox="0 0 24 24">
+                        @switch (notification.type) {
+                          @case (0) {
+                            <path d="m4 7 8-4 8 4-8 4-8-4Z" />
+                            <path d="M7 9.5V14c2.8 2 7.2 2 10 0V9.5M20 7v6" />
+                          }
+                          @case (1) {
+                            <path d="M7 3h10v12H7zM9.5 7h5M9.5 10h5" />
+                            <path d="m10 15-2 6 4-2 4 2-2-6" />
+                          }
+                          @case (2) {
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 11v5M12 8h.01" />
+                          }
+                          @case (3) {
+                            <path
+                              d="M4 5.5A3.5 3.5 0 0 1 7.5 2H12v18H7.5A3.5 3.5 0 0 0 4 23V5.5Z"
+                            />
+                            <path
+                              d="M20 5.5A3.5 3.5 0 0 0 16.5 2H12v18h4.5A3.5 3.5 0 0 1 20 23V5.5Z"
+                            />
+                          }
+                          @case (4) {
+                            <path d="M9 4h6M9 2v4h6V2M6 4H4v18h16V4h-2" />
+                            <path
+                              d="M9.5 11a2.5 2.5 0 1 1 4.4 1.6c-.9.8-1.9 1.1-1.9 2.4M12 18h.01"
+                            />
+                          }
+                          @case (5) {
+                            <path d="M5 3h14v13H9l-4 4V3Z" />
+                            <path d="M12 7v4M12 13.5h.01" />
+                          }
+                          @case (6) {
+                            <path d="M4 18 10 12l4 4 6-8" />
+                            <path d="M15 8h5v5" />
+                          }
+                        }
+                      </svg>
+                    </span>
+                    <div class="notification-copy">
+                      <strong>{{ notification.title }}</strong>
+                      <p>{{ notification.description }}</p>
+                      <time [attr.datetime]="notification.createdAt">{{
+                        notification.createdAt | date: 'd MMM y، h:mm a'
+                      }}</time>
+                    </div>
+                    <div class="notification-actions">
+                      @if (!notification.isRead) {
+                        <button
+                          type="button"
+                          [disabled]="pendingNotificationId() === notification.id"
+                          (click)="markAsRead(notification)"
+                        >
+                          {{
+                            pendingNotificationId() === notification.id ? 'جارٍ…' : 'تحديد كمقروء'
+                          }}
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="notification-delete"
+                        [disabled]="deletingNotificationId() === notification.id"
+                        (click)="deleteNotification(notification)"
+                      >
+                        {{ deletingNotificationId() === notification.id ? 'جارٍ الحذف…' : 'حذف' }}
+                      </button>
+                    </div>
+                  </li>
+                }
+              </ol>
+            }
+          </section>
+        }
+      </div>
+
+      <div class="account-menu">
+        <button
+          type="button"
+          class="account-trigger"
+          aria-label="قائمة الحساب"
+          [attr.aria-expanded]="accountMenuOpen()"
+          aria-controls="account-menu-panel"
+          (click)="toggleAccountMenu()"
+        >
+          <svg class="account-avatar" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.25" />
+            <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+          </svg>
+          <svg class="account-chevron" viewBox="0 0 12 8" aria-hidden="true">
+            <path d="m1 1 5 5 5-5" />
+          </svg>
+        </button>
+
+        @if (accountMenuOpen()) {
+          <section id="account-menu-panel" class="account-panel" aria-label="خيارات الحساب">
+            <header class="account-panel-heading">
+              <strong>{{ session.user()?.displayName }}</strong>
+              <small>{{ session.user()?.email }}</small>
+            </header>
+
+            <nav aria-label="روابط الحساب">
+              <a
+                routerLink="/app/certificates"
+                routerLinkActive="active"
+                (click)="closeAccountMenu()"
+              >
+                <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 3h10v12H7zM9.5 7h5M9.5 10h5" />
+                  <path d="m10 15-2 6 4-2 4 2-2-6" />
+                </svg>
+                شهاداتي
+              </a>
+              <a
+                routerLink="/app/leaderboard"
+                routerLinkActive="active"
+                (click)="closeAccountMenu()"
+              >
+                <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M8 20v-7h4v7M4 20v-4h4M12 20V9h4v11M16 20V4h4v16M3 20h18" />
+                </svg>
+                الترتيب
+              </a>
+              <a routerLink="/app/account" routerLinkActive="active" (click)="closeAccountMenu()">
+                <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3.25" />
+                  <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
+                </svg>
+                الحساب
+              </a>
+              <a routerLink="/app/support" routerLinkActive="active" (click)="closeAccountMenu()">
+                <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M9.5 9a2.5 2.5 0 1 1 4.4 1.6C13 11.4 12 11.7 12 14M12 17h.01" />
+                </svg>
+                الدعم
+              </a>
+            </nav>
+
+            <button
+              type="button"
+              class="logout-button"
+              (click)="logout()"
+              [disabled]="isLoggingOut()"
+            >
+              {{ isLoggingOut() ? 'جارٍ الخروج…' : 'تسجيل الخروج' }}
+            </button>
+          </section>
+        }
+      </div>
     </div>
   </div>
 </header>
 
-<main class="app-main">
+<main id="student-content" class="app-main">
   <router-outlet />
 </main>

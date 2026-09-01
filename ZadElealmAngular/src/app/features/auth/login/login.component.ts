@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -23,16 +23,15 @@ export class LoginComponent {
 
   readonly hidePassword = signal(true);
   readonly isSubmitting = signal(false);
-  readonly successMessage = signal('');
+  readonly successMessage = signal(this.initialSuccessMessage());
   readonly serverMessage = signal('');
   readonly serverErrors = signal<string[]>([]);
+  readonly needsEmailConfirmation = signal(false);
 
   readonly form = this.formBuilder.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required]],
   });
-
-  readonly submitDisabled = computed(() => this.isSubmitting() || this.form.invalid);
 
   submit(): void {
     if (this.form.invalid || this.isSubmitting()) {
@@ -43,6 +42,7 @@ export class LoginComponent {
     this.isSubmitting.set(true);
     this.serverMessage.set('');
     this.serverErrors.set([]);
+    this.needsEmailConfirmation.set(false);
 
     this.authApi
       .login(this.form.getRawValue())
@@ -58,6 +58,9 @@ export class LoginComponent {
           const normalized = normalizeApiError(error);
           this.serverMessage.set(normalized.message);
           this.serverErrors.set(normalized.errors);
+          this.needsEmailConfirmation.set(
+            normalized.status === 401 && normalized.message.includes('تأكيد'),
+          );
         },
       });
   }
@@ -69,6 +72,16 @@ export class LoginComponent {
 
   togglePasswordVisibility(): void {
     this.hidePassword.update((value) => !value);
+  }
+
+  private initialSuccessMessage(): string {
+    if (this.route.snapshot.queryParamMap.get('accountDeleted') === 'true') {
+      return 'تم إغلاق حسابك بنجاح، ولن تتمكن من تسجيل الدخول إليه مرة أخرى.';
+    }
+    if (this.route.snapshot.queryParamMap.get('emailChanged') === 'true') {
+      return 'تم تحديث البريد الإلكتروني. سجّل الدخول بالبريد الجديد.';
+    }
+    return '';
   }
 
   getError(controlName: 'email' | 'password'): string {

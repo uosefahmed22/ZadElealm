@@ -1,7 +1,7 @@
 <div class="auth-card">
   <div class="card-header">
     <p class="tag">التحقق</p>
-    <h2>أدخل رمز التحقق</h2>
+    <h1>أدخل رمز التحقق</h1>
     <p>استخدم الرمز الذي وصلك على البريد الإلكتروني لإكمال استعادة الحساب.</p>
   </div>
 
@@ -17,6 +17,9 @@
     <label class="field">
       <span>البريد الإلكتروني</span>
       <input type="email" formControlName="email" autocomplete="email" />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="field-error">أدخل بريدًا إلكترونيًا صحيحًا.</small>
+      }
     </label>
 
     <label class="field">
@@ -27,13 +30,15 @@
       }
     </label>
 
-    <button type="submit" class="primary-button" [disabled]="submitDisabled()">
+    <button type="submit" class="primary-button" [disabled]="isSubmitting()">
       {{ isSubmitting() ? 'جارٍ التحقق...' : 'تحقق من الرمز' }}
     </button>
   </form>
 
   <p class="form-footer">
     لم يصلك شيء؟
-    <a [routerLink]="['/forgot-password']" [queryParams]="{ email: form.controls.email.value }">أعد الإرسال</a>
+    <a [routerLink]="['/forgot-password']" [queryParams]="{ email: form.controls.email.value }"
+      >أعد الإرسال</a
+    >
   </p>
 </div>

@@ -30,10 +30,7 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
             var replies = await _unitOfWork.Repository<Reply>()
                 .GetAllWithSpecNoTrackingAsync(spec);
 
-            if (!replies.Any())
-                return new ApiResponse(404, "لا توجد ردود لهذه المراجعة");
-
-            var repliesDto = replies.ToDtos();
+            var repliesDto = replies.ToDtos(request.UserId);
 
             return new ApiDataResponse(200, repliesDto, "تم جلب الردود بنجاح");
         }

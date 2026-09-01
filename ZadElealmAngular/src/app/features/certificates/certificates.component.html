@@ -1,0 +1,53 @@
+<header class="page-heading">
+  <span class="eyebrow">إنجازاتك</span>
+  <h1>شهاداتي</h1>
+  <p>الشهادات التي أصدرها السيرفر بعد اجتياز اختباراتك بنجاح.</p>
+</header>
+
+@if (isLoading()) {
+  <div class="certificate-grid" aria-label="جارٍ تحميل الشهادات" aria-busy="true">
+    @for (_ of [1, 2, 3]; track $index) {
+      <div class="zad-skeleton certificate-skeleton"></div>
+    }
+  </div>
+} @else if (errorMessage()) {
+  <section class="state-card" role="alert">
+    <h2>تعذر تحميل الشهادات</h2>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
+} @else if (certificates().length === 0) {
+  <section class="state-card">
+    <img src="assets/icons/award.svg" alt="" width="52" height="52" />
+    <h2>لم تحصل على شهادات بعد</h2>
+    <p>أكمل دروس إحدى الدورات واجتز اختبارها لتظهر شهادتك هنا.</p>
+    <a class="zad-btn zad-btn--primary" routerLink="/app/courses">استكشف الدورات</a>
+  </section>
+} @else {
+  <div class="certificate-grid">
+    @for (certificate of certificates(); track certificate.id) {
+      <article class="certificate-card">
+        <div class="certificate-preview">
+          <span class="certificate-seal" aria-hidden="true">✓</span>
+          <img src="assets/brand/logo-full.svg" alt="زاد تعلم" width="150" height="45" />
+          <span class="certificate-label">شهادة إتمام</span>
+          <h2>{{ certificate.userName }}</h2>
+          <p>{{ certificate.quizName }}</p>
+          <small>{{ certificate.completedDate | date: 'd MMMM y' }}</small>
+        </div>
+        <div class="certificate-body">
+          <span class="eyebrow">{{ certificate.name }}</span>
+          <h2>{{ certificate.quizName }}</h2>
+          <p>{{ certificate.description }}</p>
+          <time [attr.datetime]="certificate.completedDate">{{ certificate.completedDate | date: 'd MMMM y' }}</time>
+          <a
+            class="zad-btn zad-btn--primary"
+            [href]="certificateUrl(certificate.pdfUrl)"
+            target="_blank"
+            rel="noopener"
+          >تحميل الشهادة PDF</a>
+        </div>
+      </article>
+    }
+  </div>
+}

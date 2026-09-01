@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -12,7 +12,7 @@ import { passwordMatchValidator } from '../../../shared/validators/password-matc
   selector: 'app-reset-password',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.scss'
+  styleUrl: './reset-password.component.scss',
 })
 export class ResetPasswordComponent {
   private readonly formBuilder = inject(FormBuilder);
@@ -31,12 +31,10 @@ export class ResetPasswordComponent {
     {
       email: [this.email(), [Validators.required, Validators.email]],
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]]
+      confirmPassword: ['', [Validators.required]],
     },
-    { validators: [passwordMatchValidator('newPassword', 'confirmPassword')] }
+    { validators: [passwordMatchValidator('newPassword', 'confirmPassword')] },
   );
-
-  readonly submitDisabled = computed(() => this.isSubmitting() || this.form.invalid);
 
   submit(): void {
     if (this.form.invalid || this.isSubmitting()) {
@@ -57,7 +55,7 @@ export class ResetPasswordComponent {
         },
         error: (error: unknown) => {
           this.serverMessage.set(normalizeApiError(error).message);
-        }
+        },
       });
   }
 

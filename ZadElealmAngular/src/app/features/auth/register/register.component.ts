@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { finalize } from 'rxjs';
+import { finalize, startWith } from 'rxjs';
 
 import { normalizeApiError } from '../../../core/api/api-error.utils';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
@@ -12,7 +13,7 @@ import { arabicNameValidator } from '../../../shared/validators/arabic-name.vali
   selector: 'app-register',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.scss'
+  styleUrl: './register.component.scss',
 })
 export class RegisterComponent {
   private readonly formBuilder = inject(FormBuilder);
@@ -28,10 +29,23 @@ export class RegisterComponent {
   readonly form = this.formBuilder.nonNullable.group({
     displayName: ['', [Validators.required, arabicNameValidator()]],
     email: ['', [Validators.required, Validators.email]],
-    password: ['', [Validators.required, Validators.minLength(8)]]
+    password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
-  readonly submitDisabled = computed(() => this.isSubmitting() || this.form.invalid);
+  private readonly passwordValue = toSignal(
+    this.form.controls.password.valueChanges.pipe(startWith(this.form.controls.password.value)),
+    { initialValue: '' },
+  );
+  readonly passwordStrength = computed<0 | 1 | 2 | 3>(() => {
+    const value = this.passwordValue();
+    if (!value) return 0;
+    if (value.length < 8) return 1;
+    if (/[A-Za-z]/.test(value) && /\d/.test(value)) return 3;
+    return 2;
+  });
+  readonly passwordStrengthLabel = computed(
+    () => ['لم تُكتب بعد', 'ضعيفة', 'متوسطة', 'جيدة'][this.passwordStrength()],
+  );
 
   submit(): void {
     if (this.form.invalid || this.isSubmitting()) {
@@ -50,14 +64,14 @@ export class RegisterComponent {
         next: (response) => {
           this.successMessage.set(response.message ?? 'تم إنشاء الحساب بنجاح.');
           void this.router.navigate(['/confirm-email'], {
-            queryParams: { email: this.form.controls.email.value, registered: true }
+            queryParams: { email: this.form.controls.email.value, registered: true },
           });
         },
         error: (error: unknown) => {
           const normalized = normalizeApiError(error);
           this.serverMessage.set(normalized.message);
           this.serverErrors.set(normalized.errors);
-        }
+        },
       });
   }
 

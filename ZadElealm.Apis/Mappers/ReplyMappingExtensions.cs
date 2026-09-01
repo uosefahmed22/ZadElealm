@@ -8,7 +8,7 @@ namespace ZadElealm.Apis.Mappers
 {
     public static class ReplyMappingExtensions
     {
-        public static ReplyDto ToDto(this Reply entity)
+        public static ReplyDto ToDto(this Reply entity, string? currentUserId = null)
         {
             ArgumentNullException.ThrowIfNull(entity);
 
@@ -20,14 +20,16 @@ namespace ZadElealm.Apis.Mappers
                 DisplayName = entity.User?.DisplayName,
                 UserImage = entity.User?.ImageUrl,
                 CreatedAt = entity.CreatedAt,
-                ReplyLikesCount = entity.ReplyLikes != null ? entity.ReplyLikes.Count : entity.ReplyLikesCount
+                ReplyLikesCount = entity.ReplyLikes != null ? entity.ReplyLikes.Count : entity.ReplyLikesCount,
+                IsOwnedByCurrentUser = entity.AppUserId == currentUserId,
+                IsLikedByCurrentUser = entity.ReplyLikes?.Any(like => like.AppUserId == currentUserId) == true
             };
         }
 
-        public static IReadOnlyList<ReplyDto> ToDtos(this IEnumerable<Reply> entities)
+        public static IReadOnlyList<ReplyDto> ToDtos(this IEnumerable<Reply> entities, string? currentUserId = null)
         {
             if (entities is null) return [];
-            return entities.Select(e => e.ToDto()).ToList();
+            return entities.Select(e => e.ToDto(currentUserId)).ToList();
         }
     }
 }

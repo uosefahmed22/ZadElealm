@@ -24,10 +24,7 @@ namespace ZadElealm.Apis.Handlers.Notification
         {
             var spec = new UserNotificationSpecification(request.UserId);
             var notifications = await _unitOfWork.Repository<UserNotification>()
-                .GetAllWithSpecAsync(spec);
-
-            if (!notifications.Any())
-                return new ApiResponse(200, "لا توجد إشعارات");
+                .GetAllWithSpecNoTrackingAsync(spec);
 
             var response = new NotificationsResponse
             {
@@ -36,21 +33,7 @@ namespace ZadElealm.Apis.Handlers.Notification
                 TotalCount = notifications.Count
             };
 
-            await UpdateNotificationsReadStatus(notifications);
-
             return new ApiDataResponse(200, response);
-        }
-
-        private async Task UpdateNotificationsReadStatus(IEnumerable<UserNotification> notifications)
-        {
-            var unreadNotifications = notifications.Where(n => !n.IsRead).ToList();
-            foreach (var notification in unreadNotifications)
-            {
-                notification.IsRead = true;
-            }
-
-            if (unreadNotifications.Count > 0)
-                await _unitOfWork.Complete();
         }
     }
 }

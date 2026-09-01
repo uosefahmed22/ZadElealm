@@ -13,6 +13,10 @@ namespace ZadElealm.Repository.Data.Config
     {
         public void Configure(EntityTypeBuilder<ReviewLike> builder)
         {
+            builder.HasIndex(x => new { x.AppUserId, x.ReviewId })
+                .IsUnique()
+                .HasDatabaseName("UX_ReviewLikes_AppUserId_ReviewId");
+
             builder.HasOne(x => x.Review)
                 .WithMany(x => x.Likes)
                 .HasForeignKey(x => x.ReviewId)

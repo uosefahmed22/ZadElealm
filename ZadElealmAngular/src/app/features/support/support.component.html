@@ -1,0 +1,94 @@
+<header class="page-heading">
+  <span class="eyebrow">نحن هنا لمساعدتك</span>
+  <h1>الدعم وإرسال بلاغ</h1>
+  <p>اختر نوع المشكلة واكتب تفاصيل واضحة؛ سيصل البلاغ مباشرة إلى فريق الإدارة.</p>
+</header>
+
+<div class="support-layout">
+  <aside class="guidance-card" aria-labelledby="guidance-title">
+    <span class="guidance-icon" aria-hidden="true">؟</span>
+    <h2 id="guidance-title">قبل إرسال البلاغ</h2>
+    <ol>
+      <li>اكتب عنوانًا يصف المشكلة مباشرة.</li>
+      <li>اذكر الصفحة أو الدورة التي ظهرت فيها المشكلة.</li>
+      <li>تجنب كتابة كلمة المرور أو أي بيانات سرية.</li>
+    </ol>
+    <p>سيُربط البلاغ بحسابك تلقائيًا؛ لا تحتاج لكتابة بريدك داخل الوصف.</p>
+    <p>للحفاظ على الخصوصية، عرض البلاغات ومتابعتها متاحان لفريق الإدارة فقط.</p>
+  </aside>
+
+  <section class="report-card" aria-labelledby="report-form-title">
+    <div class="card-heading">
+      <span>بلاغ جديد</span>
+      <h2 id="report-form-title">صف لنا ما حدث</h2>
+    </div>
+
+    @if (successMessage()) {
+      <div class="message message--success" role="status">
+        <strong>تم الاستلام</strong>
+        <p>{{ successMessage() }}</p>
+      </div>
+    }
+    @if (errorMessage()) {
+      <div class="message message--error" role="alert">
+        <strong>تعذر إرسال البلاغ</strong>
+        <p>{{ errorMessage() }}</p>
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <fieldset>
+        <legend>نوع المشكلة</legend>
+        <div class="report-types">
+          @for (type of reportTypes; track type.value) {
+            <label [class.selected]="form.controls.reportType.value === type.value">
+              <input type="radio" formControlName="reportType" [value]="type.value" />
+              <span>
+                <strong>{{ type.label }}</strong>
+                <small>{{ type.description }}</small>
+              </span>
+            </label>
+          }
+        </div>
+      </fieldset>
+
+      <label for="issue-title">عنوان المشكلة</label>
+      <input
+        id="issue-title"
+        type="text"
+        formControlName="titleOfTheIssue"
+        maxlength="100"
+        placeholder="مثال: الفيديو لا يعمل في دورة التجويد"
+      />
+      <div class="field-meta">
+        @if (titleError()) {
+          <small class="field-error">{{ titleError() }}</small>
+        } @else {
+          <span></span>
+        }
+        <small>{{ form.controls.titleOfTheIssue.value.length }}/100</small>
+      </div>
+
+      <label for="issue-description">تفاصيل المشكلة</label>
+      <textarea
+        id="issue-description"
+        formControlName="description"
+        rows="7"
+        maxlength="1000"
+        placeholder="اكتب الخطوات التي قمت بها وما الذي ظهر لك…"
+      ></textarea>
+      <div class="field-meta">
+        @if (descriptionError()) {
+          <small class="field-error">{{ descriptionError() }}</small>
+        } @else {
+          <span></span>
+        }
+        <small>{{ form.controls.description.value.length }}/1000</small>
+      </div>
+
+      <button class="primary-button" type="submit" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'جارٍ إرسال البلاغ…' : 'إرسال البلاغ' }}
+      </button>
+    </form>
+  </section>
+</div>

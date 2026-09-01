@@ -1,10 +1,11 @@
 <div class="auth-card">
   <div class="card-header">
     <p class="tag">تأكيد البريد الإلكتروني</p>
-    <h2>فعّل حسابك</h2>
+    <h1>فعّل حسابك</h1>
     <p>
       @if (justLoggedIn()) {
-        حسابك مسجل دخول، لكن يلزم أن يكون البريد الإلكتروني مؤكّدًا للاستفادة من تدفق التفعيل بشكل كامل.
+        حسابك مسجل دخول، لكن يلزم أن يكون البريد الإلكتروني مؤكّدًا للاستفادة من تدفق التفعيل بشكل
+        كامل.
       } @else {
         راجع بريدك الإلكتروني واضغط على رابط التفعيل الذي وصلك بعد التسجيل.
       }
@@ -31,9 +32,12 @@
     <label class="field">
       <span>البريد الإلكتروني</span>
       <input type="email" formControlName="email" autocomplete="email" />
+      @if (form.controls.email.touched && form.controls.email.invalid) {
+        <small class="field-error">أدخل بريدًا إلكترونيًا صحيحًا.</small>
+      }
     </label>
 
-    <button type="submit" class="primary-button" [disabled]="isSubmitting() || form.invalid">
+    <button type="submit" class="primary-button" [disabled]="isSubmitting()">
       {{ isSubmitting() ? 'جارٍ إعادة الإرسال...' : 'إعادة إرسال رسالة التفعيل' }}
     </button>
   </form>

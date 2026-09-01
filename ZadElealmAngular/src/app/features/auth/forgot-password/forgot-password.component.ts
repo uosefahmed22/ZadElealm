@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -11,7 +11,7 @@ import { AuthApiService } from '../../../core/auth/auth-api.service';
   selector: 'app-forgot-password',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './forgot-password.component.html',
-  styleUrl: './forgot-password.component.scss'
+  styleUrl: './forgot-password.component.scss',
 })
 export class ForgotPasswordComponent {
   private readonly formBuilder = inject(FormBuilder);
@@ -23,10 +23,8 @@ export class ForgotPasswordComponent {
   readonly serverMessage = signal('');
 
   readonly form = this.formBuilder.nonNullable.group({
-    email: ['', [Validators.required, Validators.email]]
+    email: ['', [Validators.required, Validators.email]],
   });
-
-  readonly submitDisabled = computed(() => this.isSubmitting() || this.form.invalid);
 
   submit(): void {
     if (this.form.invalid || this.isSubmitting()) {
@@ -48,7 +46,7 @@ export class ForgotPasswordComponent {
         },
         error: (error: unknown) => {
           this.serverMessage.set(normalizeApiError(error).message);
-        }
+        },
       });
   }
 }

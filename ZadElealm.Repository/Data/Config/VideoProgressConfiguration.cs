@@ -29,6 +29,11 @@ namespace ZadElealm.Repository.Data.Config
                 .OnDelete(DeleteBehavior.NoAction); 
 
             builder.HasIndex(vp => new { vp.UserId, vp.CourseId });
+
+            builder.HasIndex(vp => new { vp.UserId, vp.VideoId })
+                .IsUnique()
+                .HasDatabaseName("UX_VideoProgresses_UserId_VideoId")
+                .HasFilter("[IsDeleted] = 0");
         }
     }
 }

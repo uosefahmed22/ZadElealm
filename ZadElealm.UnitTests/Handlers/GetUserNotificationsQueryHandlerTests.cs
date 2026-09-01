@@ -13,7 +13,7 @@ namespace ZadElealm.UnitTests.Handlers;
 public class GetUserNotificationsQueryHandlerTests
 {
     [Fact]
-    public async Task Handle_UsesJoinEntityReadStateAndMarksUnreadNotificationsAsRead()
+    public async Task Handle_UsesJoinEntityReadStateWithoutMarkingNotificationsAsRead()
     {
         var notification = new Notification
         {
@@ -32,7 +32,7 @@ public class GetUserNotificationsQueryHandlerTests
 
         var repository = new Mock<IGenericRepository<UserNotification>>();
         repository
-            .Setup(r => r.GetAllWithSpecAsync(It.IsAny<ISpecification<UserNotification>>()))
+            .Setup(r => r.GetAllWithSpecNoTrackingAsync(It.IsAny<ISpecification<UserNotification>>()))
             .ReturnsAsync(userNotifications);
 
         var unitOfWork = new Mock<IUnitOfWork>();
@@ -54,8 +54,28 @@ public class GetUserNotificationsQueryHandlerTests
         Assert.Equal(1, response.UnreadCount);
         Assert.Equal(1, response.TotalCount);
 
-        // After handler runs, the UserNotification entity is marked as read
-        Assert.True(userNotification.IsRead);
-        unitOfWork.Verify(u => u.Complete(), Times.Once);
+        Assert.False(userNotification.IsRead);
+        unitOfWork.Verify(u => u.Complete(), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_WhenThereAreNoNotifications_ReturnsAnEmptyStableResponse()
+    {
+        var repository = new Mock<IGenericRepository<UserNotification>>();
+        repository
+            .Setup(r => r.GetAllWithSpecNoTrackingAsync(It.IsAny<ISpecification<UserNotification>>()))
+            .ReturnsAsync([]);
+        var unitOfWork = new Mock<IUnitOfWork>();
+        unitOfWork.Setup(u => u.Repository<UserNotification>()).Returns(repository.Object);
+
+        var result = await new GetUserNotificationsQueryHandler(unitOfWork.Object).Handle(
+            new GetUserNotificationsQuery("user-1"),
+            CancellationToken.None);
+
+        var dataResponse = Assert.IsType<ApiDataResponse>(result);
+        var response = Assert.IsType<NotificationsResponse>(dataResponse.Data);
+        Assert.Empty(response.Notifications);
+        Assert.Equal(0, response.UnreadCount);
+        Assert.Equal(0, response.TotalCount);
     }
 }

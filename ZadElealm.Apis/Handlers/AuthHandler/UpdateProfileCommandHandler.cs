@@ -24,8 +24,13 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
             if (user == null)
                 return new ApiResponse(404, "المستخدم غير موجود");
 
-            user.DisplayName = request.DisplayName;
-            user.PhoneNumber = request.PhoneNumber;
+            if (request.DisplayName == null && request.PhoneNumber == null)
+                return new ApiResponse(400, "يجب إرسال بيان واحد على الأقل للتحديث");
+
+            if (request.DisplayName != null)
+                user.DisplayName = request.DisplayName.Trim();
+            if (request.PhoneNumber != null)
+                user.PhoneNumber = request.PhoneNumber.Trim();
             var result = await _userManager.UpdateAsync(user);
 
             if (!result.Succeeded)

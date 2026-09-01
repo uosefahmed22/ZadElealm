@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.ComponentModel.DataAnnotations;
 using ZadElealm.Apis.Commands.UserRankCommand;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Errors;
@@ -39,6 +40,31 @@ namespace ZadElealm.Apis.Controllers
 
             var query = new GetUserRankQuery { UserId = user.Id };
             var result = await _mediator.Send(query);
+
+            return StatusCode(result.StatusCode, result);
+        }
+
+        [HttpGet("dashboard")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
+        [ProducesResponseType(typeof(ApiDataResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<ApiDataResponse>> GetRankDashboard(
+            [FromQuery, Range(3, 50)] int take = 10)
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ApiResponse(401, "بيانات الدخول غير مكتملة"));
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var result = await _mediator.Send(new GetRankDashboardQuery
+            {
+                UserId = user.Id,
+                Take = take
+            });
 
             return StatusCode(result.StatusCode, result);
         }

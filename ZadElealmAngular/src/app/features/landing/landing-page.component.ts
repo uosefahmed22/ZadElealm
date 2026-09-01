@@ -4,6 +4,7 @@ import {
   AfterViewInit,
   ChangeDetectionStrategy,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
   HostListener,
@@ -17,8 +18,9 @@ import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 
 import { CatalogApiService } from '../../core/catalog/catalog-api.service';
-import { CourseDto } from '../../core/catalog/catalog.models';
+import { CategoryDto, CourseDto } from '../../core/catalog/catalog.models';
 import { formatLatinNumber } from '../../shared/utils/latin-number-format.util';
+import { CourseCardComponent } from '../../shared/components/course-card/course-card.component';
 
 interface NavItem {
   readonly label: string;
@@ -38,15 +40,24 @@ interface JourneyStep {
   readonly icon: string;
 }
 
+interface AudienceCard {
+  readonly title: string;
+  readonly description: string;
+  readonly icon: string;
+}
+
 interface LandingCourse {
+  readonly source: CourseDto;
   readonly id: number;
   readonly title: string;
   readonly description: string;
   readonly category: string;
+  readonly author: string;
   readonly videoCountLabel: string;
   readonly image: string;
   readonly imageAlt: string;
   readonly imageSrcSet: string | null;
+  readonly videoUrl: string;
 }
 
 interface FaqItem {
@@ -58,7 +69,7 @@ type CourseRegionState = 'loading' | 'success' | 'empty' | 'error';
 
 @Component({
   selector: 'app-landing-page',
-  imports: [RouterLink],
+  imports: [RouterLink, CourseCardComponent],
   templateUrl: './landing-page.component.html',
   styleUrl: './landing-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -126,6 +137,29 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
   ];
 
+  readonly audienceCards: readonly AudienceCard[] = [
+    {
+      title: 'أطفال',
+      description: 'بداية واضحة تساعد الصغار على التعلّم خطوة بخطوة.',
+      icon: 'book',
+    },
+    {
+      title: 'شباب',
+      description: 'مسارات مرتبة تناسب الدراسة وبناء عادة تعلّم ثابتة.',
+      icon: 'trend',
+    },
+    {
+      title: 'كبار',
+      description: 'واجهة هادئة ومحتوى منظم يمكن متابعته بالوتيرة المناسبة.',
+      icon: 'play-screen',
+    },
+    {
+      title: 'أخوات',
+      description: 'تجربة عربية مريحة للوصول إلى الدروس ومتابعة الإنجاز.',
+      icon: 'award',
+    },
+  ];
+
   readonly journeySteps: readonly JourneyStep[] = [
     {
       number: formatLatinNumber(1),
@@ -178,6 +212,8 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly courseSkeletons = [1, 2, 3] as const;
   readonly courses = signal<readonly LandingCourse[]>([]);
+  readonly categories = signal<readonly CategoryDto[]>([]);
+  readonly featuredCourse = computed(() => this.courses()[0] ?? null);
   readonly courseRegionState = signal<CourseRegionState>('loading');
   readonly openFaqIndex = signal(0);
   readonly activeSection = signal('home');
@@ -186,6 +222,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCourses();
+    this.loadCategories();
   }
 
   ngAfterViewInit(): void {
@@ -236,6 +273,16 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
           this.courses.set([]);
           this.courseRegionState.set('error');
         },
+      });
+  }
+
+  private loadCategories(): void {
+    this.catalogApi
+      .getCategories()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => this.categories.set(response.data.slice(0, 5)),
+        error: () => this.categories.set([]),
       });
   }
 
@@ -310,15 +357,23 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   private toLandingCourse(course: CourseDto): LandingCourse {
     const image = course.imageUrl?.trim() || this.fallbackImage;
     return {
+      source: course,
       id: course.id,
       title: course.name,
       description: course.description,
       category: course.category?.name || 'دورة تعليمية',
+      author: course.author,
       videoCountLabel: `${formatLatinNumber(course.courseVideosCount)} درسًا`,
       image,
       imageAlt: `صورة دورة ${course.name}`,
       imageSrcSet: this.createYouTubeSrcSet(image),
+      videoUrl: this.createYouTubeWatchUrl(image) ?? '/register',
     };
+  }
+
+  private createYouTubeWatchUrl(imageUrl: string): string | null {
+    const match = imageUrl.match(/i\.ytimg\.com\/vi\/([^/]+)\//i);
+    return match?.[1] ? `https://www.youtube.com/watch?v=${match[1]}` : null;
   }
 
   private createYouTubeSrcSet(imageUrl: string): string | null {

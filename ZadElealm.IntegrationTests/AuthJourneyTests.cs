@@ -76,6 +76,38 @@ public class AuthJourneyTests : IClassFixture<ZadElealmApiFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Fact]
+    public async Task UnconfirmedLogin_CanResendConfirmation_ThenHitsTheRetryLimit()
+    {
+        using var client = CreateClient();
+        var email = $"unconfirmed-{Guid.NewGuid():N}@test.com";
+        Assert.Equal(
+            HttpStatusCode.OK,
+            (await client.PostAsJsonAsync("/api/Account/register", new
+            {
+                displayName = "طالب غير مؤكد",
+                email,
+                password = "Registration123!"
+            })).StatusCode);
+
+        var login = await client.PostAsJsonAsync("/api/Account/login", new
+        {
+            email,
+            password = "Registration123!"
+        });
+        Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
+
+        var resend = await client.PostAsync(
+            $"/api/Account/resend-confirmation-email?email={Uri.EscapeDataString(email)}",
+            null);
+        Assert.Equal(HttpStatusCode.OK, resend.StatusCode);
+
+        var repeatedResend = await client.PostAsync(
+            $"/api/Account/resend-confirmation-email?email={Uri.EscapeDataString(email)}",
+            null);
+        Assert.Equal(HttpStatusCode.TooManyRequests, repeatedResend.StatusCode);
+    }
+
     private HttpClient CreateClient()
     {
         return _factory.CreateClient(new WebApplicationFactoryClientOptions

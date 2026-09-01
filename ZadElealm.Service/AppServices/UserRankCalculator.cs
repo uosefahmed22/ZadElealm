@@ -26,16 +26,17 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<int> CalculatePoints(string userId)
         {
-            int totalPoints = 0;
-            int completedCoursesCount = 0;
-            int certificatesCount = 0;
-            double averageQuizScore = 0;
+            if (string.IsNullOrWhiteSpace(userId))
+                throw new ArgumentException("معرف المستخدم مطلوب", nameof(userId));
+
+            var totalPoints = 0;
+            var averageQuizScore = 0d;
 
             var progressSpec = new ProgressWithQuizSpecification(userId, true);
             var completedProgresses = await _unitOfWork.Repository<Progress>()
                 .GetAllWithSpecNoTrackingAsync(progressSpec);
 
-            completedCoursesCount = completedProgresses
+            var completedCoursesCount = completedProgresses
                 .Select(p => p.Quiz.CourseId)
                 .Distinct()
                 .Count();
@@ -43,10 +44,8 @@ namespace ZadElealm.Service.AppServices
             totalPoints += completedCoursesCount * 10;
 
             var certificateSpec = new CertificatesByUserSpecification(userId);
-            var certificates = await _unitOfWork.Repository<Certificate>()
-                .GetAllWithSpecNoTrackingAsync(certificateSpec);
-
-            certificatesCount = certificates.Count();
+            var certificatesCount = await _unitOfWork.Repository<Certificate>()
+                .CountAsync(certificateSpec);
             totalPoints += certificatesCount * 20;
 
             if (completedProgresses.Any())
@@ -59,14 +58,23 @@ namespace ZadElealm.Service.AppServices
             var userRank = await _unitOfWork.Repository<UserRank>()
                 .GetEntityWithSpecAsync(userRankSpec);
 
-            if (userRank != null)
+            if (userRank == null)
             {
-                userRank.CompletedCoursesCount = completedCoursesCount;
-                userRank.CertificatesCount = certificatesCount;
-                userRank.AverageQuizScore = averageQuizScore;
-                _unitOfWork.Repository<UserRank>().Update(userRank);
-                await _unitOfWork.Complete();
+                userRank = new UserRank { UserId = userId };
+                await _unitOfWork.Repository<UserRank>().AddAsync(userRank);
             }
+            else
+            {
+                _unitOfWork.Repository<UserRank>().Update(userRank);
+            }
+
+            userRank.CompletedCoursesCount = completedCoursesCount;
+            userRank.CertificatesCount = certificatesCount;
+            userRank.AverageQuizScore = averageQuizScore;
+            userRank.TotalPoints = totalPoints;
+            userRank.Rank = DetermineRank(totalPoints);
+            userRank.LastUpdated = DateTime.UtcNow;
+            await _unitOfWork.Complete();
 
             return totalPoints;
         }

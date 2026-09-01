@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -11,7 +11,7 @@ import { AuthApiService } from '../../../core/auth/auth-api.service';
   selector: 'app-verify-otp',
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './verify-otp.component.html',
-  styleUrl: './verify-otp.component.scss'
+  styleUrl: './verify-otp.component.scss',
 })
 export class VerifyOtpComponent {
   private readonly formBuilder = inject(FormBuilder);
@@ -26,10 +26,8 @@ export class VerifyOtpComponent {
 
   readonly form = this.formBuilder.nonNullable.group({
     email: [this.email(), [Validators.required, Validators.email]],
-    otp: ['', [Validators.required, Validators.minLength(4)]]
+    otp: ['', [Validators.required, Validators.minLength(4)]],
   });
-
-  readonly submitDisabled = computed(() => this.isSubmitting() || this.form.invalid);
 
   submit(): void {
     if (this.form.invalid || this.isSubmitting()) {
@@ -51,7 +49,7 @@ export class VerifyOtpComponent {
         },
         error: (error: unknown) => {
           this.serverMessage.set(normalizeApiError(error).message);
-        }
+        },
       });
   }
 }

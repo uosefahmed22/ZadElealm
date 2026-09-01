@@ -1,16 +1,16 @@
 <div class="auth-card">
   <div class="card-header">
     <p class="tag">تسجيل الدخول</p>
-    <h2>أهلًا بعودتك</h2>
+    <h1>أهلًا بعودتك</h1>
     <p>ادخل بياناتك للوصول إلى حسابك ومتابعة التعلم.</p>
   </div>
 
   @if (successMessage()) {
-    <div class="alert success">{{ successMessage() }}</div>
+    <div class="alert success" role="status">{{ successMessage() }}</div>
   }
 
   @if (serverMessage()) {
-    <div class="alert error">
+    <div class="alert error" role="alert">
       <p>{{ serverMessage() }}</p>
       @if (serverErrors().length) {
         <ul>
@@ -19,13 +19,26 @@
           }
         </ul>
       }
+      @if (needsEmailConfirmation()) {
+        <a
+          class="confirmation-link"
+          routerLink="/confirm-email"
+          [queryParams]="{ email: form.controls.email.value }"
+          >إعادة إرسال رابط تأكيد البريد</a
+        >
+      }
     </div>
   }
 
   <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <label class="field">
       <span>البريد الإلكتروني</span>
-      <input type="email" formControlName="email" placeholder="name@example.com" autocomplete="email" />
+      <input
+        type="email"
+        formControlName="email"
+        placeholder="name@example.com"
+        autocomplete="email"
+      />
       @if (getError('email')) {
         <small class="field-error">{{ getError('email') }}</small>
       }
@@ -40,8 +53,14 @@
           placeholder="••••••••"
           autocomplete="current-password"
         />
-        <button type="button" class="text-button" (click)="togglePasswordVisibility()">
-          {{ hidePassword() ? 'إظهار' : 'إخفاء' }}
+        <button
+          type="button"
+          class="text-button password-toggle"
+          [attr.aria-label]="hidePassword() ? 'إظهار كلمة المرور' : 'إخفاء كلمة المرور'"
+          [attr.aria-pressed]="!hidePassword()"
+          (click)="togglePasswordVisibility()"
+        >
+          <span aria-hidden="true">{{ hidePassword() ? '◉' : '◌' }}</span>
         </button>
       </div>
       @if (getError('password')) {
@@ -51,8 +70,13 @@
 
     <div class="form-actions">
       <a routerLink="/forgot-password">نسيت كلمة المرور؟</a>
-      <button type="submit" class="primary-button" [disabled]="submitDisabled()">
-        {{ isSubmitting() ? 'جارٍ تسجيل الدخول...' : 'دخول' }}
+      <button type="submit" class="primary-button" [disabled]="isSubmitting()">
+        @if (isSubmitting()) {
+          <span class="button-spinner" aria-hidden="true"></span>
+          <span>جارٍ تسجيل الدخول...</span>
+        } @else {
+          <span>دخول</span>
+        }
       </button>
     </div>
   </form>

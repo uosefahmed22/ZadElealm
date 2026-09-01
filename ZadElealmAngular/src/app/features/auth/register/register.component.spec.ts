@@ -17,8 +17,8 @@ describe('RegisterComponent', () => {
       providers: [
         provideRouter([]),
         { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: new Map() } } },
-        { provide: AuthApiService, useValue: authApi as Partial<AuthApiService> }
-      ]
+        { provide: AuthApiService, useValue: authApi as Partial<AuthApiService> },
+      ],
     }).compileComponents();
 
     router = TestBed.inject(Router);
@@ -31,7 +31,7 @@ describe('RegisterComponent', () => {
     component.form.setValue({
       displayName: 'Test User',
       email: 'user@test.com',
-      password: '12345678'
+      password: '12345678',
     });
 
     component.submit();
@@ -40,12 +40,26 @@ describe('RegisterComponent', () => {
     expect(authApi.register).not.toHaveBeenCalled();
   });
 
+  it('keeps the register button actionable so invalid fields can explain the problem', () => {
+    const fixture = TestBed.createComponent(RegisterComponent);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      'button[type="submit"]',
+    ) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+    button.click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('هذا الحقل مطلوب');
+  });
+
   it('navigates to confirm email after successful registration', () => {
     authApi.register.mockReturnValue(
       of({
         statusCode: 200,
-        message: 'تم إنشاء الحساب'
-      })
+        message: 'تم إنشاء الحساب',
+      }),
     );
 
     const fixture = TestBed.createComponent(RegisterComponent);
@@ -53,14 +67,31 @@ describe('RegisterComponent', () => {
     component.form.setValue({
       displayName: 'محمد أحمد',
       email: 'user@test.com',
-      password: '12345678'
+      password: '12345678',
     });
 
     component.submit();
 
     expect(authApi.register).toHaveBeenCalled();
     expect(router.navigate).toHaveBeenCalledWith(['/confirm-email'], {
-      queryParams: { email: 'user@test.com', registered: true }
+      queryParams: { email: 'user@test.com', registered: true },
     });
+  });
+
+  it('shows password strength without changing the existing validator contract', () => {
+    const fixture = TestBed.createComponent(RegisterComponent);
+    const component = fixture.componentInstance;
+
+    component.form.controls.password.setValue('12345678');
+    fixture.detectChanges();
+    expect(component.passwordStrength()).toBe(2);
+
+    component.form.controls.password.setValue('Abcd1234');
+    fixture.detectChanges();
+    expect(component.passwordStrength()).toBe(3);
+    expect(component.form.controls.password.valid).toBe(true);
+    expect(
+      fixture.nativeElement.querySelector('.password-strength').getAttribute('data-strength'),
+    ).toBe('3');
   });
 });

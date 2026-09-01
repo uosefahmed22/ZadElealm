@@ -1,0 +1,35 @@
+<a
+  class="course-card"
+  [class.course-card--ink]="tone() === 'ink'"
+  [routerLink]="['/app/courses', course().id]"
+  [attr.aria-label]="'عرض دورة ' + course().name"
+>
+  <div class="course-media">
+    <img
+      [src]="imageFailed() || !course().imageUrl ? fallbackImage : course().imageUrl"
+      [attr.srcset]="imageFailed() ? null : imageSrcSet(course().imageUrl)"
+      sizes="(min-width: 1024px) 352px, (min-width: 768px) 46vw, 92vw"
+      [alt]="'غلاف دورة ' + course().name"
+      width="480"
+      height="270"
+      loading="lazy"
+      decoding="async"
+      (error)="imageFailed.set(true)"
+    />
+    <span class="course-category">{{ course().category.name }}</span>
+  </div>
+  <div class="course-body">
+    <h2>{{ course().name }}</h2>
+    <p>{{ course().description }}</p>
+    <span class="course-author">{{ course().author }}</span>
+    <footer>
+      <span>{{ course().courseVideosCount }} درسًا</span>
+      @if (course().rating > 0) {
+        <span class="course-rating" [attr.aria-label]="'التقييم ' + course().rating + ' من 5'">
+          <span aria-hidden="true">★</span> {{ course().rating | number: '1.0-1' }}
+        </span>
+      }
+      <strong>عرض الدورة</strong>
+    </footer>
+  </div>
+</a>

@@ -32,7 +32,13 @@ namespace ZadElealm.Apis.Controllers
         public async Task<ActionResult<ApiResponse>> GetFavorites()
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ApiResponse(401, "المستخد غير موجود"));
+
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var query = new GetFavoriteCoursesQuery(user.Id);
             var response = await _mediator.Send(query);
 
@@ -44,7 +50,12 @@ namespace ZadElealm.Apis.Controllers
         public async Task<ActionResult<ApiResponse>> AddToFavorites(int courseId)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
             var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
             var command = new AddFavoriteCourseCommand(user.Id, courseId);
             var response = await _mediator.Send(command);
@@ -56,8 +67,15 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{courseId}")]
         public async Task<ActionResult<ApiResponse>> RemoveFromFavorites(int courseId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var command = new RemoveFavoriteCourseCommand(userId, courseId);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrWhiteSpace(email))
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+                return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
+
+            var command = new RemoveFavoriteCourseCommand(user.Id, courseId);
             var response = await _mediator.Send(command);
 
             return StatusCode(response.StatusCode, response);

@@ -25,9 +25,6 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
             var enrollments = await _unitOfWork.Repository<Enrollment>()
                 .GetAllWithSpecNoTrackingAsync(spec);
 
-            if (!enrollments.Any())
-                return new ApiResponse(200, "لا توجد دورات مسجلة");
-
             var mappedCourses = enrollments.Select(e => e.Course).ToDtos();
 
             var response = new AllEnrollementData()
@@ -36,7 +33,10 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 AllEnrolledCourses = enrollments.Count()
             };
 
-            return new ApiDataResponse(200, response);
+            return new ApiDataResponse(
+                200,
+                response,
+                enrollments.Any() ? "تم جلب الدورات المسجلة بنجاح" : "لا توجد دورات مسجلة");
         }
     }
 }

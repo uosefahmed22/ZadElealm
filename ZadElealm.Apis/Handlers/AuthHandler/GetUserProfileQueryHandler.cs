@@ -20,9 +20,10 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
         public override async Task<ApiResponse> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
-            var userDto = user?.ToProfileDto();
+            if (user == null)
+                return new ApiResponse(404, "المستخدم غير موجود");
 
-            return new ApiDataResponse(200, userDto);
+            return new ApiDataResponse(200, user.ToProfileDto());
         }
     }
 }

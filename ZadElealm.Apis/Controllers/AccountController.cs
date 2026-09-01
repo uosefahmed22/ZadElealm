@@ -162,13 +162,13 @@ namespace ZadElealm.Apis.Controllers
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         [HttpDelete("delete-account")]
-        public async Task<ActionResult<ApiResponse>> DeleteAccount([FromBody] string password)
+        public async Task<ActionResult<ApiResponse>> DeleteAccount([FromBody] DeleteAccountDto request)
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
-            var command = new DeleteAccountCommand( email, password);
+            var command = new DeleteAccountCommand(email, request.Password);
             var response = await _mediator.Send(command);
 
             return StatusCode(response.StatusCode, response);

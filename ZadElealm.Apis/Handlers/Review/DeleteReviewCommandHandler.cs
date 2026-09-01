@@ -31,7 +31,7 @@ namespace ZadElealm.Apis.Handlers.Review
                 return new ApiResponse(403, "أنت غير مخول لحذف هذه المراجعة");
             }
 
-            _unitOfWork.Repository<Core.Models.Review>().Delete(existingReview);
+            existingReview.IsDeleted = true;
             await _unitOfWork.Complete();
             return new ApiResponse(200, "تم حذف المراجعة بنجاح");
         }

@@ -1,0 +1,456 @@
+@if (isLoading()) {
+  <section class="details-skeleton" aria-label="جارٍ تحميل الدورة" aria-busy="true">
+    <div class="zad-skeleton skeleton-heading"></div>
+    <div class="learning-shell">
+      <div class="zad-skeleton skeleton-player"></div>
+      <div class="zad-skeleton skeleton-list"></div>
+    </div>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card" role="alert">
+    <h1>تعذر فتح الدورة</h1>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retryCourse()">
+      إعادة المحاولة
+    </button>
+  </section>
+} @else if (course(); as currentCourse) {
+  <header class="course-header">
+    <div class="course-title">
+      <span class="eyebrow">{{ currentCourse.category.name }}</span>
+      <h1>{{ currentCourse.name }}</h1>
+      <p>{{ currentCourse.description }}</p>
+      <div class="course-facts">
+        <span>{{ currentCourse.author }}</span>
+        <span>{{ currentCourse.courseVideosCount }} درسًا</span>
+        <span>{{ currentCourse.courseLanguage }}</span>
+        <span
+          class="course-rating"
+          [attr.aria-label]="'تقييم الدورة ' + currentCourse.rating + ' من 5'"
+        >
+          <span aria-hidden="true">★</span> {{ currentCourse.rating | number: '1.0-1' }}
+        </span>
+      </div>
+    </div>
+    <div class="course-progress-card">
+      <div class="progress-copy">
+        <strong>تقدم الدورة</strong>
+        <span>{{ completion() }}%</span>
+      </div>
+      <div
+        class="progress-track"
+        role="progressbar"
+        aria-label="تقدم الدورة"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        [attr.aria-valuenow]="completion()"
+      >
+        <span [style.width.%]="completion()"></span>
+      </div>
+      @if (isEnrolled() === false) {
+        <button
+          class="zad-btn zad-btn--primary"
+          type="button"
+          [disabled]="isEnrolling()"
+          (click)="enroll()"
+        >
+          {{ isEnrolling() ? 'جارٍ التسجيل...' : 'سجل في الدورة' }}
+        </button>
+      }
+      @if (currentCourse.quizzes[0]; as quiz) {
+        @if (quizUnlocked()) {
+          <a
+            class="zad-btn zad-btn--primary"
+            [routerLink]="['/app/courses', courseId, 'quiz', quiz.id]"
+          >
+            الانتقال للاختبار
+          </a>
+        } @else {
+          <button class="zad-btn zad-btn--primary" type="button" disabled>الانتقال للاختبار</button>
+          <small>أكمل 80% من الدروس لفتح الاختبار</small>
+        }
+      }
+    </div>
+  </header>
+
+  <section class="learning-shell" aria-labelledby="lesson-title">
+    <div class="player-column">
+      <div class="player-frame">
+        <div #playerHost class="player-host"></div>
+        @if (isEnrolled() === false) {
+          <div class="player-error">
+            <strong>سجل في الدورة لبدء مشاهدة الدروس وحفظ تقدمك.</strong>
+            <button
+              class="zad-btn zad-btn--primary"
+              type="button"
+              [disabled]="isEnrolling()"
+              (click)="enroll()"
+            >
+              سجل في الدورة
+            </button>
+          </div>
+        }
+        @if (playerError()) {
+          <div class="player-error" role="alert">
+            <strong>تعذر تحميل الفيديو</strong>
+            <button class="zad-btn zad-btn--ghost" type="button" (click)="retryPlayer()">
+              إعادة المحاولة
+            </button>
+          </div>
+        }
+      </div>
+      @if (activeVideo(); as video) {
+        <div class="active-lesson-copy">
+          <span class="eyebrow">الدرس {{ activeIndex() + 1 }}</span>
+          <h2 id="lesson-title">{{ video.title }}</h2>
+          <p>{{ video.description }}</p>
+          <small aria-live="polite">{{ trackingMessage() }}</small>
+        </div>
+      } @else {
+        <div class="active-lesson-copy">
+          <h2 id="lesson-title">لا توجد دروس في هذه الدورة حاليًا</h2>
+        </div>
+      }
+    </div>
+
+    <aside class="lessons-panel" aria-labelledby="lessons-title">
+      <div class="lessons-heading">
+        <div>
+          <span class="eyebrow">محتوى الدورة</span>
+          <h2 id="lessons-title">الدروس</h2>
+        </div>
+        <span>{{ progress()?.completedVideos ?? 0 }}/{{ currentCourse.videos.length }}</span>
+      </div>
+      <ol class="lesson-list">
+        @for (video of currentCourse.videos; track video.id; let index = $index) {
+          <li>
+            <button
+              type="button"
+              [class.active]="activeIndex() === index"
+              [class.completed]="video.isCompleted"
+              [class.locked]="isVideoLocked(index)"
+              [disabled]="isVideoLocked(index)"
+              [attr.aria-current]="activeIndex() === index ? 'true' : null"
+              (click)="selectVideo(index)"
+            >
+              <span class="lesson-number">{{ index + 1 }}</span>
+              <span class="lesson-copy">
+                <strong>{{ video.title }}</strong>
+                <small>{{ formatDuration(video.videoDuration) }}</small>
+              </span>
+              <span class="lesson-status" aria-hidden="true">{{
+                video.isCompleted
+                  ? '✓'
+                  : isVideoLocked(index)
+                    ? '🔒'
+                    : activeIndex() === index
+                      ? '◉'
+                      : '○'
+              }}</span>
+              <span class="sr-only">{{
+                video.isCompleted
+                  ? 'مكتمل'
+                  : isVideoLocked(index)
+                    ? 'مغلق حتى إكمال الدروس السابقة'
+                    : activeIndex() === index
+                      ? 'جارٍ'
+                      : 'لم يبدأ'
+              }}</span>
+            </button>
+          </li>
+        }
+      </ol>
+    </aside>
+  </section>
+
+  <section class="feedback-section" aria-labelledby="feedback-title">
+    <div class="feedback-heading">
+      <div>
+        <span class="eyebrow">آراء المتعلمين</span>
+        <h2 id="feedback-title">تقييمات الدورة ومراجعاتها</h2>
+      </div>
+      <div class="rating-summary">
+        <strong>{{ currentCourse.rating | number: '1.0-1' }}</strong>
+        <span aria-hidden="true">★</span>
+        <small>{{ currentCourse.review.length }} مراجعة</small>
+      </div>
+    </div>
+
+    @if (feedbackMessage()) {
+      <p class="feedback-message" role="status">{{ feedbackMessage() }}</p>
+    }
+
+    @if (isEnrolled() === true) {
+      <div class="feedback-forms">
+        <section class="feedback-form-card" aria-labelledby="rating-form-title">
+          <h3 id="rating-form-title">قيّم الدورة</h3>
+          @if (canRate() === true) {
+            <div class="star-picker" role="radiogroup" aria-label="اختر التقييم من 5">
+              @for (value of [1, 2, 3, 4, 5]; track value) {
+                <button
+                  type="button"
+                  role="radio"
+                  [class.selected]="value <= selectedRating()"
+                  [attr.aria-checked]="selectedRating() === value"
+                  [attr.aria-label]="value + ' من 5'"
+                  (click)="selectRating(value)"
+                >
+                  ★
+                </button>
+              }
+            </div>
+            <button
+              class="zad-btn zad-btn--primary"
+              type="button"
+              [disabled]="selectedRating() === 0 || isSubmittingRating()"
+              (click)="submitRating()"
+            >
+              {{ isSubmittingRating() ? 'جارٍ الحفظ…' : 'حفظ التقييم' }}
+            </button>
+          } @else if (canRate() === false) {
+            <p>سبق أن قيّمت هذه الدورة.</p>
+          } @else {
+            <p>تعذر تحديد حالة تقييمك الآن.</p>
+          }
+        </section>
+
+        <form class="feedback-form-card" [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+          <h3>اكتب مراجعتك</h3>
+          @if (hasOwnedReview()) {
+            <p>لديك مراجعة منشورة. يمكنك حذفها من القائمة لكتابة مراجعة جديدة.</p>
+          } @else {
+            <label for="course-review">نص المراجعة</label>
+            <textarea
+              id="course-review"
+              rows="5"
+              maxlength="1000"
+              formControlName="reviewText"
+              placeholder="شارك تجربتك بوضوح…"
+            ></textarea>
+            <div class="review-field-meta">
+              @if (
+                reviewForm.controls.reviewText.touched && reviewForm.controls.reviewText.invalid
+              ) {
+                <small class="field-error">المراجعة يجب أن تكون بين 10 أحرف وألف حرف.</small>
+              }
+              <small>{{ reviewForm.controls.reviewText.value.length }}/1000</small>
+            </div>
+            <button
+              class="zad-btn zad-btn--primary"
+              type="submit"
+              [disabled]="reviewForm.invalid || isSubmittingReview()"
+            >
+              {{ isSubmittingReview() ? 'جارٍ النشر…' : 'نشر المراجعة' }}
+            </button>
+          }
+        </form>
+      </div>
+    } @else {
+      <div class="feedback-enrollment-note">
+        <p>سجل في الدورة أولًا لتضيف تقييمك ومراجعتك.</p>
+        <button
+          class="zad-btn zad-btn--primary"
+          type="button"
+          [disabled]="isEnrolling()"
+          (click)="enroll()"
+        >
+          سجل في الدورة
+        </button>
+      </div>
+    }
+
+    @if (currentCourse.review.length === 0) {
+      <div class="reviews-empty"><p>لا توجد مراجعات بعد. كن أول من يشارك تجربته.</p></div>
+    } @else {
+      <div class="reviews-list">
+        @for (review of currentCourse.review; track review.id) {
+          <article class="review-card">
+            <header>
+              @if (review.imageUrl) {
+                <img
+                  [src]="review.imageUrl"
+                  [alt]="'صورة ' + review.displayName"
+                  width="48"
+                  height="48"
+                />
+              } @else {
+                <span class="review-avatar" aria-hidden="true">{{
+                  review.displayName.charAt(0)
+                }}</span>
+              }
+              <div>
+                <h3>{{ review.displayName }}</h3>
+                <time [attr.datetime]="review.createdAt">{{
+                  review.createdAt | date: 'd MMM y'
+                }}</time>
+              </div>
+              @if (review.isOwnedByCurrentUser) {
+                @if (confirmingReviewId() === review.id) {
+                  <div class="delete-confirmation">
+                    <span>متأكد؟</span>
+                    <button
+                      type="button"
+                      [disabled]="pendingReviewId() === review.id"
+                      (click)="confirmDeleteReview(review)"
+                    >
+                      {{ pendingReviewId() === review.id ? 'جارٍ الحذف…' : 'نعم، احذف' }}
+                    </button>
+                    <button
+                      type="button"
+                      [disabled]="pendingReviewId() === review.id"
+                      (click)="cancelDeleteReview()"
+                    >
+                      تراجع
+                    </button>
+                  </div>
+                } @else {
+                  <button
+                    class="delete-review"
+                    type="button"
+                    (click)="requestDeleteReview(review.id)"
+                  >
+                    حذف مراجعتي
+                  </button>
+                }
+              }
+            </header>
+            <p>{{ review.text }}</p>
+            <div class="review-actions">
+              <button
+                type="button"
+                class="feedback-action"
+                [class.active]="review.isLikedByCurrentUser"
+                [disabled]="isEnrolled() !== true || pendingReviewLikeId() === review.id"
+                [attr.aria-pressed]="review.isLikedByCurrentUser"
+                (click)="toggleReviewLike(review)"
+              >
+                <span aria-hidden="true">♥</span>
+                {{ review.likesCount }} إعجاب
+              </button>
+              <button
+                type="button"
+                class="feedback-action"
+                [attr.aria-expanded]="expandedReviewIds().has(review.id)"
+                (click)="toggleReplies(review.id)"
+              >
+                <span aria-hidden="true">↩</span>
+                {{ review.repliesCount }} رد
+              </button>
+            </div>
+
+            @if (expandedReviewIds().has(review.id)) {
+              <section
+                class="replies-panel"
+                [attr.aria-label]="'ردود مراجعة ' + review.displayName"
+              >
+                @if (isEnrolled() === true) {
+                  <div class="reply-composer">
+                    <label [for]="'reply-' + review.id">أضف ردًا</label>
+                    <textarea
+                      [id]="'reply-' + review.id"
+                      rows="3"
+                      maxlength="500"
+                      placeholder="اكتب ردًا مفيدًا…"
+                      [value]="replyDraft(review.id)"
+                      (input)="setReplyDraft(review.id, $event)"
+                    ></textarea>
+                    <div class="reply-composer-footer">
+                      <small>{{ replyDraft(review.id).length }}/500</small>
+                      <button
+                        class="zad-btn zad-btn--primary"
+                        type="button"
+                        [disabled]="
+                          replyDraft(review.id).trim().length < 2 ||
+                          pendingReplyReviewId() === review.id
+                        "
+                        (click)="submitReply(review.id)"
+                      >
+                        {{ pendingReplyReviewId() === review.id ? 'جارٍ النشر…' : 'نشر الرد' }}
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                @if (loadingRepliesId() === review.id) {
+                  <p class="replies-state" aria-live="polite">جارٍ تحميل الردود…</p>
+                } @else if (repliesFor(review.id).length === 0) {
+                  <p class="replies-state">لا توجد ردود بعد.</p>
+                } @else {
+                  <div class="replies-list">
+                    @for (reply of repliesFor(review.id); track reply.id) {
+                      <article class="reply-card">
+                        <header>
+                          @if (reply.userImage) {
+                            <img
+                              [src]="reply.userImage"
+                              [alt]="'صورة ' + reply.displayName"
+                              width="38"
+                              height="38"
+                            />
+                          } @else {
+                            <span class="reply-avatar" aria-hidden="true">{{
+                              reply.displayName.charAt(0)
+                            }}</span>
+                          }
+                          <div>
+                            <h4>{{ reply.displayName }}</h4>
+                            <time [attr.datetime]="reply.createdAt">{{
+                              reply.createdAt | date: 'd MMM y'
+                            }}</time>
+                          </div>
+                        </header>
+                        <p>{{ reply.text }}</p>
+                        <div class="reply-actions">
+                          <button
+                            type="button"
+                            class="feedback-action"
+                            [class.active]="reply.isLikedByCurrentUser"
+                            [disabled]="isEnrolled() !== true || pendingReplyLikeId() === reply.id"
+                            [attr.aria-pressed]="reply.isLikedByCurrentUser"
+                            (click)="toggleReplyLike(review.id, reply)"
+                          >
+                            <span aria-hidden="true">♥</span>
+                            {{ reply.replyLikesCount }} إعجاب
+                          </button>
+                          @if (reply.isOwnedByCurrentUser) {
+                            @if (confirmingReplyId() === reply.id) {
+                              <span class="reply-delete-confirmation">
+                                <span>متأكد؟</span>
+                                <button
+                                  type="button"
+                                  [disabled]="pendingDeleteReplyId() === reply.id"
+                                  (click)="confirmDeleteReply(review.id, reply)"
+                                >
+                                  {{ pendingDeleteReplyId() === reply.id ? 'جارٍ الحذف…' : 'احذف' }}
+                                </button>
+                                <button
+                                  type="button"
+                                  [disabled]="pendingDeleteReplyId() === reply.id"
+                                  (click)="cancelDeleteReply()"
+                                >
+                                  تراجع
+                                </button>
+                              </span>
+                            } @else {
+                              <button
+                                type="button"
+                                class="delete-reply"
+                                (click)="requestDeleteReply(reply.id)"
+                              >
+                                حذف ردي
+                              </button>
+                            }
+                          }
+                        </div>
+                      </article>
+                    }
+                  </div>
+                }
+              </section>
+            }
+          </article>
+        }
+      </div>
+    }
+  </section>
+}

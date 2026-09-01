@@ -3,6 +3,7 @@ using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications.ReplySpecifications;
+using ZadElealm.Core.Specifications;
 
 namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
 {
@@ -22,6 +23,17 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
             {
                 return new ApiResponse(404, "الرد غير موجود");
             }
+
+            var review = await _unitOfWork.Repository<Core.Models.Review>()
+                .GetEntityWithNoTrackingAsync(reply.ReviewId);
+            if (review == null)
+                return new ApiResponse(404, "المراجعة غير موجودة");
+
+            var enrollment = await _unitOfWork.Repository<Enrollment>()
+                .GetEntityWithSpecNoTrackingAsync(
+                    new EnrollmentExistsSpecification(review.CourseId, request.AppUserId));
+            if (enrollment == null)
+                return new ApiResponse(400, "يجب التسجيل في الدورة أولاً قبل الإعجاب بالرد");
 
             var spec = new ReplyLikeWithLikesSpecification(request.ReplyId, request.AppUserId);
             var exsistingLike = await _unitOfWork.Repository<ReplyLike>()

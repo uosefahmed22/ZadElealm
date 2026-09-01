@@ -18,7 +18,7 @@ namespace ZadElealm.Service.AppServices
     public class VideoProgressService : IVideoProgressService
     {
         private readonly IUnitOfWork _unitOfWork;
-        private const double COMPLETION_THRESHOLD = 0.85;
+        private const double CompletionThreshold = 0.85;
 
         public VideoProgressService(IUnitOfWork unitOfWork)
         {
@@ -27,16 +27,18 @@ namespace ZadElealm.Service.AppServices
 
         public async Task<ApiDataResponse> UpdateProgressAsync(string userId, int videoId, TimeSpan watchedDuration)
         {
+            if (string.IsNullOrWhiteSpace(userId) || videoId <= 0)
+                return new ApiDataResponse(400, null, "بيانات المستخدم أو الفيديو غير صالحة");
+
             if (watchedDuration.TotalSeconds < 0)
                 return new ApiDataResponse(400, null, "مدة المشاهدة لا يمكن أن تكون سلبية");
 
-            var videoSpec = new VideoByIdSpecification(videoId);
-            var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
+            var video = await _unitOfWork.Repository<Video>().GetEntityWithNoTrackingAsync(videoId);
 
             if (video == null)
                 return new ApiDataResponse(404, null, "الفيديو غير موجود");
 
-            if (video.CourseId <= 0)
+            if (video.CourseId <= 0 || video.VideoDuration <= TimeSpan.Zero)
                 return new ApiDataResponse(400, null, "معرف الدورة المرتبط بالفيديو غير صالح");
 
             if (watchedDuration.TotalSeconds > video.VideoDuration.TotalSeconds)
@@ -47,8 +49,8 @@ namespace ZadElealm.Service.AppServices
             var progressSpec = new VideoProgressSpecification(userId, videoId);
             var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(progressSpec);
 
-            double completionPercentage = watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds;
-            bool isCompleted = completionPercentage >= COMPLETION_THRESHOLD;
+            var completionPercentage = watchedDuration.TotalSeconds / video.VideoDuration.TotalSeconds;
+            var isCompleted = completionPercentage >= CompletionThreshold;
 
             if (progress != null)
             {
@@ -74,35 +76,30 @@ namespace ZadElealm.Service.AppServices
                 await _unitOfWork.Repository<VideoProgress>().AddAsync(progress);
             }
 
-            try
-            {
-                await _unitOfWork.Complete();
-                return new ApiDataResponse(200, progress, "تم تحديث التقدم بنجاح");
-            }
-            catch (Exception ex)
-            {
-                return new ApiDataResponse(500, null, "فشل في تحديث التقدم");
-            }
+            await _unitOfWork.Complete();
+            return new ApiDataResponse(200, progress, "تم تحديث التقدم بنجاح");
         }
         public async Task<ApiDataResponse> GetCourseProgressAsync(string userId, int courseId)
         {
-            var spec = new CourseWithVideosAndQuizzesSpecification(courseId);
-            var course = await _unitOfWork.Repository<Course>().GetEntityWithSpecAsync(spec);
+            if (string.IsNullOrWhiteSpace(userId) || courseId <= 0)
+                return new ApiDataResponse(400, null, "بيانات المستخدم أو الدورة غير صالحة");
+
+            var course = await _unitOfWork.Repository<Course>().GetEntityWithNoTrackingAsync(courseId);
 
             if (course == null)
                 return new ApiDataResponse(404, null, "الدورة غير موجودة");
 
-            var enrollmentSpec = new EnrollmentSpecification(courseId, userId);
-            var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecAsync(enrollmentSpec);
+            var enrollmentSpec = new EnrollmentExistsSpecification(courseId, userId);
+            var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecNoTrackingAsync(enrollmentSpec);
 
             if (enrollment == null)
                 return new ApiDataResponse(404, null, "المستخدم غير مسجل في هذه الدورة");
 
-            var videoProgressSpec = new VideoProgressWithSpec(userId, courseId);
-            var videoProgresses = await _unitOfWork.Repository<VideoProgress>().GetAllWithSpecNoTrackingAsync(videoProgressSpec);
-
-            var completedVideos = videoProgresses.Count(p => p.IsCompleted);
-            var totalVideos = course.Videos.Count;
+            var completedVideos = await _unitOfWork.Repository<VideoProgress>()
+                .CountAsync(new CompletedVideoProgressSpecification(userId, courseId));
+            var totalVideos = await _unitOfWork.Repository<Video>()
+                .CountAsync(new VideosByCourseSpecification(courseId));
+            completedVideos = Math.Min(completedVideos, totalVideos);
 
             var videoProgress = totalVideos > 0
                 ? ((float)completedVideos / totalVideos) * 100
@@ -133,9 +130,16 @@ namespace ZadElealm.Service.AppServices
         }
         public async Task<ApiDataResponse> GetVideoProgressAsync(string userId, int videoId)
         {
-            var spec = new VideoProgressWithSpec(userId, videoId);
-            await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(spec);
-            return new ApiDataResponse(200, spec, "تم استرجاع تقدم الفيديو بنجاح");
+            if (string.IsNullOrWhiteSpace(userId) || videoId <= 0)
+                return new ApiDataResponse(400, null, "بيانات المستخدم أو الفيديو غير صالحة");
+
+            var spec = new VideoProgressSpecification(userId, videoId);
+            var progress = await _unitOfWork.Repository<VideoProgress>()
+                .GetEntityWithSpecNoTrackingAsync(spec);
+
+            return progress == null
+                ? new ApiDataResponse(404, null, "لم يتم العثور على تقدم للفيديو")
+                : new ApiDataResponse(200, progress, "تم استرجاع تقدم الفيديو بنجاح");
         }
     }
 }

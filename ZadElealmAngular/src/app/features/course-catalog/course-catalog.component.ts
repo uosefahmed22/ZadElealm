@@ -2,7 +2,16 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Subject, catchError, map, of, startWith, switchMap } from 'rxjs';
+import {
+  Subject,
+  catchError,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  of,
+  startWith,
+  switchMap,
+} from 'rxjs';
 
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { CatalogApiService } from '../../core/catalog/catalog-api.service';
@@ -13,19 +22,22 @@ import {
   PaginatedCoursesResponse,
   PaginationMetadata,
 } from '../../core/catalog/catalog.models';
+import { CourseCardComponent } from '../../shared/components/course-card/course-card.component';
+import { LearningApiService } from '../../core/learning/learning-api.service';
 
 type CatalogLoadResult =
   { response: PaginatedCoursesResponse; error: '' } | { response: null; error: string };
 
 @Component({
   selector: 'app-course-catalog',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, CourseCardComponent],
   templateUrl: './course-catalog.component.html',
   styleUrl: './course-catalog.component.scss',
 })
 export class CourseCatalogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly catalogApi = inject(CatalogApiService);
+  private readonly learningApi = inject(LearningApiService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly reloadCourses$ = new Subject<void>();
 
@@ -36,7 +48,9 @@ export class CourseCatalogComponent implements OnInit {
   readonly categoriesError = signal('');
   readonly errorMessage = signal('');
   readonly pageNumber = signal(1);
-  readonly failedImageIds = signal<ReadonlySet<number>>(new Set<number>());
+  readonly favoriteIds = signal<ReadonlySet<number>>(new Set());
+  readonly pendingFavoriteIds = signal<ReadonlySet<number>>(new Set());
+  readonly favoriteMessage = signal('');
   readonly skeletonCards = Array.from({ length: 6 });
 
   readonly filterForm = this.formBuilder.nonNullable.group({
@@ -53,7 +67,10 @@ export class CourseCatalogComponent implements OnInit {
     if (this.isLoading()) {
       return 'جارٍ تحميل الدورات…';
     }
-    return total === 1 ? 'دورة واحدة' : `${total} دورة`;
+    const categoryCount = this.categories().length;
+    const courseLabel = total === 1 ? 'دورة واحدة' : `${total} دورة`;
+    const categoryLabel = categoryCount === 1 ? 'تصنيف واحد' : `${categoryCount} تصنيفًا`;
+    return `${courseLabel} في ${categoryLabel}`;
   });
 
   readonly visiblePages = computed(() => {
@@ -69,6 +86,7 @@ export class CourseCatalogComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadCategories();
+    this.loadFavorites();
     this.reloadCourses$
       .pipe(
         startWith(undefined),
@@ -103,6 +121,16 @@ export class CourseCatalogComponent implements OnInit {
         this.metadata.set(result.response.metaData);
         this.pageNumber.set(result.response.metaData.currentPage);
       });
+
+    this.filterForm.controls.search.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.applyFilters());
+  }
+
+  selectCategory(categoryId: number): void {
+    if (this.filterForm.controls.categoryId.value === categoryId) return;
+    this.filterForm.controls.categoryId.setValue(categoryId);
+    this.applyFilters();
   }
 
   applyFilters(): void {
@@ -136,8 +164,33 @@ export class CourseCatalogComponent implements OnInit {
     this.reloadCourses$.next();
   }
 
-  markImageFailed(courseId: number): void {
-    this.failedImageIds.update((ids) => new Set(ids).add(courseId));
+  toggleFavorite(course: CourseDto): void {
+    if (this.pendingFavoriteIds().has(course.id)) return;
+
+    const isFavorite = this.favoriteIds().has(course.id);
+    this.setFavoritePending(course.id, true);
+    this.favoriteMessage.set('');
+    const request = isFavorite
+      ? this.learningApi.removeFavorite(course.id)
+      : this.learningApi.addFavorite(course.id);
+
+    request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        const nextIds = new Set(this.favoriteIds());
+        isFavorite ? nextIds.delete(course.id) : nextIds.add(course.id);
+        this.favoriteIds.set(nextIds);
+        this.setFavoritePending(course.id, false);
+        this.favoriteMessage.set(
+          isFavorite
+            ? `تم حذف ${course.name} من المفضلة.`
+            : `تمت إضافة ${course.name} إلى المفضلة.`,
+        );
+      },
+      error: (error: unknown) => {
+        this.setFavoritePending(course.id, false);
+        this.favoriteMessage.set(normalizeApiError(error).message);
+      },
+    });
   }
 
   private loadCategories(): void {
@@ -149,6 +202,23 @@ export class CourseCatalogComponent implements OnInit {
         error: () =>
           this.categoriesError.set('تعذر تحميل التصنيفات، وما زال بإمكانك تصفح الدورات.'),
       });
+  }
+
+  private loadFavorites(): void {
+    this.learningApi
+      .getFavorites()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) =>
+          this.favoriteIds.set(new Set(response.data.courses.map((course) => course.id))),
+        error: () => this.favoriteMessage.set('تعذر تحديد الدورات المفضلة حاليًا.'),
+      });
+  }
+
+  private setFavoritePending(courseId: number, pending: boolean): void {
+    const nextIds = new Set(this.pendingFavoriteIds());
+    pending ? nextIds.add(courseId) : nextIds.delete(courseId);
+    this.pendingFavoriteIds.set(nextIds);
   }
 
   private buildFilters(): CourseCatalogFilters {

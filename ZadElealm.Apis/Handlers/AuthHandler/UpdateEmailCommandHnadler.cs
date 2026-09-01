@@ -24,6 +24,10 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
         public override async Task<ApiResponse> Handle(UpdateEmailCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
+            if (user == null)
+            {
+                return new ApiResponse(404, "المستخدم غير موجود");
+            }
 
             var isValidOtp = _otpService.IsValidOtp(request.NewEmail, request.Token);
             if (!isValidOtp)
@@ -32,6 +36,10 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
             }
 
             var oldEmail = user.Email;
+            if (string.IsNullOrWhiteSpace(oldEmail))
+            {
+                return new ApiResponse(400, "البريد الإلكتروني الحالي غير صالح");
+            }
 
             var emailMessage = new EmailMessage
             {
@@ -48,7 +56,11 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
             }
 
             user.EmailConfirmed = true;
-            await _userManager.UpdateAsync(user);
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                return new ApiResponse(400, "فشل تأكيد البريد الإلكتروني الجديد");
+            }
             var snedEmailMessage = new EmailMessage
             {
                 To = request.NewEmail,

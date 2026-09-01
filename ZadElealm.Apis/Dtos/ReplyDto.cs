@@ -9,5 +9,7 @@
         public string UserImage { get; set; }
         public DateTime CreatedAt { get; set; }
         public int ReplyLikesCount { get; set; }
+        public bool IsOwnedByCurrentUser { get; set; }
+        public bool IsLikedByCurrentUser { get; set; }
     }
 }

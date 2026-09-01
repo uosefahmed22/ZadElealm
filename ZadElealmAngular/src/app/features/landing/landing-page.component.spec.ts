@@ -4,14 +4,20 @@ import { Subject, of, throwError } from 'rxjs';
 
 import { routes } from '../../app.routes';
 import { CatalogApiService } from '../../core/catalog/catalog-api.service';
-import { PaginatedCoursesResponse } from '../../core/catalog/catalog.models';
+import { CategoryDto, PaginatedCoursesResponse } from '../../core/catalog/catalog.models';
 import { LandingPageComponent } from './landing-page.component';
 
 describe('LandingPageComponent', () => {
-  let catalogApi: { getCourses: ReturnType<typeof vi.fn> };
+  let catalogApi: {
+    getCourses: ReturnType<typeof vi.fn>;
+    getCategories: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
-    catalogApi = { getCourses: vi.fn(() => of(coursesResponse())) };
+    catalogApi = {
+      getCourses: vi.fn(() => of(coursesResponse())),
+      getCategories: vi.fn(() => of({ statusCode: 200, data: categories() })),
+    };
 
     await TestBed.configureTestingModule({
       imports: [LandingPageComponent],
@@ -31,16 +37,47 @@ describe('LandingPageComponent', () => {
     expect(headerPrimaryCtas[0].textContent.trim()).toBe('ابدأ رحلتك');
   });
 
-  it('renders API course data without invented duration, rating, author, or progress', () => {
+  it('renders API course data without invented duration or progress', () => {
     const fixture = createFixture();
     const text = fixture.nativeElement.textContent as string;
 
     expect(text).toContain('أساسيات التجويد');
     expect(text).toContain('12 درسًا');
-    expect(text).not.toContain('أحمد محمود');
-    expect(text).not.toContain('4.8');
+    expect(text).toContain('أحمد محمود');
+    expect(text).toContain('4.8');
     expect(fixture.nativeElement.querySelector('.course-progress')).toBeNull();
     expect(fixture.nativeElement.querySelector('[role="progressbar"]')).toBeNull();
+  });
+
+  it('turns a real API course video thumbnail into the hero video spotlight', () => {
+    const fixture = createFixture();
+    const spotlight = fixture.nativeElement.querySelector('.video-window') as HTMLAnchorElement;
+    const image = spotlight.querySelector('img') as HTMLImageElement;
+
+    expect(spotlight.getAttribute('href')).toBe('https://www.youtube.com/watch?v=test-video');
+    expect(spotlight.getAttribute('target')).toBe('_blank');
+    expect(image.getAttribute('src')).toBe('https://i.ytimg.com/vi/test-video/hqdefault.jpg');
+    expect(spotlight.textContent).toContain('أساسيات التجويد');
+  });
+
+  it('renders the four intended audiences and API footer categories', () => {
+    const fixture = createFixture();
+    const text = fixture.nativeElement.textContent as string;
+
+    expect(fixture.nativeElement.querySelectorAll('.audience-card')).toHaveLength(4);
+    expect(text).toContain('أطفال');
+    expect(text).toContain('القرآن الكريم');
+    expect(catalogApi.getCategories).toHaveBeenCalledOnce();
+  });
+
+  it('uses the certificate preview rendered from the backend PDF document', () => {
+    const fixture = createFixture();
+    const image = fixture.nativeElement.querySelector('.certificate-document img') as HTMLImageElement;
+
+    expect(image.getAttribute('src')).toBe('assets/brand/certificate-preview.png');
+    expect(image.getAttribute('alt')).toContain('صادرة من نظام زاد تعلم');
+    expect(image.getAttribute('loading')).toBe('lazy');
+    expect(fixture.nativeElement.textContent).not.toContain('جميع الحقوق محفوظة');
   });
 
   it('uses responsive lazy course images and a canonical YouTube srcset', () => {
@@ -53,6 +90,17 @@ describe('LandingPageComponent', () => {
     expect(image.getAttribute('height')).toBe('270');
     expect(image.getAttribute('srcset')).toContain('mqdefault.jpg 320w');
     expect(image.getAttribute('srcset')).toContain('hqdefault.jpg 480w');
+  });
+
+  it('replaces a failed external course image with the local fallback', () => {
+    const fixture = createFixture();
+    const image = fixture.nativeElement.querySelector('.course-media img') as HTMLImageElement;
+
+    image.dispatchEvent(new Event('error'));
+    fixture.detectChanges();
+
+    expect(image.getAttribute('src')).toBe('assets/brand/course-placeholder.svg');
+    expect(image.hasAttribute('srcset')).toBe(false);
   });
 
   it('shows box-matched skeleton cards while the catalog request is pending', () => {
@@ -126,6 +174,16 @@ describe('LandingPageComponent', () => {
     const rootRoute = routes.find((route) => route.path === '' && route.pathMatch === 'full');
     expect(rootRoute?.component).toBe(LandingPageComponent);
   });
+
+  it('links course discovery to the existing protected catalog route', () => {
+    const fixture = createFixture();
+    const courseLinks = Array.from(
+      fixture.nativeElement.querySelectorAll('a[routerlink="/app/courses"]'),
+    ) as HTMLAnchorElement[];
+
+    expect(courseLinks.length).toBeGreaterThanOrEqual(2);
+    expect(courseLinks.every((link) => link.getAttribute('href') === '/app/courses')).toBe(true);
+  });
 });
 
 function createFixture() {
@@ -164,4 +222,8 @@ function course(): PaginatedCoursesResponse['data'][number] {
     category: { id: 3, name: 'القرآن الكريم', description: 'دورات القرآن', imageUrl: '' },
     createdAt: '2026-01-10T00:00:00',
   };
+}
+
+function categories(): CategoryDto[] {
+  return [{ id: 3, name: 'القرآن الكريم', description: 'دورات القرآن', imageUrl: '' }];
 }

@@ -2,6 +2,7 @@
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Core.Specifications;
 
 namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
 {
@@ -20,14 +21,22 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
             if (review == null)
                 return new ApiResponse(404, "المراجعة غير موجودة");
 
-            if (string.IsNullOrWhiteSpace(request.ReplyText))
-                return new ApiResponse(400, "نص الرد مطلوب");
+            var enrollment = await _unitOfWork.Repository<Enrollment>()
+                .GetEntityWithSpecNoTrackingAsync(
+                    new EnrollmentExistsSpecification(review.CourseId, request.UserId));
+            if (enrollment == null)
+                return new ApiResponse(400, "يجب التسجيل في الدورة أولاً قبل إضافة رد");
+
+            var replyText = request.ReplyText?.Trim();
+            if (string.IsNullOrWhiteSpace(replyText) || replyText.Length < 2 || replyText.Length > 500)
+                return new ApiResponse(400, "نص الرد يجب أن يكون بين حرفين و500 حرف");
 
             var reply = new Reply
             {
-                Text = request.ReplyText.Trim(),
+                Text = replyText,
                 ReviewId = request.ReviewId,
-                AppUserId = request.UserId
+                AppUserId = request.UserId,
+                CreatedAt = DateTime.UtcNow
             };
 
             await _unitOfWork.Repository<Reply>().AddAsync(reply);
