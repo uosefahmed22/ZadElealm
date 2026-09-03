@@ -30,6 +30,7 @@ namespace ZadElealm.Apis.Middlwares
                 Title = "حدث خطأ غير متوقع.",
                 Detail = "يرجى المحاولة لاحقاً.",
                 Instance = httpContext.Request.Path
+
             };
             problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
 
