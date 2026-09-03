@@ -39,7 +39,6 @@ namespace ZadElealm.Apis.Middlwares
                 options: null,
                 contentType: "application/problem+json",
                 cancellationToken);
-
             return true;
         }
     }
