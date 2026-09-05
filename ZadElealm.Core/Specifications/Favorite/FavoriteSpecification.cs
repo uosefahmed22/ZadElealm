@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ZadElealm.Core.Models;
 
 namespace ZadElealm.Core.Specifications.Favorite
@@ -17,7 +18,10 @@ namespace ZadElealm.Core.Specifications.Favorite
         public FavoriteSpecification(string userId)
          : base(f => f.AppUserId == userId)
         {
-            Includes.Add(f => f.Course);
+            AddThenInclude(query => query
+                .Include(favorite => favorite.Course)
+                .ThenInclude(course => course.Category));
+
             OrderByDescending = f => f.CreatedAt;
         }
     }

@@ -51,6 +51,11 @@ namespace ZadElealm.Repository.Data.Datbases
             modelBuilder.Entity<Notification>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Question>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Choice>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Assessment>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<AssessmentForm>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<AssessmentQuestion>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<AssessmentChoice>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<AssessmentProgress>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<UserRank>().HasQueryFilter(userRank =>
                 !userRank.IsDeleted &&
                 !userRank.User.IsDeleted);
@@ -76,5 +81,10 @@ namespace ZadElealm.Repository.Data.Datbases
         public DbSet<Question> Question { get; set; }
         public DbSet<Choice> Choice { get; set; }
         public DbSet<UserRank> userRanks { get; set; }
+        public DbSet<Assessment> Assessments { get; set; }
+        public DbSet<AssessmentForm> AssessmentForms { get; set; }
+        public DbSet<AssessmentQuestion> AssessmentQuestions { get; set; }
+        public DbSet<AssessmentChoice> AssessmentChoices { get; set; }
+        public DbSet<AssessmentProgress> AssessmentProgresses { get; set; }
     }
 }

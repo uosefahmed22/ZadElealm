@@ -1,0 +1,38 @@
+@if (isLoading()) {
+  <section class="quiz-loading" aria-label="جارٍ تحميل الاختبار" aria-busy="true">
+    <div class="zad-skeleton skeleton-title"></div><div class="zad-skeleton skeleton-question"></div>
+  </section>
+} @else if (errorMessage() && !assessment()) {
+  <section class="state-card" role="alert"><h1>تعذر فتح الاختبار</h1><p>{{ errorMessage() }}</p><button class="zad-btn zad-btn--primary" type="button" (click)="retryLoad()">إعادة المحاولة</button></section>
+} @else if (result(); as assessmentResult) {
+  <section class="result-card" [class.passed]="assessmentResult.isCompleted">
+    <span class="eyebrow">نتيجة الاختبار</span>
+    <h1>{{ assessmentResult.isCompleted ? 'مبارك، اجتزت الاختبار بنجاح' : 'خطوة طيبة، راجع ما تعلمته وحاول مجددًا' }}</h1>
+    <div class="score-circle"><strong>{{ assessmentResult.score }}%</strong><span>درجتك</span></div>
+    <p>{{ assessmentResult.correctAnswers }} إجابة صحيحة من {{ assessmentResult.totalQuestions }}</p>
+    <div class="result-actions">
+      @if (assessmentResult.isCompleted) { <a class="zad-btn zad-btn--primary" routerLink="/app/certificates">عرض الشهادة</a> }
+      @else { <button class="zad-btn zad-btn--primary" type="button" (click)="retryAssessment()">إعادة الاختبار</button> }
+      <a class="zad-btn zad-btn--ghost" routerLink="/app/assessments">مركز الاختبارات</a>
+    </div>
+  </section>
+} @else if (assessment(); as currentAssessment) {
+  <header class="quiz-header">
+    <span class="eyebrow">اختبار التصنيف</span>
+    <h1>{{ currentAssessment.name }}</h1>
+    <p>{{ currentAssessment.description }}</p>
+    <div class="quiz-progress-copy"><span>أجبت عن {{ answeredCount() }} من {{ currentAssessment.questions.length }}</span><span>درجة النجاح {{ currentAssessment.passingScore }}%</span></div>
+    <div class="quiz-progress" role="progressbar" [attr.aria-valuemax]="currentAssessment.questions.length" [attr.aria-valuenow]="answeredCount()"><span [style.width.%]="currentAssessment.questions.length ? answeredCount() / currentAssessment.questions.length * 100 : 0"></span></div>
+  </header>
+  <form class="questions" (ngSubmit)="submit()">
+    @for (question of currentAssessment.questions; track question.id; let index = $index) {
+      <fieldset class="question-card"><legend><span>السؤال {{ index + 1 }}</span>{{ question.text }}</legend><div class="choices">
+        @for (choice of question.choices; track choice.id) {
+          <label [class.selected]="answers()[question.id] === choice.id"><input type="radio" [name]="'question-' + question.id" [value]="choice.id" [checked]="answers()[question.id] === choice.id" (change)="selectAnswer(question.id, choice.id)"/><span>{{ choice.text }}</span></label>
+        }
+      </div></fieldset>
+    }
+    @if (errorMessage()) { <div class="submit-error" role="alert">{{ errorMessage() }}</div> }
+    <div class="submit-bar"><span>{{ allAnswered() ? 'الإجابات مكتملة ويمكنك الإرسال.' : 'أجب عن كل الأسئلة لتفعيل الإرسال.' }}</span><button class="zad-btn zad-btn--primary" type="submit" [disabled]="submitDisabled()">{{ isSubmitting() ? 'جارٍ إرسال الإجابات...' : 'إرسال الإجابات' }}</button></div>
+  </form>
+}

@@ -18,6 +18,16 @@ public static class MiddlewareExtensions
         //app.UseMiddleware<SwaggerBasicAuthMiddleware>();
         app.UseStatusCodePages();
         app.UseCors("AllowSpecificOrigin");
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path.StartsWithSegments("/certificates"))
+            {
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                return;
+            }
+
+            await next();
+        });
         app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();

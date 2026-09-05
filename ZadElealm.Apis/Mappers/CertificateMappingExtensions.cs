@@ -17,10 +17,10 @@ namespace ZadElealm.Apis.Mappers
                 Id = entity.Id,
                 Name = entity.Name,
                 Description = entity.Description,
-                PdfUrl = entity.PdfUrl,
+                PdfUrl = $"/api/Certificate/{entity.Id}/file",
                 CompletedDate = entity.CreatedAt,
                 UserName = entity.User?.DisplayName,
-                QuizName = entity.Quiz?.Name
+                QuizName = entity.Assessment?.Name ?? entity.Quiz?.Name
             };
         }
 

@@ -115,7 +115,7 @@ public class LearningJourneyTests : IClassFixture<ZadElealmApiFactory>
         var certificateItems = certificates.RootElement.GetProperty("data");
         Assert.Single(certificateItems.EnumerateArray());
         Assert.Equal(
-            "https://example.test/certificates/integration-test.pdf",
+            $"/api/Certificate/{certificateItems[0].GetProperty("id").GetInt32()}/file",
             certificateItems[0].GetProperty("pdfUrl").GetString());
     }
 

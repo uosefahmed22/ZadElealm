@@ -57,17 +57,13 @@
           {{ isEnrolling() ? 'جارٍ التسجيل...' : 'سجل في الدورة' }}
         </button>
       }
-      @if (currentCourse.quizzes[0]; as quiz) {
+      @if (isEnrolled() && isFiqhCourse()) {
         @if (quizUnlocked()) {
-          <a
-            class="zad-btn zad-btn--primary"
-            [routerLink]="['/app/courses', courseId, 'quiz', quiz.id]"
-          >
-            الانتقال للاختبار
-          </a>
+          <a class="zad-btn zad-btn--primary" routerLink="/app/assessments">الانتقال لمركز الاختبارات</a>
+          <small>أكملت النسبة المطلوبة وأصبح اختبار الفقه متاحًا لك.</small>
         } @else {
-          <button class="zad-btn zad-btn--primary" type="button" disabled>الانتقال للاختبار</button>
-          <small>أكمل 80% من الدروس لفتح الاختبار</small>
+          <button class="zad-btn zad-btn--primary" type="button" disabled>اختبار الفقه</button>
+          <small>أكمل 80% من الدروس لفتح اختبار التصنيف</small>
         }
       }
     </div>

@@ -98,6 +98,20 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'assessments',
+        loadComponent: () =>
+          import('./features/assessment-center/assessment-center.component').then(
+            (component) => component.AssessmentCenterComponent,
+          ),
+      },
+      {
+        path: 'assessments/:assessmentId',
+        loadComponent: () =>
+          import('./features/assessment-exam/assessment-exam.component').then(
+            (component) => component.AssessmentExamComponent,
+          ),
+      },
+      {
         path: 'leaderboard',
         loadComponent: () =>
           import('./features/leaderboard/leaderboard.component').then(

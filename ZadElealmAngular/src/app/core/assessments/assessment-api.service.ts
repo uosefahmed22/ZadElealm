@@ -4,7 +4,16 @@ import { Observable } from 'rxjs';
 
 import { ApiDataResponseEnvelope } from '../api/api-error.models';
 import { appEnvironment } from '../config/app-environment';
-import { CertificateDto, QuizDto, QuizResultDto, QuizSubmissionDto } from './assessment.models';
+import {
+  AssessmentResultDto,
+  AssessmentSubmissionDto,
+  AssessmentSummaryDto,
+  CategoryAssessmentDto,
+  CertificateDto,
+  QuizDto,
+  QuizResultDto,
+  QuizSubmissionDto,
+} from './assessment.models';
 
 @Injectable({ providedIn: 'root' })
 export class AssessmentApiService {
@@ -21,5 +30,31 @@ export class AssessmentApiService {
 
   getCertificates(): Observable<ApiDataResponseEnvelope<CertificateDto[]>> {
     return this.http.get<ApiDataResponseEnvelope<CertificateDto[]>>(`${this.api}/Certificate/user`);
+  }
+
+  downloadCertificate(certificateId: number): Observable<Blob> {
+    return this.http.get(`${this.api}/Certificate/${certificateId}/file`, {
+      responseType: 'blob',
+    });
+  }
+
+  getAssessments(): Observable<ApiDataResponseEnvelope<AssessmentSummaryDto[]>> {
+    return this.http.get<ApiDataResponseEnvelope<AssessmentSummaryDto[]>>(`${this.api}/Assessment`);
+  }
+
+  getAssessment(assessmentId: number): Observable<ApiDataResponseEnvelope<CategoryAssessmentDto>> {
+    return this.http.get<ApiDataResponseEnvelope<CategoryAssessmentDto>>(
+      `${this.api}/Assessment/${assessmentId}`,
+    );
+  }
+
+  submitAssessment(
+    assessmentId: number,
+    payload: AssessmentSubmissionDto,
+  ): Observable<ApiDataResponseEnvelope<AssessmentResultDto>> {
+    return this.http.post<ApiDataResponseEnvelope<AssessmentResultDto>>(
+      `${this.api}/Assessment/${assessmentId}/submit`,
+      payload,
+    );
   }
 }

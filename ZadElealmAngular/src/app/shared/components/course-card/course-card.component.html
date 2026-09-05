@@ -12,11 +12,12 @@
       [alt]="'غلاف دورة ' + course().name"
       width="480"
       height="270"
-      loading="lazy"
+      [attr.loading]="imagePriority() ? 'eager' : 'lazy'"
+      [attr.fetchpriority]="imagePriority() ? 'high' : null"
       decoding="async"
       (error)="imageFailed.set(true)"
     />
-    <span class="course-category">{{ course().category.name }}</span>
+    <span class="course-category">{{ course().category?.name || 'دورة تعليمية' }}</span>
   </div>
   <div class="course-body">
     <h2>{{ course().name }}</h2>

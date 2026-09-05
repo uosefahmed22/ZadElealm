@@ -96,6 +96,10 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
   readonly quizUnlocked = computed(
     () => this.progress()?.isEligibleForQuiz ?? this.completion() >= 80,
   );
+  readonly isFiqhCourse = computed(() => {
+    const categoryName = this.course()?.category?.name?.trim();
+    return categoryName === 'الفقه' || categoryName === 'الفقه الإسلامي';
+  });
 
   readonly formatDuration = formatDuration;
 

@@ -34,4 +34,30 @@ describe('CourseCardComponent', () => {
     fixture.detectChanges();
     expect(image.getAttribute('src')).toBe('assets/brand/course-placeholder.svg');
   });
+
+  it('renders safely and uses the fallback when optional API image and category are missing', () => {
+    TestBed.configureTestingModule({
+      imports: [CourseCardComponent],
+      providers: [provideRouter([])],
+    });
+    const fixture = TestBed.createComponent(CourseCardComponent);
+    fixture.componentRef.setInput('course', {
+      id: 10,
+      name: 'دورة بلا صورة',
+      description: 'وصف الدورة',
+      author: 'المحاضر',
+      courseLanguage: 'العربية',
+      courseVideosCount: 3,
+      rating: 0,
+      imageUrl: null,
+      category: null,
+      createdAt: '2026-01-01',
+    });
+
+    expect(() => fixture.detectChanges()).not.toThrow();
+
+    const image = fixture.nativeElement.querySelector('img') as HTMLImageElement;
+    expect(image.getAttribute('src')).toBe('assets/brand/course-placeholder.svg');
+    expect(fixture.nativeElement.textContent).toContain('دورة تعليمية');
+  });
 });

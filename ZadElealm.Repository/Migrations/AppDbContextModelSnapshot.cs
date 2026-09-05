@@ -17,7 +17,7 @@ namespace ZadElealm.Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.14")
+                .HasAnnotation("ProductVersion", "8.0.30")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -155,6 +155,189 @@ namespace ZadElealm.Repository.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ZadElealm.Core.Models.Assessment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<int>("PassingScore")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Assessments_CategoryId")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("Assessments");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentChoice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AssessmentQuestionId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentQuestionId");
+
+                    b.ToTable("AssessmentChoices");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentForm", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AssessmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InternalCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentId", "InternalCode")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AssessmentForms_AssessmentId_InternalCode")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("AssessmentForms");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentProgress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AssessmentFormId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AssessmentId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentFormId");
+
+                    b.HasIndex("AssessmentId");
+
+                    b.HasIndex("AppUserId", "AssessmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AssessmentProgresses_AppUserId_AssessmentId")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("AssessmentProgresses");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AssessmentFormId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssessmentFormId");
+
+                    b.ToTable("AssessmentQuestions");
+                });
+
             modelBuilder.Entity("ZadElealm.Core.Models.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -194,6 +377,9 @@ namespace ZadElealm.Repository.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AssessmentId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -212,7 +398,7 @@ namespace ZadElealm.Repository.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("QuizId")
+                    b.Property<int?>("QuizId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -221,14 +407,19 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AssessmentId");
+
                     b.HasIndex("QuizId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "AssessmentId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Certificates_UserId_AssessmentId")
+                        .HasFilter("[IsDeleted] = 0 AND [AssessmentId] IS NOT NULL");
 
                     b.HasIndex("UserId", "QuizId")
                         .IsUnique()
                         .HasDatabaseName("UX_Certificates_UserId_QuizId")
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0 AND [QuizId] IS NOT NULL");
 
                     b.ToTable("Certificates");
                 });
@@ -551,8 +742,6 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("QuizId");
 
                     b.HasIndex("AppUserId", "QuizId")
@@ -655,14 +844,12 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
+                    b.HasIndex("courseId");
 
                     b.HasIndex("AppUserId", "courseId")
                         .IsUnique()
                         .HasDatabaseName("UX_Ratings_AppUserId_courseId")
                         .HasFilter("[IsDeleted] = 0");
-
-                    b.HasIndex("courseId");
 
                     b.ToTable("Ratings");
                 });
@@ -726,8 +913,6 @@ namespace ZadElealm.Repository.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("ReplyId");
 
@@ -810,14 +995,12 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
+                    b.HasIndex("CourseId");
 
                     b.HasIndex("AppUserId", "CourseId")
                         .IsUnique()
                         .HasDatabaseName("UX_Reviews_AppUserId_CourseId")
                         .HasFilter("[IsDeleted] = 0");
-
-                    b.HasIndex("CourseId");
 
                     b.ToTable("Reviews", (string)null);
                 });
@@ -844,8 +1027,6 @@ namespace ZadElealm.Repository.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
 
                     b.HasIndex("ReviewId");
 
@@ -1075,19 +1256,96 @@ namespace ZadElealm.Repository.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ZadElealm.Core.Models.Assessment", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Category", "Category")
+                        .WithMany("Assessments")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentChoice", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.AssessmentQuestion", "AssessmentQuestion")
+                        .WithMany("Choices")
+                        .HasForeignKey("AssessmentQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssessmentQuestion");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentForm", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Assessment", "Assessment")
+                        .WithMany("Forms")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Assessment");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentProgress", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "AppUser")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ZadElealm.Core.Models.AssessmentForm", "AssessmentForm")
+                        .WithMany("Progresses")
+                        .HasForeignKey("AssessmentFormId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ZadElealm.Core.Models.Assessment", "Assessment")
+                        .WithMany("Progresses")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Assessment");
+
+                    b.Navigation("AssessmentForm");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentQuestion", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.AssessmentForm", "AssessmentForm")
+                        .WithMany("Questions")
+                        .HasForeignKey("AssessmentFormId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssessmentForm");
+                });
+
             modelBuilder.Entity("ZadElealm.Core.Models.Certificate", b =>
                 {
+                    b.HasOne("ZadElealm.Core.Models.Assessment", "Assessment")
+                        .WithMany("Certificates")
+                        .HasForeignKey("AssessmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ZadElealm.Core.Models.Quiz", "Quiz")
                         .WithMany("Certificates")
                         .HasForeignKey("QuizId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
                         .WithMany("Certificates")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Assessment");
 
                     b.Navigation("Quiz");
 
@@ -1238,7 +1496,7 @@ namespace ZadElealm.Repository.Migrations
                     b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("AppUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("ZadElealm.Core.Models.Reply", "Reply")
@@ -1369,8 +1627,31 @@ namespace ZadElealm.Repository.Migrations
                     b.Navigation("Video");
                 });
 
+            modelBuilder.Entity("ZadElealm.Core.Models.Assessment", b =>
+                {
+                    b.Navigation("Certificates");
+
+                    b.Navigation("Forms");
+
+                    b.Navigation("Progresses");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentForm", b =>
+                {
+                    b.Navigation("Progresses");
+
+                    b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.AssessmentQuestion", b =>
+                {
+                    b.Navigation("Choices");
+                });
+
             modelBuilder.Entity("ZadElealm.Core.Models.Category", b =>
                 {
+                    b.Navigation("Assessments");
+
                     b.Navigation("Courses");
                 });
 

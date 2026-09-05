@@ -97,6 +97,7 @@ namespace ZadElealm.Repository.Data.SeedData
                     //    logger.LogInformation("Seeded UserNotifications successfully.");
                     //}
 
+                    await SeedFiqhAssessmentAsync(context, logger);
                     await transaction.CommitAsync();
                     logger.LogInformation("Database seeding completed successfully.");
                 }
@@ -107,5 +108,90 @@ namespace ZadElealm.Repository.Data.SeedData
                 }
             }
         }
+
+        private static async Task SeedFiqhAssessmentAsync(AppDbContext context, ILogger logger)
+        {
+            var fiqhCategory = context.Categories.FirstOrDefault(category =>
+                category.Name == "الفقه الإسلامي" || category.Name == "الفقه");
+            if (fiqhCategory == null)
+            {
+                logger.LogWarning("Fiqh assessment was not seeded because the Fiqh category was not found.");
+                return;
+            }
+
+            if (context.Assessments.Any(assessment => assessment.CategoryId == fiqhCategory.Id))
+                return;
+
+            var assessment = new Assessment
+            {
+                Name = "اختبار الفقه",
+                Description = "اختبار معرفي عام متاح بعد إكمال 80% من إحدى دورات الفقه.",
+                PassingScore = 60,
+                IsActive = true,
+                CategoryId = fiqhCategory.Id,
+                Forms = BuildFiqhForms()
+            };
+
+            await context.Assessments.AddAsync(assessment);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Seeded the Fiqh assessment with five internal forms.");
+        }
+
+        private static List<AssessmentForm> BuildFiqhForms()
+            =>
+            [
+                Form("FIQH-A",
+                    Question("ما المقصود بالطهارة في باب العبادات؟", "رفع الحدث وإزالة النجاسة", "تنظيف الثياب فقط", "رفع الحدث وإزالة النجاسة", "غسل اليدين فقط", "استعمال العطر"),
+                    Question("كم عدد الصلوات المفروضة في اليوم والليلة؟", "خمس صلوات", "ثلاث صلوات", "أربع صلوات", "خمس صلوات", "ست صلوات"),
+                    Question("متى يبدأ وقت الصيام اليومي؟", "من طلوع الفجر الصادق", "من شروق الشمس", "من طلوع الفجر الصادق", "من منتصف الليل", "من صلاة الظهر"),
+                    Question("الزكاة الواجبة تُصرف لمن؟", "للمستحقين الذين حددهم الشرع", "لأي شخص دون ضابط", "للأقارب فقط", "للمستحقين الذين حددهم الشرع", "للتجارة فقط"),
+                    Question("الإحرام عبادة مرتبطة أساسًا بأي نُسك؟", "الحج والعمرة", "الصلاة", "الزكاة", "الحج والعمرة", "صيام التطوع")),
+                Form("FIQH-B",
+                    Question("متى يُشرع التيمم بدل الوضوء؟", "عند فقد الماء أو تعذر استعماله", "مع وجود الماء والقدرة عليه دائمًا", "عند فقد الماء أو تعذر استعماله", "بعد كل صلاة", "قبل النوم فقط"),
+                    Question("إلى أي جهة يتوجه المسلم في الصلاة؟", "إلى القبلة", "إلى أي جهة بلا عذر", "إلى القبلة", "إلى الشرق دائمًا", "إلى موضع السجود فقط"),
+                    Question("في أي شهر يجب صيام الشهر المفروض؟", "رمضان", "محرم", "شعبان", "رمضان", "شوال"),
+                    Question("أي العبادات الآتية تتعلق بالمال؟", "الزكاة", "الصلاة", "الزكاة", "الاعتكاف", "الطواف"),
+                    Question("أين يكون الطواف في الحج والعمرة؟", "حول الكعبة", "بين الصفا والمروة", "في عرفات", "حول الكعبة", "في مزدلفة")),
+                Form("FIQH-C",
+                    Question("ما الأصل في الماء المستخدم للطهارة؟", "أن يكون طهورًا", "أن يكون ملونًا", "أن يكون ساخنًا", "أن يكون طهورًا", "أن يكون كثيرًا فقط"),
+                    Question("ما الركن الذي تتضمنه الصلاة من وضع الجبهة على الأرض؟", "السجود", "القيام", "الركوع", "السجود", "التسليم"),
+                    Question("بماذا ينتهي صيام اليوم في رمضان؟", "بغروب الشمس", "بصلاة العصر", "بمنتصف الليل", "بغروب الشمس", "بعد العشاء"),
+                    Question("ما الشرط المرتبط بوجوب الزكاة في المال الذي له نصاب؟", "بلوغ النصاب", "كثرة الإنفاق", "بلوغ النصاب", "السفر", "المرض"),
+                    Question("في أي يوم يقف الحاج بعرفة؟", "التاسع من ذي الحجة", "الأول من رمضان", "العاشر من محرم", "التاسع من ذي الحجة", "الأول من شوال")),
+                Form("FIQH-D",
+                    Question("أي مما يلي من أعمال الوضوء؟", "غسل الوجه", "غسل الثوب", "غسل الوجه", "قص الشعر", "لبس النعل"),
+                    Question("ما أول ما يدخل به المصلي في الصلاة؟", "تكبيرة الإحرام", "السجود", "التشهد", "تكبيرة الإحرام", "التسليم"),
+                    Question("من الأعذار التي تبيح الفطر في رمضان؟", "المرض الذي يشق معه الصوم", "مجرد الرغبة في الطعام", "المرض الذي يشق معه الصوم", "الانشغال بالعمل دائمًا", "السهر"),
+                    Question("ما المقصود بالنصاب في باب الزكاة؟", "القدر الذي إذا بلغه المال وجبت فيه الزكاة بشروطها", "أي مبلغ يملكه الإنسان", "القدر الذي إذا بلغه المال وجبت فيه الزكاة بشروطها", "مقدار الصدقة التطوعية", "ثمن الطعام اليومي"),
+                    Question("ما السعي في الحج والعمرة؟", "المشي بين الصفا والمروة", "الوقوف بعرفة", "المشي بين الصفا والمروة", "رمي الجمرات", "المبيت بمنى")),
+                Form("FIQH-E",
+                    Question("ما الحكم عند زوال العذر المبيح للتيمم ووجود الماء مع القدرة؟", "يعود إلى الطهارة بالماء", "يستمر في التيمم دائمًا", "يترك الصلاة", "يعود إلى الطهارة بالماء", "يؤخر كل الصلوات"),
+                    Question("بماذا تُختتم الصلاة؟", "بالتسليم", "بالأذان", "بالركوع", "بالتسليم", "بتكبيرة الإحرام"),
+                    Question("أي مما يلي يفسد الصيام إذا فُعل عمدًا بلا عذر؟", "الأكل والشرب", "النوم", "الاستحمام", "الأكل والشرب", "السواك"),
+                    Question("ما الفرق الأساسي بين الزكاة والصدقة التطوعية؟", "الزكاة واجبة بشروط والصدقة تطوع", "كلاهما واجب دائمًا", "الصدقة لا تكون بالمال", "الزكاة واجبة بشروط والصدقة تطوع", "لا فرق بينهما"),
+                    Question("ما المقصود بالوقوف بعرفة؟", "حضور الحاج بعرفة في وقته المحدد", "الطواف حول الكعبة", "حضور الحاج بعرفة في وقته المحدد", "السعي بين الصفا والمروة", "المبيت في مكة"))
+            ];
+
+        private static AssessmentForm Form(string internalCode, params AssessmentQuestion[] questions)
+            => new()
+            {
+                InternalCode = internalCode,
+                IsActive = true,
+                Questions = questions.ToList()
+            };
+
+        private static AssessmentQuestion Question(
+            string text,
+            string correctChoice,
+            params string[] choices)
+            => new()
+            {
+                Text = text,
+                Choices = choices.Select(choice => new AssessmentChoice
+                {
+                    Text = choice,
+                    IsCorrect = choice == correctChoice
+                }).ToList()
+            };
     }
 }

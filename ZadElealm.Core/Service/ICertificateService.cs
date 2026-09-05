@@ -11,5 +11,6 @@ namespace ZadElealm.Core.Service
     public interface ICertificateService
     {
         Task<ApiDataResponse> GenerateAndSaveCertificate(string userId, int quizId);
+        Task<ApiDataResponse> GenerateAndSaveAssessmentCertificate(string userId, int assessmentId);
     }
 }

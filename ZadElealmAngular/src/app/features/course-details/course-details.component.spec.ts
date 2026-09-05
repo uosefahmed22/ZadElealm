@@ -86,13 +86,16 @@ describe('CourseDetailsComponent', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('uses server progress to unlock the quiz at eighty percent', () => {
+  it('uses server progress to unlock the category assessment at eighty percent', () => {
+    const fiqhCourse = courseDetails();
+    fiqhCourse.category.name = 'الفقه';
+    learningApi.getCourse.mockReturnValue(of({ statusCode: 200, data: fiqhCourse }));
     const fixture = TestBed.createComponent(CourseDetailsComponent);
     fixture.detectChanges();
 
     expect(fixture.componentInstance.completion()).toBe(80);
     expect(fixture.componentInstance.quizUnlocked()).toBe(true);
-    expect(fixture.nativeElement.textContent).toContain('الانتقال للاختبار');
+    expect(fixture.nativeElement.textContent).toContain('الانتقال لمركز الاختبارات');
     expect(fixture.nativeElement.querySelector('.course-progress-card a')).not.toBeNull();
   });
 

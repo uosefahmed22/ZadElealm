@@ -13,6 +13,7 @@ namespace ZadElealm.Core.Specifications.Certificate
             : base(c => c.UserId == userId && c.QuizId == quizId)
         {
             Includes.Add(c => c.Quiz);
+            Includes.Add(c => c.Assessment);
             Includes.Add(c => c.User);
         }
 
@@ -21,6 +22,12 @@ namespace ZadElealm.Core.Specifications.Certificate
         {
             Includes.Add(c => c.User);
             Includes.Add(c => c.Quiz);
+            Includes.Add(c => c.Assessment);
+        }
+
+        public CertificateByUserAndQuizSpecification(int certificateId, string userId)
+            : base(c => c.Id == certificateId && c.UserId == userId)
+        {
         }
 
         public CertificateByUserAndQuizSpecification(string userId)
@@ -28,6 +35,7 @@ namespace ZadElealm.Core.Specifications.Certificate
         {
             Includes.Add(c => c.User);
             Includes.Add(c => c.Quiz);
+            Includes.Add(c => c.Assessment);
             OrderByDescending = c => c.CreatedAt;
         }
     }

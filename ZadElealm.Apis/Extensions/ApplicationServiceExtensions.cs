@@ -123,6 +123,7 @@ namespace ZadElealm.Apis.Extentions
             services.AddSingleton<ISendEmailService, SendEmailService>();
             services.AddScoped<ICertificateService, CertificateService>();
             services.AddScoped<IQuizService, QuizService>();
+            services.AddScoped<IAssessmentService, AssessmentService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVideoProgressService, VideoProgressService>();
             services.AddScoped<ICheckPasswordService, CheckPasswordService>();

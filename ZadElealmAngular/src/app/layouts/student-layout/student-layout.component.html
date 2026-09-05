@@ -192,6 +192,17 @@
 
             <nav aria-label="روابط الحساب">
               <a
+                routerLink="/app/assessments"
+                routerLinkActive="active"
+                (click)="closeAccountMenu()"
+              >
+                <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h3" />
+                  <path d="m14 16 1.5 1.5L19 14" />
+                </svg>
+                الاختبارات
+              </a>
+              <a
                 routerLink="/app/certificates"
                 routerLinkActive="active"
                 (click)="closeAccountMenu()"

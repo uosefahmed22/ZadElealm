@@ -32,7 +32,7 @@
   <section class="courses-grid" aria-label="الدورات المفضلة">
     @for (course of courses(); track course.id) {
       <div class="course-tile">
-        <app-course-card [course]="course" /><button
+        <app-course-card [course]="course" [imagePriority]="$first" /><button
           class="remove-button"
           type="button"
           [disabled]="pendingIds().has(course.id)"

@@ -30,6 +30,7 @@ describe('FavoritesComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('أساسيات التجويد');
+    expect(fixture.nativeElement.querySelector('img').getAttribute('loading')).toBe('eager');
   });
 
   it('removes a favorite and updates the empty state', () => {

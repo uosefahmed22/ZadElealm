@@ -59,3 +59,41 @@ export interface CertificateDto {
   userName: string;
   quizName: string;
 }
+
+export interface AssessmentSummaryDto {
+  id: number;
+  name: string;
+  description: string;
+  categoryName: string;
+  passingScore: number;
+  isEligible: boolean;
+  isCompleted: boolean;
+  bestScore: number | null;
+}
+
+export interface AssessmentQuestionDto {
+  id: number;
+  text: string;
+  choices: QuizChoiceDto[];
+}
+
+export interface CategoryAssessmentDto {
+  id: number;
+  name: string;
+  description: string;
+  passingScore: number;
+  questions: AssessmentQuestionDto[];
+}
+
+export interface AssessmentSubmissionDto {
+  studentAnswers: StudentAnswerDto[];
+}
+
+export interface AssessmentResultDto {
+  assessmentName: string;
+  score: number;
+  isCompleted: boolean;
+  totalQuestions: number;
+  correctAnswers: number;
+  date: string;
+}

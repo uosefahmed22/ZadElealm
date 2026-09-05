@@ -14,8 +14,11 @@ namespace ZadElealm.Core.Models
         public string Description { get; set; }
         public string PdfUrl { get; set; }
         public string UserId { get; set; }
-        public int QuizId { get; set; }
+        // Legacy course quizzes still use QuizId. Category assessments use AssessmentId.
+        public int? QuizId { get; set; }
+        public int? AssessmentId { get; set; }
         public AppUser User { get; set; }
-        public Quiz Quiz { get; set; }
+        public Quiz? Quiz { get; set; }
+        public Assessment? Assessment { get; set; }
     }
 }

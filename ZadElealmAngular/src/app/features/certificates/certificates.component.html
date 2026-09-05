@@ -4,6 +4,10 @@
   <p>الشهادات التي أصدرها السيرفر بعد اجتياز اختباراتك بنجاح.</p>
 </header>
 
+@if (fileErrorMessage()) {
+  <p class="status-message" role="alert">{{ fileErrorMessage() }}</p>
+}
+
 @if (isLoading()) {
   <div class="certificate-grid" aria-label="جارٍ تحميل الشهادات" aria-busy="true">
     @for (_ of [1, 2, 3]; track $index) {
@@ -40,12 +44,16 @@
           <h2>{{ certificate.quizName }}</h2>
           <p>{{ certificate.description }}</p>
           <time [attr.datetime]="certificate.completedDate">{{ certificate.completedDate | date: 'd MMMM y' }}</time>
-          <a
+          <button
             class="zad-btn zad-btn--primary"
-            [href]="certificateUrl(certificate.pdfUrl)"
-            target="_blank"
-            rel="noopener"
-          >تحميل الشهادة PDF</a>
+            type="button"
+            [disabled]="pendingCertificateIds().has(certificate.id)"
+            (click)="openCertificate(certificate)"
+          >
+            {{
+              pendingCertificateIds().has(certificate.id) ? 'جارٍ فتح الشهادة…' : 'عرض الشهادة PDF'
+            }}
+          </button>
         </div>
       </article>
     }

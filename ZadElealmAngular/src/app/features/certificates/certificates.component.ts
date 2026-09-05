@@ -1,12 +1,18 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { CertificateDto } from '../../core/assessments/assessment.models';
-import { appEnvironment } from '../../core/config/app-environment';
 
 @Component({
   selector: 'app-certificates',
@@ -22,6 +28,8 @@ export class CertificatesComponent implements OnInit {
   readonly certificates = signal<readonly CertificateDto[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
+  readonly fileErrorMessage = signal('');
+  readonly pendingCertificateIds = signal<ReadonlySet<number>>(new Set());
 
   ngOnInit(): void {
     this.loadCertificates();
@@ -31,10 +39,35 @@ export class CertificatesComponent implements OnInit {
     this.loadCertificates();
   }
 
-  certificateUrl(pdfUrl: string): string {
-    if (/^https?:\/\//i.test(pdfUrl)) return pdfUrl;
-    const apiOrigin = new URL(appEnvironment.apiBaseUrl).origin;
-    return new URL(pdfUrl.replace(/^\//, ''), `${apiOrigin}/`).toString();
+  openCertificate(certificate: CertificateDto): void {
+    if (this.pendingCertificateIds().has(certificate.id)) return;
+
+    const viewer = window.open('about:blank', '_blank');
+    if (!viewer) {
+      this.fileErrorMessage.set('تعذر فتح نافذة الشهادة. اسمح بالنوافذ المنبثقة ثم حاول مجددًا.');
+      return;
+    }
+
+    viewer.opener = null;
+    this.setCertificatePending(certificate.id, true);
+    this.fileErrorMessage.set('');
+
+    this.api
+      .downloadCertificate(certificate.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (pdf) => {
+          const objectUrl = URL.createObjectURL(pdf);
+          viewer.location.replace(objectUrl);
+          window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60_000);
+          this.setCertificatePending(certificate.id, false);
+        },
+        error: (error: unknown) => {
+          viewer.close();
+          this.setCertificatePending(certificate.id, false);
+          this.fileErrorMessage.set(normalizeApiError(error).message);
+        },
+      });
   }
 
   private loadCertificates(): void {
@@ -53,5 +86,11 @@ export class CertificatesComponent implements OnInit {
           this.isLoading.set(false);
         },
       });
+  }
+
+  private setCertificatePending(certificateId: number, pending: boolean): void {
+    const nextIds = new Set(this.pendingCertificateIds());
+    pending ? nextIds.add(certificateId) : nextIds.delete(certificateId);
+    this.pendingCertificateIds.set(nextIds);
   }
 }

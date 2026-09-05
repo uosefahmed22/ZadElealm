@@ -1,0 +1,60 @@
+@model AssessmentDashboardIndexViewModel
+@{
+    ViewData["Title"] = "الاختبارات";
+}
+
+<section class="page-heading assessment-page-heading">
+    <div>
+        <span class="eyebrow">المحتوى التعليمي</span>
+        <h1>مركز الاختبارات</h1>
+        <p>يدير المسؤول النماذج الداخلية، بينما يرى الطالب اختبارًا واحدًا فقط لكل تصنيف.</p>
+    </div>
+</section>
+
+@if (TempData["Success"] is string message)
+{
+    <div class="alert alert-success" role="status">@message</div>
+}
+
+@if (Model.Assessments.Count == 0)
+{
+    <section class="surface-card assessments-empty">
+        <span><i class="fas fa-file-circle-question"></i></span>
+        <h2>لا توجد اختبارات حتى الآن</h2>
+        <p>ستظهر الاختبارات هنا بعد إضافتها إلى أحد التصنيفات.</p>
+    </section>
+}
+else
+{
+    <section class="assessment-admin-grid" aria-label="الاختبارات المتاحة">
+        @foreach (var assessment in Model.Assessments)
+        {
+            <article class="surface-card assessment-admin-card">
+                <header>
+                    <span class="assessment-admin-icon"><i class="fas fa-award"></i></span>
+                    <span class="status-pill @(assessment.IsActive ? "status-active" : "status-paused")">
+                        @(assessment.IsActive ? "متاح للطلاب" : "متوقف")
+                    </span>
+                </header>
+                <span class="eyebrow">@assessment.CategoryName</span>
+                <h2>@assessment.Name</h2>
+                <p>@assessment.Description</p>
+                <dl class="assessment-admin-stats">
+                    <div><dt>النماذج الداخلية</dt><dd>@assessment.FormCount</dd></div>
+                    <div><dt>إجمالي الأسئلة</dt><dd>@assessment.QuestionCount</dd></div>
+                    <div><dt>درجة النجاح</dt><dd>@assessment.PassingScore%</dd></div>
+                </dl>
+                <footer>
+                    <a asp-action="Details" asp-route-id="@assessment.Id" class="btn btn-primary">
+                        <i class="fas fa-eye ms-2"></i>عرض النماذج
+                    </a>
+                    <form asp-action="ToggleActive" asp-route-id="@assessment.Id" method="post">
+                        <button type="submit" class="btn btn-outline-secondary">
+                            @(assessment.IsActive ? "إيقاف" : "تفعيل")
+                        </button>
+                    </form>
+                </footer>
+            </article>
+        }
+    </section>
+}

@@ -15,8 +15,8 @@ export interface CourseDto {
   courseLanguage: string;
   courseVideosCount: number;
   rating: number;
-  imageUrl: string;
-  category: CategoryDto;
+  imageUrl: string | null;
+  category: CategoryDto | null;
   createdAt: string;
 }
 

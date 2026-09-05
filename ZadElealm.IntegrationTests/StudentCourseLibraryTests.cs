@@ -188,5 +188,8 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
         Assert.Equal(1, data.GetProperty(countProperty).GetInt32());
         var course = Assert.Single(data.GetProperty("courses").EnumerateArray());
         Assert.Equal(expectedCourseId, course.GetProperty("id").GetInt32());
+        Assert.False(string.IsNullOrWhiteSpace(course.GetProperty("imageUrl").GetString()));
+        Assert.False(string.IsNullOrWhiteSpace(
+            course.GetProperty("category").GetProperty("name").GetString()));
     }
 }

@@ -1,0 +1,50 @@
+@model AssessmentDashboardDetailsViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<section class="page-heading assessment-page-heading">
+    <div>
+        <span class="eyebrow">@Model.CategoryName</span>
+        <h1>@Model.Name</h1>
+        <p>@Model.Description</p>
+    </div>
+    <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-right ms-2"></i>العودة</a>
+</section>
+
+<section class="surface-card assessment-privacy-note">
+    <i class="fas fa-eye-slash"></i>
+    <div>
+        <strong>هذه النماذج داخلية</strong>
+        <p>الطالب لا يرى عددها أو رموزها؛ يعرض له النظام اسم «@Model.Name» فقط.</p>
+    </div>
+</section>
+
+<section class="assessment-forms-list">
+    @foreach (var form in Model.Forms)
+    {
+        <details class="surface-card assessment-form-panel">
+            <summary>
+                <span><i class="fas fa-file-lines"></i>النموذج @form.InternalCode</span>
+                <small>@form.Questions.Count أسئلة · @(form.IsActive ? "فعال" : "متوقف")</small>
+            </summary>
+            <ol>
+                @foreach (var question in form.Questions)
+                {
+                    <li>
+                        <strong>@question.Text</strong>
+                        <ul>
+                            @foreach (var choice in question.Choices)
+                            {
+                                <li class="@(choice.IsCorrect ? "correct-choice" : null)">
+                                    @if (choice.IsCorrect) { <i class="fas fa-check-circle"></i> }
+                                    @choice.Text
+                                </li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ol>
+        </details>
+    }
+</section>

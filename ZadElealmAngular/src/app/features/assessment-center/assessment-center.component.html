@@ -1,0 +1,55 @@
+<header class="assessment-hero">
+  <div>
+    <span class="eyebrow">اختبر ما تعلمته</span>
+    <h1>مركز الاختبارات والشهادات</h1>
+    <p>أكمل 80% من دورة في التصنيف، ثم اجتز اختباره المعرفي لتحصل على الشهادة.</p>
+  </div>
+  <span class="hero-mark" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="M7 3h10v12H7zM9.5 7h5M9.5 10h5"/><path d="m10 15-2 6 4-2 4 2-2-6"/></svg>
+  </span>
+</header>
+
+@if (isLoading()) {
+  <section class="assessment-grid" aria-label="جارٍ تحميل الاختبارات" aria-busy="true">
+    <div class="zad-skeleton assessment-skeleton"></div>
+    <div class="zad-skeleton assessment-skeleton"></div>
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card" role="alert">
+    <h2>تعذر تحميل الاختبارات</h2>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
+} @else if (assessments().length === 0) {
+  <section class="state-card">
+    <h2>لا توجد اختبارات متاحة حاليًا</h2>
+    <p>ستظهر الاختبارات هنا عند إضافتها إلى المسارات التعليمية.</p>
+    <a class="zad-btn zad-btn--primary" routerLink="/app/courses">استكشف الدورات</a>
+  </section>
+} @else {
+  <section class="assessment-grid" aria-label="الاختبارات">
+    @for (assessment of assessments(); track assessment.id) {
+      <article class="assessment-card" [class.completed]="assessment.isCompleted">
+        <header>
+          <span class="category-label">{{ assessment.categoryName }}</span>
+          <span class="status-label">
+            {{ assessment.isCompleted ? 'تم الاجتياز' : assessment.isEligible ? 'متاح الآن' : 'غير متاح بعد' }}
+          </span>
+        </header>
+        <h2>{{ assessment.name }}</h2>
+        <p>{{ assessment.description }}</p>
+        <div class="assessment-meta">
+          <span>درجة النجاح {{ assessment.passingScore }}%</span>
+          @if (assessment.bestScore !== null) { <span>أفضل نتيجة {{ assessment.bestScore }}%</span> }
+        </div>
+        @if (assessment.isCompleted) {
+          <a class="zad-btn zad-btn--ghost" routerLink="/app/certificates">عرض الشهادة</a>
+        } @else if (assessment.isEligible) {
+          <a class="zad-btn zad-btn--primary" [routerLink]="['/app/assessments', assessment.id]">ابدأ الاختبار</a>
+        } @else {
+          <button class="zad-btn zad-btn--primary" type="button" disabled>أكمل دورة في التصنيف أولًا</button>
+        }
+      </article>
+    }
+  </section>
+}
