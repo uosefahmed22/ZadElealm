@@ -34,7 +34,9 @@ namespace ZadElealm.Apis.Extentions
                 {
                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
+            // Add Swagger/OpenAPI support
             services.AddProblemDetails();
+            // Add global exception handling middleware
             services.AddExceptionHandler<GlobalExceptionHandler>();
 
             QuestPDF.Settings.License = LicenseType.Community;
