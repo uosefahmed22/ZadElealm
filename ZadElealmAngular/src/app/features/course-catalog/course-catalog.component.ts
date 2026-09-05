@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   Subject,
   catchError,
@@ -30,7 +31,7 @@ type CatalogLoadResult =
 
 @Component({
   selector: 'app-course-catalog',
-  imports: [CommonModule, ReactiveFormsModule, CourseCardComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CourseCardComponent],
   templateUrl: './course-catalog.component.html',
   styleUrl: './course-catalog.component.scss',
 })
@@ -38,6 +39,7 @@ export class CourseCatalogComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly catalogApi = inject(CatalogApiService);
   private readonly learningApi = inject(LearningApiService);
+  private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
   private readonly reloadCourses$ = new Subject<void>();
 
@@ -50,7 +52,10 @@ export class CourseCatalogComponent implements OnInit {
   readonly pageNumber = signal(1);
   readonly favoriteIds = signal<ReadonlySet<number>>(new Set());
   readonly pendingFavoriteIds = signal<ReadonlySet<number>>(new Set());
+  readonly enrolledCourseIds = signal<ReadonlySet<number>>(new Set());
+  readonly pendingEnrollmentIds = signal<ReadonlySet<number>>(new Set());
   readonly favoriteMessage = signal('');
+  readonly enrollmentMessage = signal('');
   readonly skeletonCards = Array.from({ length: 6 });
 
   readonly filterForm = this.formBuilder.nonNullable.group({
@@ -67,11 +72,18 @@ export class CourseCatalogComponent implements OnInit {
     if (this.isLoading()) {
       return 'جارٍ تحميل الدورات…';
     }
-    const categoryCount = this.categories().length;
     const courseLabel = total === 1 ? 'دورة واحدة' : `${total} دورة`;
-    const categoryLabel = categoryCount === 1 ? 'تصنيف واحد' : `${categoryCount} تصنيفًا`;
-    return `${courseLabel} في ${categoryLabel}`;
+    return this.selectedCategory()
+      ? `${courseLabel} في ${this.selectedCategory()!.name}`
+      : `${courseLabel} في المكتبة`;
   });
+
+  readonly selectedCategory = computed(() => {
+    const categoryId = this.filterForm.controls.categoryId.value;
+    return this.categories().find((category) => category.id === categoryId) ?? null;
+  });
+
+  readonly catalogTitle = computed(() => this.selectedCategory()?.name ?? 'كل الدورات');
 
   readonly visiblePages = computed(() => {
     const metadata = this.metadata();
@@ -85,8 +97,14 @@ export class CourseCatalogComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const routeCategoryId = Number(this.route.snapshot.queryParamMap.get('categoryId'));
+    if (Number.isInteger(routeCategoryId) && routeCategoryId > 0) {
+      this.filterForm.controls.categoryId.setValue(routeCategoryId, { emitEvent: false });
+    }
+
     this.loadCategories();
     this.loadFavorites();
+    this.loadEnrollments();
     this.reloadCourses$
       .pipe(
         startWith(undefined),
@@ -127,21 +145,16 @@ export class CourseCatalogComponent implements OnInit {
       .subscribe(() => this.applyFilters());
   }
 
-  selectCategory(categoryId: number): void {
-    if (this.filterForm.controls.categoryId.value === categoryId) return;
-    this.filterForm.controls.categoryId.setValue(categoryId);
-    this.applyFilters();
-  }
-
   applyFilters(): void {
     this.pageNumber.set(1);
     this.reloadCourses$.next();
   }
 
   resetFilters(): void {
+    const categoryId = this.filterForm.controls.categoryId.value;
     this.filterForm.reset({
       search: '',
-      categoryId: 0,
+      categoryId,
       author: '',
       language: '',
       minRating: 0,
@@ -193,6 +206,29 @@ export class CourseCatalogComponent implements OnInit {
     });
   }
 
+  enroll(course: CourseDto): void {
+    if (this.enrolledCourseIds().has(course.id) || this.pendingEnrollmentIds().has(course.id)) {
+      return;
+    }
+
+    this.setEnrollmentPending(course.id, true);
+    this.enrollmentMessage.set('');
+    this.learningApi
+      .enroll(course.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.enrolledCourseIds.update((ids) => new Set(ids).add(course.id));
+          this.setEnrollmentPending(course.id, false);
+          this.enrollmentMessage.set(`تم تسجيلك في ${course.name} بنجاح.`);
+        },
+        error: (error: unknown) => {
+          this.setEnrollmentPending(course.id, false);
+          this.enrollmentMessage.set(normalizeApiError(error).message);
+        },
+      });
+  }
+
   private loadCategories(): void {
     this.catalogApi
       .getCategories()
@@ -215,10 +251,27 @@ export class CourseCatalogComponent implements OnInit {
       });
   }
 
+  private loadEnrollments(): void {
+    this.learningApi
+      .getEnrolledCourses()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) =>
+          this.enrolledCourseIds.set(new Set(response.data.courses.map((course) => course.id))),
+        error: () => this.enrollmentMessage.set('تعذر تحديد الدورات المسجل بها حاليًا.'),
+      });
+  }
+
   private setFavoritePending(courseId: number, pending: boolean): void {
     const nextIds = new Set(this.pendingFavoriteIds());
     pending ? nextIds.add(courseId) : nextIds.delete(courseId);
     this.pendingFavoriteIds.set(nextIds);
+  }
+
+  private setEnrollmentPending(courseId: number, pending: boolean): void {
+    const nextIds = new Set(this.pendingEnrollmentIds());
+    pending ? nextIds.add(courseId) : nextIds.delete(courseId);
+    this.pendingEnrollmentIds.set(nextIds);
   }
 
   private buildFilters(): CourseCatalogFilters {

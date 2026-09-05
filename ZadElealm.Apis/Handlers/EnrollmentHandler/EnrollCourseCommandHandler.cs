@@ -46,16 +46,18 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
             try
             {
                 await _unitOfWork.Repository<Enrollment>().AddAsync(enrollment);
-                await _unitOfWork.Complete();
 
-                await _notificationService.SendNotificationAsync(new NotificationServiceDto
+                var notificationResult = await _notificationService.AddNotificationAsync(new NotificationServiceDto
                 {
                     UserId = request.UserId,
                     Type = NotificationType.Enrollment,
-                    Title = "تهانينا على التسجيل!",
-                    Description = "نسأل الله أن يبارك لك في علمك وعملك. لقد تم تسجيلك بنجاح في الدورة. نتمنى لك رحلة علمية مليئة بالفائدة والنور. نسأل الله لك التوفيق والسداد."
+                    Title = $"تم تسجيلك في «{course.Name}»",
+                    Description = $"تم تسجيلك بنجاح في دورة «{course.Name}». نسأل الله أن يبارك لك في علمك وعملك، ونتمنى لك رحلة علمية مليئة بالفائدة والنور."
                 });
+                if (notificationResult.StatusCode != 200)
+                    throw new InvalidOperationException("Failed to add the enrollment notification.");
 
+                await _unitOfWork.Complete();
                 await _unitOfWork.CommitTransactionAsync();
             }
             catch

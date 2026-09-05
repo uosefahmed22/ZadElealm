@@ -39,6 +39,11 @@ namespace ZadElealm.Core.Specifications
 
             // Apply then includes
             query = specification.ThenIncludes.Aggregate(query, (current, include) => include(current));
+
+            if (specification.IsSplitQuery)
+            {
+                query = query.AsSplitQuery();
+            }
             // 4. If order by is specified apply it
 
             //6. Add pagination
@@ -46,10 +51,6 @@ namespace ZadElealm.Core.Specifications
             {
                 query = query.Skip(specification.Skip).Take(specification.Take);
             }
-
-            // 7. Apply the includes from the specification for eager loading
-            query = specification.Includes.Aggregate(query, (currentExp, includeExp)
-                => currentExp.Include(includeExp));
 
             // 8. Return the modified query
             return query;

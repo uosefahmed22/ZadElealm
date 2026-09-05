@@ -2,6 +2,7 @@
 {
     public class CourseProgressDto
     {
+        public int CourseId { get; set; }
         public float VideoProgress { get; set; }
         public float OverallProgress { get; set; }
         public int CompletedVideos { get; set; }

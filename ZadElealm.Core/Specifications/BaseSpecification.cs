@@ -21,6 +21,7 @@ namespace ZadElealm.Core.Specifications
         public int Take { get; set; }
         public int Skip { get; set; }
         public bool IsPagingEnabled { get; set; }
+        public bool IsSplitQuery { get; private set; }
 
         public BaseSpecification()
         {
@@ -34,6 +35,10 @@ namespace ZadElealm.Core.Specifications
         protected void AddThenInclude(Func<IQueryable<T>, IIncludableQueryable<T, object>> thenIncludeExpression)
         {
             ThenIncludes.Add(thenIncludeExpression);
+        }
+        protected void ApplySplitQuery()
+        {
+            IsSplitQuery = true;
         }
         public void AddOrderBy(Expression<Func<T, object>> orderBy)
         {

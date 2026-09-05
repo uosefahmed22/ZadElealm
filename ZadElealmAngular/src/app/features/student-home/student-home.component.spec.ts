@@ -20,7 +20,10 @@ describe('StudentHomeComponent', () => {
   beforeEach(async () => {
     learningApi = {
       getEnrolledCourses: vi.fn(() =>
-        of({ statusCode: 200, data: { courses: [course(1)], allEnrolledCourses: 1 } }),
+        of({
+          statusCode: 200,
+          data: { courses: [course(1)], progress: [progress(1)], allEnrolledCourses: 1 },
+        }),
       ),
       getCourseProgress: vi.fn(() =>
         of({
@@ -59,9 +62,12 @@ describe('StudentHomeComponent', () => {
     expect(text).toContain('أهلًا بك، محمد');
     expect(text).toContain('الدورة 1');
     expect(text).toContain('اختبار التجويد');
+    expect(text).toContain('شهادة اجتياز');
+    expect(text).toContain('عرض الشهادة');
     expect(text).toContain('الدورة 2');
     expect(fixture.componentInstance.ongoingCount()).toBe(1);
     expect(fixture.componentInstance.certificates()).toHaveLength(1);
+    expect(learningApi.getCourseProgress).not.toHaveBeenCalled();
   });
 
   it('renders empty states without invented statistics', () => {
@@ -69,7 +75,7 @@ describe('StudentHomeComponent', () => {
       of({
         statusCode: 200,
         message: 'لا توجد دورات مسجلة',
-        data: { courses: [], allEnrolledCourses: 0 },
+        data: { courses: [], progress: [], allEnrolledCourses: 0 },
       }),
     );
     assessmentApi.getCertificates.mockReturnValue(of({ statusCode: 200, data: [] }));
@@ -78,6 +84,27 @@ describe('StudentHomeComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('لم تسجل في أي دورة بعد');
     expect(fixture.nativeElement.textContent).toContain('لم تحصل على شهادات بعد');
+  });
+
+  it('shows only three recent courses and links to the full library', () => {
+    const courses = [course(1), course(2), course(3), course(4)];
+    learningApi.getEnrolledCourses.mockReturnValue(
+      of({
+        statusCode: 200,
+        data: {
+          courses,
+          progress: courses.map((item) => progress(item.id)),
+          allEnrolledCourses: courses.length,
+        },
+      }),
+    );
+
+    const fixture = TestBed.createComponent(StudentHomeComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.learning-card')).toHaveLength(3);
+    expect(fixture.nativeElement.textContent).toContain('عرض كل دوراتي');
+    expect(fixture.nativeElement.textContent).not.toContain('الدورة 4');
   });
 
   it('renders an actionable error state', () => {
@@ -114,6 +141,17 @@ function certificate() {
     completedDate: '2026-01-01',
     userName: 'محمد',
     quizName: 'اختبار التجويد',
+  };
+}
+function progress(courseId: number) {
+  return {
+    courseId,
+    videoProgress: 50,
+    overallProgress: 50,
+    completedVideos: 1,
+    totalVideos: 2,
+    remainingVideos: 1,
+    isEligibleForQuiz: false,
   };
 }
 function catalogResponse(data: ReturnType<typeof course>[]) {

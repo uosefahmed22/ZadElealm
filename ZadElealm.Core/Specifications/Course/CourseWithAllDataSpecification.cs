@@ -29,6 +29,8 @@ namespace ZadElealm.Core.Specifications.Course
             AddThenInclude(query => query
                 .Include(c => c.Review)
                 .ThenInclude(r => r.Likes));
+
+            ApplySplitQuery();
         }
     }
 }

@@ -5,7 +5,10 @@ import { CourseCardComponent } from './course-card.component';
 
 describe('CourseCardComponent', () => {
   it('renders a real link and falls back when the course image fails', () => {
-    TestBed.configureTestingModule({ imports: [CourseCardComponent], providers: [provideRouter([])] });
+    TestBed.configureTestingModule({
+      imports: [CourseCardComponent],
+      providers: [provideRouter([])],
+    });
     const fixture = TestBed.createComponent(CourseCardComponent);
     fixture.componentRef.setInput('course', {
       id: 9,
@@ -25,6 +28,7 @@ describe('CourseCardComponent', () => {
     const image = fixture.nativeElement.querySelector('img') as HTMLImageElement;
     expect(link.getAttribute('href')).toBe('/app/courses/9');
     expect(link.textContent).toContain('الشيخ أحمد');
+    expect(link.textContent).toContain('تفاصيل الدورة');
 
     image.dispatchEvent(new Event('error'));
     fixture.detectChanges();

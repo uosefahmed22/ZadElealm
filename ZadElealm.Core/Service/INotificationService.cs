@@ -10,6 +10,7 @@ namespace ZadElealm.Core.Service
 {
     public interface INotificationService
     {
+        Task<ApiDataResponse> AddNotificationAsync(NotificationServiceDto notificationServiceDto);
         Task<ApiDataResponse> SendNotificationAsync(NotificationServiceDto notificationServiceDto);
     }
 }

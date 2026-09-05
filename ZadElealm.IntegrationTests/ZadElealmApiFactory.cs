@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -56,7 +57,10 @@ namespace ZadElealm.IntegrationTests
                 services.RemoveAll<ICertificateService>();
                 services.RemoveAll<IOtpService>();
                 services.RemoveAll<IImageService>();
-                services.AddDbContext<AppDbContext>(options => options.UseSqlite(_connection));
+                services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(_connection)
+                        .ConfigureWarnings(warnings => warnings.Throw(
+                            RelationalEventId.MultipleCollectionIncludeWarning)));
                 services.AddSingleton<ISendEmailService, SuccessfulEmailService>();
                 services.AddScoped<ICertificateService, SuccessfulCertificateService>();
                 services.AddSingleton<IOtpService, DeterministicOtpService>();

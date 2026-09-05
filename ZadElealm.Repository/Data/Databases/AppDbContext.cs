@@ -28,6 +28,19 @@ namespace ZadElealm.Repository.Data.Datbases
             modelBuilder.Entity<Favorite>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Rating>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Review>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<Reply>().HasQueryFilter(reply =>
+                !reply.IsDeleted &&
+                !reply.Review.IsDeleted &&
+                !reply.User.IsDeleted);
+            modelBuilder.Entity<ReplyLike>().HasQueryFilter(replyLike =>
+                !replyLike.IsDeleted &&
+                !replyLike.Reply.IsDeleted &&
+                !replyLike.Reply.Review.IsDeleted &&
+                !replyLike.User.IsDeleted);
+            modelBuilder.Entity<ReviewLike>().HasQueryFilter(reviewLike =>
+                !reviewLike.IsDeleted &&
+                !reviewLike.Review.IsDeleted &&
+                !reviewLike.User.IsDeleted);
             modelBuilder.Entity<Report>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Progress>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<UserNotification>().HasQueryFilter(u => !u.IsDeleted);
@@ -38,6 +51,9 @@ namespace ZadElealm.Repository.Data.Datbases
             modelBuilder.Entity<Notification>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Question>().HasQueryFilter(u => !u.IsDeleted);
             modelBuilder.Entity<Choice>().HasQueryFilter(u => !u.IsDeleted);
+            modelBuilder.Entity<UserRank>().HasQueryFilter(userRank =>
+                !userRank.IsDeleted &&
+                !userRank.User.IsDeleted);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
         public DbSet<Category> Categories { get; set; }

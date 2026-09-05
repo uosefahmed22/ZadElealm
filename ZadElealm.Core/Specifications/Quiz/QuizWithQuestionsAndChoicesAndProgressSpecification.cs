@@ -12,13 +12,13 @@ namespace ZadElealm.Core.Specifications.Quiz
     {
         public QuizWithQuestionsAndChoicesAndProgressSpecification(int quizId) : base(x => x.Id == quizId)
         {
-            Includes.Add(q => q.Progresses);
-            Includes.Add(q => q.Questions);
             Includes.Add(Includes => Includes.Course);
 
             AddThenInclude(query => query
                 .Include(q => q.Questions)
                 .ThenInclude(question => question.Choices));
+
+            ApplySplitQuery();
         }
     }
 }

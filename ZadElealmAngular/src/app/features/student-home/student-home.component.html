@@ -1,43 +1,192 @@
 @if (isLoading()) {
   <section class="dashboard-loading" aria-label="جارٍ تحميل لوحة الطالب" aria-busy="true">
     <div class="zad-skeleton skeleton-welcome"></div>
-    <div class="summary-grid">@for (_ of [1, 2, 3]; track $index) { <div class="zad-skeleton skeleton-summary"></div> }</div>
+    <div class="summary-grid">
+      @for (_ of [1, 2, 3]; track $index) {
+        <div class="zad-skeleton skeleton-summary"></div>
+      }
+    </div>
     <div class="zad-skeleton skeleton-section"></div>
   </section>
 } @else if (errorMessage()) {
-  <section class="state-card" role="alert"><h1>تعذر تحميل مساحة التعلم</h1><p>{{ errorMessage() }}</p><button class="zad-btn zad-btn--primary" type="button" (click)="retry()">إعادة المحاولة</button></section>
+  <section class="state-card" role="alert">
+    <h1>تعذر تحميل مساحة التعلم</h1>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
 } @else {
-  <header class="welcome-card"><span class="eyebrow">مساحة التعلّم</span><h1>أهلًا بك، {{ session.user()?.displayName }}</h1><p>واصل رحلتك من آخر نقطة، أو اختر مسارًا جديدًا من مكتبة المنصة.</p></header>
+  <header class="welcome-card">
+    <div>
+      <span class="eyebrow">مساحة التعلّم</span>
+      <h1>أهلًا بك، {{ session.user()?.displayName }}</h1>
+      <p>واصل رحلتك من آخر نقطة، أو اختر مسارًا جديدًا من مكتبة المنصة.</p>
+    </div>
+    <a class="welcome-action" routerLink="/app/my-courses">اذهب إلى دوراتي</a>
+  </header>
 
   <section class="summary-grid" aria-label="ملخص التعلم">
-    <article><span>دورات جارية</span><strong>{{ ongoingCount() }}</strong></article>
-    <article><span>دورات مكتملة</span><strong>{{ completedCount() }}</strong></article>
-    <article><span>شهادات</span><strong>{{ certificates().length }}</strong></article>
+    <article>
+      <span>دورات جارية</span>
+      <strong>{{ ongoingCount() }}</strong>
+      <small>يمكنك استئنافها الآن</small>
+    </article>
+    <article>
+      <span>دورات مكتملة</span>
+      <strong>{{ completedCount() }}</strong>
+      <small>أنهيت جميع دروسها</small>
+    </article>
+    <article>
+      <span>شهادات</span>
+      <strong>{{ certificates().length }}</strong>
+      <small>شهادات صادرة باسمك</small>
+    </article>
   </section>
 
   <section class="dashboard-section" aria-labelledby="continue-title">
-    <div class="section-heading"><div><span class="eyebrow">دوراتك</span><h2 id="continue-title">متابعة التعلم</h2></div><a routerLink="/app/courses">استكشف الدورات</a></div>
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">دوراتك</span>
+        <h2 id="continue-title">متابعة التعلّم</h2>
+      </div>
+      @if (enrolledCourses().length > 3) {
+        <a routerLink="/app/my-courses">عرض كل دوراتي</a>
+      } @else {
+        <a routerLink="/app/courses">استكشف الدورات</a>
+      }
+    </div>
+
     @if (enrolledCourses().length === 0) {
-      <div class="inline-empty"><p>لم تسجل في أي دورة بعد.</p><a class="zad-btn zad-btn--primary" routerLink="/app/courses">ابدأ بدورة</a></div>
+      <div class="inline-empty">
+        <p>لم تسجل في أي دورة بعد.</p>
+        <a class="zad-btn zad-btn--primary" routerLink="/app/courses">ابدأ بدورة</a>
+      </div>
     } @else {
-      <div class="learning-grid">@for (item of enrolledCourses(); track item.course.id) {
-        <article class="learning-card"><div><span class="eyebrow">{{ item.course.category.name }}</span><h3>{{ item.course.name }}</h3><p>{{ item.course.author }}</p></div>
-          <div class="course-progress" role="progressbar" aria-label="تقدم الدورة" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="item.progress?.overallProgress ?? 0"><span [style.width.%]="item.progress?.overallProgress ?? 0"></span></div>
-          <footer><span>{{ item.progress ? (item.progress.overallProgress | number: '1.0-0') + '%' : 'التقدم غير متاح' }}</span><a [routerLink]="['/app/courses', item.course.id]">استئناف</a></footer>
-        </article>
-      }</div>
+      <div class="learning-grid">
+        @for (item of visibleEnrolledCourses(); track item.course.id) {
+          <article class="learning-card">
+            <a
+              class="learning-media"
+              [routerLink]="['/app/courses', item.course.id]"
+              [attr.aria-label]="'فتح دورة ' + item.course.name"
+            >
+              <img
+                [src]="courseImage(item.course)"
+                [alt]="'غلاف دورة ' + item.course.name"
+                width="480"
+                height="270"
+                loading="lazy"
+                decoding="async"
+                (error)="markCourseImageFailed(item.course.id)"
+              />
+              <span>{{ courseCategoryName(item.course) }}</span>
+            </a>
+
+            <div class="learning-copy">
+              <div class="course-meta">
+                <span>{{ item.course.author }}</span>
+                <span>{{ item.course.courseVideosCount }} درسًا</span>
+              </div>
+              <h3>{{ item.course.name }}</h3>
+
+              <div class="progress-copy">
+                <span>التقدم</span>
+                <strong>
+                  {{
+                    item.progress
+                      ? (item.progress.overallProgress | number: '1.0-0') + '%'
+                      : 'غير متاح'
+                  }}
+                </strong>
+              </div>
+              <div
+                class="course-progress"
+                role="progressbar"
+                aria-label="تقدم الدورة"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                [attr.aria-valuenow]="item.progress?.overallProgress ?? 0"
+              >
+                <span [style.width.%]="item.progress?.overallProgress ?? 0"></span>
+              </div>
+
+              <footer>
+                @if (item.progress) {
+                  <span>
+                    {{ item.progress.completedVideos }} من {{ item.progress.totalVideos }} دروس
+                  </span>
+                } @else {
+                  <span>تعذر تحميل تفاصيل التقدم</span>
+                }
+                <a class="resume-link" [routerLink]="['/app/courses', item.course.id]">
+                  استئناف التعلّم
+                </a>
+              </footer>
+            </div>
+          </article>
+        }
+      </div>
     }
   </section>
 
   <section class="dashboard-section" aria-labelledby="certificates-title">
-    <div class="section-heading"><div><span class="eyebrow">إنجازاتك</span><h2 id="certificates-title">شهاداتي</h2></div><a routerLink="/app/certificates">عرض كل الشهادات</a></div>
-    @if (certificates().length === 0) { <div class="inline-empty"><p>لم تحصل على شهادات بعد.</p></div> }
-    @else { <div class="mini-certificates">@for (certificate of certificates().slice(0, 3); track certificate.id) { <article><span aria-hidden="true">✓</span><div><h3>{{ certificate.quizName }}</h3><time [attr.datetime]="certificate.completedDate">{{ certificate.completedDate | date: 'd MMMM y' }}</time></div></article> }</div> }
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">إنجازاتك</span>
+        <h2 id="certificates-title">شهاداتي</h2>
+      </div>
+      <a routerLink="/app/certificates">عرض كل الشهادات</a>
+    </div>
+    @if (certificates().length === 0) {
+      <div class="inline-empty"><p>لم تحصل على شهادات بعد.</p></div>
+    } @else {
+      <div class="mini-certificates">
+        @for (certificate of certificates().slice(0, 3); track certificate.id) {
+          <article class="achievement-card">
+            <span class="achievement-medal" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="12" cy="9" r="5" />
+                <path d="m9 13-2 8 5-2 5 2-2-8" />
+                <path d="m10.2 9 1.2 1.2L14 7.6" />
+              </svg>
+            </span>
+            <div class="achievement-copy">
+              <span>شهادة اجتياز</span>
+              <h3>{{ certificate.quizName }}</h3>
+              <time [attr.datetime]="certificate.completedDate">
+                {{ certificate.completedDate | date: 'd MMMM y' }}
+              </time>
+            </div>
+            <a
+              routerLink="/app/certificates"
+              [attr.aria-label]="'عرض شهادة ' + certificate.quizName"
+            >
+              <span>عرض الشهادة</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true">
+                <path d="M4 10h12M9 5l-5 5 5 5" />
+              </svg>
+            </a>
+          </article>
+        }
+      </div>
+    }
   </section>
 
   <section class="dashboard-section" aria-labelledby="suggested-title">
-    <div class="section-heading"><div><span class="eyebrow">من المكتبة</span><h2 id="suggested-title">دورات مقترحة</h2></div></div>
-    @if (suggestedCourses().length === 0) { <div class="inline-empty"><p>لا توجد اقتراحات جديدة حاليًا.</p></div> }
-    @else { <div class="suggested-grid">@for (course of suggestedCourses(); track course.id) { <app-course-card [course]="course" /> }</div> }
+    <div class="section-heading">
+      <div>
+        <span class="eyebrow">من المكتبة</span>
+        <h2 id="suggested-title">دورات مقترحة</h2>
+      </div>
+      <a routerLink="/app/courses">عرض المكتبة</a>
+    </div>
+    @if (suggestedCourses().length === 0) {
+      <div class="inline-empty"><p>لا توجد اقتراحات جديدة حاليًا.</p></div>
+    } @else {
+      <div class="suggested-grid">
+        @for (course of suggestedCourses(); track course.id) {
+          <app-course-card [course]="course" />
+        }
+      </div>
+    }
   </section>
 }

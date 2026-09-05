@@ -2,7 +2,8 @@
 {
     public class AllEnrollementData
     {
-        public IEnumerable<CourseDto> Courses { get; set; } = [];
+        public IReadOnlyList<CourseDto> Courses { get; set; } = [];
+        public IReadOnlyList<CourseProgressDto> Progress { get; set; } = [];
         public int AllEnrolledCourses { get; set; }
     }
 }

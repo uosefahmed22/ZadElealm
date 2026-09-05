@@ -21,7 +21,7 @@ namespace ZadElealm.Service.AppServices
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<ApiDataResponse> SendNotificationAsync(NotificationServiceDto notificationServiceDto)
+        public async Task<ApiDataResponse> AddNotificationAsync(NotificationServiceDto notificationServiceDto)
         {
             if (notificationServiceDto == null || string.IsNullOrWhiteSpace(notificationServiceDto.UserId) ||
                 string.IsNullOrWhiteSpace(notificationServiceDto.Title) ||
@@ -45,9 +45,18 @@ namespace ZadElealm.Service.AppServices
             notification.UserNotifications.Add(userNotification);
 
             await _unitOfWork.Repository<Notification>().AddAsync(notification);
-            await _unitOfWork.Complete();
 
             return new ApiDataResponse(200, null, "تم إرسال الإشعار بنجاح");
+        }
+
+        public async Task<ApiDataResponse> SendNotificationAsync(NotificationServiceDto notificationServiceDto)
+        {
+            var result = await AddNotificationAsync(notificationServiceDto);
+            if (result.StatusCode != 200)
+                return result;
+
+            await _unitOfWork.Complete();
+            return result;
         }
     }
 }

@@ -9,8 +9,6 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
-
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { CourseDto } from '../../core/catalog/catalog.models';
 import { LearningApiService } from '../../core/learning/learning-api.service';
@@ -56,6 +54,10 @@ export class MyCoursesComponent implements OnInit {
     this.confirmingCourseId.set(null);
   }
 
+  courseCategoryName(course: CourseDto): string {
+    return course.category?.name || 'دورة تعليمية';
+  }
+
   confirmUnenroll(item: EnrolledCourseView): void {
     if (this.pendingCourseId() !== null) return;
 
@@ -87,32 +89,22 @@ export class MyCoursesComponent implements OnInit {
       .getEnrolledCourses()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (response) => this.loadProgress(response.data.courses),
+        next: (response) => {
+          const progressByCourse = new Map(
+            (response.data.progress ?? []).map((item) => [item.courseId, item]),
+          );
+          this.courses.set(
+            response.data.courses.map((course) => ({
+              course,
+              progress: progressByCourse.get(course.id) ?? null,
+            })),
+          );
+          this.isLoading.set(false);
+        },
         error: (error: unknown) => {
           this.isLoading.set(false);
           this.errorMessage.set(normalizeApiError(error).message);
         },
-      });
-  }
-
-  private loadProgress(courses: CourseDto[]): void {
-    if (courses.length === 0) {
-      this.courses.set([]);
-      this.isLoading.set(false);
-      return;
-    }
-
-    forkJoin(
-      courses.map((course) =>
-        this.learningApi.getCourseProgress(course.id).pipe(catchError(() => of(null))),
-      ),
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((progressItems) => {
-        this.courses.set(
-          courses.map((course, index) => ({ course, progress: progressItems[index] ?? null })),
-        );
-        this.isLoading.set(false);
       });
   }
 }

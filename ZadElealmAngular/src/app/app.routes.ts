@@ -53,6 +53,13 @@ export const routes: Routes = [
       {
         path: 'courses',
         loadComponent: () =>
+          import('./features/course-categories/course-categories.component').then(
+            (component) => component.CourseCategoriesComponent,
+          ),
+      },
+      {
+        path: 'courses/catalog',
+        loadComponent: () =>
           import('./features/course-catalog/course-catalog.component').then(
             (component) => component.CourseCatalogComponent,
           ),

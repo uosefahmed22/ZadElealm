@@ -38,6 +38,7 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
 
             return new CourseProgressDto
             {
+                CourseId = request.CourseId,
                 VideoProgress = videoProgress,
                 OverallProgress = videoProgress,
                 CompletedVideos = completedVideos,

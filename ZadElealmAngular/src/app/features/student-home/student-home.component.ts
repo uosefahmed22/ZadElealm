@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { catchError, forkJoin, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
@@ -42,8 +42,10 @@ export class StudentHomeComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly enrolledCourses = signal<readonly DashboardCourse[]>([]);
+  readonly visibleEnrolledCourses = computed(() => this.enrolledCourses().slice(0, 3));
   readonly certificates = signal<readonly CertificateDto[]>([]);
   readonly suggestedCourses = signal<readonly CourseDto[]>([]);
+  readonly failedCourseImages = signal<ReadonlySet<number>>(new Set());
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly ongoingCount = computed(
@@ -60,6 +62,20 @@ export class StudentHomeComponent implements OnInit {
   }
   retry(): void {
     this.loadDashboard();
+  }
+
+  courseCategoryName(course: CourseDto): string {
+    return course.category?.name || 'دورة تعليمية';
+  }
+
+  courseImage(course: CourseDto): string {
+    return !course.imageUrl || this.failedCourseImages().has(course.id)
+      ? 'assets/brand/course-placeholder.svg'
+      : course.imageUrl;
+  }
+
+  markCourseImageFailed(courseId: number): void {
+    this.failedCourseImages.update((ids) => new Set(ids).add(courseId));
   }
 
   private loadDashboard(): void {
@@ -84,37 +100,27 @@ export class StudentHomeComponent implements OnInit {
       .subscribe({
         next: ({ enrolled, certificates, suggested }) => {
           const courses = enrolled.data.courses;
+          const progressByCourse = new Map(
+            (enrolled.data.progress ?? []).map((item) => [item.courseId, item]),
+          );
+
+          this.enrolledCourses.set(
+            courses.map((course) => ({
+              course,
+              progress: progressByCourse.get(course.id) ?? null,
+            })),
+          );
           this.certificates.set(certificates.data);
           const enrolledIds = new Set(courses.map((course) => course.id));
           this.suggestedCourses.set(
             suggested.data.filter((course) => !enrolledIds.has(course.id)).slice(0, 3),
           );
-          this.loadCourseProgress(courses);
+          this.isLoading.set(false);
         },
         error: (error: unknown) => {
           this.isLoading.set(false);
           this.errorMessage.set(normalizeApiError(error).message);
         },
-      });
-  }
-
-  private loadCourseProgress(courses: CourseDto[]): void {
-    if (courses.length === 0) {
-      this.enrolledCourses.set([]);
-      this.isLoading.set(false);
-      return;
-    }
-    forkJoin(
-      courses.map((course) =>
-        this.learningApi.getCourseProgress(course.id).pipe(catchError(() => of(null))),
-      ),
-    )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((progressItems) => {
-        this.enrolledCourses.set(
-          courses.map((course, index) => ({ course, progress: progressItems[index] ?? null })),
-        );
-        this.isLoading.set(false);
       });
   }
 }

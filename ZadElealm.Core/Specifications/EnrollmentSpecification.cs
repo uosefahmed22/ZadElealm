@@ -23,7 +23,11 @@ namespace ZadElealm.Core.Specifications
         public EnrollmentSpecification(string userId)
             : base(x => x.AppUserId == userId)
         {
-            Includes.Add(x => x.Course);
+            AddThenInclude(query => query
+                .Include(enrollment => enrollment.Course)
+                .ThenInclude(course => course.Category));
+
+            AddOrderByDescending(enrollment => enrollment.CreatedAt);
         }
     }
 }

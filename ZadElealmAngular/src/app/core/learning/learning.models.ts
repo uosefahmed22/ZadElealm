@@ -63,6 +63,7 @@ export interface CourseDetailsDto {
 }
 
 export interface CourseProgressDto {
+  courseId: number;
   videoProgress: number;
   overallProgress: number;
   completedVideos: number;
@@ -85,6 +86,7 @@ export interface VideoProgressDto {
 
 export interface EnrolledCoursesData {
   courses: CourseDto[];
+  progress: CourseProgressDto[];
   allEnrolledCourses: number;
 }
 

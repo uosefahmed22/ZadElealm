@@ -90,7 +90,8 @@ namespace AdminDashboard.Extentions
         {
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(SqlServerConnectionString.WithoutMultipleActiveResultSets(
+                    configuration.GetConnectionString("DefaultConnection")));
             });
         }
 

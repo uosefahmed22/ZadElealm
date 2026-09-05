@@ -1,32 +1,14 @@
 <section class="catalog-heading" aria-labelledby="catalog-title">
   <div>
     <span class="eyebrow">مكتبة زاد تعلم</span>
-    <h1 id="catalog-title">المسارات التعليمية</h1>
-    <p>اختر التصنيف المناسب وابحث في الدورات المتاحة من المنصة مباشرة.</p>
+    <h1 id="catalog-title">{{ catalogTitle() }}</h1>
+    <p>ابحث وفلتر الدورات المتاحة داخل التصنيف الذي اخترته.</p>
   </div>
-  <div class="result-count" aria-live="polite">{{ resultSummary() }}</div>
+  <div class="catalog-heading-actions">
+    <div class="result-count" aria-live="polite">{{ resultSummary() }}</div>
+    <a class="catalog-back" routerLink="/app/courses">تغيير التصنيف</a>
+  </div>
 </section>
-
-<nav class="category-strip" aria-label="تصنيفات الدورات">
-  <button
-    type="button"
-    [class.active]="filterForm.controls.categoryId.value === 0"
-    [attr.aria-pressed]="filterForm.controls.categoryId.value === 0"
-    (click)="selectCategory(0)"
-  >
-    الكل
-  </button>
-  @for (category of categories(); track category.id) {
-    <button
-      type="button"
-      [class.active]="filterForm.controls.categoryId.value === category.id"
-      [attr.aria-pressed]="filterForm.controls.categoryId.value === category.id"
-      (click)="selectCategory(category.id)"
-    >
-      {{ category.name }}
-    </button>
-  }
-</nav>
 
 <form class="filters" [formGroup]="filterForm" (ngSubmit)="applyFilters()">
   <div class="field field-search">
@@ -81,6 +63,9 @@
 @if (favoriteMessage()) {
   <p class="favorite-message" role="status">{{ favoriteMessage() }}</p>
 }
+@if (enrollmentMessage()) {
+  <p class="enrollment-message" role="status">{{ enrollmentMessage() }}</p>
+}
 
 @if (isLoading()) {
   <div class="courses-grid" aria-label="جارٍ تحميل الدورات" aria-busy="true">
@@ -108,29 +93,45 @@
     <img src="assets/icons/book-open.svg" alt="" width="44" height="44" />
     <h2>لا توجد دورات في هذا التصنيف حاليًا</h2>
     <p>اختر تصنيفًا آخر أو اعرض كل الدورات المتاحة.</p>
-    <button class="button button-primary" type="button" (click)="selectCategory(0)">
-      عرض كل الدورات
-    </button>
+    <a class="button button-primary" routerLink="/app/courses/catalog">عرض كل الدورات</a>
   </section>
 } @else {
   <div class="courses-grid">
     @for (course of courses(); track course.id) {
       <div class="course-tile">
-        <app-course-card [course]="course" />
         <button
-          class="favorite-button"
+          class="favorite-heart"
           type="button"
           [class.active]="favoriteIds().has(course.id)"
           [disabled]="pendingFavoriteIds().has(course.id)"
           [attr.aria-pressed]="favoriteIds().has(course.id)"
+          [attr.aria-label]="
+            favoriteIds().has(course.id)
+              ? 'إزالة ' + course.name + ' من المفضلة'
+              : 'إضافة ' + course.name + ' إلى المفضلة'
+          "
           (click)="toggleFavorite(course)"
         >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"
+            />
+          </svg>
+        </button>
+        <app-course-card [course]="course" />
+        <button
+          class="enroll-button"
+          type="button"
+          [class.enrolled]="enrolledCourseIds().has(course.id)"
+          [disabled]="enrolledCourseIds().has(course.id) || pendingEnrollmentIds().has(course.id)"
+          (click)="enroll(course)"
+        >
           {{
-            pendingFavoriteIds().has(course.id)
-              ? 'جارٍ التحديث…'
-              : favoriteIds().has(course.id)
-                ? 'إزالة من المفضلة'
-                : 'إضافة إلى المفضلة'
+            pendingEnrollmentIds().has(course.id)
+              ? 'جارٍ التسجيل…'
+              : enrolledCourseIds().has(course.id)
+                ? 'مسجل بالفعل'
+                : 'التسجيل في الدورة'
           }}
         </button>
       </div>

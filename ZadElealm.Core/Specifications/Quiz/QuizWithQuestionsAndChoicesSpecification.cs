@@ -9,6 +9,8 @@ namespace ZadElealm.Core.Specifications.Quiz
             AddThenInclude(query => query
                 .Include(q => q.Questions)
                 .ThenInclude(q => q.Choices));
+
+            ApplySplitQuery();
         }
     }
 }

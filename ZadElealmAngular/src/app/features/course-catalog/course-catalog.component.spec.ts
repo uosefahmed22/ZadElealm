@@ -19,6 +19,8 @@ describe('CourseCatalogComponent', () => {
   };
   let learningApi: {
     getFavorites: ReturnType<typeof vi.fn>;
+    getEnrolledCourses: ReturnType<typeof vi.fn>;
+    enroll: ReturnType<typeof vi.fn>;
     addFavorite: ReturnType<typeof vi.fn>;
     removeFavorite: ReturnType<typeof vi.fn>;
   };
@@ -32,6 +34,10 @@ describe('CourseCatalogComponent', () => {
       getFavorites: vi.fn(() =>
         of({ statusCode: 200, data: { courses: [], allFavoriteCourses: 0 } }),
       ),
+      getEnrolledCourses: vi.fn(() =>
+        of({ statusCode: 200, data: { courses: [], progress: [], allEnrolledCourses: 0 } }),
+      ),
+      enroll: vi.fn(() => of({ statusCode: 200 })),
       addFavorite: vi.fn(() => of({ statusCode: 200 })),
       removeFavorite: vi.fn(() => of({ statusCode: 200 })),
     };
@@ -122,12 +128,13 @@ describe('CourseCatalogComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('إعادة المحاولة');
   });
 
-  it('debounces search for 300ms and keeps the selected category', () => {
+  it('debounces search for 300ms and keeps the route category', () => {
     vi.useFakeTimers();
     const fixture = TestBed.createComponent(CourseCatalogComponent);
     fixture.detectChanges();
     const component = fixture.componentInstance;
-    component.selectCategory(3);
+    component.filterForm.controls.categoryId.setValue(3);
+    component.applyFilters();
     const callsAfterCategory = catalogApi.getCourses.mock.calls.length;
 
     component.filterForm.controls.search.setValue('تجويد');
@@ -153,6 +160,28 @@ describe('CourseCatalogComponent', () => {
     component.toggleFavorite(selectedCourse);
     expect(learningApi.removeFavorite).toHaveBeenCalledWith(selectedCourse.id);
     expect(component.favoriteIds().has(selectedCourse.id)).toBe(false);
+  });
+
+  it('uses enrollment as the primary card action and disables it after success', () => {
+    const fixture = TestBed.createComponent(CourseCatalogComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    const selectedCourse = coursesResponse().data[0];
+    const enrollButton = fixture.nativeElement.querySelector('.enroll-button') as HTMLButtonElement;
+    const favoriteButton = fixture.nativeElement.querySelector(
+      '.favorite-heart',
+    ) as HTMLButtonElement;
+
+    expect(enrollButton.textContent).toContain('التسجيل في الدورة');
+    expect(favoriteButton.getAttribute('aria-label')).toContain('إضافة أساسيات التجويد');
+
+    enrollButton.click();
+    fixture.detectChanges();
+
+    expect(learningApi.enroll).toHaveBeenCalledWith(selectedCourse.id);
+    expect(component.enrolledCourseIds().has(selectedCourse.id)).toBe(true);
+    expect(enrollButton.textContent).toContain('مسجل بالفعل');
+    expect(enrollButton.disabled).toBe(true);
   });
 });
 

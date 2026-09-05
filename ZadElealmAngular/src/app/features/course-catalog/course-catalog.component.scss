@@ -39,34 +39,20 @@ h1 {
   font-weight: 800;
 }
 
-.category-strip {
-  margin-block: var(--space-6);
-  padding-block-end: var(--space-2);
+.catalog-heading-actions {
   display: flex;
-  gap: var(--space-3);
-  overflow-x: auto;
-  scroll-snap-type: inline mandatory;
-  scrollbar-width: thin;
-}
-
-.category-strip button {
-  min-block-size: var(--target-min);
   flex: 0 0 auto;
-  padding-inline: var(--space-5);
-  border: var(--rule-accent);
-  border-radius: var(--radius-sm);
-  scroll-snap-align: start;
-  color: var(--ink-800);
-  background: var(--surface-paper);
-  cursor: pointer;
-  font-weight: var(--font-weight-bold);
+  align-items: center;
+  gap: var(--space-4);
 }
 
-.category-strip button.active,
-.category-strip button:hover {
-  border-color: var(--ink-700);
-  color: var(--text-on-ink);
-  background: var(--ink-700);
+.catalog-back {
+  min-block-size: var(--target-min);
+  display: inline-flex;
+  align-items: center;
+  color: var(--ink-700);
+  font-weight: var(--font-weight-bold);
+  text-underline-offset: var(--space-2);
 }
 
 .filters {
@@ -119,8 +105,12 @@ h1 {
   min-height: 2.75rem;
   padding-inline: 1.2rem;
   border-radius: var(--radius-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   font-weight: 800;
+  text-decoration: none;
 }
 
 .button:disabled {
@@ -162,38 +152,86 @@ h1 {
 }
 
 .course-tile {
+  position: relative;
   min-width: 0;
   display: grid;
   grid-template-rows: 1fr auto;
   gap: var(--space-3);
 }
 
-.favorite-message {
+.favorite-message,
+.enrollment-message {
   margin: var(--space-4) 0 0;
   color: var(--color-primary-dark);
   font-weight: 700;
 }
 
-.favorite-button {
+.favorite-heart {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: var(--space-3);
+  inset-inline-end: var(--space-3);
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 75%);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--ink-700);
+  background: rgb(255 253 248 / 92%);
+  box-shadow: 0 0.45rem 1rem rgb(8 42 32 / 18%);
+  cursor: pointer;
+  backdrop-filter: blur(5px);
+}
+
+.favorite-heart svg {
+  inline-size: 1.35rem;
+  block-size: 1.35rem;
+  fill: transparent;
+  stroke: currentcolor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.favorite-heart.active {
+  color: var(--color-danger);
+}
+
+.favorite-heart.active svg {
+  fill: currentcolor;
+}
+
+.favorite-heart:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.enroll-button {
   min-height: var(--target-min);
   padding-inline: var(--space-4);
-  color: var(--color-primary-dark);
-  background: var(--surface-paper);
+  color: var(--color-on-primary);
+  background: var(--color-primary);
   border: 1px solid var(--color-primary);
   border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 800;
 }
 
-.favorite-button.active,
-.favorite-button:hover:not(:disabled) {
-  color: var(--color-on-primary);
+.enroll-button:hover:not(:disabled) {
   background: var(--color-primary-dark);
 }
 
-.favorite-button:disabled {
+.enroll-button.enrolled {
+  color: var(--ink-700);
+  background: var(--surface-sage);
+  border-color: var(--color-border-strong);
+}
+
+.enroll-button:disabled {
   opacity: 0.65;
-  cursor: wait;
+  cursor: default;
 }
 
 .course-card {
@@ -431,6 +469,11 @@ h1 {
     align-items: start;
     flex-direction: column;
     gap: 1rem;
+  }
+
+  .catalog-heading-actions {
+    inline-size: 100%;
+    justify-content: space-between;
   }
 
   .filters {

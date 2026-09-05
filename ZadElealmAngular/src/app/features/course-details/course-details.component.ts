@@ -536,6 +536,7 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     const percentage = completionPercentage(completedVideos, videos.length);
     this.progress.update((progress) => ({
       ...(progress ?? {
+        courseId: this.courseId,
         totalVideos: videos.length,
         remainingVideos: videos.length,
       }),

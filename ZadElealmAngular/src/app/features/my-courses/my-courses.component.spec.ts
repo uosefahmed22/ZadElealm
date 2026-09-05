@@ -15,7 +15,10 @@ describe('MyCoursesComponent', () => {
   beforeEach(async () => {
     learningApi = {
       getEnrolledCourses: vi.fn(() =>
-        of({ statusCode: 200, data: { courses: [course()], allEnrolledCourses: 1 } }),
+        of({
+          statusCode: 200,
+          data: { courses: [course()], progress: [progress()], allEnrolledCourses: 1 },
+        }),
       ),
       getCourseProgress: vi.fn(() =>
         of({
@@ -42,6 +45,7 @@ describe('MyCoursesComponent', () => {
 
     expect(fixture.nativeElement.textContent).toContain('أساسيات التجويد');
     expect(fixture.nativeElement.textContent).toContain('50%');
+    expect(learningApi.getCourseProgress).not.toHaveBeenCalled();
   });
 
   it('requires confirmation then removes the unenrolled course', () => {
@@ -71,5 +75,17 @@ function course() {
     imageUrl: 'course.jpg',
     category: { id: 1, name: 'القرآن', description: '', imageUrl: '' },
     createdAt: '2026-01-01',
+  };
+}
+
+function progress() {
+  return {
+    courseId: 10,
+    videoProgress: 50,
+    overallProgress: 50,
+    completedVideos: 1,
+    totalVideos: 2,
+    remainingVideos: 1,
+    isEligibleForQuiz: false,
   };
 }

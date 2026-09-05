@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Hybrid;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -89,7 +90,8 @@ namespace ZadElealm.Apis.Extentions
         {
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(SqlServerConnectionString.WithoutMultipleActiveResultSets(
+                    configuration.GetConnectionString("DefaultConnection")));
             });
         }
 
@@ -114,6 +116,7 @@ namespace ZadElealm.Apis.Extentions
         private static void ConfigureDependencyInjection(IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IEnrollmentReadRepository, EnrollmentReadRepository>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IImageService, ImageService>();
@@ -129,6 +132,7 @@ namespace ZadElealm.Apis.Extentions
 
             services.Configure<RateLimitOptions>(configuration.GetSection("RateLimit"));
             services.AddMemoryCache();
+            services.AddHybridCache();
             services.AddSingleton<ConcurrentDictionary<string, ClientStatistics>>();
             services.AddHostedService<RateLimitCleanupService>();
 

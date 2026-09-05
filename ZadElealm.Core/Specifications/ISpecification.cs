@@ -19,5 +19,6 @@ namespace ZadElealm.Core.Specifications
         public int Take { get; set; }
         public int Skip { get; set; }
         public bool IsPagingEnabled { get; set; }
+        public bool IsSplitQuery { get; }
     }
 }

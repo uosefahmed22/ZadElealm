@@ -1,0 +1,65 @@
+<header class="categories-heading">
+  <div>
+    <span class="eyebrow">مكتبة زاد تعلم</span>
+    <h1>ماذا تريد أن تتعلّم؟</h1>
+    <p>اختر المجال أولًا، ثم تصفّح الدورات المتاحة داخله.</p>
+  </div>
+  <a class="all-courses-link" routerLink="/app/courses/catalog">
+    عرض كل الدورات
+    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M9 5l-5 5 5 5" /></svg>
+  </a>
+</header>
+
+@if (isLoading()) {
+  <section class="categories-grid" aria-label="جارٍ تحميل التصنيفات" aria-busy="true">
+    @for (_ of skeletonCards; track $index) {
+      <div class="zad-skeleton category-skeleton"></div>
+    }
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card" role="alert">
+    <h2>تعذر تحميل التصنيفات</h2>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
+} @else if (categories().length === 0) {
+  <section class="state-card">
+    <h2>لا توجد تصنيفات متاحة حاليًا</h2>
+    <p>يمكنك تصفّح جميع الدورات مباشرة.</p>
+    <a class="zad-btn zad-btn--primary" routerLink="/app/courses/catalog">عرض الدورات</a>
+  </section>
+} @else {
+  <section class="categories-grid" aria-label="تصنيفات الدورات">
+    @for (category of categories(); track category.id) {
+      <a
+        class="category-card"
+        routerLink="/app/courses/catalog"
+        [queryParams]="{ categoryId: category.id }"
+        [attr.aria-label]="'استعرض دورات ' + category.name"
+      >
+        <div class="category-media">
+          <img
+            [src]="categoryImage(category)"
+            [alt]="'صورة تصنيف ' + category.name"
+            width="480"
+            height="270"
+            loading="lazy"
+            decoding="async"
+            (error)="markImageFailed(category.id)"
+          />
+        </div>
+        <div class="category-copy">
+          <span>مسار تعليمي</span>
+          <h2>{{ category.name }}</h2>
+          @if (category.description) {
+            <p>{{ category.description }}</p>
+          }
+          <strong>
+            استعرض الدورات
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12M9 5l-5 5 5 5" /></svg>
+          </strong>
+        </div>
+      </a>
+    }
+  </section>
+}

@@ -30,7 +30,7 @@ namespace ZadElealm.UnitTests.Handlers
         private static Course BuildCourse(int id) => new Course
         {
             Id = id,
-            Name = "Course",
+            Name = "فقه العبادات",
             Description = "Description",
             Author = "Author",
             CourseLanguage = "Arabic",
@@ -75,6 +75,8 @@ namespace ZadElealm.UnitTests.Handlers
         {
             _dbContext.Courses.Add(BuildCourse(1));
             _dbContext.SaveChanges();
+            var saveChangesCount = 0;
+            _dbContext.SavingChanges += (_, _) => saveChangesCount++;
 
             var handler = CreateHandler();
 
@@ -83,7 +85,10 @@ namespace ZadElealm.UnitTests.Handlers
             Assert.Equal(200, result.StatusCode);
             Assert.Single(_dbContext.Enrollments.Where(e => e.CourseId == 1 && e.AppUserId == "user-1"));
             var notification = _dbContext.Notifications.Include(n => n.UserNotifications).Single();
+            Assert.Contains("فقه العبادات", notification.Title);
+            Assert.Contains("فقه العبادات", notification.Description);
             Assert.Contains(notification.UserNotifications, un => un.AppUserId == "user-1");
+            Assert.Equal(1, saveChangesCount);
         }
 
         [Fact]
@@ -94,7 +99,7 @@ namespace ZadElealm.UnitTests.Handlers
 
             var failingNotificationService = new Mock<INotificationService>();
             failingNotificationService
-                .Setup(n => n.SendNotificationAsync(It.IsAny<NotificationServiceDto>()))
+                .Setup(n => n.AddNotificationAsync(It.IsAny<NotificationServiceDto>()))
                 .ThrowsAsync(new InvalidOperationException("notification failure"));
 
             var handler = CreateHandler(failingNotificationService.Object);
