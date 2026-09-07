@@ -44,7 +44,21 @@ public sealed class RankDashboardTests : IClassFixture<ZadElealmApiFactory>
         Assert.NotNull(envelope);
         Assert.Equal(0, envelope.Data.CurrentUser.TotalPoints);
         Assert.Equal("Bronze", envelope.Data.CurrentUser.Rank);
+        Assert.Equal(10, envelope.Data.CurrentUser.PointsBreakdown.PointsPerCompletedCourse);
+        Assert.Equal(20, envelope.Data.CurrentUser.PointsBreakdown.PointsPerCertificate);
+        Assert.Equal(50, envelope.Data.CurrentUser.PointsBreakdown.QuizAverageContributionPercentage);
+        Assert.Equal(0, envelope.Data.CurrentUser.PointsBreakdown.CompletedCoursesPoints);
+        Assert.Equal(0, envelope.Data.CurrentUser.PointsBreakdown.CertificatesPoints);
+        Assert.Equal(0, envelope.Data.CurrentUser.PointsBreakdown.QuizAverageBonusPoints);
         Assert.True(envelope.Data.CurrentUser.LastUpdated > DateTime.UtcNow.AddMinutes(-1));
+
+        Assert.Collection(
+            envelope.Data.Tiers,
+            tier => Assert.Equal(new RankTier("Bronze", 0, 99), tier),
+            tier => Assert.Equal(new RankTier("Silver", 100, 299), tier),
+            tier => Assert.Equal(new RankTier("Gold", 300, 599), tier),
+            tier => Assert.Equal(new RankTier("Platinum", 600, 999), tier),
+            tier => Assert.Equal(new RankTier("Diamond", 1000, null), tier));
 
         var leader = Assert.Single(envelope.Data.Leaders, item => item.DisplayName == "متصدر الاختبار");
         Assert.Equal(1, leader.Position);
@@ -122,14 +136,24 @@ public sealed class RankDashboardTests : IClassFixture<ZadElealmApiFactory>
     private sealed record RankDashboardEnvelope(int StatusCode, RankDashboardData Data);
     private sealed record RankDashboardData(
         StudentRankSummary CurrentUser,
-        List<LeaderboardEntry> Leaders);
+        List<LeaderboardEntry> Leaders,
+        List<RankTier> Tiers);
     private sealed record StudentRankSummary(
         int TotalPoints,
         string Rank,
         int CompletedCoursesCount,
         int CertificatesCount,
         double AverageQuizScore,
-        DateTime LastUpdated);
+        DateTime LastUpdated,
+        RankPointsBreakdown PointsBreakdown);
+    private sealed record RankPointsBreakdown(
+        int CompletedCoursesPoints,
+        int CertificatesPoints,
+        int QuizAverageBonusPoints,
+        int PointsPerCompletedCourse,
+        int PointsPerCertificate,
+        int QuizAverageContributionPercentage);
+    private sealed record RankTier(string Rank, int MinimumPoints, int? MaximumPoints);
     private sealed record LeaderboardEntry(
         int Position,
         string DisplayName,

@@ -18,13 +18,18 @@
   </section>
 } @else if (assessment(); as currentAssessment) {
   <header class="quiz-header">
+    <div class="exam-timer" [class.exam-timer--warning]="remainingSeconds() <= 300" aria-live="polite">
+      <span>الوقت المتبقي</span>
+      <strong>{{ formattedRemainingTime() }}</strong>
+      <small>{{ currentAssessment.durationMinutes }} دقيقة للاختبار</small>
+    </div>
     <span class="eyebrow">اختبار التصنيف</span>
     <h1>{{ currentAssessment.name }}</h1>
     <p>{{ currentAssessment.description }}</p>
     <div class="quiz-progress-copy"><span>أجبت عن {{ answeredCount() }} من {{ currentAssessment.questions.length }}</span><span>درجة النجاح {{ currentAssessment.passingScore }}%</span></div>
     <div class="quiz-progress" role="progressbar" [attr.aria-valuemax]="currentAssessment.questions.length" [attr.aria-valuenow]="answeredCount()"><span [style.width.%]="currentAssessment.questions.length ? answeredCount() / currentAssessment.questions.length * 100 : 0"></span></div>
   </header>
-  <form class="questions" (ngSubmit)="submit()">
+  <form class="questions" (submit)="requestSubmit($event)">
     @for (question of currentAssessment.questions; track question.id; let index = $index) {
       <fieldset class="question-card"><legend><span>السؤال {{ index + 1 }}</span>{{ question.text }}</legend><div class="choices">
         @for (choice of question.choices; track choice.id) {
@@ -33,6 +38,19 @@
       </div></fieldset>
     }
     @if (errorMessage()) { <div class="submit-error" role="alert">{{ errorMessage() }}</div> }
-    <div class="submit-bar"><span>{{ allAnswered() ? 'الإجابات مكتملة ويمكنك الإرسال.' : 'أجب عن كل الأسئلة لتفعيل الإرسال.' }}</span><button class="zad-btn zad-btn--primary" type="submit" [disabled]="submitDisabled()">{{ isSubmitting() ? 'جارٍ إرسال الإجابات...' : 'إرسال الإجابات' }}</button></div>
+    <div class="submit-bar"><span>{{ timeExpired() ? 'انتهى الوقت، جارٍ تسليم الإجابات.' : allAnswered() ? 'الإجابات مكتملة ويمكنك الإرسال.' : 'أجب عن كل الأسئلة لتفعيل الإرسال.' }}</span><button class="zad-btn zad-btn--primary" type="submit" [disabled]="submitDisabled()">{{ isSubmitting() ? 'جارٍ إرسال الإجابات...' : 'مراجعة وتسليم الإجابات' }}</button></div>
   </form>
+  @if (showSubmitConfirmation()) {
+    <div class="confirm-overlay" role="presentation" (click)="cancelSubmit()">
+      <section class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title" (click)="$event.stopPropagation()">
+        <span class="eyebrow">تأكيد التسليم</span>
+        <h2 id="confirm-title">هل تريد تسليم إجاباتك الآن؟</h2>
+        <p>أجبت عن {{ answeredCount() }} من {{ currentAssessment.questions.length }}، ولن تتمكن من تعديل هذه المحاولة بعد التسليم.</p>
+        <div class="result-actions">
+          <button class="zad-btn zad-btn--primary" type="button" (click)="confirmSubmit()">نعم، سلّم الإجابات</button>
+          <button class="zad-btn zad-btn--ghost" type="button" (click)="cancelSubmit()">العودة للمراجعة</button>
+        </div>
+      </section>
+    </div>
+  }
 }

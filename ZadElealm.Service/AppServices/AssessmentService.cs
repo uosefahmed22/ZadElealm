@@ -3,6 +3,7 @@ using System.Text;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Policies;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.ServiceDto;
@@ -12,7 +13,7 @@ namespace ZadElealm.Service.AppServices;
 
 public sealed class AssessmentService : IAssessmentService
 {
-    private const double CourseCompletionThreshold = 0.80;
+    private static readonly TimeSpan SubmissionGracePeriod = TimeSpan.FromSeconds(30);
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEnrollmentReadRepository _enrollmentReadRepository;
     private readonly ICertificateService _certificateService;
@@ -54,7 +55,7 @@ public sealed class AssessmentService : IAssessmentService
                 PassingScore = assessment.PassingScore,
                 IsEligible = eligibleCategoryIds.Contains(assessment.CategoryId),
                 IsCompleted = progress?.IsCompleted == true,
-                BestScore = progress?.Score
+                BestScore = progress?.AttemptSubmittedAtUtc is null ? null : progress.Score
             };
         }).ToList();
 
@@ -67,13 +68,42 @@ public sealed class AssessmentService : IAssessmentService
         if (error != null)
             return error;
 
-        var existingProgress = await GetProgressAsync(userId, assessmentId);
-        if (existingProgress?.IsCompleted == true)
+        var progress = await GetProgressAsync(userId, assessmentId);
+        if (progress?.IsCompleted == true)
             return new ApiDataResponse(409, null, "تم اجتياز الاختبار مسبقًا");
 
-        var form = SelectForm(assessment!, userId);
+        var form = SelectForm(assessment!, userId, progress?.AssessmentFormId);
         if (form == null)
             return new ApiDataResponse(409, null, "لا يوجد نموذج متاح للاختبار حاليًا");
+
+        var now = DateTime.UtcNow;
+        if (progress == null)
+        {
+            progress = new AssessmentProgress
+            {
+                AppUserId = userId,
+                AssessmentId = assessmentId,
+                AssessmentFormId = form.Id,
+                Score = 0,
+                AttemptStartedAtUtc = now,
+                AttemptExpiresAtUtc = now.AddMinutes(assessment!.DurationMinutes),
+                CreatedAt = now
+            };
+            await _unitOfWork.Repository<AssessmentProgress>().AddAsync(progress);
+            await _unitOfWork.Complete();
+        }
+        else if (progress.AttemptStartedAtUtc == null ||
+                 progress.AttemptExpiresAtUtc == null ||
+                 progress.AttemptSubmittedAtUtc != null ||
+                 progress.AttemptExpiresAtUtc <= now)
+        {
+            progress.AssessmentFormId = form.Id;
+            progress.AttemptStartedAtUtc = now;
+            progress.AttemptExpiresAtUtc = now.AddMinutes(assessment!.DurationMinutes);
+            progress.AttemptSubmittedAtUtc = null;
+            _unitOfWork.Repository<AssessmentProgress>().Update(progress);
+            await _unitOfWork.Complete();
+        }
 
         var dto = new AssessmentDto
         {
@@ -81,8 +111,11 @@ public sealed class AssessmentService : IAssessmentService
             Name = assessment.Name,
             Description = assessment.Description,
             PassingScore = assessment.PassingScore,
+            DurationMinutes = assessment.DurationMinutes,
+            AttemptStartedAtUtc = progress.AttemptStartedAtUtc!.Value,
+            AttemptExpiresAtUtc = progress.AttemptExpiresAtUtc!.Value,
             Questions = form.Questions
-                .OrderBy(question => question.Id)
+                .OrderBy(question => question.DisplayOrder)
                 .Select(question => new AssessmentQuestionDto
                 {
                     Id = question.Id,
@@ -115,8 +148,14 @@ public sealed class AssessmentService : IAssessmentService
         var existingProgress = await GetProgressAsync(userId, assessmentId);
         if (existingProgress?.IsCompleted == true)
             return new ApiDataResponse(409, null, "تم اجتياز الاختبار مسبقًا");
+        if (existingProgress?.AttemptStartedAtUtc == null || existingProgress.AttemptExpiresAtUtc == null)
+            return new ApiDataResponse(409, null, "ابدأ الاختبار أولًا قبل إرسال الإجابات");
+        if (existingProgress.AttemptSubmittedAtUtc != null)
+            return new ApiDataResponse(409, null, "تم تسليم هذه المحاولة بالفعل");
+        if (DateTime.UtcNow > existingProgress.AttemptExpiresAtUtc.Value.Add(SubmissionGracePeriod))
+            return new ApiDataResponse(409, null, "انتهى وقت المحاولة. افتح الاختبار لبدء محاولة جديدة");
 
-        var form = SelectForm(assessment!, userId);
+        var form = SelectForm(assessment!, userId, existingProgress.AssessmentFormId);
         if (form == null)
             return new ApiDataResponse(409, null, "لا يوجد نموذج متاح للاختبار حاليًا");
 
@@ -126,30 +165,20 @@ public sealed class AssessmentService : IAssessmentService
 
         var answersByQuestion = submission.StudentAnswers.ToDictionary(x => x.QuestionId);
         var correctAnswers = form.Questions.Count(question =>
-            question.Choices.Any(choice =>
-                choice.Id == answersByQuestion[question.Id].ChoiceId && choice.IsCorrect));
+            answersByQuestion.TryGetValue(question.Id, out var answer) &&
+            question.Choices.Any(choice => choice.Id == answer.ChoiceId && choice.IsCorrect));
         var score = (correctAnswers * 100) / form.Questions.Count;
         var isCompleted = score >= assessment!.PassingScore;
 
         await _unitOfWork.BeginTransactionAsync();
         try
         {
-            var progress = existingProgress ?? new AssessmentProgress
-            {
-                AppUserId = userId,
-                AssessmentId = assessmentId,
-                AssessmentFormId = form.Id,
-                CreatedAt = DateTime.UtcNow
-            };
-
+            var progress = existingProgress;
             progress.AssessmentFormId = form.Id;
             progress.Score = Math.Max(progress.Score, score);
             progress.IsCompleted = progress.IsCompleted || isCompleted;
-
-            if (existingProgress == null)
-                await _unitOfWork.Repository<AssessmentProgress>().AddAsync(progress);
-            else
-                _unitOfWork.Repository<AssessmentProgress>().Update(progress);
+            progress.AttemptSubmittedAtUtc = DateTime.UtcNow;
+            _unitOfWork.Repository<AssessmentProgress>().Update(progress);
 
             await _unitOfWork.Complete();
 
@@ -189,7 +218,7 @@ public sealed class AssessmentService : IAssessmentService
                 IsCompleted = isCompleted,
                 TotalQuestions = form.Questions.Count,
                 CorrectAnswers = correctAnswers,
-                Date = progress.CreatedAt
+                Date = progress.AttemptSubmittedAtUtc.Value
             }, isCompleted ? "تهانينا! لقد اجتزت الاختبار بنجاح" : "تم تسليم الاختبار");
         }
         catch
@@ -213,7 +242,7 @@ public sealed class AssessmentService : IAssessmentService
 
         var eligibleCategoryIds = await GetEligibleCategoryIdsAsync(userId);
         return !eligibleCategoryIds.Contains(assessment.CategoryId)
-            ? (null, new ApiDataResponse(403, null, "أكمل 80% من دورة واحدة في هذا التصنيف لفتح الاختبار"))
+            ? (null, new ApiDataResponse(403, null, "أكمل جميع دروس دورة واحدة في هذا التصنيف لفتح الاختبار"))
             : (assessment, null);
     }
 
@@ -221,8 +250,9 @@ public sealed class AssessmentService : IAssessmentService
     {
         var courses = await _enrollmentReadRepository.GetUserCoursesWithProgressAsync(userId);
         return courses
-            .Where(course => course.TotalVideos > 0 &&
-                (double)course.CompletedVideos / course.TotalVideos >= CourseCompletionThreshold)
+            .Where(course => CourseCompletionPolicy.HasCompletedAllVideos(
+                course.CompletedVideos,
+                course.TotalVideos))
             .Select(course => course.CategoryId)
             .ToHashSet();
     }
@@ -231,7 +261,10 @@ public sealed class AssessmentService : IAssessmentService
         => await _unitOfWork.Repository<AssessmentProgress>()
             .GetEntityWithSpecAsync(new AssessmentProgressSpecification(userId, assessmentId));
 
-    private static AssessmentForm? SelectForm(Assessment assessment, string userId)
+    private static AssessmentForm? SelectForm(
+        Assessment assessment,
+        string userId,
+        int? preferredFormId = null)
     {
         var forms = assessment.Forms
             .Where(form => form.IsActive &&
@@ -243,6 +276,12 @@ public sealed class AssessmentService : IAssessmentService
         if (forms.Count == 0)
             return null;
 
+        var preferredForm = preferredFormId.HasValue
+            ? forms.FirstOrDefault(form => form.Id == preferredFormId.Value)
+            : null;
+        if (preferredForm != null)
+            return preferredForm;
+
         var hash = SHA256.HashData(Encoding.UTF8.GetBytes($"{assessment.Id}:{userId}"));
         var index = (int)(BitConverter.ToUInt32(hash, 0) % (uint)forms.Count);
         return forms[index];
@@ -252,11 +291,11 @@ public sealed class AssessmentService : IAssessmentService
         AssessmentForm form,
         IReadOnlyList<StudentAnswerDto> answers)
     {
-        if (answers.Count != form.Questions.Count ||
+        if (answers.Count > form.Questions.Count ||
             answers.Any(answer => answer.QuestionId <= 0 || answer.ChoiceId <= 0) ||
             answers.Select(answer => answer.QuestionId).Distinct().Count() != answers.Count)
         {
-            return new ApiDataResponse(400, null, "يجب الإجابة عن كل سؤال مرة واحدة");
+            return new ApiDataResponse(400, null, "إجابات الاختبار غير صالحة");
         }
 
         var questions = form.Questions.ToDictionary(question => question.Id);

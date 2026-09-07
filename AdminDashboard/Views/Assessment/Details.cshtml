@@ -8,6 +8,7 @@
         <span class="eyebrow">@Model.CategoryName</span>
         <h1>@Model.Name</h1>
         <p>@Model.Description</p>
+        <small>المدة: @Model.DurationMinutes دقيقة · درجة النجاح: @Model.PassingScore%</small>
     </div>
     <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-right ms-2"></i>العودة</a>
 </section>
@@ -32,7 +33,8 @@
                 @foreach (var question in form.Questions)
                 {
                     <li>
-                        <strong>@question.Text</strong>
+                        <strong>س@question.DisplayOrder · @question.Text</strong>
+                        <span class="assessment-difficulty assessment-difficulty--@question.Difficulty">@question.Difficulty</span>
                         <ul>
                             @foreach (var choice in question.Choices)
                             {

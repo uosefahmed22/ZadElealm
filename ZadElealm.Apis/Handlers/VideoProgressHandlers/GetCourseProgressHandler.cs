@@ -1,6 +1,7 @@
 ﻿using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Apis.Quaries.VideoProgressQueries;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Policies;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Specifications.Course;
 using ZadElealm.Core.Specifications.Videos;
@@ -43,7 +44,7 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
                 OverallProgress = videoProgress,
                 CompletedVideos = completedVideos,
                 TotalVideos = totalVideos,
-                IsEligibleForQuiz = videoProgress >= 80,
+                IsEligibleForQuiz = CourseCompletionPolicy.IsEligibleForAssessment(videoProgress),
                 RemainingVideos = totalVideos - completedVideos
             };
         }

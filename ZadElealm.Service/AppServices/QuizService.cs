@@ -196,7 +196,7 @@ namespace ZadElealm.Service.AppServices
                 .CheckCourseCompletionEligibilityAsync(userId, quiz!.CourseId);
             if (!isEligible)
                 return (null, new ApiDataResponse(403, null,
-                    "الرجاء إكمال 80% من الدورة للدخول للإختبار"));
+                    "الرجاء إكمال جميع دروس الدورة للدخول للاختبار"));
 
             var calculation = CalculateResult(quiz, submission.StudentAnswers);
             return (new SubmissionContext(quiz, existingProgress, calculation), null);

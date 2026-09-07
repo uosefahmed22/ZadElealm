@@ -119,6 +119,7 @@ namespace ZadElealm.Apis.Extentions
         {
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEnrollmentReadRepository, EnrollmentReadRepository>();
+            services.AddScoped<IEnrollmentWriteRepository, EnrollmentWriteRepository>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IImageService, ImageService>();

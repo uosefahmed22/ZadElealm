@@ -174,6 +174,11 @@ namespace ZadElealm.Repository.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
+                    b.Property<int>("DurationMinutes")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(30);
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -283,6 +288,15 @@ namespace ZadElealm.Repository.Migrations
                     b.Property<int>("AssessmentId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("AttemptExpiresAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("AttemptStartedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("AttemptSubmittedAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -323,6 +337,12 @@ namespace ZadElealm.Repository.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Difficulty")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -333,7 +353,10 @@ namespace ZadElealm.Repository.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssessmentFormId");
+                    b.HasIndex("AssessmentFormId", "DisplayOrder")
+                        .IsUnique()
+                        .HasDatabaseName("UX_AssessmentQuestions_FormId_DisplayOrder")
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("AssessmentQuestions");
                 });
@@ -523,11 +546,17 @@ namespace ZadElealm.Repository.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("UnenrolledAtUtc")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("AppUserId");
-
                     b.HasIndex("CourseId");
+
+                    b.HasIndex("AppUserId", "CourseId")
+                        .IsUnique()
+                        .HasDatabaseName("UX_Enrollments_AppUserId_CourseId")
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Enrollments");
                 });

@@ -30,6 +30,7 @@ public sealed class AssessmentController : Controller
                 Description = assessment.Description,
                 CategoryName = assessment.Category.Name,
                 PassingScore = assessment.PassingScore,
+                DurationMinutes = assessment.DurationMinutes,
                 IsActive = assessment.IsActive,
                 FormCount = assessment.Forms.Count,
                 QuestionCount = assessment.Forms.Sum(form => form.Questions.Count)
@@ -51,6 +52,7 @@ public sealed class AssessmentController : Controller
             Description = assessment.Description,
             CategoryName = assessment.Category.Name,
             PassingScore = assessment.PassingScore,
+            DurationMinutes = assessment.DurationMinutes,
             IsActive = assessment.IsActive,
             Forms = assessment.Forms.OrderBy(form => form.InternalCode).Select(form =>
                 new AssessmentFormAdminViewModel
@@ -58,11 +60,18 @@ public sealed class AssessmentController : Controller
                     Id = form.Id,
                     InternalCode = form.InternalCode,
                     IsActive = form.IsActive,
-                    Questions = form.Questions.OrderBy(question => question.Id).Select(question =>
+                    Questions = form.Questions.OrderBy(question => question.DisplayOrder).Select(question =>
                         new AssessmentQuestionAdminViewModel
                         {
                             Id = question.Id,
                             Text = question.Text,
+                            DisplayOrder = question.DisplayOrder,
+                            Difficulty = question.Difficulty switch
+                            {
+                                AssessmentQuestionDifficulty.Easy => "سهل",
+                                AssessmentQuestionDifficulty.Medium => "متوسط",
+                                _ => "صعب"
+                            },
                             Choices = question.Choices.OrderBy(choice => choice.Id).Select(choice =>
                                 new AssessmentChoiceAdminViewModel
                                 {

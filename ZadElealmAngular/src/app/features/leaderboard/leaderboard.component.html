@@ -1,7 +1,9 @@
 <header class="page-heading">
-  <span>رحلتك في زاد العلم</span>
-  <h1>النقاط ولوحة المتصدرين</h1>
-  <p>تتحدث نقاطك من إنجاز الدورات والشهادات ونتائج الاختبارات الفعلية.</p>
+  <div>
+    <span>رحلتك في زاد العلم</span>
+    <h1>نقاطك تصنع تقدّمك</h1>
+  </div>
+  <p>اعرف حصيلة كل إنجاز، وتابع مكانك بين أكثر الطلاب اجتهادًا.</p>
 </header>
 
 @if (isLoading()) {
@@ -17,63 +19,146 @@
     <button type="button" (click)="retry()">إعادة المحاولة</button>
   </section>
 } @else if (dashboard(); as data) {
-  <section class="rank-summary" aria-labelledby="current-rank-title">
-    <div class="rank-seal" aria-hidden="true">✦</div>
-    <div class="summary-copy">
-      <span>تصنيفك الحالي</span>
-      <h2 id="current-rank-title">{{ rankLabel(data.currentUser.rank) }}</h2>
-      <strong>{{ data.currentUser.totalPoints | number }} نقطة</strong>
+  <section class="rank-hero" aria-labelledby="current-rank-title">
+    <div class="rank-identity">
+      <div class="rank-seal" aria-hidden="true"><span>✦</span></div>
+      <div class="rank-copy">
+        <span>تصنيفك الحالي</span>
+        <h2 id="current-rank-title">{{ rankLabel(data.currentUser.rank) }}</h2>
+        <strong>{{ data.currentUser.totalPoints | number }} <small>نقطة</small></strong>
+      </div>
 
       <div class="rank-progress">
         <div class="progress-copy">
-          @if (pointsToNext(data.currentUser.rank, data.currentUser.totalPoints); as remaining) {
-            <span>متبقي {{ remaining | number }} نقطة للتصنيف التالي</span>
+          @if (
+            pointsToNext(data.tiers, data.currentUser.rank, data.currentUser.totalPoints) !== null
+          ) {
+            <span>
+              متبقي
+              {{
+                pointsToNext(data.tiers, data.currentUser.rank, data.currentUser.totalPoints)
+                  | number
+              }}
+              نقطة للمستوى التالي
+            </span>
           } @else {
-            <span>وصلت إلى أعلى تصنيف</span>
+            <span>أحسنت، وصلت إلى أعلى مستوى</span>
           }
-          <small
-            >{{
-              progressPercentage(data.currentUser.rank, data.currentUser.totalPoints)
+          <small>
+            {{
+              progressPercentage(data.tiers, data.currentUser.rank, data.currentUser.totalPoints)
                 | number: '1.0-0'
-            }}%</small
-          >
+            }}%
+          </small>
         </div>
         <div
           class="progress-track"
           role="progressbar"
-          aria-label="التقدم داخل التصنيف"
+          aria-label="التقدم داخل المستوى الحالي"
           aria-valuemin="0"
           aria-valuemax="100"
           [attr.aria-valuenow]="
-            progressPercentage(data.currentUser.rank, data.currentUser.totalPoints)
+            progressPercentage(data.tiers, data.currentUser.rank, data.currentUser.totalPoints)
           "
         >
           <span
             [style.inline-size.%]="
-              progressPercentage(data.currentUser.rank, data.currentUser.totalPoints)
+              progressPercentage(data.tiers, data.currentUser.rank, data.currentUser.totalPoints)
             "
           ></span>
         </div>
       </div>
+
+      <small class="updated-at">
+        آخر تحديث: {{ data.currentUser.lastUpdated | date: 'd MMM y، h:mm a' }}
+      </small>
     </div>
 
-    <dl class="rank-stats">
-      <div>
-        <dt>دورات مكتملة</dt>
-        <dd>{{ data.currentUser.completedCoursesCount | number }}</dd>
+    <div class="points-story" aria-labelledby="points-story-title">
+      <header>
+        <span>حصيلة إنجازك</span>
+        <h2 id="points-story-title">كيف جُمعت نقاطك؟</h2>
+        <p>كل خطوة لها قيمة واضحة، والمجموع يتحدث من إنجازاتك الفعلية.</p>
+      </header>
+
+      <div class="points-equation">
+        <article class="point-source point-source--courses">
+          <span class="source-icon" aria-hidden="true">✓</span>
+          <div>
+            <h3>إكمال الدورات</h3>
+            <p>
+              {{ data.currentUser.completedCoursesCount | number }} دورة ×
+              {{ data.currentUser.pointsBreakdown.pointsPerCompletedCourse | number }} نقاط
+            </p>
+          </div>
+          <strong>+{{ data.currentUser.pointsBreakdown.completedCoursesPoints | number }}</strong>
+        </article>
+
+        <span class="equation-sign" aria-hidden="true">+</span>
+
+        <article class="point-source point-source--certificates">
+          <span class="source-icon" aria-hidden="true">◇</span>
+          <div>
+            <h3>الحصول على الشهادات</h3>
+            <p>
+              {{ data.currentUser.certificatesCount | number }} شهادة ×
+              {{ data.currentUser.pointsBreakdown.pointsPerCertificate | number }} نقطة
+            </p>
+          </div>
+          <strong>+{{ data.currentUser.pointsBreakdown.certificatesPoints | number }}</strong>
+        </article>
+
+        <span class="equation-sign" aria-hidden="true">+</span>
+
+        <article class="point-source point-source--quiz">
+          <span class="source-icon" aria-hidden="true">٪</span>
+          <div>
+            <h3>مكافأة الاختبارات</h3>
+            <p>
+              {{ data.currentUser.averageQuizScore | number: '1.0-1' }}% متوسط ×
+              {{ data.currentUser.pointsBreakdown.quizAverageContributionPercentage | number }}%
+            </p>
+          </div>
+          <strong>+{{ data.currentUser.pointsBreakdown.quizAverageBonusPoints | number }}</strong>
+        </article>
+
+        <span class="equation-sign equation-sign--equals" aria-hidden="true">=</span>
+
+        <div class="points-total">
+          <span>إجمالي نقاطك</span>
+          <strong>{{ data.currentUser.totalPoints | number }}</strong>
+          <small>نقطة</small>
+        </div>
       </div>
+
+      <p class="calculation-note">
+        تُحتسب الدورة بعد اجتياز اختبارها، ومكافأة الأداء تساوي نصف متوسط درجات اختبارات الدورات
+        المجتازة.
+      </p>
+    </div>
+  </section>
+
+  <section class="levels-card" aria-labelledby="levels-title">
+    <header>
       <div>
-        <dt>شهادات</dt>
-        <dd>{{ data.currentUser.certificatesCount | number }}</dd>
+        <span>طريقك للأعلى</span>
+        <h2 id="levels-title">مستويات زاد العلم</h2>
       </div>
-      <div>
-        <dt>متوسط الاختبارات</dt>
-        <dd>{{ data.currentUser.averageQuizScore | number: '1.0-1' }}%</dd>
-      </div>
-    </dl>
-    <small class="updated-at"
-      >آخر تحديث: {{ data.currentUser.lastUpdated | date: 'd MMM y، h:mm a' }}</small
-    >
+      <p>اجمع النقاط لترتقي من البرونزي حتى الماسي.</p>
+    </header>
+
+    <ol class="level-track">
+      @for (tier of data.tiers; track tier.rank) {
+        <li [class.active]="tier.rank === data.currentUser.rank">
+          <span class="level-mark" aria-hidden="true">✦</span>
+          <strong>{{ rankLabel(tier.rank) }}</strong>
+          <small>{{ tierRange(tier) }}</small>
+          @if (tier.rank === data.currentUser.rank) {
+            <em>مستواك</em>
+          }
+        </li>
+      }
+    </ol>
   </section>
 
   <section class="leaderboard" aria-labelledby="leaderboard-title">
@@ -82,7 +167,7 @@
         <span>أهل الهمة</span>
         <h2 id="leaderboard-title">أعلى الطلاب نقاطًا</h2>
       </div>
-      <small>يظهر أول {{ data.leaders.length }} طلاب فقط</small>
+      <p>أفضل 10 طلاب حسب إجمالي النقاط · ظاهر الآن {{ data.leaders.length | number }}</p>
     </header>
 
     @if (data.leaders.length === 0) {
@@ -91,32 +176,72 @@
         <p>ابدأ بإكمال دورة ليظهر تقدمك هنا.</p>
       </div>
     } @else {
-      <ol class="leader-list">
-        @for (entry of data.leaders; track entry.position) {
-          <li [class.current-user]="entry.isCurrentUser">
-            <strong class="position" [attr.aria-label]="'المركز ' + entry.position">{{
+      <ol class="podium" aria-label="المراكز الثلاثة الأولى">
+        @for (entry of podiumLeaders(); track entry.position) {
+          <li
+            class="podium-card"
+            [class.podium-card--first]="entry.position === 1"
+            [class.podium-card--second]="entry.position === 2"
+            [class.podium-card--third]="entry.position === 3"
+            [class.current-user]="entry.isCurrentUser"
+          >
+            <span class="podium-rank" [attr.aria-label]="'المركز ' + entry.position">{{
               entry.position
-            }}</strong>
-            <div class="avatar" aria-hidden="true">
+            }}</span>
+            <div class="podium-avatar" aria-hidden="true">
               @if (imageIsAvailable(entry)) {
                 <img [src]="entry.imageUrl" alt="" (error)="hideBrokenImage(entry.position)" />
               } @else {
                 <span>{{ initials(entry) }}</span>
               }
             </div>
-            <div class="student-copy">
+            <div class="podium-copy">
               <strong>{{ entry.displayName }}</strong>
-              <small
-                >{{ rankLabel(entry.rank) }} · {{ entry.completedCoursesCount }} دورة مكتملة</small
-              >
+              <small>{{ rankLabel(entry.rank) }}</small>
             </div>
+            <strong class="podium-points"
+              >{{ entry.totalPoints | number }} <small>نقطة</small></strong
+            >
             @if (entry.isCurrentUser) {
               <span class="you-badge">أنت</span>
             }
-            <strong class="points">{{ entry.totalPoints | number }} <small>نقطة</small></strong>
+            <span class="podium-base" aria-hidden="true"></span>
           </li>
         }
       </ol>
+
+      @if (remainingLeaders().length > 0) {
+        <div class="remaining-board">
+          <h3>بقية المتصدرين</h3>
+          <ol class="leader-list" start="4">
+            @for (entry of remainingLeaders(); track entry.position) {
+              <li class="leader-row" [class.current-user]="entry.isCurrentUser">
+                <strong class="position" [attr.aria-label]="'المركز ' + entry.position">{{
+                  entry.position
+                }}</strong>
+                <div class="avatar" aria-hidden="true">
+                  @if (imageIsAvailable(entry)) {
+                    <img [src]="entry.imageUrl" alt="" (error)="hideBrokenImage(entry.position)" />
+                  } @else {
+                    <span>{{ initials(entry) }}</span>
+                  }
+                </div>
+                <div class="student-copy">
+                  <strong>{{ entry.displayName }}</strong>
+                  <small>
+                    {{ rankLabel(entry.rank) }} · {{ entry.completedCoursesCount | number }} دورة
+                    مكتملة
+                  </small>
+                </div>
+                @if (entry.isCurrentUser) {
+                  <span class="you-badge">أنت</span>
+                }
+                <strong class="points">{{ entry.totalPoints | number }} <small>نقطة</small></strong>
+              </li>
+            }
+          </ol>
+        </div>
+      }
     }
   </section>
 }

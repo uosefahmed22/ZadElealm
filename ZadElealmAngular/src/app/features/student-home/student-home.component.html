@@ -171,19 +171,22 @@
     }
   </section>
 
-  <section class="dashboard-section" aria-labelledby="suggested-title">
+  <section class="dashboard-section" aria-labelledby="favorites-title">
     <div class="section-heading">
       <div>
-        <span class="eyebrow">من المكتبة</span>
-        <h2 id="suggested-title">دورات مقترحة</h2>
+        <span class="eyebrow">اختياراتك المحفوظة</span>
+        <h2 id="favorites-title">الدورات المفضلة</h2>
       </div>
-      <a routerLink="/app/courses">عرض المكتبة</a>
+      <a routerLink="/app/favorites">عرض الكل</a>
     </div>
-    @if (suggestedCourses().length === 0) {
-      <div class="inline-empty"><p>لا توجد اقتراحات جديدة حاليًا.</p></div>
+    @if (favoriteCourses().length === 0) {
+      <div class="inline-empty">
+        <p>لم تضف أي دورة إلى المفضلة بعد.</p>
+        <a class="zad-btn zad-btn--primary" routerLink="/app/courses">استكشف الدورات</a>
+      </div>
     } @else {
-      <div class="suggested-grid">
-        @for (course of suggestedCourses(); track course.id) {
+      <div class="favorite-grid">
+        @for (course of favoriteCourses(); track course.id) {
           <app-course-card [course]="course" />
         }
       </div>

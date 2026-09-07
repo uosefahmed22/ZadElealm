@@ -1,6 +1,10 @@
 :host { display: block; max-inline-size: 58rem; margin-inline: auto; }
 .eyebrow { color: var(--accent-on-paper); font-family: var(--font-kufi); font-size: var(--fs-eyebrow); }
 .quiz-header { margin-block-end: var(--space-8); }
+.exam-timer { position: sticky; z-index: 5; inset-block-start: var(--space-3); margin-block-end: var(--space-5); padding: var(--space-3) var(--space-4); border: 1px solid var(--ink-700); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0 var(--space-4); color: var(--ink-800); background: var(--surface-paper-raised); box-shadow: var(--shadow-sm); }
+.exam-timer span, .exam-timer small { font-family: var(--font-kufi); font-size: var(--fs-caption); }
+.exam-timer strong { grid-row: span 2; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--fs-title-md); direction: ltr; }
+.exam-timer--warning { border-color: var(--color-danger); color: var(--color-danger); background: var(--color-danger-soft); }
 .quiz-header h1, .result-card h1 { margin-block: var(--space-2) var(--space-3); font-size: var(--fs-title-lg); }
 .quiz-header p { margin: 0; color: var(--text-muted); }
 .quiz-progress-copy { margin-block: var(--space-5) var(--space-2); display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--fs-caption); }
@@ -22,6 +26,10 @@
 .score-circle strong { color: var(--ink-800); font-family: var(--font-display); font-size: var(--fs-title-lg); }
 .score-circle span { color: var(--text-muted); font-size: var(--fs-caption); }
 .result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-3); }
+.confirm-overlay { position: fixed; z-index: 50; inset: 0; padding: var(--space-5); display: grid; place-items: center; background: rgb(0 0 0 / 45%); }
+.confirm-card { inline-size: min(100%, 34rem); padding: var(--space-7); border: var(--rule-hairline); text-align: center; background: var(--surface-paper-raised); box-shadow: var(--shadow-lg); }
+.confirm-card h2 { margin-block: var(--space-3); font-family: var(--font-display); }
+.confirm-card p { margin-block-end: var(--space-6); color: var(--text-muted); }
 .quiz-loading { display: grid; gap: var(--space-6); }
 .skeleton-title { block-size: 6rem; }
 .skeleton-question { block-size: 16rem; }

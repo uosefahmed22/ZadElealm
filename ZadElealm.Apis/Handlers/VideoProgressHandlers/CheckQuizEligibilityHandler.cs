@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Quaries.VideoProgressQueries;
+using ZadElealm.Core.Policies;
 
 namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
 {
@@ -21,14 +22,14 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
                 CourseId = request.CourseId
             });
 
-            var isEligible = progress.OverallProgress >= 80;
+            var isEligible = CourseCompletionPolicy.IsEligibleForAssessment(progress.OverallProgress);
 
             return new EligibilityResponse
             {
                 IsEligible = isEligible,
                 Message = isEligible
                     ? "يمكنك الآن الدخول للإختبار"
-                    : "الرجاء إكمال 80% من الدورة للدخول للإختبار"
+                    : "الرجاء إكمال جميع دروس الدورة للدخول للاختبار"
             };
         }
     }

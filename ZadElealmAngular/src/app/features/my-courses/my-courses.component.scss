@@ -47,6 +47,24 @@ button {
   border-radius: var(--radius-md);
   font-weight: 700;
 }
+.undo-banner {
+  margin-block: calc(var(--space-3) * -1) var(--space-6);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  color: var(--color-primary-dark);
+  background: var(--surface-paper-raised);
+  border: 1px solid var(--color-secondary);
+  border-radius: var(--radius-md);
+}
+.undo-button {
+  flex: 0 0 auto;
+  color: var(--color-on-primary);
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+}
 .course-list,
 .loading-grid {
   display: grid;
@@ -144,5 +162,9 @@ button:disabled {
   .learning-card > img {
     aspect-ratio: 16 / 9;
     min-height: 0;
+  }
+  .undo-banner {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

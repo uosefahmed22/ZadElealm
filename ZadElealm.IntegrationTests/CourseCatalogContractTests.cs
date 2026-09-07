@@ -56,4 +56,30 @@ public class CourseCatalogContractTests : IClassFixture<ZadElealmApiFactory>
         Assert.Single(courses.EnumerateArray());
         Assert.Equal("أساسيات التجويد", courses[0].GetProperty("name").GetString());
     }
+
+    [Fact]
+    public async Task GetAllCourses_WithMixedOrdering_IsStableAcrossPagesAndVariesCategories()
+    {
+        var firstPageResponse = await _client.GetAsync(
+            "/api/Category/get-courses-by-category?pageNumber=1&pageSize=1&sortBy=mixed");
+        var secondPageResponse = await _client.GetAsync(
+            "/api/Category/get-courses-by-category?pageNumber=2&pageSize=1&sortBy=mixed");
+
+        Assert.Equal(HttpStatusCode.OK, firstPageResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, secondPageResponse.StatusCode);
+
+        using var firstDocument = JsonDocument.Parse(
+            await firstPageResponse.Content.ReadAsStringAsync());
+        using var secondDocument = JsonDocument.Parse(
+            await secondPageResponse.Content.ReadAsStringAsync());
+        var firstCourse = firstDocument.RootElement.GetProperty("data")[0];
+        var secondCourse = secondDocument.RootElement.GetProperty("data")[0];
+
+        Assert.NotEqual(
+            firstCourse.GetProperty("id").GetInt32(),
+            secondCourse.GetProperty("id").GetInt32());
+        Assert.NotEqual(
+            firstCourse.GetProperty("category").GetProperty("id").GetInt32(),
+            secondCourse.GetProperty("category").GetProperty("id").GetInt32());
+    }
 }

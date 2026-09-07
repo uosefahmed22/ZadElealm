@@ -64,7 +64,7 @@ export class CourseCatalogComponent implements OnInit {
     author: '',
     language: '',
     minRating: 0,
-    sort: 'date-desc',
+    sort: 'mixed-desc',
   });
 
   readonly resultSummary = computed(() => {
@@ -99,7 +99,10 @@ export class CourseCatalogComponent implements OnInit {
   ngOnInit(): void {
     const routeCategoryId = Number(this.route.snapshot.queryParamMap.get('categoryId'));
     if (Number.isInteger(routeCategoryId) && routeCategoryId > 0) {
-      this.filterForm.controls.categoryId.setValue(routeCategoryId, { emitEvent: false });
+      this.filterForm.patchValue(
+        { categoryId: routeCategoryId, sort: 'date-desc' },
+        { emitEvent: false },
+      );
     }
 
     this.loadCategories();
@@ -158,7 +161,7 @@ export class CourseCatalogComponent implements OnInit {
       author: '',
       language: '',
       minRating: 0,
-      sort: 'date-desc',
+      sort: categoryId > 0 ? 'date-desc' : 'mixed-desc',
     });
     this.applyFilters();
   }

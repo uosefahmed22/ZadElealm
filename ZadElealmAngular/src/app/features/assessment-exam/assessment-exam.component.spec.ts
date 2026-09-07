@@ -13,6 +13,9 @@ describe('AssessmentExamComponent', () => {
         name: 'اختبار الفقه',
         description: 'اختبار عام',
         passingScore: 60,
+        durationMinutes: 30,
+        attemptStartedAtUtc: new Date(Date.now() - 1_000).toISOString(),
+        attemptExpiresAtUtc: new Date(Date.now() + 30 * 60_000).toISOString(),
         questions: [{ id: 11, text: 'سؤال', choices: [{ id: 21, text: 'اختيار' }] }],
       } })),
       submitAssessment: vi.fn(() => of({ statusCode: 200, data: {
@@ -32,11 +35,17 @@ describe('AssessmentExamComponent', () => {
     const fixture = TestBed.createComponent(AssessmentExamComponent);
     fixture.detectChanges();
     fixture.componentInstance.selectAnswer(11, 21);
-    fixture.componentInstance.submit();
+    const submitEvent = { preventDefault: vi.fn() } as unknown as SubmitEvent;
+    fixture.componentInstance.requestSubmit(submitEvent);
+
+    expect(submitEvent.preventDefault).toHaveBeenCalled();
+    expect(fixture.componentInstance.showSubmitConfirmation()).toBe(true);
+    fixture.componentInstance.confirmSubmit();
 
     expect(api.submitAssessment).toHaveBeenCalledWith(8, {
       studentAnswers: [{ questionId: 11, choiceId: 21 }],
     });
     expect(fixture.componentInstance.result()?.isCompleted).toBe(true);
+    fixture.destroy();
   });
 });

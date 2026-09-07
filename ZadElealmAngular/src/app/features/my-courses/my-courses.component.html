@@ -10,6 +10,19 @@
 @if (statusMessage()) {
   <p class="status-message" role="status">{{ statusMessage() }}</p>
 }
+@if (undoItem(); as removedItem) {
+  <aside class="undo-banner" role="status">
+    <span>تقدمك في الدورة محفوظ ولن يبدأ من الصفر.</span>
+    <button
+      class="undo-button"
+      type="button"
+      [disabled]="restoringCourseId() === removedItem.course.id"
+      (click)="undoUnenroll()"
+    >
+      {{ restoringCourseId() === removedItem.course.id ? 'جارٍ الاستعادة…' : 'تراجع (' + undoSeconds() + ')' }}
+    </button>
+  </aside>
+}
 
 @if (isLoading()) {
   <section class="loading-grid" aria-label="جارٍ تحميل دوراتك" aria-busy="true">
@@ -65,7 +78,7 @@
             >
             @if (confirmingCourseId() === item.course.id) {
               <span class="confirmation">
-                <span>هل أنت متأكد؟</span>
+                <span>هل أنت متأكد؟ سيظل تقدمك محفوظًا ويمكنك استعادة التسجيل لاحقًا.</span>
                 <button
                   class="danger-button"
                   type="button"

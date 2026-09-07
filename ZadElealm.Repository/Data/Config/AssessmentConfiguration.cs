@@ -10,6 +10,7 @@ public sealed class AssessmentConfiguration : IEntityTypeConfiguration<Assessmen
     {
         builder.Property(x => x.Name).HasMaxLength(150).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(1000).IsRequired();
+        builder.Property(x => x.DurationMinutes).HasDefaultValue(30);
 
         builder.HasIndex(x => x.CategoryId)
             .IsUnique()

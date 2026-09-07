@@ -110,7 +110,6 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly navItems: readonly NavItem[] = [
     { label: 'الرئيسية', fragment: 'home' },
     { label: 'المميزات', fragment: 'features' },
-    { label: 'كيف تبدأ', fragment: 'how-it-works' },
     { label: 'الأسئلة الشائعة', fragment: 'faq' },
   ];
 

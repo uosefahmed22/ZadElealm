@@ -86,17 +86,40 @@ describe('CourseDetailsComponent', () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it('uses server progress to unlock the category assessment at eighty percent', () => {
+  it('uses server progress to unlock the category assessment at one hundred percent', () => {
     const fiqhCourse = courseDetails();
     fiqhCourse.category.name = 'الفقه';
     learningApi.getCourse.mockReturnValue(of({ statusCode: 200, data: fiqhCourse }));
     const fixture = TestBed.createComponent(CourseDetailsComponent);
     fixture.detectChanges();
 
-    expect(fixture.componentInstance.completion()).toBe(80);
+    expect(fixture.componentInstance.completion()).toBe(100);
     expect(fixture.componentInstance.quizUnlocked()).toBe(true);
     expect(fixture.nativeElement.textContent).toContain('الانتقال لمركز الاختبارات');
     expect(fixture.nativeElement.querySelector('.course-progress-card a')).not.toBeNull();
+  });
+
+  it('keeps the category assessment locked while one lesson remains', () => {
+    const fiqhCourse = courseDetails();
+    fiqhCourse.category.name = 'الفقه';
+    learningApi.getCourse.mockReturnValue(of({ statusCode: 200, data: fiqhCourse }));
+    learningApi.getCourseProgress.mockReturnValue(
+      of({
+        ...progress(),
+        videoProgress: 80,
+        overallProgress: 80,
+        completedVideos: 4,
+        remainingVideos: 1,
+        isEligibleForQuiz: false,
+      }),
+    );
+
+    const fixture = TestBed.createComponent(CourseDetailsComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.quizUnlocked()).toBe(false);
+    expect(fixture.nativeElement.textContent).toContain('أكمل جميع دروس الدورة');
+    expect(fixture.nativeElement.querySelector('.course-progress-card a')).toBeNull();
   });
 
   it('switches lessons through the mocked YouTube player without reloading', () => {
@@ -372,11 +395,11 @@ function reply() {
 
 function progress() {
   return {
-    videoProgress: 80,
-    overallProgress: 80,
-    completedVideos: 4,
+    videoProgress: 100,
+    overallProgress: 100,
+    completedVideos: 5,
     totalVideos: 5,
-    remainingVideos: 1,
+    remainingVideos: 0,
     isEligibleForQuiz: true,
   };
 }

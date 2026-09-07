@@ -59,6 +59,11 @@ describe('CourseCatalogComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('أساسيات التجويد');
     expect(fixture.nativeElement.textContent).toContain('أحمد محمود');
     expect(fixture.nativeElement.textContent).toContain('دورة واحدة');
+    expect(catalogApi.getCourses.mock.calls[0][0]).toMatchObject({
+      categoryId: 0,
+      sortBy: 'mixed',
+      pageNumber: 1,
+    });
   });
 
   it('maps submitted filters to the backend contract', () => {

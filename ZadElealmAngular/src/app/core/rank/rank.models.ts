@@ -7,6 +7,22 @@ export interface StudentRankSummary {
   certificatesCount: number;
   averageQuizScore: number;
   lastUpdated: string;
+  pointsBreakdown: RankPointsBreakdown;
+}
+
+export interface RankPointsBreakdown {
+  completedCoursesPoints: number;
+  certificatesPoints: number;
+  quizAverageBonusPoints: number;
+  pointsPerCompletedCourse: number;
+  pointsPerCertificate: number;
+  quizAverageContributionPercentage: number;
+}
+
+export interface RankTierDefinition {
+  rank: RankTier;
+  minimumPoints: number;
+  maximumPoints: number | null;
 }
 
 export interface LeaderboardEntry {
@@ -22,4 +38,5 @@ export interface LeaderboardEntry {
 export interface RankDashboard {
   currentUser: StudentRankSummary;
   leaders: LeaderboardEntry[];
+  tiers: RankTierDefinition[];
 }

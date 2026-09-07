@@ -3,6 +3,7 @@ using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Quaries.UserRankquery;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Policies;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications.UserRank;
@@ -49,7 +50,20 @@ namespace ZadElealm.Apis.Handlers.UserRankHandler
                     CompletedCoursesCount = currentUser.CompletedCoursesCount,
                     CertificatesCount = currentUser.CertificatesCount,
                     AverageQuizScore = currentUser.AverageQuizScore,
-                    LastUpdated = currentUser.LastUpdated
+                    LastUpdated = currentUser.LastUpdated,
+                    PointsBreakdown = new RankPointsBreakdownDto
+                    {
+                        CompletedCoursesPoints = currentUser.CompletedCoursesCount
+                            * UserRankPolicy.PointsPerCompletedCourse,
+                        CertificatesPoints = currentUser.CertificatesCount
+                            * UserRankPolicy.PointsPerCertificate,
+                        QuizAverageBonusPoints = UserRankPolicy.CalculateQuizAverageBonus(
+                            currentUser.AverageQuizScore),
+                        PointsPerCompletedCourse = UserRankPolicy.PointsPerCompletedCourse,
+                        PointsPerCertificate = UserRankPolicy.PointsPerCertificate,
+                        QuizAverageContributionPercentage =
+                            UserRankPolicy.QuizAverageContributionPercentage
+                    }
                 },
                 Leaders = leaders.Select((rank, index) => new LeaderboardEntryDto
                 {
@@ -62,6 +76,12 @@ namespace ZadElealm.Apis.Handlers.UserRankHandler
                     Rank = rank.Rank.ToString(),
                     CompletedCoursesCount = rank.CompletedCoursesCount,
                     IsCurrentUser = rank.UserId == request.UserId
+                }).ToList(),
+                Tiers = UserRankPolicy.Tiers.Select(tier => new RankTierDto
+                {
+                    Rank = tier.Rank.ToString(),
+                    MinimumPoints = tier.MinimumPoints,
+                    MaximumPoints = tier.MaximumPoints
                 }).ToList()
             };
 

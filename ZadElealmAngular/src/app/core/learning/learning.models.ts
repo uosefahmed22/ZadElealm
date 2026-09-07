@@ -1,5 +1,7 @@
 import { CategoryDto, CourseDto } from '../catalog/catalog.models';
 
+export const COURSE_EXAM_REQUIRED_COMPLETION_PERCENTAGE = 100;
+
 export interface CourseVideoDto {
   id: number;
   title: string;
@@ -118,6 +120,10 @@ export function formatDuration(value: string | number): string {
 
 export function completionPercentage(completed: number, total: number): number {
   return total > 0 ? Math.round((completed / total) * 100) : 0;
+}
+
+export function isCourseExamUnlocked(completion: number): boolean {
+  return completion >= COURSE_EXAM_REQUIRED_COMPLETION_PERCENTAGE;
 }
 
 export function hasReachedVideoCompletion(

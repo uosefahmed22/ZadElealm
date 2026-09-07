@@ -101,7 +101,7 @@ namespace ZadElealm.UnitTests.Services
         }
 
         [Fact]
-        public async Task SubmitQuiz_WhenUserHasNotCompleted80Percent_Returns403_AndDoesNotSaveProgress()
+        public async Task SubmitQuiz_WhenUserHasNotCompletedAllLessons_Returns403_AndDoesNotSaveProgress()
         {
             var quiz = new Quiz { Id = 1, CourseId = CourseId };
             quiz.Questions = new List<Question>

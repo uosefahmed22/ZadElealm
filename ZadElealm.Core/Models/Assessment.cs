@@ -5,6 +5,7 @@ public class Assessment : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int PassingScore { get; set; } = 60;
+    public int DurationMinutes { get; set; } = 30;
     public bool IsActive { get; set; } = true;
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;

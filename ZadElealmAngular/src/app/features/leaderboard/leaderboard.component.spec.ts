@@ -21,7 +21,10 @@ describe('LeaderboardComponent', () => {
     expect(text).toContain('420 نقطة');
     expect(text).toContain('سارة علي');
     expect(text).toContain('أنت');
-    expect(fixture.nativeElement.querySelectorAll('.leader-list li')).toHaveLength(2);
+    expect(text).toContain('33 دورة × 10 نقاط');
+    expect(text).toContain('2 شهادة × 20 نقطة');
+    expect(fixture.nativeElement.querySelectorAll('.podium-card')).toHaveLength(3);
+    expect(fixture.nativeElement.querySelectorAll('.leader-row')).toHaveLength(2);
   });
 
   it('shows the API error and retries without inventing leaderboard rows', () => {
@@ -37,7 +40,7 @@ describe('LeaderboardComponent', () => {
     const fixture = TestBed.createComponent(LeaderboardComponent);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('تعذر الاتصال');
-    expect(fixture.nativeElement.querySelectorAll('.leader-list li')).toHaveLength(0);
+    expect(fixture.nativeElement.querySelectorAll('.podium-card')).toHaveLength(0);
 
     (fixture.nativeElement.querySelector('.state-card button') as HTMLButtonElement).click();
     fixture.detectChanges();
@@ -53,10 +56,18 @@ function rankResponse() {
       currentUser: {
         totalPoints: 420,
         rank: 'Gold' as const,
-        completedCoursesCount: 7,
+        completedCoursesCount: 33,
         certificatesCount: 2,
-        averageQuizScore: 86.5,
+        averageQuizScore: 100,
         lastUpdated: '2026-09-01T10:00:00Z',
+        pointsBreakdown: {
+          completedCoursesPoints: 330,
+          certificatesPoints: 40,
+          quizAverageBonusPoints: 50,
+          pointsPerCompletedCourse: 10,
+          pointsPerCertificate: 20,
+          quizAverageContributionPercentage: 50,
+        },
       },
       leaders: [
         {
@@ -74,9 +85,43 @@ function rankResponse() {
           imageUrl: null,
           totalPoints: 420,
           rank: 'Gold' as const,
-          completedCoursesCount: 7,
+          completedCoursesCount: 33,
           isCurrentUser: true,
         },
+        {
+          position: 3,
+          displayName: 'أحمد حسن',
+          imageUrl: null,
+          totalPoints: 390,
+          rank: 'Gold' as const,
+          completedCoursesCount: 6,
+          isCurrentUser: false,
+        },
+        {
+          position: 4,
+          displayName: 'مريم محمد',
+          imageUrl: null,
+          totalPoints: 320,
+          rank: 'Gold' as const,
+          completedCoursesCount: 5,
+          isCurrentUser: false,
+        },
+        {
+          position: 5,
+          displayName: 'عمر خالد',
+          imageUrl: null,
+          totalPoints: 290,
+          rank: 'Silver' as const,
+          completedCoursesCount: 4,
+          isCurrentUser: false,
+        },
+      ],
+      tiers: [
+        { rank: 'Bronze' as const, minimumPoints: 0, maximumPoints: 99 },
+        { rank: 'Silver' as const, minimumPoints: 100, maximumPoints: 299 },
+        { rank: 'Gold' as const, minimumPoints: 300, maximumPoints: 599 },
+        { rank: 'Platinum' as const, minimumPoints: 600, maximumPoints: 999 },
+        { rank: 'Diamond' as const, minimumPoints: 1000, maximumPoints: null },
       ],
     },
   };

@@ -41,7 +41,9 @@ namespace ZadElealm.UnitTests.Handlers
         {
             var unitOfWork = new UnitOfWork(_dbContext);
             return new EnrollCourseCommandHandler(
-                notificationService ?? new NotificationService(unitOfWork), unitOfWork);
+                notificationService ?? new NotificationService(unitOfWork),
+                unitOfWork,
+                new EnrollmentWriteRepository(_dbContext));
         }
 
         [Fact]
@@ -89,6 +91,41 @@ namespace ZadElealm.UnitTests.Handlers
             Assert.Contains("فقه العبادات", notification.Description);
             Assert.Contains(notification.UserNotifications, un => un.AppUserId == "user-1");
             Assert.Equal(1, saveChangesCount);
+        }
+
+        [Fact]
+        public async Task Handle_WhenEnrollmentWasCancelled_ReactivatesSameEnrollmentAndKeepsProgress()
+        {
+            _dbContext.Courses.Add(BuildCourse(1));
+            var enrollment = new Enrollment
+            {
+                CourseId = 1,
+                AppUserId = "user-1",
+                IsDeleted = true,
+                UnenrolledAtUtc = DateTime.UtcNow
+            };
+            _dbContext.Enrollments.Add(enrollment);
+            _dbContext.VideoProgresses.Add(new VideoProgress
+            {
+                UserId = "user-1",
+                VideoId = 10,
+                CourseId = 1,
+                WatchedDuration = TimeSpan.FromSeconds(50),
+                IsCompleted = false
+            });
+            _dbContext.SaveChanges();
+            var originalEnrollmentId = enrollment.Id;
+
+            var handler = CreateHandler();
+
+            var result = await handler.Handle(new EnrollCourseCommand(1, "user-1"), CancellationToken.None);
+
+            Assert.Equal(200, result.StatusCode);
+            var storedEnrollment = Assert.Single(_dbContext.Enrollments.IgnoreQueryFilters());
+            Assert.Equal(originalEnrollmentId, storedEnrollment.Id);
+            Assert.False(storedEnrollment.IsDeleted);
+            Assert.Null(storedEnrollment.UnenrolledAtUtc);
+            Assert.Equal(TimeSpan.FromSeconds(50), Assert.Single(_dbContext.VideoProgresses).WatchedDuration);
         }
 
         [Fact]

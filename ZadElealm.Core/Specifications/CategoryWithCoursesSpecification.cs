@@ -11,7 +11,10 @@ namespace ZadElealm.Core.Specifications
 {
     public class CategoryWithCoursesSpecification : BaseSpecification<Core.Models.Course>
     {
-        public CategoryWithCoursesSpecification(CourseSpecParams specParams, bool countOnly = false)
+        public CategoryWithCoursesSpecification(
+            CourseSpecParams specParams,
+            bool countOnly = false,
+            bool applyPagination = true)
             : base(x => (specParams.CategoryId <= 0 || x.CategoryId == specParams.CategoryId) &&
                 (string.IsNullOrEmpty(specParams.Search) ||
                 x.Name.ToLower().Contains(specParams.Search) ||
@@ -29,7 +32,12 @@ namespace ZadElealm.Core.Specifications
             {
                 Includes.Add(x => x.Category);
                 ApplyOrdering(specParams);
-                ApplyPagination((specParams.PageNumber - 1) * specParams.PageSize, specParams.PageSize);
+                if (applyPagination)
+                {
+                    ApplyPagination(
+                        (specParams.PageNumber - 1) * specParams.PageSize,
+                        specParams.PageSize);
+                }
             }
         }
 
@@ -63,6 +71,10 @@ namespace ZadElealm.Core.Specifications
                         OrderBy = x => x.Author;
                     else
                         OrderByDescending = x => x.Author;
+                    break;
+
+                case "mixed":
+                    OrderByDescending = x => x.CreatedAt;
                     break;
 
                 default:

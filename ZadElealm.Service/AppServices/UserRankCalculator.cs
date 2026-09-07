@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ZadElealm.Apis.Dtos;
 using ZadElealm.Core.Enums;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Policies;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
@@ -41,17 +42,17 @@ namespace ZadElealm.Service.AppServices
                 .Distinct()
                 .Count();
 
-            totalPoints += completedCoursesCount * 10;
+            totalPoints += completedCoursesCount * UserRankPolicy.PointsPerCompletedCourse;
 
             var certificateSpec = new CertificatesByUserSpecification(userId);
             var certificatesCount = await _unitOfWork.Repository<Certificate>()
                 .CountAsync(certificateSpec);
-            totalPoints += certificatesCount * 20;
+            totalPoints += certificatesCount * UserRankPolicy.PointsPerCertificate;
 
             if (completedProgresses.Any())
             {
                 averageQuizScore = completedProgresses.Average(p => p.Score);
-                totalPoints += (int)(averageQuizScore * 0.5);
+                totalPoints += UserRankPolicy.CalculateQuizAverageBonus(averageQuizScore);
             }
 
             var userRankSpec = new UserRankWithUserSpecification(userId);
@@ -81,14 +82,7 @@ namespace ZadElealm.Service.AppServices
 
         public UserRankEnum DetermineRank(int points)
         {
-            return points switch
-            {
-                < 100 => UserRankEnum.Bronze,
-                < 300 => UserRankEnum.Silver,
-                < 600 => UserRankEnum.Gold,
-                < 1000 => UserRankEnum.Platinum,
-                _ => UserRankEnum.Diamond
-            };
+            return UserRankPolicy.DetermineRank(points);
         }
 
         public async Task<UserRankDto> GetUserRank(string userId)

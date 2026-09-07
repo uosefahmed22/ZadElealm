@@ -18,6 +18,9 @@ public sealed class AssessmentDto
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public int PassingScore { get; set; }
+    public int DurationMinutes { get; set; }
+    public DateTime AttemptStartedAtUtc { get; set; }
+    public DateTime AttemptExpiresAtUtc { get; set; }
     public IReadOnlyList<AssessmentQuestionDto> Questions { get; set; } = [];
 }
 

@@ -6,6 +6,9 @@ public class AssessmentProgress : BaseEntity
 {
     public int Score { get; set; }
     public bool IsCompleted { get; set; }
+    public DateTime? AttemptStartedAtUtc { get; set; }
+    public DateTime? AttemptExpiresAtUtc { get; set; }
+    public DateTime? AttemptSubmittedAtUtc { get; set; }
     public int AssessmentId { get; set; }
     public Assessment Assessment { get; set; } = null!;
     public int AssessmentFormId { get; set; }

@@ -2,10 +2,13 @@
   <div>
     <span class="eyebrow">اختبر ما تعلمته</span>
     <h1>مركز الاختبارات والشهادات</h1>
-    <p>أكمل 80% من دورة في التصنيف، ثم اجتز اختباره المعرفي لتحصل على الشهادة.</p>
+    <p>أكمل جميع دروس دورة في التصنيف، ثم اجتز اختباره المعرفي لتحصل على الشهادة.</p>
   </div>
   <span class="hero-mark" aria-hidden="true">
-    <svg viewBox="0 0 24 24"><path d="M7 3h10v12H7zM9.5 7h5M9.5 10h5"/><path d="m10 15-2 6 4-2 4 2-2-6"/></svg>
+    <svg viewBox="0 0 24 24">
+      <path d="M7 3h10v12H7zM9.5 7h5M9.5 10h5" />
+      <path d="m10 15-2 6 4-2 4 2-2-6" />
+    </svg>
   </span>
 </header>
 
@@ -33,21 +36,33 @@
         <header>
           <span class="category-label">{{ assessment.categoryName }}</span>
           <span class="status-label">
-            {{ assessment.isCompleted ? 'تم الاجتياز' : assessment.isEligible ? 'متاح الآن' : 'غير متاح بعد' }}
+            {{
+              assessment.isCompleted
+                ? 'تم الاجتياز'
+                : assessment.isEligible
+                  ? 'متاح الآن'
+                  : 'غير متاح بعد'
+            }}
           </span>
         </header>
         <h2>{{ assessment.name }}</h2>
         <p>{{ assessment.description }}</p>
         <div class="assessment-meta">
           <span>درجة النجاح {{ assessment.passingScore }}%</span>
-          @if (assessment.bestScore !== null) { <span>أفضل نتيجة {{ assessment.bestScore }}%</span> }
+          @if (assessment.bestScore !== null) {
+            <span>أفضل نتيجة {{ assessment.bestScore }}%</span>
+          }
         </div>
         @if (assessment.isCompleted) {
           <a class="zad-btn zad-btn--ghost" routerLink="/app/certificates">عرض الشهادة</a>
         } @else if (assessment.isEligible) {
-          <a class="zad-btn zad-btn--primary" [routerLink]="['/app/assessments', assessment.id]">ابدأ الاختبار</a>
+          <a class="zad-btn zad-btn--primary" [routerLink]="['/app/assessments', assessment.id]"
+            >ابدأ الاختبار</a
+          >
         } @else {
-          <button class="zad-btn zad-btn--primary" type="button" disabled>أكمل دورة في التصنيف أولًا</button>
+          <button class="zad-btn zad-btn--primary" type="button" disabled>
+            أكمل دورة في التصنيف أولًا
+          </button>
         }
       </article>
     }

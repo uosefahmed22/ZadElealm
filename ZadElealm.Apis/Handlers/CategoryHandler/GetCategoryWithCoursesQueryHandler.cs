@@ -64,13 +64,71 @@ namespace ZadElealm.Apis.Handlers.Category
             IReadOnlyList<CourseDto> coursesDto = [];
             if (totalItems > 0)
             {
-                var spec = new CategoryWithCoursesSpecification(specParams);
+                var mixCategories = ShouldMixCategories(specParams);
+                var spec = new CategoryWithCoursesSpecification(
+                    specParams,
+                    applyPagination: !mixCategories);
                 var courses = await _unitOfWork.Repository<Core.Models.Course>()
                     .GetAllWithSpecNoTrackingAsync(spec);
+
+                if (mixCategories)
+                {
+                    courses = MixCoursesByCategory(courses)
+                        .Skip((specParams.PageNumber - 1) * specParams.PageSize)
+                        .Take(specParams.PageSize)
+                        .ToList();
+                }
+
                 coursesDto = courses.ToDtos();
             }
 
             return new CourseCatalogCacheEntry(coursesDto, totalItems);
         }
+
+        private static bool ShouldMixCategories(CourseSpecParams specParams)
+            => specParams.CategoryId <= 0
+                && string.Equals(specParams.SortBy, "mixed", StringComparison.OrdinalIgnoreCase);
+
+        private static IReadOnlyList<Core.Models.Course> MixCoursesByCategory(
+            IEnumerable<Core.Models.Course> courses)
+        {
+            var categoryQueues = courses
+                .GroupBy(course => course.CategoryId)
+                .Select(group => new CategoryCourseQueue(
+                    group.Key,
+                    new Queue<Core.Models.Course>(group.OrderBy(course => ShuffleKey(course.Id)))))
+                .ToList();
+            var mixedCourses = new List<Core.Models.Course>();
+            int? previousCategoryId = null;
+
+            while (categoryQueues.Count > 0)
+            {
+                var nextCategory = categoryQueues
+                    .Where(group => group.CategoryId != previousCategoryId)
+                    .OrderByDescending(group => group.Courses.Count)
+                    .ThenBy(group => ShuffleKey(group.CategoryId))
+                    .FirstOrDefault()
+                    ?? categoryQueues
+                        .OrderByDescending(group => group.Courses.Count)
+                        .ThenBy(group => ShuffleKey(group.CategoryId))
+                        .First();
+
+                mixedCourses.Add(nextCategory.Courses.Dequeue());
+                previousCategoryId = nextCategory.CategoryId;
+                if (nextCategory.Courses.Count == 0)
+                {
+                    categoryQueues.Remove(nextCategory);
+                }
+            }
+
+            return mixedCourses;
+        }
+
+        private static int ShuffleKey(int value)
+            => unchecked((value * 1103515245) + 12345);
+
+        private sealed record CategoryCourseQueue(
+            int CategoryId,
+            Queue<Core.Models.Course> Courses);
     }
 }

@@ -9,6 +9,7 @@ describe('MyCoursesComponent', () => {
   let learningApi: {
     getEnrolledCourses: ReturnType<typeof vi.fn>;
     getCourseProgress: ReturnType<typeof vi.fn>;
+    enroll: ReturnType<typeof vi.fn>;
     unenroll: ReturnType<typeof vi.fn>;
   };
 
@@ -30,6 +31,7 @@ describe('MyCoursesComponent', () => {
           isEligibleForQuiz: false,
         }),
       ),
+      enroll: vi.fn(() => of({ statusCode: 200 })),
       unenroll: vi.fn(() => of({ statusCode: 200 })),
     };
 
@@ -48,7 +50,7 @@ describe('MyCoursesComponent', () => {
     expect(learningApi.getCourseProgress).not.toHaveBeenCalled();
   });
 
-  it('requires confirmation then removes the unenrolled course', () => {
+  it('requires confirmation and can undo without losing the course progress', () => {
     const fixture = TestBed.createComponent(MyCoursesComponent);
     fixture.detectChanges();
 
@@ -60,6 +62,16 @@ describe('MyCoursesComponent', () => {
     expect(learningApi.unenroll).toHaveBeenCalledWith(10);
     expect(fixture.componentInstance.courses()).toHaveLength(0);
     expect(fixture.nativeElement.textContent).toContain('تم إلغاء التسجيل');
+    expect(fixture.nativeElement.textContent).toContain('تقدمك في الدورة محفوظ');
+
+    fixture.componentInstance.undoUnenroll();
+    fixture.detectChanges();
+
+    expect(learningApi.enroll).toHaveBeenCalledWith(10);
+    expect(fixture.componentInstance.courses()).toHaveLength(1);
+    expect(fixture.componentInstance.courses()[0].progress?.overallProgress).toBe(50);
+    expect(fixture.nativeElement.textContent).toContain('تمت استعادة');
+    fixture.destroy();
   });
 });
 

@@ -4,6 +4,7 @@ import {
   Component,
   DestroyRef,
   OnInit,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -11,7 +12,12 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { RankApiService } from '../../core/rank/rank-api.service';
-import { LeaderboardEntry, RankDashboard, RankTier } from '../../core/rank/rank.models';
+import {
+  LeaderboardEntry,
+  RankDashboard,
+  RankTier,
+  RankTierDefinition,
+} from '../../core/rank/rank.models';
 
 const rankLabels: Record<RankTier, string> = {
   Bronze: 'برونزي',
@@ -19,22 +25,6 @@ const rankLabels: Record<RankTier, string> = {
   Gold: 'ذهبي',
   Platinum: 'بلاتيني',
   Diamond: 'ماسي',
-};
-
-const nextThresholds: Record<RankTier, number | null> = {
-  Bronze: 100,
-  Silver: 300,
-  Gold: 600,
-  Platinum: 1000,
-  Diamond: null,
-};
-
-const rankStarts: Record<RankTier, number> = {
-  Bronze: 0,
-  Silver: 100,
-  Gold: 300,
-  Platinum: 600,
-  Diamond: 1000,
 };
 
 @Component({
@@ -52,6 +42,8 @@ export class LeaderboardComponent implements OnInit {
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
   readonly brokenImages = signal<readonly number[]>([]);
+  readonly podiumLeaders = computed(() => this.dashboard()?.leaders.slice(0, 3) ?? []);
+  readonly remainingLeaders = computed(() => this.dashboard()?.leaders.slice(3, 10) ?? []);
 
   ngOnInit(): void {
     this.loadDashboard();
@@ -65,16 +57,32 @@ export class LeaderboardComponent implements OnInit {
     return rankLabels[rank];
   }
 
-  pointsToNext(rank: RankTier, points: number): number | null {
-    const threshold = nextThresholds[rank];
-    return threshold === null ? null : Math.max(0, threshold - points);
+  pointsToNext(tiers: RankTierDefinition[], rank: RankTier, points: number): number | null {
+    const tierIndex = tiers.findIndex((tier) => tier.rank === rank);
+    const nextTier = tiers[tierIndex + 1];
+    return nextTier ? Math.max(0, nextTier.minimumPoints - points) : null;
   }
 
-  progressPercentage(rank: RankTier, points: number): number {
-    const threshold = nextThresholds[rank];
-    if (threshold === null) return 100;
-    const start = rankStarts[rank];
-    return Math.min(100, Math.max(0, ((points - start) / (threshold - start)) * 100));
+  progressPercentage(tiers: RankTierDefinition[], rank: RankTier, points: number): number {
+    const tierIndex = tiers.findIndex((tier) => tier.rank === rank);
+    const currentTier = tiers[tierIndex];
+    const nextTier = tiers[tierIndex + 1];
+    if (!currentTier || !nextTier) return 100;
+    return Math.min(
+      100,
+      Math.max(
+        0,
+        ((points - currentTier.minimumPoints) /
+          (nextTier.minimumPoints - currentTier.minimumPoints)) *
+          100,
+      ),
+    );
+  }
+
+  tierRange(tier: RankTierDefinition): string {
+    return tier.maximumPoints === null
+      ? `${tier.minimumPoints.toLocaleString('ar-EG')}+ نقطة`
+      : `${tier.minimumPoints.toLocaleString('ar-EG')}–${tier.maximumPoints.toLocaleString('ar-EG')}`;
   }
 
   initials(entry: LeaderboardEntry): string {

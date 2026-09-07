@@ -82,6 +82,9 @@ export interface CategoryAssessmentDto {
   name: string;
   description: string;
   passingScore: number;
+  durationMinutes: number;
+  attemptStartedAtUtc: string;
+  attemptExpiresAtUtc: string;
   questions: AssessmentQuestionDto[];
 }
 

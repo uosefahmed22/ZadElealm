@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
+using ZadElealm.Core.Policies;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
@@ -106,7 +107,7 @@ namespace ZadElealm.Service.AppServices
                 : 0;
 
             var overallProgress = videoProgress;
-            var isEligibleForQuiz = videoProgress >= 80;
+            var isEligibleForQuiz = CourseCompletionPolicy.IsEligibleForAssessment(videoProgress);
 
             var courseProgress = new CourseProgress
             {
@@ -126,7 +127,8 @@ namespace ZadElealm.Service.AppServices
                 return false;
 
             var courseProgress = progressResponse.Data as CourseProgress;
-            return courseProgress?.OverallProgress >= 80;
+            return courseProgress != null &&
+                CourseCompletionPolicy.IsEligibleForAssessment(courseProgress.OverallProgress);
         }
         public async Task<ApiDataResponse> GetVideoProgressAsync(string userId, int videoId)
         {

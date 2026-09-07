@@ -5,7 +5,6 @@ import { of, throwError } from 'rxjs';
 
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
-import { CatalogApiService } from '../../core/catalog/catalog-api.service';
 import { LearningApiService } from '../../core/learning/learning-api.service';
 import { StudentHomeComponent } from './student-home.component';
 
@@ -13,9 +12,9 @@ describe('StudentHomeComponent', () => {
   let learningApi: {
     getEnrolledCourses: ReturnType<typeof vi.fn>;
     getCourseProgress: ReturnType<typeof vi.fn>;
+    getFavorites: ReturnType<typeof vi.fn>;
   };
   let assessmentApi: { getCertificates: ReturnType<typeof vi.fn> };
-  let catalogApi: { getCourses: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     learningApi = {
@@ -35,11 +34,16 @@ describe('StudentHomeComponent', () => {
           isEligibleForQuiz: false,
         }),
       ),
+      getFavorites: vi.fn(() =>
+        of({
+          statusCode: 200,
+          data: { courses: [course(2)], allFavoriteCourses: 1 },
+        }),
+      ),
     };
     assessmentApi = {
       getCertificates: vi.fn(() => of({ statusCode: 200, data: [certificate()] })),
     };
-    catalogApi = { getCourses: vi.fn(() => of(catalogResponse([course(2)]))) };
     await TestBed.configureTestingModule({
       imports: [StudentHomeComponent],
       providers: [
@@ -50,7 +54,6 @@ describe('StudentHomeComponent', () => {
         },
         { provide: LearningApiService, useValue: learningApi },
         { provide: AssessmentApiService, useValue: assessmentApi },
-        { provide: CatalogApiService, useValue: catalogApi },
       ],
     }).compileComponents();
   });
@@ -79,11 +82,35 @@ describe('StudentHomeComponent', () => {
       }),
     );
     assessmentApi.getCertificates.mockReturnValue(of({ statusCode: 200, data: [] }));
-    catalogApi.getCourses.mockReturnValue(of(catalogResponse([])));
+    learningApi.getFavorites.mockReturnValue(
+      of({ statusCode: 200, data: { courses: [], allFavoriteCourses: 0 } }),
+    );
     const fixture = TestBed.createComponent(StudentHomeComponent);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('لم تسجل في أي دورة بعد');
     expect(fixture.nativeElement.textContent).toContain('لم تحصل على شهادات بعد');
+    expect(fixture.nativeElement.textContent).toContain('لم تضف أي دورة إلى المفضلة بعد');
+  });
+
+  it('shows only three favorite courses and links to the full favorites page', () => {
+    learningApi.getFavorites.mockReturnValue(
+      of({
+        statusCode: 200,
+        data: {
+          courses: [course(2), course(3), course(4), course(5)],
+          allFavoriteCourses: 4,
+        },
+      }),
+    );
+
+    const fixture = TestBed.createComponent(StudentHomeComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelectorAll('.favorite-grid app-course-card')).toHaveLength(
+      3,
+    );
+    expect(fixture.nativeElement.textContent).toContain('عرض الكل');
+    expect(fixture.nativeElement.textContent).not.toContain('الدورة 5');
   });
 
   it('shows only three recent courses and links to the full library', () => {
@@ -152,19 +179,5 @@ function progress(courseId: number) {
     totalVideos: 2,
     remainingVideos: 1,
     isEligibleForQuiz: false,
-  };
-}
-function catalogResponse(data: ReturnType<typeof course>[]) {
-  return {
-    statusCode: 200,
-    data,
-    metaData: {
-      pageSize: 3,
-      currentPage: 1,
-      totalMatchedItems: data.length,
-      nextPage: null,
-      previousPage: null,
-      numberOfPages: data.length ? 1 : 0,
-    },
   };
 }

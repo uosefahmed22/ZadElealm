@@ -26,9 +26,10 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 return new ApiResponse(404, "لم يتم العثور على التسجيل");
 
             enrollment.IsDeleted = true;
+            enrollment.UnenrolledAtUtc = DateTime.UtcNow;
             await _unitOfWork.Complete();
 
-            return new ApiResponse(200, "تم إلغاء التسجيل بنجاح");
+            return new ApiResponse(200, "تم إلغاء التسجيل مع الاحتفاظ بتقدمك");
         }
     }
 }

@@ -133,7 +133,7 @@
 }
 
 .learning-grid,
-.suggested-grid {
+.favorite-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-5);
@@ -400,7 +400,7 @@
 
 @media (max-width: 64rem) {
   .learning-grid,
-  .suggested-grid,
+  .favorite-grid,
   .mini-certificates {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -416,7 +416,7 @@
 
   .summary-grid,
   .learning-grid,
-  .suggested-grid,
+  .favorite-grid,
   .mini-certificates {
     grid-template-columns: 1fr;
   }

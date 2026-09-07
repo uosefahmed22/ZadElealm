@@ -26,6 +26,7 @@ import {
   CourseReviewDto,
   completionPercentage,
   formatDuration,
+  isCourseExamUnlocked,
   timeSpanToSeconds,
 } from '../../core/learning/learning.models';
 import {
@@ -94,7 +95,7 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
     return completionPercentage(videos.filter((video) => video.isCompleted).length, videos.length);
   });
   readonly quizUnlocked = computed(
-    () => this.progress()?.isEligibleForQuiz ?? this.completion() >= 80,
+    () => this.progress()?.isEligibleForQuiz ?? isCourseExamUnlocked(this.completion()),
   );
   readonly isFiqhCourse = computed(() => {
     const categoryName = this.course()?.category?.name?.trim();
@@ -549,7 +550,7 @@ export class CourseDetailsComponent implements OnInit, OnDestroy {
       completedVideos,
       totalVideos: videos.length,
       remainingVideos: videos.length - completedVideos,
-      isEligibleForQuiz: percentage >= 80,
+      isEligibleForQuiz: isCourseExamUnlocked(percentage),
     }));
   }
 

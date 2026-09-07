@@ -13,6 +13,14 @@ import { StudentLayoutComponent } from './layouts/student-layout/student-layout.
 export const routes: Routes = [
   { path: '', pathMatch: 'full', component: LandingPageComponent },
   {
+    path: 'guide',
+    data: { publicGuide: true },
+    loadComponent: () =>
+      import('./features/platform-guide/platform-guide.component').then(
+        (component) => component.PlatformGuideComponent,
+      ),
+  },
+  {
     path: '',
     component: AuthLayoutComponent,
     children: [
@@ -83,6 +91,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/favorites/favorites.component').then(
             (component) => component.FavoritesComponent,
+          ),
+      },
+      {
+        path: 'guide',
+        loadComponent: () =>
+          import('./features/platform-guide/platform-guide.component').then(
+            (component) => component.PlatformGuideComponent,
           ),
       },
       {

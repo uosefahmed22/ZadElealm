@@ -67,11 +67,15 @@ describe('StudentLayoutComponent notifications', () => {
     ).not.toBeNull();
   });
 
-  it('keeps four primary links and moves secondary navigation and logout into account menu', () => {
+  it('keeps four primary links, removes favorites, and names the guide clearly', () => {
     const fixture = TestBed.createComponent(StudentLayoutComponent);
     fixture.detectChanges();
 
     expect(fixture.nativeElement.querySelectorAll('.student-nav a')).toHaveLength(4);
+    expect(fixture.nativeElement.querySelector('.student-nav').textContent).toContain('كيف تبدأ؟');
+    expect(fixture.nativeElement.querySelector('.student-nav').textContent).not.toContain(
+      'المفضلة',
+    );
     expect(fixture.nativeElement.querySelector('.account-panel')).toBeNull();
 
     const trigger = fixture.nativeElement.querySelector('.account-trigger') as HTMLButtonElement;

@@ -40,7 +40,7 @@ export interface CourseCatalogFilters {
   author: string;
   language: string;
   minRating: number;
-  sortBy: 'date' | 'rating' | 'name';
+  sortBy: 'mixed' | 'date' | 'rating' | 'name';
   sortDirection: 'asc' | 'desc';
   pageNumber: number;
   pageSize: number;

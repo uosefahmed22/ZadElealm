@@ -22,6 +22,7 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
     [Fact]
     public async Task Student_CanManageEnrollmentAndFavorites_WithStableListContracts()
     {
+        await ResetStudentLibraryStateAsync();
         var courseId = await GetSeededCourseIdAsync();
         using var client = CreateAuthenticatedClient();
 
@@ -74,6 +75,7 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
     [Fact]
     public async Task EnrollmentList_IncludesCategoryAndBatchedProgress()
     {
+        await ResetStudentLibraryStateAsync();
         var seeded = await SeedCompletedVideoAsync();
         using var client = CreateAuthenticatedClient();
 
@@ -91,11 +93,45 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
         var progress = Assert.Single(data.GetProperty("progress").EnumerateArray());
         Assert.Equal(seeded.CourseId, progress.GetProperty("courseId").GetInt32());
         Assert.Equal(1, progress.GetProperty("completedVideos").GetInt32());
-        Assert.Equal(1, progress.GetProperty("totalVideos").GetInt32());
-        Assert.Equal(100, progress.GetProperty("overallProgress").GetSingle());
+        Assert.Equal(2, progress.GetProperty("totalVideos").GetInt32());
+        Assert.Equal(50, progress.GetProperty("overallProgress").GetSingle());
 
         var unenroll = await client.DeleteAsync($"/api/Enrollment/{seeded.CourseId}");
         Assert.Equal(HttpStatusCode.OK, unenroll.StatusCode);
+
+        using (var verificationScope = _factory.Services.CreateScope())
+        {
+            var verificationContext = verificationScope.ServiceProvider.GetRequiredService<AppDbContext>();
+            Assert.True(await verificationContext.VideoProgresses.AnyAsync(progressItem =>
+                progressItem.CourseId == seeded.CourseId && progressItem.IsCompleted));
+        }
+
+        var restoreEnrollment = await client.PostAsync($"/api/Enrollment/{seeded.CourseId}", null);
+        Assert.Equal(HttpStatusCode.OK, restoreEnrollment.StatusCode);
+
+        var restoredResponse = await client.GetAsync("/api/Enrollment");
+        Assert.Equal(HttpStatusCode.OK, restoredResponse.StatusCode);
+        using var restoredDocument = JsonDocument.Parse(await restoredResponse.Content.ReadAsStringAsync());
+        var restoredProgress = restoredDocument.RootElement.GetProperty("data")
+            .GetProperty("progress")
+            .EnumerateArray()
+            .Single(item => item.GetProperty("courseId").GetInt32() == seeded.CourseId);
+        Assert.Equal(50, restoredProgress.GetProperty("overallProgress").GetSingle());
+
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var userId = await dbContext.Users
+            .Where(user => user.Email == "user@test.com")
+            .Select(user => user.Id)
+            .SingleAsync();
+        var enrollmentRows = await dbContext.Enrollments
+            .IgnoreQueryFilters()
+            .Where(enrollment => enrollment.AppUserId == userId &&
+                enrollment.CourseId == seeded.CourseId)
+            .ToListAsync();
+        var restoredEnrollment = Assert.Single(enrollmentRows);
+        Assert.False(restoredEnrollment.IsDeleted);
+        Assert.Null(restoredEnrollment.UnenrolledAtUtc);
     }
 
     private HttpClient CreateAuthenticatedClient()
@@ -121,6 +157,35 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
             .FirstAsync();
     }
 
+    private async Task ResetStudentLibraryStateAsync()
+    {
+        using var scope = _factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var userId = await dbContext.Users
+            .Where(user => user.Email == "user@test.com")
+            .Select(user => user.Id)
+            .SingleAsync();
+
+        dbContext.Enrollments.RemoveRange(await dbContext.Enrollments
+            .IgnoreQueryFilters()
+            .Where(enrollment => enrollment.AppUserId == userId)
+            .ToListAsync());
+        dbContext.Favorites.RemoveRange(await dbContext.Favorites
+            .IgnoreQueryFilters()
+            .Where(favorite => favorite.AppUserId == userId)
+            .ToListAsync());
+        dbContext.VideoProgresses.RemoveRange(await dbContext.VideoProgresses
+            .IgnoreQueryFilters()
+            .Where(progress => progress.UserId == userId)
+            .ToListAsync());
+        dbContext.Videos.RemoveRange(await dbContext.Videos
+            .IgnoreQueryFilters()
+            .Where(video => video.Title.StartsWith("اختبار تقدم الدورة"))
+            .ToListAsync());
+
+        await dbContext.SaveChangesAsync();
+    }
+
     private async Task<(int CourseId, int VideoId)> SeedCompletedVideoAsync()
     {
         using var scope = _factory.Services.CreateScope();
@@ -134,9 +199,9 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
             .Select(user => user.Id)
             .SingleAsync();
 
-        var video = new Video
+        var completedVideo = new Video
         {
-            Title = "اختبار تقدم الدورة",
+            Title = "اختبار تقدم الدورة - مكتمل",
             Description = "فيديو مخصص لاختبار عقد التقدم المجمع",
             VideoUrl = "https://example.test/video",
             ThumbnailUrl = "https://example.test/video.jpg",
@@ -144,20 +209,30 @@ public class StudentCourseLibraryTests : IClassFixture<ZadElealmApiFactory>
             OrderInCourse = 1,
             CourseId = courseId
         };
-        dbContext.Videos.Add(video);
+        var remainingVideo = new Video
+        {
+            Title = "اختبار تقدم الدورة - متبقٍ",
+            Description = "فيديو ثانٍ لإثبات الاحتفاظ بنسبة خمسين بالمائة",
+            VideoUrl = "https://example.test/video-2",
+            ThumbnailUrl = "https://example.test/video-2.jpg",
+            VideoDuration = TimeSpan.FromMinutes(5),
+            OrderInCourse = 2,
+            CourseId = courseId
+        };
+        dbContext.Videos.AddRange(completedVideo, remainingVideo);
         await dbContext.SaveChangesAsync();
 
         dbContext.VideoProgresses.Add(new VideoProgress
         {
             UserId = userId,
-            VideoId = video.Id,
+            VideoId = completedVideo.Id,
             CourseId = courseId,
-            WatchedDuration = video.VideoDuration,
+            WatchedDuration = completedVideo.VideoDuration,
             IsCompleted = true
         });
         await dbContext.SaveChangesAsync();
 
-        return (courseId, video.Id);
+        return (courseId, completedVideo.Id);
     }
 
     private static async Task AssertEmptyCourseListAsync(

@@ -2,13 +2,19 @@ import {
   completionPercentage,
   formatDuration,
   hasReachedVideoCompletion,
+  isCourseExamUnlocked,
   timeSpanToSeconds,
 } from './learning.models';
 
 describe('learning progress helpers', () => {
-  it('opens a course quiz at eighty percent completed videos', () => {
+  it('calculates completed-video percentages', () => {
     expect(completionPercentage(4, 5)).toBe(80);
     expect(completionPercentage(3, 5)).toBe(60);
+  });
+
+  it('opens a course exam only after all videos are complete', () => {
+    expect(isCourseExamUnlocked(99)).toBe(false);
+    expect(isCourseExamUnlocked(100)).toBe(true);
   });
 
   it('marks a video complete only at eighty-five percent', () => {

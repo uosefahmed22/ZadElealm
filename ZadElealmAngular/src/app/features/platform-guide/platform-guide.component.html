@@ -1,0 +1,124 @@
+@if (showPublicHeader) {
+  <header class="guide-header">
+    <div class="guide-header__inner">
+      <a class="brand" routerLink="/" aria-label="زاد تعلم - الرئيسية">
+        <img src="assets/icons/logo-dark.svg" alt="" width="150" height="45" />
+      </a>
+      <nav aria-label="روابط دليل المنصة">
+        <a routerLink="/">الرئيسية</a>
+        <a routerLink="/login">تسجيل الدخول</a>
+        <a class="header-action" routerLink="/register">إنشاء حساب</a>
+      </nav>
+    </div>
+  </header>
+}
+
+<main class="guide-page" id="guide-content">
+  <section class="guide-hero" aria-labelledby="guide-title">
+    <div class="hero-copy">
+      <span class="eyebrow">دليل المنصة</span>
+      <h1 id="guide-title">رحلتك من إنشاء الحساب إلى الشهادة</h1>
+      <p>اتبع الخطوات بالترتيب لتختار دورتك، تحفظ تقدمك، تدخل اختبار المجال وتحصل على شهادتك.</p>
+      <div class="hero-actions">
+        <a class="primary-link" routerLink="/register">ابدأ بإنشاء حساب</a>
+        <a class="secondary-link" routerLink="/app/courses">استكشف الدورات</a>
+      </div>
+    </div>
+    <ol class="journey-summary" aria-label="ملخص رحلة الطالب">
+      <li><span>1</span> حساب</li>
+      <li><span>2</span> دورة</li>
+      <li><span>3</span> تعلّم</li>
+      <li><span>4</span> اختبار</li>
+      <li><span>5</span> مراجعة</li>
+      <li><span>6</span> شهادة</li>
+    </ol>
+  </section>
+
+  <section class="visual-journey" aria-labelledby="visual-guide-title">
+    <header class="section-heading">
+      <span class="eyebrow">ابدأ من هنا</span>
+      <h2 id="visual-guide-title">أول خطوتين داخل المنصة</h2>
+      <p>الصور توضح لك مكان الإجراء الذي تحتاجه في كل خطوة.</p>
+    </header>
+
+    <article class="visual-step">
+      <div class="step-copy">
+        <span class="step-number">الخطوة 1</span>
+        <h3>أنشئ حسابك وفعّل بريدك</h3>
+        <p>
+          اكتب اسمك وبريدك وكلمة المرور، ثم اضغط «إنشاء الحساب». افتح رسالة التأكيد التي ستصلك على
+          البريد، وبعدها سجّل الدخول.
+        </p>
+        <a routerLink="/register">الذهاب إلى إنشاء الحساب</a>
+      </div>
+      <figure>
+        <img
+          src="assets/guide/create-account.jpg"
+          alt="شرح إنشاء حساب جديد وتفعيل البريد ثم تسجيل الدخول"
+          width="1200"
+          height="675"
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption>املأ البيانات ثم اضغط زر «إنشاء الحساب».</figcaption>
+      </figure>
+    </article>
+
+    <article class="visual-step visual-step--reverse">
+      <div class="step-copy">
+        <span class="step-number">الخطوة 2</span>
+        <h3>اختر الدورة وسجّل فيها</h3>
+        <p>
+          افتح التصنيف المناسب، اختر الدورة، ثم ادخل إلى تفاصيلها واضغط «التسجيل في الدورة». ستجدها
+          بعد ذلك في صفحة «دوراتي».
+        </p>
+        <a routerLink="/app/courses">عرض التصنيفات والدورات</a>
+      </div>
+      <figure>
+        <img
+          src="assets/guide/choose-course.jpg"
+          alt="شرح اختيار دورة الفقه والضغط على زر التسجيل في الدورة"
+          width="1200"
+          height="675"
+          loading="lazy"
+        />
+        <figcaption>اختر الدورة المناسبة ثم اضغط «التسجيل في الدورة».</figcaption>
+      </figure>
+    </article>
+  </section>
+
+  <section class="next-steps" aria-labelledby="next-steps-title">
+    <header class="section-heading section-heading--center">
+      <span class="eyebrow">بعد التسجيل</span>
+      <h2 id="next-steps-title">كمّل رحلتك حتى الشهادة</h2>
+      <p>سنضيف الصور التفصيلية لهذه الخطوات بعد اعتماد شكل الدليل.</p>
+    </header>
+
+    <ol class="steps-grid">
+      @for (step of remainingSteps; track step.number) {
+        <li>
+          <div class="step-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <use [attr.href]="'assets/icons/sprite.svg#' + step.icon"></use>
+            </svg>
+          </div>
+          <span>الخطوة {{ step.number }}</span>
+          <h3>{{ step.title }}</h3>
+          <p>{{ step.description }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <section class="support-callout" aria-labelledby="support-title">
+    <div>
+      <span class="eyebrow">نحن هنا لمساعدتك</span>
+      <h2 id="support-title">لم تجد الدورة التي تبحث عنها؟</h2>
+      <p>
+        أرسل اقتراحك أو تواصل مع الإدارة من خلال الدعم. اكتب اسم المجال أو الدورة المطلوبة وتفاصيل
+        تساعدنا على فهم احتياجك.
+      </p>
+    </div>
+    <a routerLink="/app/support">التواصل مع الدعم</a>
+  </section>
+</main>

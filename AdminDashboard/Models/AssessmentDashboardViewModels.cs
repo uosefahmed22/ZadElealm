@@ -12,6 +12,7 @@ public sealed class AssessmentDashboardItemViewModel
     public string Description { get; init; } = string.Empty;
     public string CategoryName { get; init; } = string.Empty;
     public int PassingScore { get; init; }
+    public int DurationMinutes { get; init; }
     public bool IsActive { get; init; }
     public int FormCount { get; init; }
     public int QuestionCount { get; init; }
@@ -24,6 +25,7 @@ public sealed class AssessmentDashboardDetailsViewModel
     public string Description { get; init; } = string.Empty;
     public string CategoryName { get; init; } = string.Empty;
     public int PassingScore { get; init; }
+    public int DurationMinutes { get; init; }
     public bool IsActive { get; init; }
     public IReadOnlyList<AssessmentFormAdminViewModel> Forms { get; init; } = [];
 }
@@ -40,6 +42,8 @@ public sealed class AssessmentQuestionAdminViewModel
 {
     public int Id { get; init; }
     public string Text { get; init; } = string.Empty;
+    public int DisplayOrder { get; init; }
+    public string Difficulty { get; init; } = string.Empty;
     public IReadOnlyList<AssessmentChoiceAdminViewModel> Choices { get; init; } = [];
 }
 

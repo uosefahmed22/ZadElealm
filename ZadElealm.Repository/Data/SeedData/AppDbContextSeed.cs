@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Repository.Data.Datbases;
@@ -119,22 +120,54 @@ namespace ZadElealm.Repository.Data.SeedData
                 return;
             }
 
-            if (context.Assessments.Any(assessment => assessment.CategoryId == fiqhCategory.Id))
-                return;
+            var assessment = await context.Assessments
+                .Include(item => item.Forms)
+                .ThenInclude(form => form.Questions)
+                .ThenInclude(question => question.Choices)
+                .AsSplitQuery()
+                .FirstOrDefaultAsync(item => item.CategoryId == fiqhCategory.Id);
+            var desiredForms = FiqhAssessmentSeedData.BuildForms();
 
-            var assessment = new Assessment
+            if (assessment == null)
             {
-                Name = "اختبار الفقه",
-                Description = "اختبار معرفي عام متاح بعد إكمال 80% من إحدى دورات الفقه.",
-                PassingScore = 60,
-                IsActive = true,
-                CategoryId = fiqhCategory.Id,
-                Forms = BuildFiqhForms()
-            };
+                assessment = new Assessment
+                {
+                    Name = "اختبار الفقه",
+                    Description = "اختبار معرفي عام متاح بعد إكمال 80% من إحدى دورات الفقه.",
+                    PassingScore = 60,
+                    DurationMinutes = 30,
+                    IsActive = true,
+                    CategoryId = fiqhCategory.Id,
+                    Forms = desiredForms
+                };
+                await context.Assessments.AddAsync(assessment);
+            }
+            else
+            {
+                assessment.DurationMinutes = 30;
+                foreach (var desiredForm in desiredForms)
+                {
+                    var existingForm = assessment.Forms.FirstOrDefault(form =>
+                        form.InternalCode == desiredForm.InternalCode);
+                    if (existingForm == null)
+                    {
+                        assessment.Forms.Add(desiredForm);
+                        continue;
+                    }
 
-            await context.Assessments.AddAsync(assessment);
+                    existingForm.IsActive = true;
+                    var needsUpgrade = existingForm.Questions.Count != 25 ||
+                        existingForm.Questions.Any(question => question.DisplayOrder <= 0);
+                    if (!needsUpgrade)
+                        continue;
+
+                    context.AssessmentQuestions.RemoveRange(existingForm.Questions);
+                    existingForm.Questions = desiredForm.Questions;
+                }
+            }
+
             await context.SaveChangesAsync();
-            logger.LogInformation("Seeded the Fiqh assessment with five internal forms.");
+            logger.LogInformation("Fiqh assessment is ready with five internal forms and 25 questions per form.");
         }
 
         private static List<AssessmentForm> BuildFiqhForms()

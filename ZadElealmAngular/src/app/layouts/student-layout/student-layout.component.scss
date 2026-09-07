@@ -490,7 +490,7 @@
     padding: var(--space-2);
     border-block-start: var(--rule-hairline);
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--space-1);
     background: var(--surface-paper-raised);
   }

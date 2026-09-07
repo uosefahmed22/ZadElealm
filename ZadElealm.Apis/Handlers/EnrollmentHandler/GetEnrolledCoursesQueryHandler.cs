@@ -2,6 +2,7 @@ using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Dtos.DtosCategory;
 using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Core.Errors;
+using ZadElealm.Core.Policies;
 using ZadElealm.Apis.Quaries.EnrollmentQuery;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.ServiceDto;
@@ -74,7 +75,7 @@ namespace ZadElealm.Apis.Handlers.EnrollentHandler
                 CompletedVideos = completedVideos,
                 TotalVideos = enrollment.TotalVideos,
                 RemainingVideos = enrollment.TotalVideos - completedVideos,
-                IsEligibleForQuiz = percentage >= 80
+                IsEligibleForQuiz = CourseCompletionPolicy.IsEligibleForAssessment(percentage)
             };
         }
     }

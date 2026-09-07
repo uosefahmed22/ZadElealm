@@ -16,7 +16,6 @@ import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { CertificateDto } from '../../core/assessments/assessment.models';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
-import { CatalogApiService } from '../../core/catalog/catalog-api.service';
 import { CourseDto } from '../../core/catalog/catalog.models';
 import { LearningApiService } from '../../core/learning/learning-api.service';
 import { CourseProgressDto } from '../../core/learning/learning.models';
@@ -38,13 +37,12 @@ export class StudentHomeComponent implements OnInit {
   readonly session = inject(AuthSessionService);
   private readonly learningApi = inject(LearningApiService);
   private readonly assessmentApi = inject(AssessmentApiService);
-  private readonly catalogApi = inject(CatalogApiService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly enrolledCourses = signal<readonly DashboardCourse[]>([]);
   readonly visibleEnrolledCourses = computed(() => this.enrolledCourses().slice(0, 3));
   readonly certificates = signal<readonly CertificateDto[]>([]);
-  readonly suggestedCourses = signal<readonly CourseDto[]>([]);
+  readonly favoriteCourses = signal<readonly CourseDto[]>([]);
   readonly failedCourseImages = signal<ReadonlySet<number>>(new Set());
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
@@ -84,21 +82,11 @@ export class StudentHomeComponent implements OnInit {
     forkJoin({
       enrolled: this.learningApi.getEnrolledCourses(),
       certificates: this.assessmentApi.getCertificates(),
-      suggested: this.catalogApi.getCourses({
-        categoryId: 0,
-        search: '',
-        author: '',
-        language: '',
-        minRating: 0,
-        sortBy: 'date',
-        sortDirection: 'desc',
-        pageNumber: 1,
-        pageSize: 3,
-      }),
+      favorites: this.learningApi.getFavorites(),
     })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ enrolled, certificates, suggested }) => {
+        next: ({ enrolled, certificates, favorites }) => {
           const courses = enrolled.data.courses;
           const progressByCourse = new Map(
             (enrolled.data.progress ?? []).map((item) => [item.courseId, item]),
@@ -111,10 +99,7 @@ export class StudentHomeComponent implements OnInit {
             })),
           );
           this.certificates.set(certificates.data);
-          const enrolledIds = new Set(courses.map((course) => course.id));
-          this.suggestedCourses.set(
-            suggested.data.filter((course) => !enrolledIds.has(course.id)).slice(0, 3),
-          );
+          this.favoriteCourses.set(favorites.data.courses.slice(0, 3));
           this.isLoading.set(false);
         },
         error: (error: unknown) => {
