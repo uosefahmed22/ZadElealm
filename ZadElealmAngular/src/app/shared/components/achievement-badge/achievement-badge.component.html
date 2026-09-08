@@ -1,0 +1,105 @@
+<article
+  class="badge-card"
+  tabindex="0"
+  [class.badge-card--locked]="!achievement().isUnlocked"
+  [class.badge-card--new]="isNew()"
+  [attr.data-icon]="achievement().iconKey"
+  [attr.aria-describedby]="'achievement-details-' + achievement().code"
+>
+  @if (isNew()) {
+    <span class="new-label">جديد</span>
+  }
+
+  <span class="badge-icon" aria-hidden="true">
+    @switch (achievement().iconKey) {
+      @case ('first-lesson') {
+        <svg viewBox="0 0 32 32">
+          <path d="M6 7h8a4 4 0 0 1 4 4v15H10a4 4 0 0 0-4 4V7Zm20 0h-8v19h4a4 4 0 0 1 4 4V7Z" />
+        </svg>
+      }
+      @case ('seven-day-streak') {
+        <span class="flame-emoji" [class.flame-emoji--hot]="isHotStreak()">🔥</span>
+      }
+      @case ('thirty-day-streak') {
+        <span class="flame-emoji" [class.flame-emoji--hot]="isHotStreak()">🔥</span>
+      }
+      @case ('quiz-excellence') {
+        <svg viewBox="0 0 32 32">
+          <path d="m16 3 3.8 8 8.7 1.1-6.4 6 1.7 8.6-7.8-4.2-7.8 4.2 1.7-8.6-6.4-6 8.7-1.1L16 3Z" />
+        </svg>
+      }
+      @case ('diamond-rank') {
+        <svg viewBox="0 0 32 32">
+          <path d="m4 11 5-6h14l5 6-12 17L4 11Zm0 0h24M9 5l7 23L23 5" />
+        </svg>
+      }
+      @case ('silver-rank') {
+        <svg viewBox="0 0 32 32">
+          <path
+            d="M8 4h16v12a8 8 0 0 1-16 0V4Zm-1 3H3v4a6 6 0 0 0 6 6m16-10h4v4a6 6 0 0 1-6 6M16 24v5m-6 0h12"
+          />
+        </svg>
+      }
+      @case ('gold-rank') {
+        <svg viewBox="0 0 32 32">
+          <path
+            d="M8 4h16v12a8 8 0 0 1-16 0V4Zm-1 3H3v4a6 6 0 0 0 6 6m16-10h4v4a6 6 0 0 1-6 6M16 24v5m-6 0h12"
+          />
+        </svg>
+      }
+      @case ('platinum-rank') {
+        <svg viewBox="0 0 32 32">
+          <path
+            d="M8 4h16v12a8 8 0 0 1-16 0V4Zm-1 3H3v4a6 6 0 0 0 6 6m16-10h4v4a6 6 0 0 1-6 6M16 24v5m-6 0h12"
+          />
+        </svg>
+      }
+      @default {
+        <svg viewBox="0 0 32 32">
+          <circle cx="16" cy="16" r="11" />
+          <path d="m11 16 3.2 3.2L21 12" />
+        </svg>
+      }
+    }
+    @if (!achievement().isUnlocked) {
+      <span class="lock-mark">
+        <svg viewBox="0 0 16 16">
+          <rect x="3" y="7" width="10" height="7" rx="2" />
+          <path d="M5.5 7V5.5a2.5 2.5 0 0 1 5 0V7" />
+        </svg>
+      </span>
+    }
+  </span>
+
+  <div class="badge-copy">
+    <h3>{{ achievement().title }}</h3>
+    <span>{{ achievement().isUnlocked ? 'تم تحقيقه' : 'لم يتحقق بعد' }}</span>
+  </div>
+
+  <div
+    class="badge-progress"
+    role="progressbar"
+    [attr.aria-label]="'تقدم إنجاز ' + achievement().title"
+    aria-valuemin="0"
+    [attr.aria-valuemax]="achievement().target"
+    [attr.aria-valuenow]="achievement().currentValue"
+  >
+    <span [style.width.%]="progressPercent()"></span>
+  </div>
+
+  <div class="badge-values">
+    <span
+      >{{ achievement().currentValue | arabicNumber }} /
+      {{ achievement().target | arabicNumber }}</span
+    >
+    <span>{{ progressPercent() | arabicNumber }}٪</span>
+  </div>
+
+  <div class="badge-tooltip" role="tooltip" [id]="'achievement-details-' + achievement().code">
+    <strong>{{ achievement().title }}</strong>
+    <p>{{ achievement().description }}</p>
+    <small>
+      {{ achievement().isUnlocked ? 'أحسنت، حصلت على هذا الإنجاز.' : 'واصل التقدم لفتحه.' }}
+    </small>
+  </div>
+</article>

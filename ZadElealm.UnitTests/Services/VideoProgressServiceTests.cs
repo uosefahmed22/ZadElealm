@@ -14,6 +14,7 @@ public class VideoProgressServiceTests
     private readonly Mock<IGenericRepository<VideoProgress>> _progressRepository = new();
     private readonly Mock<IGenericRepository<Course>> _courseRepository = new();
     private readonly Mock<IGenericRepository<Enrollment>> _enrollmentRepository = new();
+    private readonly Mock<IVideoProgressReadRepository> _videoProgressReadRepository = new();
 
     public VideoProgressServiceTests()
     {
@@ -26,10 +27,10 @@ public class VideoProgressServiceTests
     [Fact]
     public async Task UpdateProgress_WhenVideoDurationIsZero_Returns400WithoutSaving()
     {
-        _videoRepository.Setup(r => r.GetEntityWithNoTrackingAsync(1))
+        _videoRepository.Setup(r => r.GetEntityWithNoTrackingAsync(1, CancellationToken.None))
             .ReturnsAsync(new Video { Id = 1, CourseId = 2, VideoDuration = TimeSpan.Zero });
 
-        var result = await new VideoProgressService(_unitOfWork.Object)
+        var result = await CreateService()
             .UpdateProgressAsync("user-1", 1, TimeSpan.Zero);
 
         Assert.Equal(400, result.StatusCode);
@@ -41,10 +42,12 @@ public class VideoProgressServiceTests
     {
         var progress = new VideoProgress { Id = 4, UserId = "user-1", VideoId = 7, CourseId = 2 };
         _progressRepository
-            .Setup(r => r.GetEntityWithSpecNoTrackingAsync(It.IsAny<ISpecification<VideoProgress>>()))
+            .Setup(r => r.GetEntityWithSpecNoTrackingAsync(
+                It.IsAny<ISpecification<VideoProgress>>(),
+                CancellationToken.None))
             .ReturnsAsync(progress);
 
-        var result = await new VideoProgressService(_unitOfWork.Object)
+        var result = await CreateService()
             .GetVideoProgressAsync("user-1", 7);
 
         Assert.Equal(200, result.StatusCode);
@@ -54,17 +57,11 @@ public class VideoProgressServiceTests
     [Fact]
     public async Task GetCourseProgress_UsesCountQueriesAndClampsDuplicateCompletedRows()
     {
-        _courseRepository.Setup(r => r.GetEntityWithNoTrackingAsync(2))
-            .ReturnsAsync(new Course { Id = 2 });
-        _enrollmentRepository
-            .Setup(r => r.GetEntityWithSpecNoTrackingAsync(It.IsAny<ISpecification<Enrollment>>()))
-            .ReturnsAsync(new Enrollment { Id = 3, CourseId = 2, AppUserId = "user-1" });
-        _progressRepository.Setup(r => r.CountAsync(It.IsAny<ISpecification<VideoProgress>>()))
-            .ReturnsAsync(5);
-        _videoRepository.Setup(r => r.CountAsync(It.IsAny<ISpecification<Video>>()))
-            .ReturnsAsync(3);
+        _videoProgressReadRepository
+            .Setup(r => r.GetCourseSummaryAsync("user-1", 2, CancellationToken.None))
+            .ReturnsAsync(new CourseProgressSummaryReadModel(true, 3, 5));
 
-        var result = await new VideoProgressService(_unitOfWork.Object)
+        var result = await CreateService()
             .GetCourseProgressAsync("user-1", 2);
 
         var progress = Assert.IsType<CourseProgress>(result.Data);
@@ -72,4 +69,7 @@ public class VideoProgressServiceTests
         Assert.Equal(100, progress.VideoProgress);
         _progressRepository.Verify(r => r.GetAllWithSpecNoTrackingAsync(It.IsAny<ISpecification<VideoProgress>>()), Times.Never);
     }
+
+    private VideoProgressService CreateService()
+        => new(_unitOfWork.Object, _videoProgressReadRepository.Object);
 }

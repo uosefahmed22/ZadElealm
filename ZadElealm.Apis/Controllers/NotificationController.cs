@@ -31,7 +31,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetNotifications()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -46,7 +46,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("mark-all-as-read")]
         public async Task<ActionResult<ApiResponse>> MarkAllAsRead()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -61,7 +61,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("mark-as-read/{notificationId}")]
         public async Task<ActionResult<ApiResponse>> MarkAsRead(int notificationId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -76,7 +76,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{notificationId}")]
         public async Task<ActionResult<ApiResponse>> DeleteNotification(int notificationId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -91,7 +91,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("{notificationId}")]
         public async Task<ActionResult<ApiResponse>> GetNotificationById(int notificationId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));

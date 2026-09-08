@@ -47,4 +47,43 @@ public sealed class EnrollmentReadRepository : IEnrollmentReadRepository
             })
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<CourseEnrollmentSummaryReadModel> GetCourseEnrollmentSummaryAsync(
+        int courseId,
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        var summary = await _dbContext.Enrollments
+            .AsNoTracking()
+            .Where(enrollment => enrollment.CourseId == courseId)
+            .GroupBy(_ => 1)
+            .Select(group => new CourseEnrollmentSummaryReadModel(
+                group.Count(),
+                group.Any(enrollment => enrollment.AppUserId == userId)))
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return summary ?? new CourseEnrollmentSummaryReadModel(0, false);
+    }
+
+    public async Task<IReadOnlySet<int>> GetCompletedCourseCategoryIdsAsync(
+        string userId,
+        CancellationToken cancellationToken = default)
+    {
+        var categoryIds = await _dbContext.Enrollments
+            .AsNoTracking()
+            .Where(enrollment => enrollment.AppUserId == userId)
+            .Where(enrollment => _dbContext.Videos.Any(video =>
+                video.CourseId == enrollment.CourseId))
+            .Where(enrollment => !_dbContext.Videos
+                .Where(video => video.CourseId == enrollment.CourseId)
+                .Any(video => !_dbContext.VideoProgresses.Any(progress =>
+                    progress.UserId == userId &&
+                    progress.VideoId == video.Id &&
+                    progress.IsCompleted)))
+            .Select(enrollment => enrollment.Course.CategoryId)
+            .Distinct()
+            .ToListAsync(cancellationToken);
+
+        return categoryIds.ToHashSet();
+    }
 }

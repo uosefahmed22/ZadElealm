@@ -64,7 +64,7 @@ export class CourseCatalogComponent implements OnInit {
     author: '',
     language: '',
     minRating: 0,
-    sort: 'mixed-desc',
+    sort: 'date-desc',
   });
 
   readonly resultSummary = computed(() => {
@@ -161,7 +161,7 @@ export class CourseCatalogComponent implements OnInit {
       author: '',
       language: '',
       minRating: 0,
-      sort: categoryId > 0 ? 'date-desc' : 'mixed-desc',
+      sort: 'date-desc',
     });
     this.applyFilters();
   }

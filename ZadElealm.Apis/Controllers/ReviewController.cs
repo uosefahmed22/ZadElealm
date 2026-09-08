@@ -34,7 +34,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> AddReview([FromBody] ReviewDto request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -49,7 +49,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("{reviewId}/like")]
         public async Task<ActionResult<ApiResponse>> ToggleLike(int reviewId) 
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -69,7 +69,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{reviewId}")]
         public async Task<ActionResult<ApiResponse>> DeleteReview(int reviewId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -84,7 +84,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("user-add-rateing-before/{courseId}")]
         public async Task<ActionResult<ApiResponse>> GetUserAddRateingBefore(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));

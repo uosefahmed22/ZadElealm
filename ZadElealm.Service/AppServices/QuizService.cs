@@ -15,16 +15,19 @@ namespace ZadElealm.Service.AppServices
         private readonly ICertificateService _certificateService;
         private readonly IVideoProgressService _videoProgressService;
         private readonly INotificationService _notificationService;
+        private readonly ICertificateFileStorage _certificateFileStorage;
 
         public QuizService(IUnitOfWork unitOfWork,
             ICertificateService certificateService,
             IVideoProgressService videoProgressService,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            ICertificateFileStorage certificateFileStorage)
         {
             _unitOfWork = unitOfWork;
             _certificateService = certificateService;
             _videoProgressService = videoProgressService;
             _notificationService = notificationService;
+            _certificateFileStorage = certificateFileStorage;
         }
 
         public async Task<ApiResponse> CreateQuizAsync(CreateQuizDto quizDto)
@@ -58,6 +61,7 @@ namespace ZadElealm.Service.AppServices
                 return preparationError;
 
             await _unitOfWork.BeginTransactionAsync();
+            string? generatedCertificateFile = null;
             try
             {
                 var progress = await SaveProgressAsync(
@@ -68,11 +72,13 @@ namespace ZadElealm.Service.AppServices
 
                 if (context.Calculation.IsCompleted)
                 {
-                    var completionError = await CreateCompletionArtifactsAsync(userId, submission.QuizId);
-                    if (completionError != null)
+                    var completion = await CreateCompletionArtifactsAsync(userId, submission.QuizId);
+                    generatedCertificateFile = completion.CertificateFileName;
+                    if (completion.Error != null)
                     {
+                        _certificateFileStorage.DeletePrivateFileIfExists(generatedCertificateFile);
                         await _unitOfWork.RollbackTransactionAsync();
-                        return completionError;
+                        return completion.Error;
                     }
                 }
 
@@ -81,6 +87,7 @@ namespace ZadElealm.Service.AppServices
             }
             catch
             {
+                _certificateFileStorage.DeletePrivateFileIfExists(generatedCertificateFile);
                 await _unitOfWork.RollbackTransactionAsync();
                 return new ApiDataResponse(500, null, "حدث خطأ أثناء حفظ النتائج");
             }
@@ -300,20 +307,36 @@ namespace ZadElealm.Service.AppServices
             return progress;
         }
 
-        private async Task<ApiDataResponse?> CreateCompletionArtifactsAsync(string userId, int quizId)
+        private async Task<CompletionArtifactsResult> CreateCompletionArtifactsAsync(
+            string userId,
+            int quizId)
         {
             var certificateResult = await _certificateService.GenerateAndSaveCertificate(userId, quizId);
             if (certificateResult.StatusCode != 200 || certificateResult.Data is not Certificate certificate)
-                return new ApiDataResponse(500, null, "حدث خطأ أثناء إنشاء الشهادة");
+                return new CompletionArtifactsResult(
+                    new ApiDataResponse(500, null, "حدث خطأ أثناء إنشاء الشهادة"),
+                    null);
 
-            var notificationResult = await _notificationService.SendNotificationAsync(
-                BuildCertificateNotification(userId));
-            if (notificationResult.StatusCode != 200)
-                return new ApiDataResponse(500, null, "حدث خطأ أثناء إنشاء الإشعار");
+            try
+            {
+                var notificationResult = await _notificationService.SendNotificationAsync(
+                    BuildCertificateNotification(userId));
+                if (notificationResult.StatusCode != 200)
+                {
+                    return new CompletionArtifactsResult(
+                        new ApiDataResponse(500, null, "حدث خطأ أثناء إنشاء الإشعار"),
+                        certificate.PdfUrl);
+                }
 
-            await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
-            await _unitOfWork.Complete();
-            return null;
+                await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
+                await _unitOfWork.Complete();
+                return new CompletionArtifactsResult(null, certificate.PdfUrl);
+            }
+            catch
+            {
+                _certificateFileStorage.DeletePrivateFileIfExists(certificate.PdfUrl);
+                throw;
+            }
         }
 
         private static NotificationServiceDto BuildCertificateNotification(string userId)
@@ -361,5 +384,9 @@ namespace ZadElealm.Service.AppServices
             int CorrectAnswers,
             int UnansweredQuestions,
             List<QuestionResultDto> QuestionResults);
+
+        private sealed record CompletionArtifactsResult(
+            ApiDataResponse? Error,
+            string? CertificateFileName);
     }
 }

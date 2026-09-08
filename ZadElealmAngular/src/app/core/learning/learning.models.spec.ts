@@ -24,6 +24,6 @@ describe('learning progress helpers', () => {
 
   it('parses and formats backend TimeSpan values', () => {
     expect(timeSpanToSeconds('00:02:05')).toBe(125);
-    expect(formatDuration('00:02:05')).toBe('2:05');
+    expect(formatDuration('00:02:05')).toBe('٢:٠٥');
   });
 });

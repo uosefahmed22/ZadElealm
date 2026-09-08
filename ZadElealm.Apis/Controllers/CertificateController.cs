@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -36,7 +36,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("user")]
         public async Task<ActionResult<ApiResponse>> GetUserCertificates()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401));
@@ -53,7 +53,7 @@ namespace ZadElealm.Apis.Controllers
             int certificateId,
             CancellationToken cancellationToken)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401));

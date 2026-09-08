@@ -39,10 +39,21 @@
       >
         <div class="category-media">
           <img
+            class="category-media__backdrop"
+            [src]="categoryImage(category)"
+            alt=""
+            aria-hidden="true"
+            width="480"
+            height="360"
+            loading="lazy"
+            decoding="async"
+          />
+          <img
+            class="category-media__artwork"
             [src]="categoryImage(category)"
             [alt]="'صورة تصنيف ' + category.name"
             width="480"
-            height="270"
+            height="360"
             loading="lazy"
             decoding="async"
             (error)="markImageFailed(category.id)"

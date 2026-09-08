@@ -76,16 +76,30 @@ h1 {
 }
 
 .category-media {
-  aspect-ratio: 16 / 9;
+  position: relative;
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--surface-sage);
 }
 
 .category-media img {
+  position: absolute;
+  inset: 0;
   inline-size: 100%;
   block-size: 100%;
+  object-position: center;
+}
+
+.category-media__backdrop {
   object-fit: cover;
-  transition: transform var(--dur-slow) var(--ease-standard);
+  filter: blur(1rem);
+  opacity: .28;
+  transform: scale(1.12);
+}
+
+.category-media__artwork {
+  z-index: 1;
+  object-fit: contain;
 }
 
 .category-copy {
@@ -162,10 +176,6 @@ h1 {
   .category-card:hover {
     border-color: var(--accent-on-paper);
     transform: var(--surface-lift);
-  }
-
-  .category-card:hover img {
-    transform: scale(1.035);
   }
 }
 

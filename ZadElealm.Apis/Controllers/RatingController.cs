@@ -33,7 +33,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> AddRating([FromBody] RatingDto request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -48,7 +48,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("can-rate/{courseId}")]
         public async Task<ActionResult<ApiResponse>> CanRate(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));

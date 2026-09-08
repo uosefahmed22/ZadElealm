@@ -25,20 +25,22 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
         public override async Task<ApiDataResponse> Handle(UpdateVideoProgressCommand request, CancellationToken cancellationToken)
         {
             var videoSpec = new VideoByIdSpecification(request.VideoId);
-            var video = await _unitOfWork.Repository<Video>().GetEntityWithSpecAsync(videoSpec);
+            var video = await _unitOfWork.Repository<Video>()
+                .GetEntityWithSpecAsync(videoSpec, cancellationToken);
 
             if (video == null)
                 return new ApiDataResponse(404, "الفيديو غير موجود");
 
             var enrollmentSpec = new EnrollmentSpecification(video.CourseId, request.UserId);
-            var enrollment = await _unitOfWork.Repository<Enrollment>().GetEntityWithSpecAsync(enrollmentSpec);
+            var enrollment = await _unitOfWork.Repository<Enrollment>()
+                .GetEntityWithSpecAsync(enrollmentSpec, cancellationToken);
 
             if (enrollment == null)
                 return new ApiDataResponse(403, "أنت غير مسجل في هذه الدورة");
 
             var previousVideosSpec = new VideoProgressWithSpec(request.UserId, video.CourseId);
             var previousVideosProgress = await _unitOfWork.Repository<VideoProgress>()
-                .GetAllWithSpecAsync(previousVideosSpec);
+                .GetAllWithSpecAsync(previousVideosSpec, cancellationToken);
 
             var canAccessVideo = CanAccessVideo(video, enrollment, previousVideosProgress);
             if (!canAccessVideo)
@@ -47,7 +49,8 @@ namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
             var progressResponse = await _videoProgressService.UpdateProgressAsync(
                 request.UserId,
                 request.VideoId,
-                request.WatchedDuration
+                request.WatchedDuration,
+                cancellationToken
             );
 
             if (progressResponse.StatusCode != 200)

@@ -28,7 +28,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost]
         public async Task<ActionResult<ApiResponse>> AddReport([FromBody] CreateReportDto reportDto)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized(new ApiResponse(401, "المستخدم غير مصرح"));
 

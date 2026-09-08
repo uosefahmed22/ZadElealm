@@ -13,10 +13,14 @@ namespace ZadElealm.Service.AppServices;
 public class CertificateService : ICertificateService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICertificateFileStorage _certificateFileStorage;
 
-    public CertificateService(IUnitOfWork unitOfWork)
+    public CertificateService(
+        IUnitOfWork unitOfWork,
+        ICertificateFileStorage certificateFileStorage)
     {
         _unitOfWork = unitOfWork;
+        _certificateFileStorage = certificateFileStorage;
     }
 
     public async Task<ApiDataResponse> GenerateAndSaveCertificate(string userId, int quizId)
@@ -48,7 +52,7 @@ public class CertificateService : ICertificateService
 
         var certificate = new Certificate
         {
-            Name = $"Certificate_{user.DisplayName}_{quiz.Name}",
+            Name = $"شهادة اجتياز {quiz.Name}",
             Description = $"شهادة اجتياز {quiz.Name} بدرجة {progress.Score}%",
             PdfUrl = fileName,
             UserId = userId,
@@ -86,7 +90,7 @@ public class CertificateService : ICertificateService
 
         var certificate = new Certificate
         {
-            Name = $"Certificate_{progress.AppUser.DisplayName}_{assessmentName}",
+            Name = $"شهادة اجتياز {assessmentName}",
             Description = $"شهادة اجتياز {assessmentName} بدرجة {progress.Score}%",
             PdfUrl = fileName,
             UserId = userId,
@@ -103,7 +107,7 @@ public class CertificateService : ICertificateService
         return $"ZA-{issuedAtUtc:yyyy}-{randomPart}";
     }
 
-    private static string GeneratePdfCertificate(
+    private string GeneratePdfCertificate(
         AppUser user,
         Quiz quiz,
         int score,
@@ -116,23 +120,19 @@ public class CertificateService : ICertificateService
             issuedAtUtc,
             certificateReference);
 
-    private static string GeneratePdfCertificate(
+    private string GeneratePdfCertificate(
         string studentName,
         string assessmentName,
         int score,
         DateTime issuedAtUtc,
         string certificateReference)
     {
-        var certificatesDirectory = CertificateFileStorage.GetPrivateDirectory();
+        var certificatesDirectory = _certificateFileStorage.GetPrivateDirectory();
         Directory.CreateDirectory(certificatesDirectory);
 
         var fileName = $"certificate_{certificateReference.ToLowerInvariant()}.pdf";
-        var filePath = CertificateFileStorage.GetPrivateFilePath(fileName);
-        var logoPath = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            "wwwroot",
-            "certificates",
-            "logo.png");
+        var filePath = _certificateFileStorage.GetPrivateFilePath(fileName);
+        var logoPath = _certificateFileStorage.GetLogoFilePath();
 
         var model = new CertificateDocumentModel(
             studentName,

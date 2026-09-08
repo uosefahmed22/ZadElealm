@@ -21,10 +21,13 @@ namespace ZadElealm.Repository.Repositories
         }
 
         public async Task<T> GetEntityAsync(int id)
+            => await GetEntityAsync(id, CancellationToken.None);
+
+        public async Task<T> GetEntityAsync(int id, CancellationToken cancellationToken)
         {
             try
             {
-                return await _dbContext.Set<T>().FindAsync(id);
+                return await _dbContext.Set<T>().FindAsync([id], cancellationToken);
             }
             catch (Exception ex)
             {
@@ -32,10 +35,13 @@ namespace ZadElealm.Repository.Repositories
             }
         }
         public async Task<IReadOnlyList<T>> GetAllAsync()
+            => await GetAllAsync(CancellationToken.None);
+
+        public async Task<IReadOnlyList<T>> GetAllAsync(CancellationToken cancellationToken)
         {
             try
             {
-                return await _dbContext.Set<T>().ToListAsync();
+                return await _dbContext.Set<T>().ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -43,12 +49,15 @@ namespace ZadElealm.Repository.Repositories
             }
         }
         public async Task<T> GetEntityWithSpecAsync(ISpecification<T> spec)
+            => await GetEntityWithSpecAsync(spec, CancellationToken.None);
+
+        public async Task<T> GetEntityWithSpecAsync(ISpecification<T> spec, CancellationToken cancellationToken)
         {
             try
             {
                 return await ApplySpecification(spec)
                     .AsSplitQuery()
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -56,12 +65,15 @@ namespace ZadElealm.Repository.Repositories
             }
         }
         public async Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec)
+            => await GetAllWithSpecAsync(spec, CancellationToken.None);
+
+        public async Task<IReadOnlyList<T>> GetAllWithSpecAsync(ISpecification<T> spec, CancellationToken cancellationToken)
         {
             try
             {
                 return await ApplySpecification(spec)
                     .AsSplitQuery()
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -71,10 +83,13 @@ namespace ZadElealm.Repository.Repositories
 
         //With no tracking
         public async Task<IReadOnlyList<T>> GetAllWithNoTrackingAsync()
+            => await GetAllWithNoTrackingAsync(CancellationToken.None);
+
+        public async Task<IReadOnlyList<T>> GetAllWithNoTrackingAsync(CancellationToken cancellationToken)
         {
             try
             {
-                return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
+                return await _dbContext.Set<T>().AsNoTracking().ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -82,12 +97,15 @@ namespace ZadElealm.Repository.Repositories
             }
         }
         public async Task<IReadOnlyList<T>> GetAllWithSpecNoTrackingAsync(ISpecification<T> spec)
+            => await GetAllWithSpecNoTrackingAsync(spec, CancellationToken.None);
+
+        public async Task<IReadOnlyList<T>> GetAllWithSpecNoTrackingAsync(ISpecification<T> spec, CancellationToken cancellationToken)
         {
             try
             {
                 return await ApplySpecification(spec)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .ToListAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -95,12 +113,15 @@ namespace ZadElealm.Repository.Repositories
             }
         }
         public async Task<T> GetEntityWithSpecNoTrackingAsync(ISpecification<T> spec)
+            => await GetEntityWithSpecNoTrackingAsync(spec, CancellationToken.None);
+
+        public async Task<T> GetEntityWithSpecNoTrackingAsync(ISpecification<T> spec, CancellationToken cancellationToken)
         {
             try
             {
                 return await ApplySpecification(spec)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync();
+                    .FirstOrDefaultAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -108,10 +129,14 @@ namespace ZadElealm.Repository.Repositories
             }
         }
         public async Task<T> GetEntityWithNoTrackingAsync(int id)
+            => await GetEntityWithNoTrackingAsync(id, CancellationToken.None);
+
+        public async Task<T> GetEntityWithNoTrackingAsync(int id, CancellationToken cancellationToken)
         {
             try
             {
-                return await _dbContext.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+                return await _dbContext.Set<T>().AsNoTracking()
+                    .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -122,11 +147,16 @@ namespace ZadElealm.Repository.Repositories
 
 
         public async Task<int> CountAsync(ISpecification<T> spec)
+            => await CountAsync(spec, CancellationToken.None);
+
+        public async Task<int> CountAsync(ISpecification<T> spec, CancellationToken cancellationToken)
         {
-            return await ApplySpecification(spec).CountAsync();
+            return await ApplySpecification(spec).CountAsync(cancellationToken);
         }
         public async Task AddAsync(T entity)
-            => await _dbContext.Set<T>().AddAsync(entity);
+            => await AddAsync(entity, CancellationToken.None);
+        public async Task AddAsync(T entity, CancellationToken cancellationToken)
+            => await _dbContext.Set<T>().AddAsync(entity, cancellationToken);
         public void Update(T entity)
         => _dbContext.Set<T>().Update(entity);
         public void UpdateRange(IEnumerable<T> entities)

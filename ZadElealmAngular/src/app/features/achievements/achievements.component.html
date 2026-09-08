@@ -1,0 +1,69 @@
+<header class="page-heading">
+  <div>
+    <span>رحلة تقدّمك</span>
+    <h1>إنجازاتي</h1>
+    <p>كل خطوة صغيرة تصنع رحلة كبيرة. مرّر المؤشر أو اضغط على أي شارة لمعرفة هدفها.</p>
+  </div>
+  @if (dashboard()) {
+    <div
+      class="completion-ring"
+      [style.--completion]="(dashboard()!.unlockedCount / dashboard()!.totalCount) * 100 + '%'"
+    >
+      <strong>{{ dashboard()!.unlockedCount | arabicNumber }}</strong>
+      <span>من {{ dashboard()!.totalCount | arabicNumber }}</span>
+    </div>
+  }
+</header>
+
+@if (isLoading()) {
+  <section class="achievement-loading" aria-label="جارٍ تحميل الإنجازات" aria-busy="true">
+    @for (_ of [1, 2, 3, 4, 5, 6, 7, 8]; track $index) {
+      <div class="zad-skeleton"></div>
+    }
+  </section>
+} @else if (errorMessage()) {
+  <section class="state-card" role="alert">
+    <h2>تعذر تحميل الإنجازات</h2>
+    <p>{{ errorMessage() }}</p>
+    <button class="zad-btn zad-btn--primary" type="button" (click)="retry()">إعادة المحاولة</button>
+  </section>
+} @else if (dashboard(); as data) {
+  <section class="streak-panel" aria-label="سلسلة النشاط">
+    <span
+      class="streak-icon"
+      [class.streak-icon--hot]="data.currentStreak >= 10"
+      aria-hidden="true"
+    >
+      🔥
+    </span>
+    <div>
+      <span>سلسلتك الحالية</span><strong>{{ data.currentStreak | arabicNumber }} أيام</strong>
+    </div>
+    <div>
+      <span>أطول سلسلة</span><strong>{{ data.longestStreak | arabicNumber }} أيام</strong>
+    </div>
+    <p>ادخل المنصة يوميًا وحافظ على استمراريتك لفتح شارات الـStreak.</p>
+  </section>
+
+  <section aria-labelledby="all-achievements-title">
+    <div class="section-heading">
+      <div>
+        <span>مجموعة الشارات</span>
+        <h2 id="all-achievements-title">كل الإنجازات</h2>
+      </div>
+      <p>
+        <strong>{{ data.unlockedCount | arabicNumber }}</strong> مفتوح ·
+        <strong>{{ data.totalCount - data.unlockedCount | arabicNumber }}</strong> متبقٍ
+      </p>
+    </div>
+    <div class="achievement-grid">
+      @for (achievement of data.achievements; track achievement.code) {
+        <app-achievement-badge
+          [achievement]="achievement"
+          [isNew]="isNew(achievement)"
+          [streakDays]="data.currentStreak"
+        />
+      }
+    </div>
+  </section>
+}

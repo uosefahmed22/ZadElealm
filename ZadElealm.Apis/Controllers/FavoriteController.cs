@@ -31,7 +31,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetFavorites()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized(new ApiResponse(401, "المستخد غير موجود"));
 
@@ -49,7 +49,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("{courseId}")]
         public async Task<ActionResult<ApiResponse>> AddToFavorites(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
@@ -67,7 +67,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{courseId}")]
         public async Task<ActionResult<ApiResponse>> RemoveFromFavorites(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 

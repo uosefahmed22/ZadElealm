@@ -85,7 +85,7 @@ namespace ZadElealm.Service.AppServices
             return UserRankPolicy.DetermineRank(points);
         }
 
-        public async Task<UserRankDto> GetUserRank(string userId)
+        public async Task<UserRankDto?> GetUserRank(string userId)
         {
             var spec = new UserRankWithUserSpecification(userId);
             var userRank = await _unitOfWork.Repository<UserRank>()

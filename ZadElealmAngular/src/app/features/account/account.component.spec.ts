@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { AccountApiService } from '../../core/account/account-api.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
@@ -57,6 +58,7 @@ describe('AccountComponent', () => {
       displayName: 'يوسف أحمد',
       phoneNumber: '+201001234567',
     });
+    expect(fixture.componentInstance.emailForm.controls.newEmail.value).toBe('');
     expect(fixture.nativeElement.textContent).toContain('يوسف أحمد');
   });
 
@@ -121,6 +123,46 @@ describe('AccountComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/login'], {
       queryParams: { emailChanged: 'true' },
     });
+  });
+
+  it('rejects the current email locally and shows the error inside the email section', () => {
+    const fixture = TestBed.createComponent(AccountComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.emailForm.patchValue({
+      newEmail: 'USER@test.com',
+      password: 'Password123!',
+    });
+
+    fixture.componentInstance.sendEmailOtp();
+    fixture.detectChanges();
+
+    expect(accountApi.sendEmailOtp).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.errorAction()).toBe('email');
+    expect(fixture.nativeElement.textContent).toContain('البريد الجديد هو نفس بريدك الحالي');
+  });
+
+  it('shows the API email error next to the email form', () => {
+    accountApi.sendEmailOtp.mockReturnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { statusCode: 400, message: 'كلمة المرور غير صحيحة' },
+          }),
+      ),
+    );
+    const fixture = TestBed.createComponent(AccountComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.emailForm.patchValue({
+      newEmail: 'new@test.com',
+      password: 'WrongPassword',
+    });
+
+    fixture.componentInstance.sendEmailOtp();
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.errorAction()).toBe('email');
+    expect(fixture.nativeElement.textContent).toContain('كلمة المرور غير صحيحة');
   });
 
   it('rejects unsupported profile images before calling the API', () => {

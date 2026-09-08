@@ -78,10 +78,19 @@ public sealed class AccountProfileTests : IClassFixture<ZadElealmApiFactory>
         var newPasswordLogin = await LoginAsync(OriginalEmail, UpdatedPassword);
         Assert.Equal(HttpStatusCode.OK, newPasswordLogin.StatusCode);
 
+        var sameEmailOtp = await client.PostAsJsonAsync(
+            "/api/Account/send-email-otp",
+            new { newEmail = OriginalEmail.ToUpperInvariant(), password = UpdatedPassword });
+        Assert.Equal(HttpStatusCode.BadRequest, sameEmailOtp.StatusCode);
+        var sameEmailPayload = await sameEmailOtp.Content.ReadFromJsonAsync<JsonElement>();
+        Assert.Contains(
+            "نفس بريدك الحالي",
+            sameEmailPayload.GetProperty("message").GetString());
+
         var wrongPasswordOtp = await client.PostAsJsonAsync(
             "/api/Account/send-email-otp",
             new { newEmail = UpdatedEmail, password = "WrongPassword" });
-        Assert.Equal(HttpStatusCode.Unauthorized, wrongPasswordOtp.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, wrongPasswordOtp.StatusCode);
 
         var sendOtp = await client.PostAsJsonAsync(
             "/api/Account/send-email-otp",

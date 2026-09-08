@@ -36,7 +36,9 @@ namespace ZadElealm.UnitTests.Handlers
         [Fact]
         public async Task Handle_WhenQuizNotFound_Returns404()
         {
-            _quizRepository.Setup(r => r.GetEntityWithSpecNoTrackingAsync(It.IsAny<ISpecification<Quiz>>()))
+            _quizRepository.Setup(r => r.GetEntityWithSpecNoTrackingAsync(
+                    It.IsAny<ISpecification<Quiz>>(),
+                    CancellationToken.None))
                 .ReturnsAsync((Quiz)null!);
 
             var result = await CreateHandler().Handle(new GetQuizQuery(1, "user-1"), CancellationToken.None);
@@ -47,9 +49,14 @@ namespace ZadElealm.UnitTests.Handlers
         [Fact]
         public async Task Handle_WhenUserIsNotEligible_Returns403()
         {
-            _quizRepository.Setup(r => r.GetEntityWithSpecNoTrackingAsync(It.IsAny<ISpecification<Quiz>>()))
+            _quizRepository.Setup(r => r.GetEntityWithSpecNoTrackingAsync(
+                    It.IsAny<ISpecification<Quiz>>(),
+                    CancellationToken.None))
                 .ReturnsAsync(BuildQuiz());
-            _videoProgressService.Setup(v => v.CheckCourseCompletionEligibilityAsync("user-1", 5))
+            _videoProgressService.Setup(v => v.CheckCourseCompletionEligibilityAsync(
+                    "user-1",
+                    5,
+                    CancellationToken.None))
                 .ReturnsAsync(false);
 
             var result = await CreateHandler().Handle(new GetQuizQuery(1, "user-1"), CancellationToken.None);
@@ -62,9 +69,14 @@ namespace ZadElealm.UnitTests.Handlers
         {
             var quiz = BuildQuiz();
 
-            _quizRepository.Setup(r => r.GetEntityWithSpecNoTrackingAsync(It.IsAny<ISpecification<Quiz>>()))
+            _quizRepository.Setup(r => r.GetEntityWithSpecNoTrackingAsync(
+                    It.IsAny<ISpecification<Quiz>>(),
+                    CancellationToken.None))
                 .ReturnsAsync(quiz);
-            _videoProgressService.Setup(v => v.CheckCourseCompletionEligibilityAsync("user-1", 5))
+            _videoProgressService.Setup(v => v.CheckCourseCompletionEligibilityAsync(
+                    "user-1",
+                    5,
+                    CancellationToken.None))
                 .ReturnsAsync(true);
 
             var result = await CreateHandler().Handle(new GetQuizQuery(1, "user-1"), CancellationToken.None);

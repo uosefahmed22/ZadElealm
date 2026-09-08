@@ -134,6 +134,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'achievements',
+        loadComponent: () =>
+          import('./features/achievements/achievements.component').then(
+            (component) => component.AchievementsComponent,
+          ),
+      },
+      {
         path: 'account',
         loadComponent: () =>
           import('./features/account/account.component').then(

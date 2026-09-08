@@ -42,7 +42,12 @@ describe('CertificatesComponent', () => {
     expect(text).toContain('محمد أحمد');
     expect(text).not.toContain('الدرجة');
     expect(text).not.toContain('الرقم المرجعي');
-    expect(text).toContain('عرض الشهادة PDF');
+    expect(text).toContain('١٠ يناير ٢٠٢٦');
+    expect(text).toContain('عرض الشهادة');
+    expect(text).toContain('شهادة اجتياز');
+    expect(text).toContain('شهادة إتمام اختبار التجويد بنجاح');
+    expect(text).not.toContain('Certificate');
+    expect(text).not.toContain('PDF');
     expect(fixture.nativeElement.querySelector('a[href*="certificates"]')).toBeNull();
   });
 
@@ -78,8 +83,8 @@ describe('CertificatesComponent', () => {
 function certificate() {
   return {
     id: 4,
-    name: 'شهادة إتمام',
-    description: 'اجتياز الاختبار',
+    name: 'Certificate_Mohamed_Tajweed',
+    description: 'Certificate for completing Tajweed with score 92',
     pdfUrl: '/api/Certificate/4/file',
     completedDate: '2026-01-10',
     userName: 'محمد أحمد',

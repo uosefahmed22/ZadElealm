@@ -11,9 +11,14 @@ namespace ZadElealm.Apis.Handlers.Rating
     public class AddRatingCommandHandler : BaseCommandHandler<AddRatingCommand, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
-        public AddRatingCommandHandler(IUnitOfWork unitOfWork)
+        private readonly IRatingReadRepository _ratingReadRepository;
+
+        public AddRatingCommandHandler(
+            IUnitOfWork unitOfWork,
+            IRatingReadRepository ratingReadRepository)
         {
             _unitOfWork = unitOfWork;
+            _ratingReadRepository = ratingReadRepository;
         }
 
         public override async Task<ApiResponse> Handle(AddRatingCommand request, CancellationToken cancellationToken)
@@ -45,30 +50,22 @@ namespace ZadElealm.Apis.Handlers.Rating
                 CreatedAt = DateTime.UtcNow
             };
 
+            var ratingSummary = await _ratingReadRepository
+                .GetSummaryAsync(request.CourseId, cancellationToken);
+            course.rating = CalculateAverage(ratingSummary, request.Value);
+
             await _unitOfWork.Repository<Core.Models.Rating>().AddAsync(rating);
             await _unitOfWork.Complete();
-
-            await UpdateCourseAverageRating(request.CourseId);
 
             return new ApiResponse(200, "تم إضافة التقييم بنجاح");
         }
 
-        private async Task UpdateCourseAverageRating(int courseId)
-        {
-            var spec = new RatingSpecification(courseId);
-            var ratings = await _unitOfWork.Repository<Core.Models.Rating>().GetAllWithSpecAsync(spec);
-
-            if (ratings.Any())
-            {
-                var averageRating = Math.Min(5, ratings.Select(r => r.Value).Average());
-                var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityAsync(courseId);
-
-                if (course != null)
-                {
-                    course.rating = averageRating;
-                    await _unitOfWork.Complete();
-                }
-            }
-        }
+        private static decimal CalculateAverage(
+            RatingSummaryReadModel current,
+            decimal newRating)
+            => Math.Min(
+                5m,
+                ((((decimal)current.Average) * current.Count) + newRating) /
+                    (current.Count + 1));
     }
 }

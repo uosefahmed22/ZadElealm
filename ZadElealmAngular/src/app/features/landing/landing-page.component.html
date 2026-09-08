@@ -170,40 +170,6 @@
     </section>
 
     <section
-      class="zad-section zad-section--paper challenge-section"
-      aria-labelledby="challenge-title"
-    >
-      <div class="zad-container">
-        <div class="section-heading section-heading--center challenge-heading">
-          <span class="eyebrow">رحلة أوضح</span>
-          <h2 id="challenge-title">من التشتت إلى طريق تعلم منظم</h2>
-          <p>نرتب لك خطوات الرحلة حتى تعرف أين تبدأ، وماذا تتعلم بعد ذلك.</p>
-        </div>
-        <div class="challenge-grid">
-          <article class="zad-card challenge-copy">
-            <span class="challenge-icon" aria-hidden="true">؟</span>
-            <div>
-              <span class="eyebrow">التحدي</span>
-              <h3>المعرفة موجودة، لكن الطريق قد يبدو مشتتًا</h3>
-              <p>كثرة المصادر وتفاوت ترتيبها قد يصعّبان معرفة نقطة البداية والخطوة التالية.</p>
-            </div>
-          </article>
-          <article class="zad-card solution-copy">
-            <span class="challenge-icon" aria-hidden="true"
-              ><svg viewBox="0 0 24 24" focusable="false">
-                <use href="assets/icons/sprite.svg#check"></use></svg
-            ></span>
-            <div>
-              <span class="eyebrow">الحل</span>
-              <h3>رحلة تعلم منظمة تجمع لك ما تحتاجه</h3>
-              <p>مسارات واضحة ودروس واختبارات مترابطة، لتبقى خطوتك القادمة معروفة.</p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section
       id="features"
       class="zad-section zad-section--paper-muted"
       aria-labelledby="features-title"
@@ -230,34 +196,6 @@
     </section>
 
     <section
-      class="zad-section zad-section--paper audience-section"
-      aria-labelledby="audience-title"
-    >
-      <div class="zad-container">
-        <div class="section-heading section-heading--center">
-          <span class="eyebrow">مساحة للجميع</span>
-          <h2 id="audience-title">لمن هذه المنصة؟</h2>
-          <p>واجهة واحدة مرنة تساعد مختلف الأعمار على الوصول إلى المحتوى بوضوح.</p>
-        </div>
-        <div class="audience-grid">
-          @for (audience of audienceCards; track audience.title) {
-            <article class="zad-card audience-card">
-              <span class="audience-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" focusable="false">
-                  <use [attr.href]="'assets/icons/sprite.svg#' + audience.icon"></use>
-                </svg>
-              </span>
-              <div>
-                <h3>{{ audience.title }}</h3>
-                <p>{{ audience.description }}</p>
-              </div>
-            </article>
-          }
-        </div>
-      </div>
-    </section>
-
-    <section
       id="how-it-works"
       class="zad-section zad-section--paper journey-section"
       aria-labelledby="journey-title"
@@ -266,7 +204,7 @@
         <div class="section-heading section-heading--center">
           <span class="eyebrow">كيف تبدأ</span>
           <h2 id="journey-title">رحلتك في طلب العلم</h2>
-          <p>أربع خطوات بسيطة تنقلك من اختيار المسار إلى إتمامه.</p>
+          <p>ثلاث خطوات واضحة تنقلك من اختيار الدورة إلى إتمامها.</p>
         </div>
         <ol class="journey-list">
           @for (step of journeySteps; track step.number) {

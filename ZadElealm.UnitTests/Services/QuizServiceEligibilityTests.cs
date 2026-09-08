@@ -6,7 +6,9 @@ using ZadElealm.Core.Specifications;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Core.ServiceDto;
+using ZadElealm.Core.Options;
 using ZadElealm.Service.AppServices;
+using ZadElealm.Service.Documents;
 
 namespace ZadElealm.UnitTests.Services
 {
@@ -19,6 +21,10 @@ namespace ZadElealm.UnitTests.Services
         private readonly Mock<IGenericRepository<Quiz>> _quizRepository = new();
         private readonly Mock<IGenericRepository<Progress>> _progressRepository = new();
         private readonly Mock<IGenericRepository<Certificate>> _certificateRepository = new();
+        private readonly ICertificateFileStorage _certificateFileStorage =
+            new CertificateFileStorage(
+                Directory.GetCurrentDirectory(),
+                new CertificateStorageOptions());
 
         private const string UserId = "user-1";
         private const int CourseId = 5;
@@ -29,7 +35,7 @@ namespace ZadElealm.UnitTests.Services
             _unitOfWork.Setup(u => u.Repository<Progress>()).Returns(_progressRepository.Object);
             _unitOfWork.Setup(u => u.Repository<Certificate>()).Returns(_certificateRepository.Object);
             return new QuizService(_unitOfWork.Object, _certificateService.Object,
-                _videoProgressService.Object, _notificationService.Object);
+                _videoProgressService.Object, _notificationService.Object, _certificateFileStorage);
         }
 
         private static QuizSubmissionDto BuildSubmission()
@@ -322,6 +328,11 @@ namespace ZadElealm.UnitTests.Services
         [Fact]
         public async Task SubmitQuiz_WhenNotificationFails_RollsBackWithoutCertificateInsertOrCommit()
         {
+            var certificateFileName = $"certificate_cleanup_{Guid.NewGuid():N}.pdf";
+            var certificatePath = _certificateFileStorage.GetPrivateFilePath(certificateFileName);
+            Directory.CreateDirectory(_certificateFileStorage.GetPrivateDirectory());
+            await File.WriteAllBytesAsync(certificatePath, [1, 2, 3]);
+
             var quiz = new Quiz
             {
                 Id = 1,
@@ -331,16 +342,27 @@ namespace ZadElealm.UnitTests.Services
             };
             SetupSubmissionDependencies(quiz);
             _certificateService.Setup(c => c.GenerateAndSaveCertificate(UserId, 1))
-                .ReturnsAsync(new ApiDataResponse(200, new Certificate()));
+                .ReturnsAsync(new ApiDataResponse(
+                    200,
+                    new Certificate { PdfUrl = certificateFileName }));
             _notificationService.Setup(n => n.SendNotificationAsync(It.IsAny<NotificationServiceDto>()))
                 .ReturnsAsync(new ApiDataResponse(500, null, "failed"));
 
-            var result = await CreateService().SubmitQuizAsync(UserId, BuildSubmission());
+            try
+            {
+                var result = await CreateService().SubmitQuizAsync(UserId, BuildSubmission());
 
-            Assert.Equal(500, result.StatusCode);
-            _unitOfWork.Verify(u => u.RollbackTransactionAsync(), Times.Once);
-            _unitOfWork.Verify(u => u.CommitTransactionAsync(), Times.Never);
-            _certificateRepository.Verify(r => r.AddAsync(It.IsAny<Certificate>()), Times.Never);
+                Assert.Equal(500, result.StatusCode);
+                Assert.False(File.Exists(certificatePath));
+                _unitOfWork.Verify(u => u.RollbackTransactionAsync(), Times.Once);
+                _unitOfWork.Verify(u => u.CommitTransactionAsync(), Times.Never);
+                _certificateRepository.Verify(r => r.AddAsync(It.IsAny<Certificate>()), Times.Never);
+            }
+            finally
+            {
+                if (File.Exists(certificatePath))
+                    File.Delete(certificatePath);
+            }
         }
 
         [Fact]

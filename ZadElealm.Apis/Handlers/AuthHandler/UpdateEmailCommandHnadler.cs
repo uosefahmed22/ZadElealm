@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ZadElealm.Apis.Commands.Auth;
+using ZadElealm.Apis.Helpers;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
@@ -35,20 +36,6 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
                 return new ApiResponse(400, "الرمز غير صحيح او منتهي الصلاحية");
             }
 
-            var oldEmail = user.Email;
-            if (string.IsNullOrWhiteSpace(oldEmail))
-            {
-                return new ApiResponse(400, "البريد الإلكتروني الحالي غير صالح");
-            }
-
-            var emailMessage = new EmailMessage
-            {
-                To = oldEmail,
-                Subject = "تم تحديث البريد الإلكتروني",
-                Body = "تم تحديث البريد الإلكتروني بنجاح, إذا لم تكن أنت من قام بتغيير البريد الإلكتروني يرجى التواصل بالدعم الفني عن طريق ارسال ريبورت"
-            };
-            await _sendEmailService.SendEmailAsync(emailMessage);
-
             var result = await _userManager.SetEmailAsync(user, request.NewEmail);
             if (!result.Succeeded)
             {
@@ -61,13 +48,13 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
             {
                 return new ApiResponse(400, "فشل تأكيد البريد الإلكتروني الجديد");
             }
-            var snedEmailMessage = new EmailMessage
+            var newAddressMessage = new EmailMessage
             {
                 To = request.NewEmail,
                 Subject = "تم تحديث البريد الإلكتروني",
-                Body = "تم تحديث البريد الإلكتروني بنجاح, سجل الدخول الآن واستمتع بالتعامل معنا"
+                Body = AccountEmailTemplates.EmailChangedNewAddress()
             };
-            await _sendEmailService.SendEmailAsync(snedEmailMessage);
+            await _sendEmailService.SendEmailAsync(newAddressMessage, cancellationToken);
 
             return new ApiResponse(200, "لقد تم تحديث البريد الإلكتروني بنجاح");
         }

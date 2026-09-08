@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
+import { AchievementStateService } from '../../core/achievements/achievement-state.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
 import { LearningApiService } from '../../core/learning/learning-api.service';
 import { StudentHomeComponent } from './student-home.component';
@@ -15,6 +16,11 @@ describe('StudentHomeComponent', () => {
     getFavorites: ReturnType<typeof vi.fn>;
   };
   let assessmentApi: { getCertificates: ReturnType<typeof vi.fn> };
+  let achievementState: {
+    dashboard: ReturnType<typeof signal>;
+    errorMessage: ReturnType<typeof signal>;
+    reload: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     learningApi = {
@@ -44,6 +50,11 @@ describe('StudentHomeComponent', () => {
     assessmentApi = {
       getCertificates: vi.fn(() => of({ statusCode: 200, data: [certificate()] })),
     };
+    achievementState = {
+      dashboard: signal(achievementDashboard()),
+      errorMessage: signal(''),
+      reload: vi.fn(() => of(achievementDashboard())),
+    };
     await TestBed.configureTestingModule({
       imports: [StudentHomeComponent],
       providers: [
@@ -54,6 +65,7 @@ describe('StudentHomeComponent', () => {
         },
         { provide: LearningApiService, useValue: learningApi },
         { provide: AssessmentApiService, useValue: assessmentApi },
+        { provide: AchievementStateService, useValue: achievementState },
       ],
     }).compileComponents();
   });
@@ -70,7 +82,35 @@ describe('StudentHomeComponent', () => {
     expect(text).toContain('الدورة 2');
     expect(fixture.componentInstance.ongoingCount()).toBe(1);
     expect(fixture.componentInstance.certificates()).toHaveLength(1);
+    expect(fixture.nativeElement.textContent).toContain('وصول سريع');
+    expect(fixture.nativeElement.querySelectorAll('.quick-access__links a')).toHaveLength(4);
+    expect(fixture.componentInstance.closestToCompletionCourseId()).toBe(1);
     expect(learningApi.getCourseProgress).not.toHaveBeenCalled();
+    expect(fixture.nativeElement.textContent).toContain('إنجازاتي');
+    expect(fixture.nativeElement.textContent).toContain('أسبوع من الهمة');
+    expect(fixture.nativeElement.querySelectorAll('app-achievement-badge')).toHaveLength(2);
+  });
+
+  it('highlights the incomplete course that is closest to completion', () => {
+    const courses = [course(1), course(2), course(3)];
+    learningApi.getEnrolledCourses.mockReturnValue(
+      of({
+        statusCode: 200,
+        data: {
+          courses,
+          progress: [progress(1, 25), progress(2, 80), progress(3, 100)],
+          allEnrolledCourses: courses.length,
+        },
+      }),
+    );
+
+    const fixture = TestBed.createComponent(StudentHomeComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.closestToCompletionCourseId()).toBe(2);
+    expect(fixture.nativeElement.querySelector('.completion-badge')?.textContent).toContain(
+      'الأقرب للإنهاء',
+    );
   });
 
   it('renders empty states without invented statistics', () => {
@@ -143,6 +183,18 @@ describe('StudentHomeComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('dashboard unavailable');
     expect(fixture.nativeElement.textContent).toContain('إعادة المحاولة');
   });
+
+  it('keeps the learning dashboard available when achievements fail', () => {
+    achievementState.dashboard.set(null);
+    achievementState.errorMessage.set('achievements unavailable');
+
+    const fixture = TestBed.createComponent(StudentHomeComponent);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain('الدورة 1');
+    expect(fixture.nativeElement.textContent).toContain('تعذر تحميل إنجازاتك الآن');
+    expect(fixture.nativeElement.textContent).toContain('achievements unavailable');
+  });
 });
 
 function course(id: number) {
@@ -170,14 +222,46 @@ function certificate() {
     quizName: 'اختبار التجويد',
   };
 }
-function progress(courseId: number) {
+function progress(courseId: number, overallProgress = 50) {
   return {
     courseId,
-    videoProgress: 50,
-    overallProgress: 50,
-    completedVideos: 1,
+    videoProgress: overallProgress,
+    overallProgress,
+    completedVideos: overallProgress >= 100 ? 2 : 1,
     totalVideos: 2,
     remainingVideos: 1,
     isEligibleForQuiz: false,
+  };
+}
+
+function achievementDashboard() {
+  return {
+    currentStreak: 3,
+    longestStreak: 5,
+    unlockedCount: 1,
+    totalCount: 11,
+    newlyUnlocked: ['FirstLesson'],
+    achievements: [
+      {
+        code: 'FirstLesson',
+        title: 'البداية',
+        description: 'أكمل أول درس.',
+        iconKey: 'first-lesson',
+        isUnlocked: true,
+        unlockedAtUtc: '2026-09-08T10:00:00Z',
+        currentValue: 1,
+        target: 1,
+      },
+      {
+        code: 'SevenDayStreak',
+        title: 'أسبوع من الهمة',
+        description: 'زر المنصة سبعة أيام متتالية.',
+        iconKey: 'seven-day-streak',
+        isUnlocked: false,
+        unlockedAtUtc: null,
+        currentValue: 5,
+        target: 7,
+      },
+    ],
   };
 }

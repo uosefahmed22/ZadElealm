@@ -3,8 +3,8 @@ using ZadElealm.Apis.Quaries.Certificate;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
+using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications.Certificate;
-using ZadElealm.Service.Documents;
 
 namespace ZadElealm.Apis.Handlers.CertificateHandler;
 
@@ -12,10 +12,14 @@ public sealed class GetCertificateFileQueryHandler
     : BaseQueryHandler<GetCertificateFileQuery, ApiResponse>
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICertificateFileStorage _certificateFileStorage;
 
-    public GetCertificateFileQueryHandler(IUnitOfWork unitOfWork)
+    public GetCertificateFileQueryHandler(
+        IUnitOfWork unitOfWork,
+        ICertificateFileStorage certificateFileStorage)
     {
         _unitOfWork = unitOfWork;
+        _certificateFileStorage = certificateFileStorage;
     }
 
     public override async Task<ApiResponse> Handle(
@@ -31,7 +35,7 @@ public sealed class GetCertificateFileQueryHandler
         if (certificate is null)
             return new ApiDataResponse(404, message: "الشهادة غير موجودة");
 
-        var filePath = CertificateFileStorage.ResolveExistingFile(certificate.PdfUrl);
+        var filePath = _certificateFileStorage.ResolveExistingFile(certificate.PdfUrl);
         if (filePath is null)
             return new ApiDataResponse(404, message: "ملف الشهادة غير موجود");
 

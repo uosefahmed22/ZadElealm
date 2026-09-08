@@ -104,6 +104,11 @@ public class CourseFeedbackTests : IClassFixture<ZadElealmApiFactory>
         var secondEnrollment = await otherStudent.PostAsync($"/api/Enrollment/{courseId}", null);
         Assert.Equal(HttpStatusCode.OK, secondEnrollment.StatusCode);
 
+        var secondRating = await AddRatingAsync(otherStudent, courseId, 3);
+        Assert.Equal(HttpStatusCode.OK, secondRating.StatusCode);
+        feedback = await ReadCourseFeedbackAsync(student, courseId);
+        Assert.Equal(4m, feedback.Rating);
+
         var forbiddenDelete = await otherStudent.DeleteAsync($"/api/Review/{ownedReview.Id}");
         Assert.Equal(HttpStatusCode.Forbidden, forbiddenDelete.StatusCode);
 

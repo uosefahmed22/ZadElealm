@@ -1,16 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, HostListener, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthFacadeService } from '../../core/auth/auth-facade.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { AchievementStateService } from '../../core/achievements/achievement-state.service';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { NotificationApiService } from '../../core/notifications/notification-api.service';
 import { UserNotificationDto } from '../../core/notifications/notification.models';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 @Component({
   selector: 'app-student-layout',
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ArabicNumberPipe],
   templateUrl: './student-layout.component.html',
   styleUrl: './student-layout.component.scss',
 })
@@ -18,8 +21,10 @@ export class StudentLayoutComponent implements OnInit {
   private readonly authFacade = inject(AuthFacadeService);
   private readonly router = inject(Router);
   private readonly notificationApi = inject(NotificationApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly session = inject(AuthSessionService);
+  readonly achievementState = inject(AchievementStateService);
   readonly isLoggingOut = signal(false);
   readonly notifications = signal<UserNotificationDto[]>([]);
   readonly unreadCount = signal(0);
@@ -33,6 +38,10 @@ export class StudentLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadNotifications();
+    this.achievementState
+      .load()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
   }
 
   @HostListener('document:keydown.escape')

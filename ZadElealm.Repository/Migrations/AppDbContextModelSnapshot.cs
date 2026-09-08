@@ -1066,6 +1066,71 @@ namespace ZadElealm.Repository.Migrations
                     b.ToTable("ReviewLikes");
                 });
 
+            modelBuilder.Entity("ZadElealm.Core.Models.UserAchievement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Code")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UnlockedAtUtc")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "Code")
+                        .IsUnique()
+                        .HasDatabaseName("UX_UserAchievements_UserId_Code")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("UserAchievements");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.UserActivityDay", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateOnly>("ActivityDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "ActivityDate")
+                        .IsUnique()
+                        .HasDatabaseName("UX_UserActivityDays_UserId_ActivityDate")
+                        .HasFilter("[IsDeleted] = 0");
+
+                    b.ToTable("UserActivityDays");
+                });
+
             modelBuilder.Entity("ZadElealm.Core.Models.UserNotification", b =>
                 {
                     b.Property<int>("Id")
@@ -1584,6 +1649,28 @@ namespace ZadElealm.Repository.Migrations
                         .IsRequired();
 
                     b.Navigation("Review");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.UserAchievement", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("ZadElealm.Core.Models.UserActivityDay", b =>
+                {
+                    b.HasOne("ZadElealm.Core.Models.Identity.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

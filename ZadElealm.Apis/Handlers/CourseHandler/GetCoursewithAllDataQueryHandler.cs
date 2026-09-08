@@ -14,10 +14,14 @@ namespace ZadElealm.Apis.Handlers.Course
     public class GetCourseWithAllDataQueryHandler : BaseQueryHandler<GetCourseWithAllDataQuery, ApiResponse>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEnrollmentReadRepository _enrollmentReadRepository;
 
-        public GetCourseWithAllDataQueryHandler(IUnitOfWork unitOfWork)
+        public GetCourseWithAllDataQueryHandler(
+            IUnitOfWork unitOfWork,
+            IEnrollmentReadRepository enrollmentReadRepository)
         {
             _unitOfWork = unitOfWork;
+            _enrollmentReadRepository = enrollmentReadRepository;
         }
 
         public override async Task<ApiResponse> Handle(GetCourseWithAllDataQuery request, CancellationToken cancellationToken)
@@ -30,17 +34,19 @@ namespace ZadElealm.Apis.Handlers.Course
                 return new ApiResponse(404, "الدورة غير موجودة");
 
             var mappedCourse = course.ToDetailsDto();
-            var enrollment = await _unitOfWork.Repository<Enrollment>()
-                .GetEntityWithSpecNoTrackingAsync(
-                    new EnrollmentExistsSpecification(request.CourseId, request.UserId));
-            mappedCourse.IsEnrolled = enrollment != null;
+            var enrollmentSummary = await _enrollmentReadRepository
+                .GetCourseEnrollmentSummaryAsync(
+                    request.CourseId,
+                    request.UserId,
+                    cancellationToken);
+            mappedCourse.IsEnrolled = enrollmentSummary.IsCurrentUserEnrolled;
+            mappedCourse.TotalEnrolledStudents = enrollmentSummary.TotalEnrolledStudents;
+
+            var sourceReviewsById = course.Review.ToDictionary(review => review.Id);
             foreach (var review in mappedCourse.Review)
             {
                 review.IsOwnedByCurrentUser = review.AppUserId == request.UserId;
-            }
-            foreach (var review in mappedCourse.Review)
-            {
-                var sourceReview = course.Review.First(source => source.Id == review.Id);
+                var sourceReview = sourceReviewsById[review.Id];
                 review.IsLikedByCurrentUser = sourceReview.Likes.Any(like => like.AppUserId == request.UserId);
             }
 
@@ -50,10 +56,10 @@ namespace ZadElealm.Apis.Handlers.Course
                 var videoProgress = await _unitOfWork.Repository<VideoProgress>()
                     .GetAllWithSpecNoTrackingAsync(specvideoProgress);
 
+                var progressByVideoId = videoProgress.ToDictionary(progress => progress.VideoId);
                 foreach (var video in mappedCourse.Videos)
                 {
-                    var progress = videoProgress.FirstOrDefault(vp => vp.VideoId == video.Id);
-                    if (progress != null)
+                    if (progressByVideoId.TryGetValue(video.Id, out var progress))
                     {
                         video.IsCompleted = progress.IsCompleted;
                         video.WatchedDuration = progress.WatchedDuration;

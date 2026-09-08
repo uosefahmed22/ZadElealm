@@ -59,6 +59,12 @@ namespace ZadElealm.Repository.Data.Datbases
             modelBuilder.Entity<UserRank>().HasQueryFilter(userRank =>
                 !userRank.IsDeleted &&
                 !userRank.User.IsDeleted);
+            modelBuilder.Entity<UserAchievement>().HasQueryFilter(achievement =>
+                !achievement.IsDeleted &&
+                !achievement.User.IsDeleted);
+            modelBuilder.Entity<UserActivityDay>().HasQueryFilter(activity =>
+                !activity.IsDeleted &&
+                !activity.User.IsDeleted);
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
         public DbSet<Category> Categories { get; set; }
@@ -81,6 +87,8 @@ namespace ZadElealm.Repository.Data.Datbases
         public DbSet<Question> Question { get; set; }
         public DbSet<Choice> Choice { get; set; }
         public DbSet<UserRank> userRanks { get; set; }
+        public DbSet<UserAchievement> UserAchievements { get; set; }
+        public DbSet<UserActivityDay> UserActivityDays { get; set; }
         public DbSet<Assessment> Assessments { get; set; }
         public DbSet<AssessmentForm> AssessmentForms { get; set; }
         public DbSet<AssessmentQuestion> AssessmentQuestions { get; set; }

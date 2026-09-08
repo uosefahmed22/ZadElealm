@@ -1,16 +1,35 @@
+using ZadElealm.Core.Options;
+using ZadElealm.Core.Service;
+
 namespace ZadElealm.Service.Documents;
 
-public static class CertificateFileStorage
+public sealed class CertificateFileStorage : ICertificateFileStorage
 {
     private const string PdfExtension = ".pdf";
+    private readonly string _privateDirectory;
+    private readonly string _legacyPublicDirectory;
+    private readonly string _logoFilePath;
 
-    public static string GetPrivateDirectory()
-        => Path.Combine(Directory.GetCurrentDirectory(), "App_Data", "certificates");
+    public CertificateFileStorage(
+        string contentRootPath,
+        CertificateStorageOptions options)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(contentRootPath);
+        ArgumentNullException.ThrowIfNull(options);
 
-    public static string GetPrivateFilePath(string fileName)
-        => Path.Combine(GetPrivateDirectory(), GetSafePdfFileName(fileName));
+        _privateDirectory = ResolveConfiguredPath(contentRootPath, options.PrivatePath);
+        _legacyPublicDirectory = ResolveConfiguredPath(contentRootPath, options.LegacyPublicPath);
+        _logoFilePath = ResolveConfiguredPath(contentRootPath, options.LogoPath);
+    }
 
-    public static string? ResolveExistingFile(string storedReference)
+    public string GetPrivateDirectory() => _privateDirectory;
+
+    public string GetPrivateFilePath(string fileName)
+        => Path.Combine(_privateDirectory, GetSafePdfFileName(fileName));
+
+    public string GetLogoFilePath() => _logoFilePath;
+
+    public string? ResolveExistingFile(string storedReference)
     {
         var fileName = TryGetSafePdfFileName(storedReference);
         if (fileName is null)
@@ -18,11 +37,25 @@ public static class CertificateFileStorage
 
         var candidates = new[]
         {
-            Path.Combine(GetPrivateDirectory(), fileName),
-            Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "certificates", fileName)
+            Path.Combine(_privateDirectory, fileName),
+            Path.Combine(_legacyPublicDirectory, fileName)
         };
 
         return candidates.FirstOrDefault(File.Exists);
+    }
+
+    public bool DeletePrivateFileIfExists(string? storedReference)
+    {
+        var fileName = TryGetSafePdfFileName(storedReference);
+        if (fileName is null)
+            return false;
+
+        var filePath = Path.Combine(_privateDirectory, fileName);
+        if (!File.Exists(filePath))
+            return false;
+
+        File.Delete(filePath);
+        return true;
     }
 
     private static string GetSafePdfFileName(string value)
@@ -43,5 +76,14 @@ public static class CertificateFileStorage
                !fileName.EndsWith(PdfExtension, StringComparison.OrdinalIgnoreCase)
             ? null
             : fileName;
+    }
+
+    private static string ResolveConfiguredPath(string contentRootPath, string configuredPath)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(configuredPath);
+        var path = Path.IsPathRooted(configuredPath)
+            ? configuredPath
+            : Path.Combine(contentRootPath, configuredPath);
+        return Path.GetFullPath(path);
     }
 }

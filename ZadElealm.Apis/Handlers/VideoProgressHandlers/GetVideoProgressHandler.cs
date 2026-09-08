@@ -1,35 +1,36 @@
-﻿using ZadElealm.Apis.Dtos;
+using ZadElealm.Apis.Dtos;
 using ZadElealm.Apis.Quaries.VideoProgressQueries;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
-using ZadElealm.Core.Repositories;
-using ZadElealm.Core.Specifications.Videos;
+using ZadElealm.Core.Service;
 
 namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
 {
-    public class GetVideoProgressHandler : BaseQueryHandler<GetVideoProgressQuery, VideoProgressDto>
+    public class GetVideoProgressHandler : BaseQueryHandler<GetVideoProgressQuery, ApiDataResponse>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVideoProgressService _videoProgressService;
 
-        public GetVideoProgressHandler(IUnitOfWork unitOfWork)
+        public GetVideoProgressHandler(IVideoProgressService videoProgressService)
         {
-            _unitOfWork = unitOfWork;
+            _videoProgressService = videoProgressService;
         }
 
-        public override async Task<VideoProgressDto> Handle(GetVideoProgressQuery request, CancellationToken cancellationToken)
+        public override async Task<ApiDataResponse> Handle(
+            GetVideoProgressQuery request,
+            CancellationToken cancellationToken)
         {
-            var spec = new VideoProgressSpecification(request.UserId, request.VideoId);
-            var progress = await _unitOfWork.Repository<VideoProgress>().GetEntityWithSpecAsync(spec);
+            var response = await _videoProgressService
+                .GetVideoProgressAsync(request.UserId, request.VideoId, cancellationToken);
+            if (response.StatusCode != 200 || response.Data is not VideoProgress progress)
+                return response;
 
-            if (progress == null)
-                return null;
-
-            return new VideoProgressDto
+            return new ApiDataResponse(200, new VideoProgressDto
             {
                 VideoId = progress.VideoId,
                 CourseId = progress.CourseId,
                 WatchedDuration = progress.WatchedDuration.TotalSeconds,
                 IsCompleted = progress.IsCompleted
-            };
+            }, response.Message);
         }
     }
 }

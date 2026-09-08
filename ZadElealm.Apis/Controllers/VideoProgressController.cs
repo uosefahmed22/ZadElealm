@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -28,7 +28,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("update")]
         public async Task<ActionResult<VideoProgressDto>> UpdateProgress([FromBody] UpdateProgressRequest request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null) {
                 return BadRequest(new ApiResponse(400, "User not found"));
@@ -49,7 +49,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("course/{courseId}")]
         public async Task<ActionResult<CourseProgressDto>> GetCourseProgress(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -63,14 +63,16 @@ namespace ZadElealm.Apis.Controllers
             };
 
             var result = await _mediator.Send(query);
-            return Ok(result);
+            return result.StatusCode == StatusCodes.Status200OK
+                ? Ok(result.Data)
+                : StatusCode(result.StatusCode, result);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpGet("check-eligibility/{courseId}")]
         public async Task<ActionResult<EligibilityResponse>> CheckQuizEligibility(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -84,14 +86,16 @@ namespace ZadElealm.Apis.Controllers
             };
 
             var result = await _mediator.Send(query);
-            return Ok(result);
+            return result.StatusCode == StatusCodes.Status200OK
+                ? Ok(result.Data)
+                : StatusCode(result.StatusCode, result);
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [HttpGet("video/{videoId}")]
         public async Task<ActionResult<VideoProgressDto>> GetVideoProgress(int videoId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -106,10 +110,9 @@ namespace ZadElealm.Apis.Controllers
 
             var result = await _mediator.Send(query);
 
-            if (result == null)
-                return NotFound(new ApiResponse(404, "Video progress not found"));
-
-            return Ok(result);
+            return result.StatusCode == StatusCodes.Status200OK
+                ? Ok(result.Data)
+                : StatusCode(result.StatusCode, result);
         }
     }
 }

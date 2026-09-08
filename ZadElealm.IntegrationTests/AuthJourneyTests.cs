@@ -3,7 +3,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using ZadElealm.Core.Models.Identity;
 
 namespace ZadElealm.IntegrationTests;
 
@@ -48,6 +51,49 @@ public class AuthJourneyTests : IClassFixture<ZadElealmApiFactory>
         var refreshed = await ReadAuthResponse(refreshResponse);
         Assert.NotEqual(login.RefreshToken, refreshed.RefreshToken);
         Assert.False(string.IsNullOrWhiteSpace(refreshed.Token));
+    }
+
+    [Fact]
+    public async Task RefreshToken_WithMultipleRoleClaims_CompletesSuccessfully()
+    {
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                var roleResult = await roleManager.CreateAsync(new IdentityRole("Admin"));
+                Assert.True(roleResult.Succeeded);
+            }
+
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            var user = await userManager.FindByEmailAsync("user@test.com");
+            Assert.NotNull(user);
+            if (!await userManager.IsInRoleAsync(user, "Admin"))
+            {
+                var addRoleResult = await userManager.AddToRoleAsync(user, "Admin");
+                Assert.True(addRoleResult.Succeeded);
+            }
+        }
+
+        using var client = CreateClient();
+        var loginResponse = await client.PostAsJsonAsync("/api/Account/login", new
+        {
+            email = "user@test.com",
+            password = ZadElealmApiFactory.TestUserPassword
+        });
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+        var login = await ReadAuthResponse(loginResponse);
+
+        var refreshResponse = await client.PostAsJsonAsync("/api/Account/refresh-token", new
+        {
+            token = login.Token,
+            refreshToken = login.RefreshToken
+        });
+
+        Assert.Equal(HttpStatusCode.OK, refreshResponse.StatusCode);
+        var refreshed = await ReadAuthResponse(refreshResponse);
+        Assert.False(string.IsNullOrWhiteSpace(refreshed.Token));
+        Assert.NotEqual(login.RefreshToken, refreshed.RefreshToken);
     }
 
     [Fact]

@@ -151,6 +151,29 @@ public class MappingExtensionsTests
         Assert.Equal(88.5, dto.AverageQuizScore);
     }
 
+    [Fact]
+    public void CertificateToDto_ReplacesLegacyEnglishContentWithArabic()
+    {
+        var certificate = new Certificate
+        {
+            Id = 7,
+            Name = "Certificate_Youssef_Fiqh",
+            Description = "Certificate for completing Fiqh with score 92",
+            PdfUrl = "legacy-file.pdf",
+            User = new AppUser { DisplayName = "يوسف أحمد" },
+            Quiz = new Quiz { Name = "اختبار الفقه" },
+            CreatedAt = new DateTime(2026, 9, 6)
+        };
+
+        var dto = certificate.ToDto();
+
+        Assert.Equal("شهادة اجتياز اختبار الفقه", dto.Name);
+        Assert.Equal("شهادة إتمام اختبار الفقه بنجاح", dto.Description);
+        Assert.Equal("اختبار الفقه", dto.QuizName);
+        Assert.DoesNotContain("Certificate", dto.Name);
+        Assert.DoesNotContain("Certificate", dto.Description);
+    }
+
     // ─── 5. Report mapping (enum/string conversions) ─────────────────────────
 
     [Fact]

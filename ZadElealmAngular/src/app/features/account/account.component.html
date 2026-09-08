@@ -7,9 +7,6 @@
 @if (statusMessage()) {
   <p class="message message--success" role="status">{{ statusMessage() }}</p>
 }
-@if (errorMessage()) {
-  <p class="message message--error" role="alert">{{ errorMessage() }}</p>
-}
 
 @if (isLoading()) {
   <div class="account-grid" aria-label="جارٍ تحميل بيانات الحساب" aria-busy="true">
@@ -25,52 +22,59 @@
 } @else if (profile(); as currentProfile) {
   <div class="account-grid">
     <section class="account-card profile-summary">
-      <div class="avatar" aria-hidden="true">
-        @if (currentProfile.imageUrl && !imageError()) {
-          <img
-            [src]="currentProfile.imageUrl"
-            [alt]="'الصورة الشخصية لـ ' + currentProfile.displayName"
-            (error)="imageError.set(true)"
+      <div class="profile-identity">
+        <div class="avatar" aria-hidden="true">
+          @if (currentProfile.imageUrl && !imageError()) {
+            <img
+              [src]="currentProfile.imageUrl"
+              [alt]="'الصورة الشخصية لـ ' + currentProfile.displayName"
+              (error)="imageError.set(true)"
+            />
+          } @else {
+            <span>{{ initials() }}</span>
+          }
+        </div>
+        <div class="profile-details">
+          <h2>{{ currentProfile.displayName }}</h2>
+          <p dir="ltr">{{ currentProfile.email }}</p>
+        </div>
+      </div>
+      <div class="profile-media-controls">
+        <div class="image-actions">
+          <label class="file-picker" for="profile-image">اختيار صورة</label>
+          <input
+            id="profile-image"
+            type="file"
+            accept="image/png,image/jpeg"
+            (change)="selectImage($event)"
           />
-        } @else {
-          <span>{{ initials() }}</span>
+          @if (selectedImageName()) {
+            <span class="file-name" dir="auto">{{ selectedImageName() }}</span>
+            <button
+              class="primary-button"
+              type="button"
+              [disabled]="activeAction() !== null"
+              (click)="uploadImage()"
+            >
+              {{ activeAction() === 'image' ? 'جارٍ الرفع…' : 'رفع الصورة' }}
+            </button>
+          }
+          @if (currentProfile.imageUrl) {
+            <button
+              class="text-button text-button--danger"
+              type="button"
+              [disabled]="activeAction() !== null"
+              (click)="removeImage()"
+            >
+              حذف الصورة
+            </button>
+          }
+        </div>
+        <small>PNG أو JPG، بحد أقصى 5 ميجابايت.</small>
+        @if (errorAction() === 'image' && errorMessage()) {
+          <p class="message message--error" role="alert">{{ errorMessage() }}</p>
         }
       </div>
-      <div>
-        <h2>{{ currentProfile.displayName }}</h2>
-        <p dir="ltr">{{ currentProfile.email }}</p>
-      </div>
-      <div class="image-actions">
-        <label class="file-picker" for="profile-image">اختيار صورة</label>
-        <input
-          id="profile-image"
-          type="file"
-          accept="image/png,image/jpeg"
-          (change)="selectImage($event)"
-        />
-        @if (selectedImageName()) {
-          <span class="file-name" dir="auto">{{ selectedImageName() }}</span>
-          <button
-            class="primary-button"
-            type="button"
-            [disabled]="activeAction() !== null"
-            (click)="uploadImage()"
-          >
-            {{ activeAction() === 'image' ? 'جارٍ الرفع…' : 'رفع الصورة' }}
-          </button>
-        }
-        @if (currentProfile.imageUrl) {
-          <button
-            class="text-button text-button--danger"
-            type="button"
-            [disabled]="activeAction() !== null"
-            (click)="removeImage()"
-          >
-            حذف الصورة
-          </button>
-        }
-      </div>
-      <small>PNG أو JPG، بحد أقصى 5 ميجابايت.</small>
     </section>
 
     <section class="account-card">
@@ -97,6 +101,9 @@
         <button class="primary-button" type="submit" [disabled]="activeAction() !== null">
           {{ activeAction() === 'profile' ? 'جارٍ الحفظ…' : 'حفظ البيانات' }}
         </button>
+        @if (errorAction() === 'profile' && errorMessage()) {
+          <p class="message message--error" role="alert">{{ errorMessage() }}</p>
+        }
       </form>
     </section>
 
@@ -113,6 +120,12 @@
           formControlName="currentPassword"
           autocomplete="current-password"
         />
+        @if (
+          passwordForm.controls.currentPassword.touched &&
+          passwordForm.controls.currentPassword.invalid
+        ) {
+          <small class="field-error">أدخل كلمة المرور الحالية.</small>
+        }
 
         <label for="new-password">كلمة المرور الجديدة</label>
         <input
@@ -134,10 +147,19 @@
           formControlName="confirmPassword"
           autocomplete="new-password"
         />
+        @if (
+          passwordForm.controls.confirmPassword.touched &&
+          passwordForm.controls.confirmPassword.invalid
+        ) {
+          <small class="field-error">أعد كتابة كلمة المرور الجديدة.</small>
+        }
 
         <button class="primary-button" type="submit" [disabled]="activeAction() !== null">
           {{ activeAction() === 'password' ? 'جارٍ التغيير…' : 'تغيير كلمة المرور' }}
         </button>
+        @if (errorAction() === 'password' && errorMessage()) {
+          <p class="message message--error" role="alert">{{ errorMessage() }}</p>
+        }
       </form>
     </section>
 
@@ -157,8 +179,14 @@
                 type="email"
                 formControlName="newEmail"
                 autocomplete="email"
+                placeholder="name@example.com"
                 dir="ltr"
               />
+              @if (
+                emailForm.controls.newEmail.touched && emailForm.controls.newEmail.invalid
+              ) {
+                <small class="field-error">أدخل بريدًا إلكترونيًا صحيحًا.</small>
+              }
             </div>
             <div>
               <label for="email-password">كلمة المرور الحالية</label>
@@ -168,6 +196,11 @@
                 formControlName="password"
                 autocomplete="current-password"
               />
+              @if (
+                emailForm.controls.password.touched && emailForm.controls.password.invalid
+              ) {
+                <small class="field-error">أدخل كلمة المرور الحالية.</small>
+              }
             </div>
           </div>
           <button
@@ -215,6 +248,9 @@
             </button>
           </div>
         }
+        @if (errorAction() === 'email' && errorMessage()) {
+          <p class="message message--error" role="alert">{{ errorMessage() }}</p>
+        }
       </form>
     </section>
 
@@ -249,7 +285,7 @@
         أدخل كلمة المرور، ثم اكتب <strong>«{{ deleteConfirmationText }}»</strong> لإتمام الإغلاق.
       </p>
 
-      @if (errorMessage()) {
+      @if (errorAction() === 'delete' && errorMessage()) {
         <p class="message message--error" role="alert">{{ errorMessage() }}</p>
       }
 

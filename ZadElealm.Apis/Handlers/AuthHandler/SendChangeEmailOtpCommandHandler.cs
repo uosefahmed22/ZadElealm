@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ZadElealm.Apis.Commands.Auth;
+using ZadElealm.Apis.Helpers;
 using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Core.Service;
@@ -27,6 +28,11 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
 
         public override async Task<ApiResponse> Handle(SendChangeEmailOtpCommand request, CancellationToken cancellationToken)
         {
+            if (string.Equals(request.OldEmail, request.NewEmail, StringComparison.OrdinalIgnoreCase))
+            {
+                return new ApiResponse(400, "البريد الجديد هو نفس بريدك الحالي. أدخل بريدًا مختلفًا");
+            }
+
             var user = await _userManager.FindByEmailAsync(request.NewEmail);
             if (user != null)
             {
@@ -44,15 +50,15 @@ namespace ZadElealm.Apis.Handlers.AuthHandler
             {
                 To = request.NewEmail,
                 Subject = "تغيير البريد الإلكتروني",
-                Body = $"رمز التحقق الخاص بك هو: {otp}" +
-                       "إذا لم تقم بطلب تغيير البريد الإلكتروني، يرجى تجاهل هذا البريد الإلكتروني"+
-                       "لن يتم تغيير البريد الإلكتروني إلا بعد تأكيد الرمز"
+                Body = AccountEmailTemplates.ChangeEmailOtp(otp)
             };
 
-            var result = await _sendEmailService.SendEmailAsync(emailMessage);
+            var result = await _sendEmailService.SendEmailAsync(emailMessage, cancellationToken);
             if (result.StatusCode != 200)
             {
-                return new ApiResponse(400, "فشل في إرسال رمز التحقق");
+                return new ApiResponse(
+                    result.StatusCode,
+                    result.Message ?? "تعذر إرسال رمز التحقق حاليًا");
             }
 
             return new ApiResponse(200, "لقد تم إرسال رمز التحقق بنجاح");

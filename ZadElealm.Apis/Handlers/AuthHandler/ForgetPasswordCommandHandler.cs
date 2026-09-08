@@ -45,10 +45,10 @@ namespace ZadElealm.Apis.Handlers.Auth
             {
                 To = request.Email,
                 Subject = "إعادة تعيين كلمة المرور",
-                Body = BuildEmailBody(user.DisplayName, otp)
+                Body = AccountEmailTemplates.PasswordResetOtp(user.DisplayName, otp)
             };
 
-            var emailSent = await _sendEmailService.SendEmailAsync(emailMessage);
+            var emailSent = await _sendEmailService.SendEmailAsync(emailMessage, cancellationToken);
             if (emailSent.StatusCode != 200)
             {
                 return new ApiResponse(500, "فشل في إرسال البريد الإلكتروني");
@@ -59,14 +59,6 @@ namespace ZadElealm.Apis.Handlers.Auth
             return new ApiResponse(200, "تم إرسال رمز التحقق بنجاح");
         }
 
-        private string BuildEmailBody(string displayName, string otp)
-        {
-            return $@"<h1>عزيزي {displayName}</h1>
-                  <p>لقد تلقينا طلباً لإعادة تعيين كلمة المرور الخاصة بك.</p>
-                  <p>رمز التحقق الخاص بك هو: <strong>{otp}</strong></p>
-                  <p>هذا الرمز صالح لمدة خمسه عشر دقيقة.</p>
-                  <p>إذا لم تطلب إعادة تعيين كلمة المرور، يرجى تجاهل هذا البريد الإلكتروني.</p>";
-        }
         private string FormatWaitTimeMessage(TimeSpan waitTime)
         {
             if (waitTime.TotalDays >= 1)

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -13,10 +12,11 @@ import { RouterLink } from '@angular/router';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { CertificateDto } from '../../core/assessments/assessment.models';
+import { formatArabicDate } from '../../core/i18n/arabic-number-format.util';
 
 @Component({
   selector: 'app-certificates',
-  imports: [DatePipe, RouterLink],
+  imports: [RouterLink],
   templateUrl: './certificates.component.html',
   styleUrl: './certificates.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +37,21 @@ export class CertificatesComponent implements OnInit {
 
   retry(): void {
     this.loadCertificates();
+  }
+
+  formatArabicDate(value: string): string {
+    return formatArabicDate(value);
+  }
+
+  certificateTitle(_certificate: CertificateDto): string {
+    return 'شهادة اجتياز';
+  }
+
+  certificateDescription(certificate: CertificateDto): string {
+    const description = certificate.description.trim();
+    return description && !/[A-Za-z]/.test(description)
+      ? description
+      : `شهادة إتمام ${certificate.quizName} بنجاح`;
   }
 
   openCertificate(certificate: CertificateDto): void {

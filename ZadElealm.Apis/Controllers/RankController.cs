@@ -1,4 +1,4 @@
-﻿using CloudinaryDotNet;
+using CloudinaryDotNet;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +33,7 @@ namespace ZadElealm.Apis.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<UserRankDto>> GetUserRank()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -52,7 +52,7 @@ namespace ZadElealm.Apis.Controllers
         public async Task<ActionResult<ApiDataResponse>> GetRankDashboard(
             [FromQuery, Range(3, 50)] int take = 10)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrWhiteSpace(email))
                 return Unauthorized(new ApiResponse(401, "بيانات الدخول غير مكتملة"));
 
@@ -71,7 +71,8 @@ namespace ZadElealm.Apis.Controllers
 
         [HttpGet("top")]
         [ProducesResponseType(typeof(List<UserRankDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<UserRankDto>>> GetTopRankedUsers([FromQuery] int take = 10)
+        public async Task<ActionResult<List<UserRankDto>>> GetTopRankedUsers(
+            [FromQuery, Range(1, 100)] int take = 10)
         {
             var query = new GetTopRankedUsersQuery { Take = take };
             var result = await _mediator.Send(query);
@@ -84,7 +85,7 @@ namespace ZadElealm.Apis.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> UpdateUserRank()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -97,10 +98,11 @@ namespace ZadElealm.Apis.Controllers
         }
 
         [HttpGet("calculate")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "User")]
         [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
         public async Task<ActionResult<int>> CalculateUserPoints()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -112,9 +114,15 @@ namespace ZadElealm.Apis.Controllers
 
         [HttpGet("leaderboard")]
         [ProducesResponseType(typeof(List<UserRankDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<List<UserRankDto>>> GetLeaderboard([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<ActionResult<List<UserRankDto>>> GetLeaderboard(
+            [FromQuery, Range(1, 1_000_000)] int page = 1,
+            [FromQuery, Range(1, 100)] int pageSize = 10)
         {
-            var query = new GetTopRankedUsersQuery { Take = pageSize };
+            var query = new GetTopRankedUsersQuery
+            {
+                Skip = (page - 1) * pageSize,
+                Take = pageSize
+            };
             var result = await _mediator.Send(query);
             return Ok(result);
         }

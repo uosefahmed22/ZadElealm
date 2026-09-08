@@ -70,15 +70,14 @@ namespace ZadElealm.Apis.Handlers.Auth
             var emailConfirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callBackUrl = GenerateCallBackUrl(emailConfirmationToken, user.Id);
 
-            var emailBody = BuildEmailBody(user.DisplayName, callBackUrl);
             var emailMessage = new EmailMessage
             {
                 To = user.Email,
                 Subject = "تأكيد البريد الإلكتروني",
-                Body = emailBody
+                Body = AccountEmailTemplates.WelcomeConfirmation(user.DisplayName, callBackUrl)
             };
 
-            var emailSent = await _sendEmailService.SendEmailAsync(emailMessage);
+            var emailSent = await _sendEmailService.SendEmailAsync(emailMessage, cancellationToken);
 
             if (emailSent.StatusCode != 200)
             {
@@ -89,13 +88,6 @@ namespace ZadElealm.Apis.Handlers.Auth
             return new ApiResponse(200, "تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتأكيد الحساب");
         }
 
-        private string BuildEmailBody(string displayName, string callBackUrl)
-        {
-            return $@"<h1>عزيزي {displayName}</h1>
-              مرحبًا بك في موقعنا, ونحن سعداء بانضمامك إلينا
-              <p>شكرًا لتسجيلك في موقعنا. يرجى تأكيد عنوان بريدك الإلكتروني بالنقر على الزر أدناه</p>
-              <a href='{callBackUrl}'><button style='background-color: #4CAF50; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;'>تأكيد البريد الإلكتروني</button></a>";
-        }
         private string GenerateCallBackUrl(string token, string userId)
         {
             if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(userId))

@@ -34,7 +34,7 @@
   border-radius: 999px;
   background: var(--color-accent-soft);
   color: var(--color-primary-dark);
-  font-size: 0.74rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 
@@ -95,7 +95,7 @@ form {
   align-items: center;
   gap: var(--space-2);
   color: var(--color-danger);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
 }
 .field-error::before {
   content: '!';
@@ -106,7 +106,7 @@ form {
   display: grid;
   flex: 0 0 auto;
   place-items: center;
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
 }
 
 .password-field {
@@ -253,7 +253,7 @@ form {
   border: 0;
   background: transparent;
   color: var(--color-primary-dark);
-  font-size: 0.78rem;
+  font-size: 0.875rem;
   font-weight: 600;
 }
 

@@ -31,12 +31,17 @@ public class LearningJourneyTests : IClassFixture<ZadElealmApiFactory>
         var progressWithoutEnrollment = await UpdateProgressAsync(client, seeded.FirstVideoId, 85);
         Assert.Equal(HttpStatusCode.Forbidden, progressWithoutEnrollment.StatusCode);
 
+        var courseProgressWithoutEnrollment = await client.GetAsync(
+            $"/api/VideoProgress/course/{seeded.CourseId}");
+        Assert.Equal(HttpStatusCode.NotFound, courseProgressWithoutEnrollment.StatusCode);
+
         var previewResponse = await client.GetAsync($"/api/Course/{seeded.CourseId}");
         Assert.Equal(HttpStatusCode.OK, previewResponse.StatusCode);
         using (var preview = JsonDocument.Parse(await previewResponse.Content.ReadAsStringAsync()))
         {
             var previewData = preview.RootElement.GetProperty("data");
             Assert.False(previewData.GetProperty("isEnrolled").GetBoolean());
+            Assert.Equal(0, previewData.GetProperty("totalEnrolledStudents").GetInt32());
             Assert.All(
                 previewData.GetProperty("videos").EnumerateArray(),
                 video => Assert.Equal(string.Empty, video.GetProperty("videoUrl").GetString()));
@@ -48,12 +53,17 @@ public class LearningJourneyTests : IClassFixture<ZadElealmApiFactory>
         var duplicateEnrollmentResponse = await client.PostAsync($"/api/Enrollment/{seeded.CourseId}", null);
         Assert.Equal(HttpStatusCode.BadRequest, duplicateEnrollmentResponse.StatusCode);
 
+        var missingVideoProgress = await client.GetAsync(
+            $"/api/VideoProgress/video/{seeded.FirstVideoId}");
+        Assert.Equal(HttpStatusCode.NotFound, missingVideoProgress.StatusCode);
+
         var courseResponse = await client.GetAsync($"/api/Course/{seeded.CourseId}");
         Assert.Equal(HttpStatusCode.OK, courseResponse.StatusCode);
         using (var course = JsonDocument.Parse(await courseResponse.Content.ReadAsStringAsync()))
         {
             var courseData = course.RootElement.GetProperty("data");
             Assert.True(courseData.GetProperty("isEnrolled").GetBoolean());
+            Assert.Equal(1, courseData.GetProperty("totalEnrolledStudents").GetInt32());
             Assert.Equal(2, courseData.GetProperty("videos").GetArrayLength());
             Assert.All(
                 courseData.GetProperty("videos").EnumerateArray(),
@@ -78,6 +88,15 @@ public class LearningJourneyTests : IClassFixture<ZadElealmApiFactory>
         {
             Assert.Equal(100, progress.RootElement.GetProperty("overallProgress").GetSingle());
             Assert.True(progress.RootElement.GetProperty("isEligibleForQuiz").GetBoolean());
+        }
+
+        var eligibilityResponse = await client.GetAsync(
+            $"/api/VideoProgress/check-eligibility/{seeded.CourseId}");
+        Assert.Equal(HttpStatusCode.OK, eligibilityResponse.StatusCode);
+        using (var eligibility = JsonDocument.Parse(
+            await eligibilityResponse.Content.ReadAsStringAsync()))
+        {
+            Assert.True(eligibility.RootElement.GetProperty("isEligible").GetBoolean());
         }
 
         var quizResponse = await client.GetAsync($"/api/Quiz/{seeded.QuizId}");

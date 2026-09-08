@@ -36,7 +36,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("{courseId}")]
         public async Task<ActionResult<ApiResponse>> EnrollCourse(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null) 
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -51,7 +51,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{courseId}")]
         public async Task<ActionResult<ApiResponse>> UnenrollCourse(int courseId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -66,7 +66,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet]
         public async Task<ActionResult<ApiResponse>> GetEnrolledCourses()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)

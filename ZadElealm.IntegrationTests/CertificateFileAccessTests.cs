@@ -8,7 +8,7 @@ using Xunit;
 using ZadElealm.Core.Models;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Repository.Data.Datbases;
-using ZadElealm.Service.Documents;
+using ZadElealm.Core.Service;
 
 namespace ZadElealm.IntegrationTests;
 
@@ -92,6 +92,7 @@ public sealed class CertificateFileAccessTests : IClassFixture<ZadElealmApiFacto
         }
 
         var dbContext = services.GetRequiredService<AppDbContext>();
+        var certificateFileStorage = services.GetRequiredService<ICertificateFileStorage>();
         var courseId = await dbContext.Courses.Select(course => course.Id).FirstAsync();
         var quiz = new Quiz
         {
@@ -106,7 +107,7 @@ public sealed class CertificateFileAccessTests : IClassFixture<ZadElealmApiFacto
         await dbContext.SaveChangesAsync();
 
         var fileName = $"certificate-secure-{Guid.NewGuid():N}.pdf";
-        var filePath = CertificateFileStorage.GetPrivateFilePath(fileName);
+        var filePath = certificateFileStorage.GetPrivateFilePath(fileName);
         Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
         await File.WriteAllBytesAsync(filePath, PdfContent);
 

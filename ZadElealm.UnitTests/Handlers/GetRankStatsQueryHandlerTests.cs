@@ -13,20 +13,17 @@ public class GetRankStatsQueryHandlerTests
     [Fact]
     public async Task Handle_ReturnsCountsForEveryRankIncludingZeroCounts()
     {
-        IReadOnlyList<UserRank> userRanks =
-        [
-            new() { Rank = UserRankEnum.Bronze },
-            new() { Rank = UserRankEnum.Bronze },
-            new() { Rank = UserRankEnum.Gold }
-        ];
+        IReadOnlyDictionary<UserRankEnum, int> counts =
+            new Dictionary<UserRankEnum, int>
+            {
+                [UserRankEnum.Bronze] = 2,
+                [UserRankEnum.Gold] = 1
+            };
+        var repository = new Mock<IUserRankReadRepository>();
+        repository.Setup(r => r.GetCountsByRankAsync(CancellationToken.None))
+            .ReturnsAsync(counts);
 
-        var repository = new Mock<IGenericRepository<UserRank>>();
-        repository.Setup(r => r.GetAllWithNoTrackingAsync()).ReturnsAsync(userRanks);
-
-        var unitOfWork = new Mock<IUnitOfWork>();
-        unitOfWork.Setup(u => u.Repository<UserRank>()).Returns(repository.Object);
-
-        var handler = new GetRankStatsQueryHandler(unitOfWork.Object);
+        var handler = new GetRankStatsQueryHandler(repository.Object);
 
         var result = await handler.Handle(new GetRankStatsQuery(), CancellationToken.None);
 

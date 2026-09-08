@@ -25,6 +25,30 @@
     </nav>
 
     <div class="account">
+      @if (achievementState.dashboard(); as achievements) {
+        <a
+          class="streak-link"
+          [class.streak-link--hot]="achievements.currentStreak >= 10"
+          routerLink="/app/achievements"
+          [attr.aria-label]="
+            'سلسلة دخولك الحالية ' +
+            (achievements.currentStreak | arabicNumber) +
+            ' أيام. عرض الإنجازات'
+          "
+        >
+          <span
+            class="streak-flame"
+            [class.streak-flame--hot]="achievements.currentStreak >= 10"
+            aria-hidden="true"
+            >🔥</span
+          >
+          <span class="streak-divider" aria-hidden="true"></span>
+          <span
+            ><strong>{{ achievements.currentStreak | arabicNumber }}</strong
+            ><small> أيام</small></span
+          >
+        </a>
+      }
       <div class="notification-center">
         <button
           type="button"
@@ -222,6 +246,18 @@
                   <path d="M8 20v-7h4v7M4 20v-4h4M12 20V9h4v11M16 20V4h4v16M3 20h18" />
                 </svg>
                 الترتيب
+              </a>
+              <a
+                routerLink="/app/achievements"
+                routerLinkActive="active"
+                (click)="closeAccountMenu()"
+              >
+                <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.7 5.6 6.1.8-4.4 4.2 1.2 6-5.6-3-5.6 3 1.2-6-4.4-4.2 6.1-.8L12 3Z"
+                  />
+                </svg>
+                إنجازاتي
               </a>
               <a routerLink="/app/account" routerLinkActive="active" (click)="closeAccountMenu()">
                 <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">

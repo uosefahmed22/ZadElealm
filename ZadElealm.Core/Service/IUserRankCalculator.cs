@@ -12,6 +12,6 @@ namespace ZadElealm.Core.Service
     {
         Task<int> CalculatePoints(string userId);
         UserRankEnum DetermineRank(int points);
-        Task<UserRankDto> GetUserRank(string userId);
+        Task<UserRankDto?> GetUserRank(string userId);
     }
 }

@@ -25,7 +25,7 @@ namespace ZadElealm.Service.IdentityService
             var result = await _userManager.CheckPasswordAsync(user, password);
             if (!result)
             {
-                return new ApiResponse(401, "كلمة المرور غير صحيحة");
+                return new ApiResponse(400, "كلمة المرور غير صحيحة");
             }
 
             return new ApiResponse(200, "تم التحقق من كلمة المرور بنجاح");

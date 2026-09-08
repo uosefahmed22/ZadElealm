@@ -19,7 +19,7 @@ import { filter, Subscription } from 'rxjs';
 
 import { CatalogApiService } from '../../core/catalog/catalog-api.service';
 import { CategoryDto, CourseDto } from '../../core/catalog/catalog.models';
-import { formatLatinNumber } from '../../shared/utils/latin-number-format.util';
+import { formatArabicNumber } from '../../core/i18n/arabic-number-format.util';
 import { CourseCardComponent } from '../../shared/components/course-card/course-card.component';
 
 interface NavItem {
@@ -35,12 +35,6 @@ interface FeatureCard {
 
 interface JourneyStep {
   readonly number: string;
-  readonly title: string;
-  readonly description: string;
-  readonly icon: string;
-}
-
-interface AudienceCard {
   readonly title: string;
   readonly description: string;
   readonly icon: string;
@@ -109,7 +103,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
 
   readonly navItems: readonly NavItem[] = [
     { label: 'الرئيسية', fragment: 'home' },
-    { label: 'المميزات', fragment: 'features' },
+    { label: 'الدورات', fragment: 'courses' },
     { label: 'الأسئلة الشائعة', fragment: 'faq' },
   ];
 
@@ -136,50 +130,21 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
     },
   ];
 
-  readonly audienceCards: readonly AudienceCard[] = [
-    {
-      title: 'أطفال',
-      description: 'بداية واضحة تساعد الصغار على التعلّم خطوة بخطوة.',
-      icon: 'book',
-    },
-    {
-      title: 'شباب',
-      description: 'مسارات مرتبة تناسب الدراسة وبناء عادة تعلّم ثابتة.',
-      icon: 'trend',
-    },
-    {
-      title: 'كبار',
-      description: 'واجهة هادئة ومحتوى منظم يمكن متابعته بالوتيرة المناسبة.',
-      icon: 'play-screen',
-    },
-    {
-      title: 'أخوات',
-      description: 'تجربة عربية مريحة للوصول إلى الدروس ومتابعة الإنجاز.',
-      icon: 'award',
-    },
-  ];
-
   readonly journeySteps: readonly JourneyStep[] = [
     {
-      number: formatLatinNumber(1),
-      title: 'سجل حسابك',
-      description: 'أنشئ حسابك الآن وانضم إلى مجتمع المتعلمين.',
+      number: formatArabicNumber(1),
+      title: 'أنشئ حسابك واختر دورتك',
+      description: 'سجّل حسابك واختر الدورة المناسبة لمستواك وهدفك.',
       icon: 'user-plus',
     },
     {
-      number: formatLatinNumber(2),
-      title: 'اختر مساراتك',
-      description: 'اختر الدورة المناسبة لمستواك وهدفك.',
-      icon: 'book',
-    },
-    {
-      number: formatLatinNumber(3),
+      number: formatArabicNumber(2),
       title: 'تعلّم وتدرّب',
       description: 'شاهد الدروس، ونفذ الأنشطة، وحل الاختبارات.',
       icon: 'play-screen',
     },
     {
-      number: formatLatinNumber(4),
+      number: formatArabicNumber(3),
       title: 'أكمل واحصل على شهادتك',
       description: 'أتم متطلبات الدورة واحصل على شهادتك.',
       icon: 'award',
@@ -362,7 +327,7 @@ export class LandingPageComponent implements OnInit, AfterViewInit, OnDestroy {
       description: course.description,
       category: course.category?.name || 'دورة تعليمية',
       author: course.author,
-      videoCountLabel: `${formatLatinNumber(course.courseVideosCount)} درسًا`,
+      videoCountLabel: `${formatArabicNumber(course.courseVideosCount)} درسًا`,
       image,
       imageAlt: `صورة دورة ${course.name}`,
       imageSrcSet: this.createYouTubeSrcSet(image),

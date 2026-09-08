@@ -23,6 +23,25 @@ public sealed class RankDashboardTests : IClassFixture<ZadElealmApiFactory>
     }
 
     [Fact]
+    public async Task PublicRankEndpoints_EnforceAuthorizationAndPagingBounds()
+    {
+        using var anonymous = CreateClient();
+
+        Assert.Equal(
+            HttpStatusCode.Unauthorized,
+            (await anonymous.GetAsync("/api/Rank/calculate")).StatusCode);
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            (await anonymous.GetAsync("/api/Rank/top?take=101")).StatusCode);
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            (await anonymous.GetAsync("/api/Rank/leaderboard?page=0&pageSize=10")).StatusCode);
+        Assert.Equal(
+            HttpStatusCode.BadRequest,
+            (await anonymous.GetAsync("/api/Rank/leaderboard?page=1&pageSize=101")).StatusCode);
+    }
+
+    [Fact]
     public async Task DashboardRequiresAStudent_ValidatesTake_AndReturnsSafeLiveRanking()
     {
         using var anonymous = CreateClient();

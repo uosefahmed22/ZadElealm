@@ -1,28 +1,25 @@
 using MediatR;
 using ZadElealm.Apis.Quaries.UserRankquery;
 using ZadElealm.Core.Enums;
-using ZadElealm.Core.Models;
 using ZadElealm.Core.Repositories;
 
 namespace ZadElealm.Apis.Handlers.UserRankHandler
 {
     public class GetRankStatsQueryHandler : IRequestHandler<GetRankStatsQuery, Dictionary<UserRankEnum, int>>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUserRankReadRepository _userRankReadRepository;
 
-        public GetRankStatsQueryHandler(IUnitOfWork unitOfWork)
+        public GetRankStatsQueryHandler(IUserRankReadRepository userRankReadRepository)
         {
-            _unitOfWork = unitOfWork;
+            _userRankReadRepository = userRankReadRepository;
         }
 
         public async Task<Dictionary<UserRankEnum, int>> Handle(
             GetRankStatsQuery request,
             CancellationToken cancellationToken)
         {
-            var userRanks = await _unitOfWork.Repository<UserRank>().GetAllWithNoTrackingAsync();
-            var counts = userRanks
-                .GroupBy(userRank => userRank.Rank)
-                .ToDictionary(group => group.Key, group => group.Count());
+            var counts = await _userRankReadRepository
+                .GetCountsByRankAsync(cancellationToken);
 
             return Enum.GetValues<UserRankEnum>()
                 .ToDictionary(rank => rank, rank => counts.GetValueOrDefault(rank));

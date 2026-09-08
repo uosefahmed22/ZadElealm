@@ -25,12 +25,13 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
         {
             var spec = new QuizWithQuestionsAndChoicesAndProgressSpecification(request.QuizId);
             var quiz = await _unitOfWork.Repository<Quiz>()
-                .GetEntityWithSpecNoTrackingAsync(spec);
+                .GetEntityWithSpecNoTrackingAsync(spec, cancellationToken);
 
             if (quiz == null)
                 return new ApiResponse(404, "الاختبار غير موجود");
 
-            var isUserEligible = await _videoProgressService.CheckCourseCompletionEligibilityAsync(request.UserId, quiz.CourseId);
+            var isUserEligible = await _videoProgressService
+                .CheckCourseCompletionEligibilityAsync(request.UserId, quiz.CourseId, cancellationToken);
             if (!isUserEligible)
                 return new ApiResponse(403, "غير مؤهل للدخول لهذا الاختبار");
 

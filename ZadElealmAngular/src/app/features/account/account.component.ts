@@ -21,6 +21,7 @@ import { AuthSessionService } from '../../core/auth/auth-session.service';
 const arabicNamePattern = /^[\u0600-\u06ff\s]+$/;
 const acceptedImageTypes = new Set(['image/jpeg', 'image/png']);
 const maxImageBytes = 5 * 1024 * 1024;
+type AccountAction = 'profile' | 'password' | 'image' | 'email' | 'delete';
 
 @Component({
   selector: 'app-account',
@@ -39,11 +40,10 @@ export class AccountComponent implements OnInit {
   readonly profile = signal<UserProfileDto | null>(null);
   readonly isLoading = signal(true);
   readonly loadError = signal('');
-  readonly activeAction = signal<'profile' | 'password' | 'image' | 'email' | 'delete' | null>(
-    null,
-  );
+  readonly activeAction = signal<AccountAction | null>(null);
   readonly statusMessage = signal('');
   readonly errorMessage = signal('');
+  readonly errorAction = signal<AccountAction | null>(null);
   readonly imageError = signal(false);
   readonly emailOtpSent = signal(false);
   readonly pendingEmail = signal('');
@@ -143,8 +143,9 @@ export class AccountComponent implements OnInit {
       this.activeAction()
     ) {
       this.passwordForm.markAllAsTouched();
-      if (value.newPassword !== value.confirmPassword)
-        this.errorMessage.set('تأكيد كلمة المرور غير مطابق.');
+      if (value.newPassword !== value.confirmPassword) {
+        this.setActionError('password', 'تأكيد كلمة المرور غير مطابق.');
+      }
       return;
     }
 
@@ -173,12 +174,12 @@ export class AccountComponent implements OnInit {
       return;
     }
     if (!acceptedImageTypes.has(file.type)) {
-      this.errorMessage.set('اختر صورة بصيغة PNG أو JPG فقط.');
+      this.setActionError('image', 'اختر صورة بصيغة PNG أو JPG فقط.');
       input.value = '';
       return;
     }
     if (file.size > maxImageBytes) {
-      this.errorMessage.set('حجم الصورة يجب ألا يتجاوز 5 ميجابايت.');
+      this.setActionError('image', 'حجم الصورة يجب ألا يتجاوز 5 ميجابايت.');
       input.value = '';
       return;
     }
@@ -226,6 +227,8 @@ export class AccountComponent implements OnInit {
 
   sendEmailOtp(): void {
     const { newEmail, password } = this.emailForm.getRawValue();
+    const normalizedNewEmail = newEmail.trim().toLowerCase();
+    const currentEmail = this.profile()?.email.trim().toLowerCase();
     if (
       this.emailForm.controls.newEmail.invalid ||
       this.emailForm.controls.password.invalid ||
@@ -236,16 +239,22 @@ export class AccountComponent implements OnInit {
       return;
     }
 
+    if (normalizedNewEmail === currentEmail) {
+      this.emailForm.controls.newEmail.markAsTouched();
+      this.setActionError('email', 'البريد الجديد هو نفس بريدك الحالي. أدخل بريدًا مختلفًا.');
+      return;
+    }
+
     this.beginAction('email');
     this.accountApi
-      .sendEmailOtp({ newEmail: newEmail.trim(), password })
+      .sendEmailOtp({ newEmail: normalizedNewEmail, password })
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.activeAction.set(null)),
       )
       .subscribe({
         next: (response) => {
-          this.pendingEmail.set(newEmail.trim());
+          this.pendingEmail.set(normalizedNewEmail);
           this.emailOtpSent.set(true);
           this.statusMessage.set(response.message ?? 'أرسلنا رمز التحقق إلى البريد الجديد.');
         },
@@ -304,7 +313,7 @@ export class AccountComponent implements OnInit {
     ) {
       this.deleteAccountForm.markAllAsTouched();
       if (value.confirmation.trim() !== this.deleteConfirmationText) {
-        this.errorMessage.set(`اكتب «${this.deleteConfirmationText}» كما هي للتأكيد.`);
+        this.setActionError('delete', `اكتب «${this.deleteConfirmationText}» كما هي للتأكيد.`);
       }
       return;
     }
@@ -338,7 +347,7 @@ export class AccountComponent implements OnInit {
             displayName: response.data.displayName,
             phoneNumber: response.data.phoneNumber ?? '',
           });
-          this.emailForm.controls.newEmail.setValue(response.data.email);
+          this.emailForm.controls.newEmail.setValue('');
           this.imageError.set(false);
           this.isLoading.set(false);
         },
@@ -349,7 +358,7 @@ export class AccountComponent implements OnInit {
       });
   }
 
-  private beginAction(action: 'profile' | 'password' | 'image' | 'email' | 'delete'): void {
+  private beginAction(action: AccountAction): void {
     this.clearMessages();
     this.activeAction.set(action);
   }
@@ -357,9 +366,16 @@ export class AccountComponent implements OnInit {
   private clearMessages(): void {
     this.statusMessage.set('');
     this.errorMessage.set('');
+    this.errorAction.set(null);
   }
 
   private setError(error: unknown): void {
-    this.errorMessage.set(normalizeApiError(error).message);
+    this.setActionError(this.activeAction() ?? 'profile', normalizeApiError(error).message);
+  }
+
+  private setActionError(action: AccountAction, message: string): void {
+    this.statusMessage.set('');
+    this.errorAction.set(action);
+    this.errorMessage.set(message);
   }
 }

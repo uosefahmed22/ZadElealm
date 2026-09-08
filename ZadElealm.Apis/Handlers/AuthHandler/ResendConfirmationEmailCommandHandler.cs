@@ -57,13 +57,11 @@ namespace ZadElealm.Apis.Handlers.Auth
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             var callbackUrl = GenerateCallBackUrl(token, user.Id);
 
-            var emailBody = BuildEmailBody(user.DisplayName, callbackUrl);
-
             var emailResult = await _sendEmailService.SendEmailAsync(new EmailMessage
             {
                 To = user.Email,
                 Subject = "تأكيد البريد الإلكتروني",
-                Body = emailBody
+                Body = AccountEmailTemplates.ConfirmationReminder(user.DisplayName, callbackUrl)
             }, cancellationToken);
 
             if (emailResult.StatusCode != 200)
@@ -74,14 +72,6 @@ namespace ZadElealm.Apis.Handlers.Auth
             _rateLimiter.RecordAttempt(request.Email);
 
             return new ApiResponse(200, "تم إرسال رسالة التأكيد بنجاح");
-        }
-
-        private string BuildEmailBody(string displayName, string callbackUrl)
-        {
-            return $@"<h1>عزيزي {displayName}</h1>
-                  هذا البريد الإلكتروني تم إرساله لتأكيد بريدك الإلكتروني
-                  <p>لتأكيد بريدك الإلكتروني، اضغط على الرابط أدناه:</p>
-                  <p><a href='{callbackUrl}'>اضغط هنا</a></p>";
         }
 
         private string GenerateCallBackUrl(string token, string userId)

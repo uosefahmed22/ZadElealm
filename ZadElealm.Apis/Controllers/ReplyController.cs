@@ -31,7 +31,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("{replyId}/like")]
         public async Task<IActionResult> LikeReply(int replyId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -47,7 +47,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("{replyId}")]
         public async Task<ActionResult<ApiResponse>> DeleteReply(int replyId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -62,7 +62,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("review/{reviewId}")]
         public async Task<ActionResult<ApiResponse>> GetReplies(int reviewId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -78,7 +78,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("review/{reviewId}")]
         public async Task<ActionResult<ApiResponse>> AddReply(int reviewId, [FromBody] ReplyRequestDto request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));

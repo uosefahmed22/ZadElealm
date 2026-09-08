@@ -5,6 +5,7 @@ namespace ZadElealm.Apis.Quaries.UserRankquery
 {
     public class GetTopRankedUsersQuery : IRequest<List<UserRankDto>>
     {
+        public int Skip { get; set; }
         public int Take { get; set; } = 10;
     }
 }

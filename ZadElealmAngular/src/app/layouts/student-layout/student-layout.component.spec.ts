@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 
 import { AuthFacadeService } from '../../core/auth/auth-facade.service';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { AchievementStateService } from '../../core/achievements/achievement-state.service';
 import { NotificationApiService } from '../../core/notifications/notification-api.service';
 import { UserNotificationDto } from '../../core/notifications/notification.models';
 import { StudentLayoutComponent } from './student-layout.component';
@@ -37,6 +38,13 @@ describe('StudentLayoutComponent notifications', () => {
         { provide: NotificationApiService, useValue: notificationApi },
         { provide: AuthFacadeService, useValue: { logout: vi.fn(() => of(null)) } },
         {
+          provide: AchievementStateService,
+          useValue: {
+            dashboard: signal({ currentStreak: 3 }),
+            load: vi.fn(() => of({ currentStreak: 3 })),
+          },
+        },
+        {
           provide: AuthSessionService,
           useValue: {
             user: signal({ displayName: 'محمد أحمد', email: 'user@test.com' }),
@@ -54,6 +62,9 @@ describe('StudentLayoutComponent notifications', () => {
     expect(component.unreadCount()).toBe(1);
     expect(fixture.nativeElement.querySelector('.notification-badge').textContent).toContain('1');
     expect(fixture.nativeElement.querySelector('.notification-bell')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.streak-link').textContent).toContain('٣');
+    expect(fixture.nativeElement.querySelector('.streak-link').textContent).toContain('🔥');
+    expect(fixture.nativeElement.querySelector('.streak-divider')).not.toBeNull();
 
     component.toggleNotifications();
     fixture.detectChanges();
@@ -98,7 +109,7 @@ describe('StudentLayoutComponent notifications', () => {
       (element) => (element as HTMLElement).className,
     );
 
-    expect(groups).toEqual(['notification-center', 'account-menu']);
+    expect(groups).toEqual(['streak-link', 'notification-center', 'account-menu']);
     component.toggleNotifications();
     component.toggleAccountMenu();
 

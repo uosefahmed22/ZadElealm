@@ -18,9 +18,14 @@ namespace ZadElealm.Service.AppServices
     public class SendEmailService : ISendEmailService
     {
         private readonly EmailSettings _emailSettings;
-        public SendEmailService(IOptions<EmailSettings> emailSettings)
+        private readonly ILogger<SendEmailService> _logger;
+
+        public SendEmailService(
+            IOptions<EmailSettings> emailSettings,
+            ILogger<SendEmailService> logger)
         {
             _emailSettings = emailSettings.Value;
+            _logger = logger;
         }
 
         public async Task<ApiDataResponse> SendEmailAsync(EmailMessage emailMessage, CancellationToken cancellationToken = default)
@@ -42,9 +47,10 @@ namespace ZadElealm.Service.AppServices
                 return new ApiDataResponse(400, null, "عنوان البريد الإلكتروني غير صالح.");
 
             if (string.IsNullOrWhiteSpace(_emailSettings.Email) ||
+                string.IsNullOrWhiteSpace(_emailSettings.Password) ||
                 string.IsNullOrWhiteSpace(_emailSettings.SmtpServer) ||
                 _emailSettings.Port <= 0)
-                return new ApiDataResponse(500, null, "إعدادات البريد الإلكتروني غير مكتملة");
+                return new ApiDataResponse(503, null, "خدمة إرسال البريد غير مهيأة حاليًا");
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(_emailSettings.DisplayedName, _emailSettings.Email));
@@ -66,9 +72,16 @@ namespace ZadElealm.Service.AppServices
             {
                 throw;
             }
-            catch
+            catch (Exception exception)
             {
-                return new ApiDataResponse(500, null, "حدث خطأ أثناء إرسال البريد الإلكتروني");
+                _logger.LogError(
+                    exception,
+                    "تعذر إرسال البريد الإلكتروني عبر خادم SMTP {SmtpServer}",
+                    _emailSettings.SmtpServer);
+                return new ApiDataResponse(
+                    503,
+                    null,
+                    "تعذر الاتصال بخدمة البريد. تحقق من إعدادات الإرسال أو حاول مرة أخرى لاحقًا");
             }
         }
     }

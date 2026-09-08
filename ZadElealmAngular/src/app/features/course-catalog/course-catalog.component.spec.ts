@@ -61,7 +61,7 @@ describe('CourseCatalogComponent', () => {
     expect(fixture.nativeElement.textContent).toContain('دورة واحدة');
     expect(catalogApi.getCourses.mock.calls[0][0]).toMatchObject({
       categoryId: 0,
-      sortBy: 'mixed',
+      sortBy: 'date',
       pageNumber: 1,
     });
   });

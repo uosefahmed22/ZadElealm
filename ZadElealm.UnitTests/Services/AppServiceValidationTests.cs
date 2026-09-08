@@ -1,6 +1,7 @@
 using CloudinaryDotNet;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using ZadElealm.Core.Models.Identity;
 using ZadElealm.Service.AppServices;
@@ -26,9 +27,36 @@ public class AppServiceValidationTests
             Body = "Body"
         };
 
-        var result = await new SendEmailService(settings).SendEmailAsync(message);
+        var result = await new SendEmailService(
+            settings,
+            NullLogger<SendEmailService>.Instance).SendEmailAsync(message);
 
         Assert.Equal(400, result.StatusCode);
+    }
+
+    [Fact]
+    public async Task SendEmail_WhenSmtpCredentialsAreMissing_ReturnsActionable503()
+    {
+        var settings = Options.Create(new EmailSettings
+        {
+            Email = string.Empty,
+            Password = string.Empty,
+            SmtpServer = "smtp.gmail.com",
+            Port = 587
+        });
+        var message = new EmailMessage
+        {
+            To = "recipient@example.com",
+            Subject = "رمز التحقق",
+            Body = "Body"
+        };
+
+        var result = await new SendEmailService(
+            settings,
+            NullLogger<SendEmailService>.Instance).SendEmailAsync(message);
+
+        Assert.Equal(503, result.StatusCode);
+        Assert.Contains("غير مهيأة", result.Message);
     }
 
     [Fact]

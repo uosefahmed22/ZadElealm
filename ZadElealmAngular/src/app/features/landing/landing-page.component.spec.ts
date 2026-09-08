@@ -37,6 +37,17 @@ describe('LandingPageComponent', () => {
     expect(headerPrimaryCtas[0].textContent.trim()).toBe('ابدأ رحلتك');
   });
 
+  it('prioritizes course discovery in the primary navigation', () => {
+    const fixture = createFixture();
+    const navigationLinks = Array.from(
+      fixture.nativeElement.querySelectorAll('.site-nav .nav-link'),
+    ) as HTMLAnchorElement[];
+    const courseLink = navigationLinks.find((link) => link.textContent?.trim() === 'الدورات');
+
+    expect(courseLink?.getAttribute('href')).toBe('#courses');
+    expect(navigationLinks.some((link) => link.textContent?.trim() === 'المميزات')).toBe(false);
+  });
+
   it('renders API course data without invented duration or progress', () => {
     const fixture = createFixture();
     const text = fixture.nativeElement.textContent as string;
@@ -60,12 +71,14 @@ describe('LandingPageComponent', () => {
     expect(spotlight.textContent).toContain('أساسيات التجويد');
   });
 
-  it('renders the four intended audiences and API footer categories', () => {
+  it('keeps the landing journey concise and renders API footer categories', () => {
     const fixture = createFixture();
     const text = fixture.nativeElement.textContent as string;
 
-    expect(fixture.nativeElement.querySelectorAll('.audience-card')).toHaveLength(4);
-    expect(text).toContain('أطفال');
+    expect(fixture.nativeElement.querySelectorAll('.journey-step')).toHaveLength(3);
+    expect(fixture.nativeElement.querySelector('.audience-section')).toBeNull();
+    expect(fixture.nativeElement.querySelector('.challenge-section')).toBeNull();
+    expect(text).toContain('أنشئ حسابك واختر دورتك');
     expect(text).toContain('القرآن الكريم');
     expect(catalogApi.getCategories).toHaveBeenCalledOnce();
   });

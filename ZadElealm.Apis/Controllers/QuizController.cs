@@ -32,7 +32,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("{quizId}")]
         public async Task<ActionResult<ApiResponse>> GetQuiz(int quizId)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
             {
@@ -48,7 +48,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("submit")]
         public async Task<ActionResult<ApiResponse>> SubmitQuiz(QuizSubmissionDto submission)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)

@@ -113,9 +113,8 @@ namespace ZadElealm.Service.IdentityService
                     return new AuthResult { Result = false, message = "رمز غير صالح." };
                 }
 
-                var claims = tokenInVerification.Claims.ToDictionary(c => c.Type, c => c.Value);
-
-                if (!claims.TryGetValue(JwtRegisteredClaimNames.Jti, out var jti))
+                var jti = tokenInVerification.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+                if (string.IsNullOrWhiteSpace(jti))
                 {
                     return new AuthResult { Result = false, message = "رمز غير صالح." };
                 }
@@ -168,7 +167,8 @@ namespace ZadElealm.Service.IdentityService
                 return new AuthResult { Result = true, message = "تم تحديث الرمز.", UserData = newToken };
 
             }
-            catch (SecurityTokenException)
+            catch (Exception exception) when (
+                exception is SecurityTokenException or ArgumentException)
             {
                 return new AuthResult { Result = false, message = "رمز غير صالح." };
             }

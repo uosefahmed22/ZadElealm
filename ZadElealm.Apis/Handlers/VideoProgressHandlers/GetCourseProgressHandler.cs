@@ -1,53 +1,41 @@
-﻿using ZadElealm.Apis.Dtos.DtosCourse;
+using ZadElealm.Apis.Dtos.DtosCourse;
 using ZadElealm.Apis.Quaries.VideoProgressQueries;
+using ZadElealm.Core.Errors;
 using ZadElealm.Core.Models;
-using ZadElealm.Core.Policies;
-using ZadElealm.Core.Repositories;
-using ZadElealm.Core.Specifications.Course;
-using ZadElealm.Core.Specifications.Videos;
+using ZadElealm.Core.Service;
 
 namespace ZadElealm.Apis.Handlers.VideoProgressHandlers
 {
-    public class GetCourseProgressHandler : BaseQueryHandler<GetCourseProgressQuery, CourseProgressDto>
+    public class GetCourseProgressHandler : BaseQueryHandler<GetCourseProgressQuery, ApiDataResponse>
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IVideoProgressService _videoProgressService;
 
-        public GetCourseProgressHandler(IUnitOfWork unitOfWork)
+        public GetCourseProgressHandler(IVideoProgressService videoProgressService)
         {
-            _unitOfWork = unitOfWork;
+            _videoProgressService = videoProgressService;
         }
 
-        public override async Task<CourseProgressDto> Handle(GetCourseProgressQuery request, CancellationToken cancellationToken)
+        public override async Task<ApiDataResponse> Handle(
+            GetCourseProgressQuery request,
+            CancellationToken cancellationToken)
         {
-            var spec = new CourseWithVideosAndQuizzesSpecification(request.CourseId);
-            var course = await _unitOfWork.Repository<Core.Models.Course>().GetEntityWithSpecAsync(spec);
+            var response = await _videoProgressService
+                .GetCourseProgressAsync(request.UserId, request.CourseId, cancellationToken);
+            if (response.StatusCode != 200 || response.Data is not CourseProgress progress)
+                return response;
 
-            if (course == null)
-                if (course == null)
-                    throw new Exception($"لم يتم العثور على الدورة التدريبية بالمعرف {request.CourseId}");
-
-            var videoProgressSpec = new VideoProgressWithSpec(request.UserId, request.CourseId);
-            var videoProgresses = await _unitOfWork.Repository<VideoProgress>()
-                .GetAllWithSpecNoTrackingAsync(videoProgressSpec);
-
-            var completedVideos = videoProgresses.Count(p => p.IsCompleted);
-            var totalVideos = course.Videos.Count;
-
-            var videoProgress = totalVideos > 0
-                ? ((float)completedVideos / totalVideos) * 100
-                : 0;
-
-            return new CourseProgressDto
+            var dto = new CourseProgressDto
             {
                 CourseId = request.CourseId,
-                VideoProgress = videoProgress,
-                OverallProgress = videoProgress,
-                CompletedVideos = completedVideos,
-                TotalVideos = totalVideos,
-                IsEligibleForQuiz = CourseCompletionPolicy.IsEligibleForAssessment(videoProgress),
-                RemainingVideos = totalVideos - completedVideos
+                VideoProgress = progress.VideoProgress,
+                OverallProgress = progress.OverallProgress,
+                CompletedVideos = progress.CompletedVideos,
+                TotalVideos = progress.TotalVideos,
+                IsEligibleForQuiz = progress.IsEligibleForQuiz,
+                RemainingVideos = progress.TotalVideos - progress.CompletedVideos
             };
+
+            return new ApiDataResponse(200, dto, response.Message);
         }
     }
-
 }

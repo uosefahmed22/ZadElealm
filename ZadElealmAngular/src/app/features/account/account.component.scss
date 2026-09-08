@@ -39,10 +39,35 @@
 }
 
 .profile-summary {
+  inline-size: min(100%, 72rem);
+  justify-self: center;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr;
   align-items: center;
-  gap: var(--space-5);
+  gap: var(--space-6);
+  border-color: color-mix(in srgb, var(--accent-on-paper) 28%, transparent);
+  border-radius: var(--radius-md, 0.75rem);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--gold-50) 68%, transparent), transparent 55%),
+    var(--surface-paper-raised);
+  box-shadow: 0 0.75rem 2rem rgb(28 47 39 / 0.06);
+}
+
+.profile-identity {
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.profile-details {
+  min-inline-size: 0;
+}
+
+.profile-details p {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .avatar {
@@ -66,16 +91,23 @@
 }
 
 .image-actions {
-  grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
 }
 
-.profile-summary > small {
-  grid-column: 1 / -1;
+.profile-media-controls {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.profile-media-controls > small {
   color: var(--text-muted);
+}
+
+.profile-media-controls .message {
+  margin: var(--space-2) 0 0;
 }
 
 #profile-image {
@@ -90,13 +122,16 @@
 .primary-button,
 .text-button,
 .danger-button {
+  box-sizing: border-box;
   min-block-size: var(--target-min);
   padding-inline: var(--space-5);
   border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  font: inherit;
   font-weight: var(--font-weight-bold);
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -105,6 +140,22 @@
   border: var(--rule-hairline);
   color: var(--text-strong);
   background: transparent;
+}
+
+.file-picker {
+  min-inline-size: 9rem;
+  margin-block-start: 0;
+  border-color: var(--ink-700);
+  color: var(--text-on-ink);
+  background: var(--ink-700);
+}
+
+.image-actions .text-button {
+  min-inline-size: 9rem;
+}
+
+.file-picker:hover {
+  background: var(--ink-800, var(--ink-700));
 }
 
 .primary-button {
@@ -297,16 +348,16 @@ form > .primary-button,
   }
 
   .profile-summary {
-    grid-template-columns: auto minmax(12rem, 1fr) auto;
+    grid-template-columns: minmax(18rem, 1.15fr) minmax(17rem, 0.85fr);
+    padding-block: var(--space-6);
+  }
+
+  .profile-media-controls {
+    justify-items: start;
   }
 
   .image-actions {
-    grid-column: auto;
-    justify-content: end;
-  }
-
-  .profile-summary > small {
-    grid-column: 2 / -1;
+    justify-content: start;
   }
 
   .email-fields {
@@ -324,12 +375,11 @@ form > .primary-button,
     block-size: 5rem;
   }
 
-  .image-actions,
-  .profile-summary > small {
-    grid-column: auto;
+  .image-actions > * {
+    inline-size: 100%;
   }
 
-  .image-actions > * {
+  .profile-media-controls {
     inline-size: 100%;
   }
 }

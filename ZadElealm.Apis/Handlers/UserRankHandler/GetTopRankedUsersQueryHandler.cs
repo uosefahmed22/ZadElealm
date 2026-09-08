@@ -20,7 +20,7 @@ namespace ZadElealm.Apis.Handlers.UserRankHandler
 
         public async Task<List<UserRankDto>> Handle(GetTopRankedUsersQuery request, CancellationToken cancellationToken)
         {
-            var spec = new TopRankedUsersSpecification(request.Take);
+            var spec = new TopRankedUsersSpecification(request.Skip, request.Take);
             var topUsers = await _unitOfWork.Repository<UserRank>()
                 .GetAllWithSpecNoTrackingAsync(spec);
 

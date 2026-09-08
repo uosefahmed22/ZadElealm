@@ -62,7 +62,7 @@ public sealed class AssessmentController : ApiBaseController
 
     private async Task<AppUser?> GetCurrentUserAsync()
     {
-        var email = User.FindFirstValue(ClaimTypes.Email);
+        var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
         return string.IsNullOrWhiteSpace(email) ? null : await _userManager.FindByEmailAsync(email);
     }
 }

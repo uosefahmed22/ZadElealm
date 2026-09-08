@@ -1,0 +1,215 @@
+:host {
+  display: block;
+}
+
+.page-heading {
+  margin-block-end: var(--space-8);
+  padding: clamp(var(--space-6), 4vw, var(--space-10));
+  border: 1px solid var(--border-on-ink);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+  color: var(--text-on-ink);
+  background:
+    radial-gradient(circle at 12% 0%, rgb(201 162 39 / 24%), transparent 34%), var(--surface-ink);
+}
+
+.page-heading > div:first-child {
+  max-inline-size: 45rem;
+}
+
+.page-heading span,
+.section-heading > div > span {
+  color: var(--accent-on-paper);
+  font-family: var(--font-kufi);
+  font-size: var(--fs-eyebrow);
+}
+
+.page-heading h1 {
+  margin: var(--space-2) 0 var(--space-3);
+  color: var(--text-on-ink);
+  font-size: var(--fs-title-lg);
+}
+
+.page-heading p {
+  margin: 0;
+  color: var(--text-on-ink-muted);
+}
+
+.completion-ring {
+  --completion: 0%;
+  inline-size: 7rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  flex: 0 0 auto;
+  place-content: center;
+  text-align: center;
+  background:
+    radial-gradient(circle, var(--surface-ink) 59%, transparent 61%),
+    conic-gradient(var(--gold-400) var(--completion), rgb(255 255 255 / 12%) 0);
+}
+
+.completion-ring strong {
+  color: var(--gold-300);
+  font-family: var(--font-display);
+  font-size: var(--fs-title-lg);
+  line-height: 1;
+}
+
+.completion-ring span {
+  color: var(--text-on-ink-muted);
+}
+
+.streak-panel {
+  margin-block-end: var(--space-10);
+  padding: var(--space-5) var(--space-6);
+  border: var(--rule-hairline);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-items: center;
+  gap: var(--space-5);
+  background: var(--surface-sand);
+}
+
+.streak-icon {
+  inline-size: 4rem;
+  block-size: 4rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--gold-100);
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+  font-size: 2.15rem;
+  line-height: 1;
+  filter: grayscale(1) sepia(1) saturate(3.5) hue-rotate(355deg);
+}
+
+.streak-icon--hot {
+  background: #fff0e5;
+  filter: none;
+  box-shadow: 0 0.45rem 1rem rgb(232 91 28 / 18%);
+}
+
+.streak-panel > div {
+  min-inline-size: 8rem;
+  display: grid;
+}
+
+.streak-panel div span,
+.streak-panel p {
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+}
+
+.streak-panel strong {
+  color: var(--ink-800);
+  font-size: var(--fs-title-sm);
+}
+
+.streak-panel p {
+  margin: 0;
+  text-align: end;
+}
+
+.section-heading {
+  margin-block-end: var(--space-5);
+  padding-block-end: var(--space-3);
+  border-block-end: var(--rule-hairline);
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: var(--fs-title-sm);
+}
+
+.section-heading p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.achievement-grid,
+.achievement-loading {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.achievement-loading > div {
+  block-size: 15.5rem;
+}
+
+.state-card {
+  min-block-size: 18rem;
+  padding: var(--space-8);
+  border: var(--rule-hairline);
+  border-radius: var(--radius-md);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  text-align: center;
+  background: var(--surface-paper-raised);
+}
+
+@media (max-width: 64rem) {
+  .achievement-grid,
+  .achievement-loading {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .streak-panel {
+    grid-template-columns: auto 1fr 1fr;
+  }
+
+  .streak-panel p {
+    grid-column: 1 / -1;
+    text-align: start;
+  }
+}
+
+@media (max-width: 42rem) {
+  .page-heading {
+    align-items: flex-start;
+  }
+
+  .completion-ring {
+    inline-size: 5.5rem;
+  }
+
+  .achievement-grid,
+  .achievement-loading {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .streak-panel {
+    grid-template-columns: auto 1fr;
+  }
+
+  .streak-panel > div:last-of-type {
+    grid-column: 2;
+  }
+}
+
+@media (max-width: 30rem) {
+  .page-heading {
+    flex-direction: column;
+  }
+
+  .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .achievement-grid,
+  .achievement-loading {
+    grid-template-columns: 1fr;
+  }
+}

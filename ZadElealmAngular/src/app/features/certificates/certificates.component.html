@@ -1,7 +1,7 @@
 <header class="page-heading">
   <span class="eyebrow">إنجازاتك</span>
   <h1>شهاداتي</h1>
-  <p>الشهادات التي أصدرها السيرفر بعد اجتياز اختباراتك بنجاح.</p>
+  <p>الشهادات التي حصلت عليها بعد اجتياز اختباراتك بنجاح.</p>
 </header>
 
 @if (fileErrorMessage()) {
@@ -37,13 +37,13 @@
           <span class="certificate-label">شهادة إتمام</span>
           <h2>{{ certificate.userName }}</h2>
           <p>{{ certificate.quizName }}</p>
-          <small>{{ certificate.completedDate | date: 'd MMMM y' }}</small>
+          <small>{{ formatArabicDate(certificate.completedDate) }}</small>
         </div>
         <div class="certificate-body">
-          <span class="eyebrow">{{ certificate.name }}</span>
+          <span class="eyebrow">{{ certificateTitle(certificate) }}</span>
           <h2>{{ certificate.quizName }}</h2>
-          <p>{{ certificate.description }}</p>
-          <time [attr.datetime]="certificate.completedDate">{{ certificate.completedDate | date: 'd MMMM y' }}</time>
+          <p>{{ certificateDescription(certificate) }}</p>
+          <time [attr.datetime]="certificate.completedDate">{{ formatArabicDate(certificate.completedDate) }}</time>
           <button
             class="zad-btn zad-btn--primary"
             type="button"
@@ -51,7 +51,7 @@
             (click)="openCertificate(certificate)"
           >
             {{
-              pendingCertificateIds().has(certificate.id) ? 'جارٍ فتح الشهادة…' : 'عرض الشهادة PDF'
+              pendingCertificateIds().has(certificate.id) ? 'جارٍ فتح الشهادة…' : 'عرض الشهادة'
             }}
           </button>
         </div>

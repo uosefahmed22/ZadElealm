@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
@@ -52,7 +52,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("current-user")]
         public async Task<ActionResult<ApiResponse>> GetCurrentUser()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -67,7 +67,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("change-password")]
         public async Task<ActionResult<ApiResponse>> ChangePassword(ChangePasswordDTO changePasswordDTO)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrEmpty(email))
                  return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
@@ -81,7 +81,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("update-profile-image")]
         public async Task<ActionResult<ApiResponse>> UpdateProfileImage(IFormFile? file)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -96,7 +96,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpGet("get-User-Profile")]
         public async Task<ActionResult<ApiResponse>> GetProfile()
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -111,7 +111,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("send-email-otp")]
         public async Task<ActionResult<ApiResponse>> SendEmailOtp([FromBody] SendChangeEmailOtpDto sendChangeEmailOtpDto)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -126,7 +126,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("update-email")]
         public async Task<ActionResult<ApiResponse>> UpdateEmail([FromBody] UpdateEmailDto request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
@@ -141,7 +141,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpPost("update-profile")]
         public async Task<ActionResult<ApiResponse>> UpdateProfile([FromBody] UpdateProfileDto request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrEmpty(email))
                  return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
@@ -164,7 +164,7 @@ namespace ZadElealm.Apis.Controllers
         [HttpDelete("delete-account")]
         public async Task<ActionResult<ApiResponse>> DeleteAccount([FromBody] DeleteAccountDto request)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? string.Empty;
             if (string.IsNullOrEmpty(email))
                 return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 

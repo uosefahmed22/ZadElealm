@@ -73,10 +73,6 @@ namespace ZadElealm.Core.Specifications
                         OrderByDescending = x => x.Author;
                     break;
 
-                case "mixed":
-                    OrderByDescending = x => x.CreatedAt;
-                    break;
-
                 default:
                     OrderByDescending = x => x.rating;
                     break;

@@ -18,17 +18,20 @@ public sealed class AssessmentService : IAssessmentService
     private readonly IEnrollmentReadRepository _enrollmentReadRepository;
     private readonly ICertificateService _certificateService;
     private readonly INotificationService _notificationService;
+    private readonly ICertificateFileStorage _certificateFileStorage;
 
     public AssessmentService(
         IUnitOfWork unitOfWork,
         IEnrollmentReadRepository enrollmentReadRepository,
         ICertificateService certificateService,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        ICertificateFileStorage certificateFileStorage)
     {
         _unitOfWork = unitOfWork;
         _enrollmentReadRepository = enrollmentReadRepository;
         _certificateService = certificateService;
         _notificationService = notificationService;
+        _certificateFileStorage = certificateFileStorage;
     }
 
     public async Task<ApiDataResponse> GetAvailableAssessmentsAsync(string userId)
@@ -146,16 +149,11 @@ public sealed class AssessmentService : IAssessmentService
             return error;
 
         var existingProgress = await GetProgressAsync(userId, assessmentId);
-        if (existingProgress?.IsCompleted == true)
-            return new ApiDataResponse(409, null, "تم اجتياز الاختبار مسبقًا");
-        if (existingProgress?.AttemptStartedAtUtc == null || existingProgress.AttemptExpiresAtUtc == null)
-            return new ApiDataResponse(409, null, "ابدأ الاختبار أولًا قبل إرسال الإجابات");
-        if (existingProgress.AttemptSubmittedAtUtc != null)
-            return new ApiDataResponse(409, null, "تم تسليم هذه المحاولة بالفعل");
-        if (DateTime.UtcNow > existingProgress.AttemptExpiresAtUtc.Value.Add(SubmissionGracePeriod))
-            return new ApiDataResponse(409, null, "انتهى وقت المحاولة. افتح الاختبار لبدء محاولة جديدة");
+        var attemptError = ValidateAttempt(existingProgress, DateTime.UtcNow);
+        if (attemptError != null)
+            return attemptError;
 
-        var form = SelectForm(assessment!, userId, existingProgress.AssessmentFormId);
+        var form = SelectForm(assessment!, userId, existingProgress!.AssessmentFormId);
         if (form == null)
             return new ApiDataResponse(409, null, "لا يوجد نموذج متاح للاختبار حاليًا");
 
@@ -163,70 +161,155 @@ public sealed class AssessmentService : IAssessmentService
         if (validationError != null)
             return validationError;
 
-        var answersByQuestion = submission.StudentAnswers.ToDictionary(x => x.QuestionId);
-        var correctAnswers = form.Questions.Count(question =>
-            answersByQuestion.TryGetValue(question.Id, out var answer) &&
-            question.Choices.Any(choice => choice.Id == answer.ChoiceId && choice.IsCorrect));
-        var score = (correctAnswers * 100) / form.Questions.Count;
-        var isCompleted = score >= assessment!.PassingScore;
+        var calculation = CalculateResult(
+            form,
+            submission.StudentAnswers,
+            assessment!.PassingScore);
 
         await _unitOfWork.BeginTransactionAsync();
+        string? generatedCertificateFile = null;
         try
         {
-            var progress = existingProgress;
-            progress.AssessmentFormId = form.Id;
-            progress.Score = Math.Max(progress.Score, score);
-            progress.IsCompleted = progress.IsCompleted || isCompleted;
-            progress.AttemptSubmittedAtUtc = DateTime.UtcNow;
-            _unitOfWork.Repository<AssessmentProgress>().Update(progress);
+            await SaveSubmissionAsync(existingProgress, form.Id, calculation);
 
-            await _unitOfWork.Complete();
-
-            if (isCompleted)
+            if (calculation.IsCompleted)
             {
-                var certificateResult = await _certificateService
-                    .GenerateAndSaveAssessmentCertificate(userId, assessmentId);
-                if (certificateResult.StatusCode != 200 ||
-                    certificateResult.Data is not Certificate certificate)
+                var artifacts = await CreateCompletionArtifactsAsync(
+                    userId,
+                    assessmentId,
+                    assessment.Name);
+                generatedCertificateFile = artifacts.CertificateFileName;
+                if (artifacts.Error != null)
                 {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new ApiDataResponse(500, null, "تعذر إنشاء شهادة الاختبار");
-                }
-
-                await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
-                await _unitOfWork.Complete();
-
-                var notificationResult = await _notificationService.SendNotificationAsync(new NotificationServiceDto
-                {
-                    Title = "مبارك على اجتيازك!",
-                    Description = $"لقد اجتزت {assessment.Name} بنجاح، وأصبحت شهادتك متاحة في قسم الشهادات.",
-                    Type = NotificationType.Certificate,
-                    UserId = userId
-                });
-                if (notificationResult.StatusCode != 200)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return new ApiDataResponse(500, null, "تعذر إنشاء إشعار الشهادة");
+                    _certificateFileStorage.DeletePrivateFileIfExists(generatedCertificateFile);
+                    return await RollbackAsync(artifacts.Error);
                 }
             }
 
             await _unitOfWork.CommitTransactionAsync();
-            return new ApiDataResponse(200, new AssessmentResultDto
-            {
-                AssessmentName = assessment.Name,
-                Score = score,
-                IsCompleted = isCompleted,
-                TotalQuestions = form.Questions.Count,
-                CorrectAnswers = correctAnswers,
-                Date = progress.AttemptSubmittedAtUtc.Value
-            }, isCompleted ? "تهانينا! لقد اجتزت الاختبار بنجاح" : "تم تسليم الاختبار");
+            return BuildSubmissionResponse(assessment.Name, existingProgress, calculation);
         }
         catch
         {
+            _certificateFileStorage.DeletePrivateFileIfExists(generatedCertificateFile);
             await _unitOfWork.RollbackTransactionAsync();
             return new ApiDataResponse(500, null, "حدث خطأ أثناء حفظ نتيجة الاختبار");
         }
     }
+
+    private static ApiDataResponse? ValidateAttempt(
+        AssessmentProgress? progress,
+        DateTime nowUtc)
+    {
+        if (progress?.IsCompleted == true)
+            return new ApiDataResponse(409, null, "تم اجتياز الاختبار مسبقًا");
+        if (progress?.AttemptStartedAtUtc == null || progress.AttemptExpiresAtUtc == null)
+            return new ApiDataResponse(409, null, "ابدأ الاختبار أولًا قبل إرسال الإجابات");
+        if (progress.AttemptSubmittedAtUtc != null)
+            return new ApiDataResponse(409, null, "تم تسليم هذه المحاولة بالفعل");
+        if (nowUtc > progress.AttemptExpiresAtUtc.Value.Add(SubmissionGracePeriod))
+            return new ApiDataResponse(409, null, "انتهى وقت المحاولة. افتح الاختبار لبدء محاولة جديدة");
+
+        return null;
+    }
+
+    private static AssessmentCalculation CalculateResult(
+        AssessmentForm form,
+        IReadOnlyList<StudentAnswerDto> answers,
+        int passingScore)
+    {
+        var answersByQuestion = answers.ToDictionary(answer => answer.QuestionId);
+        var correctAnswers = form.Questions.Count(question =>
+            answersByQuestion.TryGetValue(question.Id, out var answer) &&
+            question.Choices.Any(choice => choice.Id == answer.ChoiceId && choice.IsCorrect));
+        var score = (correctAnswers * 100) / form.Questions.Count;
+
+        return new AssessmentCalculation(
+            score,
+            score >= passingScore,
+            form.Questions.Count,
+            correctAnswers);
+    }
+
+    private async Task SaveSubmissionAsync(
+        AssessmentProgress progress,
+        int formId,
+        AssessmentCalculation calculation)
+    {
+        progress.AssessmentFormId = formId;
+        progress.Score = Math.Max(progress.Score, calculation.Score);
+        progress.IsCompleted = progress.IsCompleted || calculation.IsCompleted;
+        progress.AttemptSubmittedAtUtc = DateTime.UtcNow;
+        _unitOfWork.Repository<AssessmentProgress>().Update(progress);
+        await _unitOfWork.Complete();
+    }
+
+    private async Task<CompletionArtifactsResult> CreateCompletionArtifactsAsync(
+        string userId,
+        int assessmentId,
+        string assessmentName)
+    {
+        var certificateResult = await _certificateService
+            .GenerateAndSaveAssessmentCertificate(userId, assessmentId);
+        if (certificateResult.StatusCode != 200 ||
+            certificateResult.Data is not Certificate certificate)
+        {
+            return new CompletionArtifactsResult(
+                new ApiDataResponse(500, null, "تعذر إنشاء شهادة الاختبار"),
+                null);
+        }
+
+        try
+        {
+            await _unitOfWork.Repository<Certificate>().AddAsync(certificate);
+            await _unitOfWork.Complete();
+
+            var notificationResult = await _notificationService.SendNotificationAsync(
+                BuildCertificateNotification(userId, assessmentName));
+            var error = notificationResult.StatusCode == 200
+                ? null
+                : new ApiDataResponse(500, null, "تعذر إنشاء إشعار الشهادة");
+            return new CompletionArtifactsResult(error, certificate.PdfUrl);
+        }
+        catch
+        {
+            _certificateFileStorage.DeletePrivateFileIfExists(certificate.PdfUrl);
+            throw;
+        }
+    }
+
+    private static NotificationServiceDto BuildCertificateNotification(
+        string userId,
+        string assessmentName)
+        => new()
+        {
+            Title = "مبارك على اجتيازك!",
+            Description = $"لقد اجتزت {assessmentName} بنجاح، وأصبحت شهادتك متاحة في قسم الشهادات.",
+            Type = NotificationType.Certificate,
+            UserId = userId
+        };
+
+    private async Task<ApiDataResponse> RollbackAsync(ApiDataResponse response)
+    {
+        await _unitOfWork.RollbackTransactionAsync();
+        return response;
+    }
+
+    private static ApiDataResponse BuildSubmissionResponse(
+        string assessmentName,
+        AssessmentProgress progress,
+        AssessmentCalculation calculation)
+        => new(200, new AssessmentResultDto
+        {
+            AssessmentName = assessmentName,
+            Score = calculation.Score,
+            IsCompleted = calculation.IsCompleted,
+            TotalQuestions = calculation.TotalQuestions,
+            CorrectAnswers = calculation.CorrectAnswers,
+            Date = progress.AttemptSubmittedAtUtc!.Value
+        }, calculation.IsCompleted
+            ? "تهانينا! لقد اجتزت الاختبار بنجاح"
+            : "تم تسليم الاختبار");
 
     private async Task<(Assessment? Assessment, ApiDataResponse? Error)> LoadEligibleAssessmentAsync(
         string userId,
@@ -248,13 +331,9 @@ public sealed class AssessmentService : IAssessmentService
 
     private async Task<HashSet<int>> GetEligibleCategoryIdsAsync(string userId)
     {
-        var courses = await _enrollmentReadRepository.GetUserCoursesWithProgressAsync(userId);
-        return courses
-            .Where(course => CourseCompletionPolicy.HasCompletedAllVideos(
-                course.CompletedVideos,
-                course.TotalVideos))
-            .Select(course => course.CategoryId)
-            .ToHashSet();
+        var categoryIds = await _enrollmentReadRepository
+            .GetCompletedCourseCategoryIdsAsync(userId);
+        return categoryIds.ToHashSet();
     }
 
     private async Task<AssessmentProgress?> GetProgressAsync(string userId, int assessmentId)
@@ -310,4 +389,14 @@ public sealed class AssessmentService : IAssessmentService
 
         return null;
     }
+
+    private sealed record AssessmentCalculation(
+        int Score,
+        bool IsCompleted,
+        int TotalQuestions,
+        int CorrectAnswers);
+
+    private sealed record CompletionArtifactsResult(
+        ApiDataResponse? Error,
+        string? CertificateFileName);
 }

@@ -31,19 +31,33 @@ namespace ZadElealm.Repository.Repositories
         }
         public Task<int> Complete()
         => _dbContext.SaveChangesAsync();
+        public Task<int> Complete(CancellationToken cancellationToken)
+        => _dbContext.SaveChangesAsync(cancellationToken);
         public ValueTask DisposeAsync()
        => _dbContext.DisposeAsync();
         public async Task BeginTransactionAsync()
         {
             await _dbContext.Database.BeginTransactionAsync();
         }
+        public async Task BeginTransactionAsync(CancellationToken cancellationToken)
+        {
+            await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        }
         public async Task CommitTransactionAsync()
         {
             await _dbContext.Database.CommitTransactionAsync();
         }
+        public async Task CommitTransactionAsync(CancellationToken cancellationToken)
+        {
+            await _dbContext.Database.CommitTransactionAsync(cancellationToken);
+        }
         public async Task RollbackTransactionAsync()
         {
             await _dbContext.Database.RollbackTransactionAsync();
+        }
+        public async Task RollbackTransactionAsync(CancellationToken cancellationToken)
+        {
+            await _dbContext.Database.RollbackTransactionAsync(cancellationToken);
         }
     }
 }

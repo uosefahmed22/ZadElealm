@@ -16,12 +16,14 @@ using ZadElealm.Core.Errors;
 using ZadElealm.Apis.Helpers;
 using ZadElealm.Apis.Middlwares;
 using ZadElealm.Core.Models.Identity;
+using ZadElealm.Core.Options;
 using ZadElealm.Core.Repositories;
 using ZadElealm.Core.Service;
 using ZadElealm.Repository.Data.Datbases;
 using ZadElealm.Repository.Repositories;
 using ZadElealm.Service.AppServices;
 using ZadElealm.Service.IdentityService;
+using ZadElealm.Service.Documents;
 
 namespace ZadElealm.Apis.Extentions
 {
@@ -120,17 +122,35 @@ namespace ZadElealm.Apis.Extentions
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEnrollmentReadRepository, EnrollmentReadRepository>();
             services.AddScoped<IEnrollmentWriteRepository, EnrollmentWriteRepository>();
+            services.AddScoped<IRatingReadRepository, RatingReadRepository>();
+            services.AddScoped<IUserRankReadRepository, UserRankReadRepository>();
+            services.AddScoped<IVideoProgressReadRepository, VideoProgressReadRepository>();
+            services.AddScoped<IAchievementRepository, AchievementRepository>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IOtpService, OtpService>();
             services.AddScoped<IImageService, ImageService>();
             services.AddSingleton<ISendEmailService, SendEmailService>();
             services.AddScoped<ICertificateService, CertificateService>();
+            services.AddOptions<CertificateStorageOptions>()
+                .Bind(configuration.GetSection(CertificateStorageOptions.SectionName))
+                .Validate(options =>
+                    !string.IsNullOrWhiteSpace(options.PrivatePath) &&
+                    !string.IsNullOrWhiteSpace(options.LegacyPublicPath) &&
+                    !string.IsNullOrWhiteSpace(options.LogoPath),
+                    "Certificate storage paths are required.")
+                .ValidateOnStart();
+            services.AddSingleton<ICertificateFileStorage>(serviceProvider =>
+                new CertificateFileStorage(
+                    serviceProvider.GetRequiredService<IHostEnvironment>().ContentRootPath,
+                    serviceProvider.GetRequiredService<IOptions<CertificateStorageOptions>>().Value));
             services.AddScoped<IQuizService, QuizService>();
             services.AddScoped<IAssessmentService, AssessmentService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IVideoProgressService, VideoProgressService>();
             services.AddScoped<ICheckPasswordService, CheckPasswordService>();
             services.AddScoped<IUserRankCalculator, UserRankCalculator>();
+            services.AddScoped<IAchievementService, AchievementService>();
+            services.AddSingleton(TimeProvider.System);
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 

@@ -99,7 +99,8 @@
   gap: var(--space-3);
 }
 .nav-actions {
-  margin-block-start: auto;
+  padding-block-start: var(--space-3);
+  border-block-start: var(--rule-hairline);
 }
 .nav-link {
   min-block-size: var(--target-min);
@@ -256,7 +257,8 @@
 
 .video-window {
   position: relative;
-  min-block-size: 19rem;
+  min-block-size: 0;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   display: block;
   color: var(--text-on-ink);
@@ -271,7 +273,7 @@
   block-size: 100%;
   display: block;
   object-fit: cover;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: inherit;
 }
 
 .video-shade {
@@ -362,40 +364,6 @@
   font-family: var(--font-kufi);
   font-size: var(--fs-eyebrow);
 }
-.audience-grid {
-  display: grid;
-  gap: var(--space-4);
-}
-.audience-card {
-  min-block-size: 100%;
-  padding: var(--space-6);
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-4);
-}
-.audience-icon {
-  inline-size: var(--feature-icon-size);
-  block-size: var(--feature-icon-size);
-  flex: 0 0 var(--feature-icon-size);
-  border: var(--rule-accent);
-  display: grid;
-  place-items: center;
-  color: var(--ink-600);
-  background: var(--surface-sand);
-}
-.audience-icon svg {
-  inline-size: var(--icon-md);
-}
-.audience-card h3 {
-  margin-block-end: var(--space-2);
-  font-size: var(--fs-card-title);
-}
-.audience-card p {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: var(--fs-caption);
-}
-
 .section-heading {
   max-inline-size: var(--measure-prose);
   margin-block-end: var(--space-10);
@@ -421,56 +389,6 @@
 .zad-section--ink .section-heading p {
   color: var(--text-on-ink-muted);
 }
-.challenge-grid {
-  display: grid;
-  gap: var(--space-5);
-}
-.challenge-copy,
-.solution-copy {
-  padding: var(--space-8);
-  display: grid;
-  grid-template-columns: var(--challenge-icon-size) minmax(0, 1fr);
-  align-items: start;
-  gap: var(--space-5);
-  border-radius: var(--radius-md);
-}
-.challenge-copy h3,
-.solution-copy h3 {
-  margin-block: var(--space-3) var(--space-4);
-  font-size: var(--fs-card-emphasis);
-}
-.challenge-copy p,
-.solution-copy p {
-  margin: 0;
-}
-.challenge-copy p {
-  color: var(--text-muted);
-}
-.solution-copy {
-  background: var(--surface-sage);
-}
-.solution-copy h3 {
-  color: var(--text-strong);
-}
-.solution-copy p {
-  color: var(--text-muted);
-}
-.challenge-icon {
-  inline-size: var(--challenge-icon-size);
-  block-size: var(--challenge-icon-size);
-  border: var(--rule-accent);
-  border-radius: var(--radius-sm);
-  display: grid;
-  place-items: center;
-  color: var(--accent-on-paper);
-  background: var(--surface-paper-raised);
-  font-family: var(--font-display);
-  font-size: var(--fs-title-sm);
-}
-.challenge-icon svg {
-  inline-size: var(--icon-md);
-}
-
 .feature-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -839,9 +757,6 @@
   }
 }
 @media (min-width: tokens.$bp-tablet) {
-  .audience-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -862,9 +777,6 @@
   }
 }
 @media (min-width: tokens.$bp-desktop) {
-  .audience-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
   .site-header {
     block-size: var(--header-h-desktop);
   }
@@ -898,6 +810,8 @@
     grid-column: 3;
     grid-row: 1;
     justify-self: end;
+    padding-block-start: 0;
+    border-block-start: 0;
   }
   .brand-link {
     transform: translateY(-0.15rem);
@@ -959,25 +873,18 @@
     grid-template-columns: 6fr 5fr;
     gap: var(--space-16);
   }
-  .challenge-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .challenge-copy,
-  .solution-copy {
-    padding: var(--space-12);
-  }
   .journey-layout {
     display: block;
   }
   .journey-list {
     position: relative;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .journey-list::before {
     position: absolute;
     inset-block-start: calc(var(--space-8) + var(--space-3) + var(--target-min) / 2);
-    inset-inline: 12.5%;
+    inset-inline: 16.666%;
     border-block-start: var(--rule-hairline);
     content: '';
   }

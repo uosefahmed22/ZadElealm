@@ -20,7 +20,8 @@ namespace ZadElealm.Apis.Handlers.QuizHandler
         public async Task<ApiResponse> Handle(CreateQuizCommand request, CancellationToken cancellationToken)
         {
             var spec = new QuizWithCourseSpecification(request.QuizDto.CourseId);
-            var quiz = await _unitOfWork.Repository<Core.Models.Quiz>().GetEntityWithSpecNoTrackingAsync(spec);
+            var quiz = await _unitOfWork.Repository<Core.Models.Quiz>()
+                .GetEntityWithSpecNoTrackingAsync(spec, cancellationToken);
             if (quiz != null)
             {
                 return new ApiResponse(400, "الدورة لديها اختبار مسبق");

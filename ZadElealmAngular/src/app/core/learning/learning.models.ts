@@ -1,4 +1,5 @@
 import { CategoryDto, CourseDto } from '../catalog/catalog.models';
+import { localizeArabicDigits } from '../i18n/arabic-number-format.util';
 
 export const COURSE_EXAM_REQUIRED_COMPLETION_PERCENTAGE = 100;
 
@@ -113,9 +114,10 @@ export function formatDuration(value: string | number): string {
   const minutes = Math.floor((total % 3600) / 60);
   const seconds = total % 60;
   const padded = (part: number) => String(part).padStart(2, '0');
-  return hours > 0
+  const duration = hours > 0
     ? `${hours}:${padded(minutes)}:${padded(seconds)}`
     : `${minutes}:${padded(seconds)}`;
+  return localizeArabicDigits(duration);
 }
 
 export function completionPercentage(completed: number, total: number): number {
