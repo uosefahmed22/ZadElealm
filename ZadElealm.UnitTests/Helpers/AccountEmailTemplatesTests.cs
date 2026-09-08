@@ -11,9 +11,9 @@ public sealed class AccountEmailTemplatesTests
         var body = AccountEmailTemplates.ChangeEmailOtp("227110");
 
         Assert.Contains("lang=\"ar\" dir=\"rtl\"", body);
-        Assert.Contains(">227110</div>", body);
+        Assert.Contains(">٢٢٧١١٠</div>", body);
         Assert.Contains("تأكيد تغيير البريد الإلكتروني", body);
-        Assert.DoesNotContain("227110إذا", body);
+        Assert.DoesNotContain("٢٢٧١١٠إذا", body);
     }
 
     [Fact]

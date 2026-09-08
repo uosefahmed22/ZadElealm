@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
+using AdminDashboard.Helpers;
+using AdminDashboard.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using ZadElealm.Repository.Data.Datbases;
 
 public class Program
 {
@@ -28,6 +33,22 @@ public class Program
         builder.Services.AddRateLimiting(builder.Configuration);
 
         var app = builder.Build();
+
+        if (app.Environment.IsProduction())
+        {
+            await using var scope = app.Services.CreateAsyncScope();
+            var bootstrapOptions = scope.ServiceProvider
+                .GetRequiredService<IOptions<AdminBootstrapOptions>>()
+                .Value;
+
+            if (bootstrapOptions.Enabled)
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                await dbContext.Database.MigrateAsync();
+                await scope.ServiceProvider.GetRequiredService<PrimaryAdminSeeder>().SeedAsync();
+            }
+        }
+
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -38,7 +59,6 @@ public class Program
             app.UseHsts();
         }
 
-        app.UseHsts();
         app.UseCookiePolicy(new CookiePolicyOptions
         {
             Secure = CookieSecurePolicy.Always,
@@ -49,13 +69,17 @@ public class Program
         app.UseStaticFiles();
         app.UseSerilogRequestLogging();
         app.UseRouting();
+        app.UseRateLimiter();
         app.UseAuthentication();
         app.UseAuthorization();
-        app.UseSwagger();
-        app.MapScalarApiReference("/scalar", options => options
-            .WithTitle("Zad Elealm Dashboard")
-            .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
-            .DisableAgent());
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.MapScalarApiReference("/scalar", options => options
+                .WithTitle("Zad Elealm Dashboard")
+                .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json")
+                .DisableAgent());
+        }
 
         app.MapControllerRoute(
             name: "default",

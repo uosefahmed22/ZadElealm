@@ -108,7 +108,7 @@ namespace ZadElealm.Apis.Middlwares
 
             var response = new ApiResponse(
                 StatusCodes.Status429TooManyRequests,
-                $"Rate limit exceeded. Try again after {_options.Value.TimeWindowMinutes} minute(s)."
+                $"تجاوزت عدد المحاولات المسموح به. حاول مرة أخرى بعد {ZadElealm.Core.Localization.ArabicNumerals.Format(_options.Value.TimeWindowMinutes)} دقيقة."
             );
 
             await context.Response.WriteAsJsonAsync(response);

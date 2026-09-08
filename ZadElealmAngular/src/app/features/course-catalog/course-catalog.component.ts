@@ -25,13 +25,15 @@ import {
 } from '../../core/catalog/catalog.models';
 import { CourseCardComponent } from '../../shared/components/course-card/course-card.component';
 import { LearningApiService } from '../../core/learning/learning-api.service';
+import { formatArabicNumber } from '../../core/i18n/arabic-number-format.util';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 type CatalogLoadResult =
   { response: PaginatedCoursesResponse; error: '' } | { response: null; error: string };
 
 @Component({
   selector: 'app-course-catalog',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, CourseCardComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, CourseCardComponent, ArabicNumberPipe],
   templateUrl: './course-catalog.component.html',
   styleUrl: './course-catalog.component.scss',
 })
@@ -72,7 +74,7 @@ export class CourseCatalogComponent implements OnInit {
     if (this.isLoading()) {
       return 'جارٍ تحميل الدورات…';
     }
-    const courseLabel = total === 1 ? 'دورة واحدة' : `${total} دورة`;
+    const courseLabel = total === 1 ? 'دورة واحدة' : `${formatArabicNumber(total)} دورة`;
     return this.selectedCategory()
       ? `${courseLabel} في ${this.selectedCategory()!.name}`
       : `${courseLabel} في المكتبة`;

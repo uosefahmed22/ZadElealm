@@ -1,6 +1,7 @@
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using ZadElealm.Core.Localization;
 
 namespace ZadElealm.Service.Documents;
 
@@ -130,7 +131,7 @@ public sealed class CertificateDocument : IDocument
                     score.Item().AlignCenter().Text("الدرجة المحققة")
                         .FontSize(9)
                         .FontColor(Muted);
-                    score.Item().PaddingTop(2).AlignCenter().Text($"{_model.Score}%")
+                    score.Item().PaddingTop(2).AlignCenter().Text($"{ArabicNumerals.Format(_model.Score)}٪")
                         .FontSize(16)
                         .Bold()
                         .FontColor(Primary);
@@ -143,7 +144,7 @@ public sealed class CertificateDocument : IDocument
                     date.Item().AlignCenter().Text("تاريخ الإصدار")
                         .FontSize(9)
                         .FontColor(Muted);
-                    date.Item().PaddingTop(2).AlignCenter().Text(FormatArabicDate(_model.IssuedAtUtc))
+                    date.Item().PaddingTop(2).AlignCenter().Text(ArabicNumerals.FormatDate(_model.IssuedAtUtc))
                         .FontSize(13)
                         .SemiBold()
                         .FontColor(Primary);
@@ -205,14 +206,4 @@ public sealed class CertificateDocument : IDocument
             .FontColor(Primary);
     }
 
-    private static string FormatArabicDate(DateTime date)
-    {
-        string[] monthNames =
-        [
-            "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
-            "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
-        ];
-
-        return $"{date.Day} {monthNames[date.Month - 1]} {date.Year}";
-    }
 }

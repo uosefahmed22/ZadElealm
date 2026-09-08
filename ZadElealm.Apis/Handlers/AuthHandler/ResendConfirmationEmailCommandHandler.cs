@@ -46,9 +46,9 @@ namespace ZadElealm.Apis.Handlers.Auth
 
                 string waitMessage = waitTime.Value.TotalMinutes switch
                 {
-                    <= 60 => $"يرجى الانتظار {minutes} دقيقة قبل إعادة المحاولة",
-                    <= 1440 => $"يرجى الانتظار {hours} ساعة قبل إعادة المحاولة",
-                    _ => $"يرجى الانتظار {days} يوم قبل إعادة المحاولة"
+                    <= 60 => $"يرجى الانتظار {ZadElealm.Core.Localization.ArabicNumerals.Format(minutes, 0)} دقيقة قبل إعادة المحاولة",
+                    <= 1440 => $"يرجى الانتظار {ZadElealm.Core.Localization.ArabicNumerals.Format(hours, 0)} ساعة قبل إعادة المحاولة",
+                    _ => $"يرجى الانتظار {ZadElealm.Core.Localization.ArabicNumerals.Format(days, 0)} يوم قبل إعادة المحاولة"
                 };
 
                 return new ApiResponse(429, waitMessage);

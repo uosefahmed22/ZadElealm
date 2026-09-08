@@ -8,7 +8,7 @@
         <span class="eyebrow">@Model.CategoryName</span>
         <h1>@Model.Name</h1>
         <p>@Model.Description</p>
-        <small>المدة: @Model.DurationMinutes دقيقة · درجة النجاح: @Model.PassingScore%</small>
+        <small>المدة: @ArabicNumerals.Format(Model.DurationMinutes) دقيقة · درجة النجاح: @ArabicNumerals.Format(Model.PassingScore)٪</small>
     </div>
     <a asp-action="Index" class="btn btn-outline-secondary"><i class="fas fa-arrow-right ms-2"></i>العودة</a>
 </section>
@@ -27,13 +27,13 @@
         <details class="surface-card assessment-form-panel">
             <summary>
                 <span><i class="fas fa-file-lines"></i>النموذج @form.InternalCode</span>
-                <small>@form.Questions.Count أسئلة · @(form.IsActive ? "فعال" : "متوقف")</small>
+                <small>@ArabicNumerals.Format(form.Questions.Count) أسئلة · @(form.IsActive ? "فعال" : "متوقف")</small>
             </summary>
             <ol>
                 @foreach (var question in form.Questions)
                 {
                     <li>
-                        <strong>س@question.DisplayOrder · @question.Text</strong>
+                        <strong>س@ArabicNumerals.Format(question.DisplayOrder) · @question.Text</strong>
                         <span class="assessment-difficulty assessment-difficulty--@question.Difficulty">@question.Difficulty</span>
                         <ul>
                             @foreach (var choice in question.Choices)

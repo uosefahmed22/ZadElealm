@@ -1,6 +1,11 @@
 ﻿@model IEnumerable<UserViewModel>
+@inject Microsoft.Extensions.Options.IOptions<AdminDashboard.Helpers.AdminSettings> AdminSettings
 @{
     ViewData["Title"] = "إدارة المستخدمين";
+    var isPrimaryAdmin = string.Equals(
+        User.FindFirstValue(System.Security.Claims.ClaimTypes.Email),
+        AdminSettings.Value.PrimaryAdminEmail,
+        StringComparison.OrdinalIgnoreCase);
 }
 
 <div class="dashboard-container">
@@ -15,11 +20,14 @@
                     </ol>
                 </nav>
             </div>
+            @if (isPrimaryAdmin)
+            {
             <div class="action-buttons">
                 <a class="btn btn-custom" asp-action="AddAdmin" asp-controller="Admin">
                     <i class="fas fa-user-plus"></i> إضافة مسؤول
                 </a>
             </div>
+            }
         </div>
     </div>
 
@@ -108,18 +116,17 @@
                                             @{
                                                 var isAdmin = user.Roles.Contains("Admin");
                                             }
-                                            <button class="btn btn-icon @(isAdmin ? "disabled" : "")"
+                                            <button class="btn btn-icon @(isAdmin || !isPrimaryAdmin ? "disabled" : "")"
                                                     onclick="editUser('@user.Id')"
                                                     title="تعديل"
-                                            @(isAdmin ? "disabled" : "")>
+                                            @(isAdmin || !isPrimaryAdmin ? "disabled" : "")>
                                                 <i class="fas fa-pen"></i>
                                             </button>
-                                            <button class="btn btn-icon @(isAdmin ? "disabled" : "")"
-                                                    onclick="deleteUser('@user.Id')"
-                                                    title="حذف"
-                                            @(isAdmin ? "disabled" : "")>
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
+                                            <form asp-action="Delete" asp-route-id="@user.Id" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا المستخدم؟');">
+                                                <button type="submit" class="btn btn-icon @(isAdmin ? "disabled" : "")" title="حذف" @(isAdmin ? "disabled" : "")>
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -176,10 +183,5 @@
             window.location.href = `/User/Edit/${userId}`;
         }
 
-        function deleteUser(userId) {
-            if (confirm('هل أنت متأكد من حذف هذا المستخدم؟')) {
-                window.location.href = `/User/Delete/${userId}`;
-            }
-        }
     </script>
 }

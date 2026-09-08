@@ -6,10 +6,11 @@ import { finalize } from 'rxjs';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { SupportApiService } from '../../core/support/support-api.service';
 import { ReportType, reportTypeOptions } from '../../core/support/support.models';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 @Component({
   selector: 'app-support',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, ArabicNumberPipe],
   templateUrl: './support.component.html',
   styleUrl: './support.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,7 +66,7 @@ export class SupportComponent {
     const control = this.form.controls.titleOfTheIssue;
     if (!control.touched || !control.errors) return '';
     if (control.errors['required']) return 'اكتب عنوانًا مختصرًا للمشكلة.';
-    if (control.errors['maxlength']) return 'العنوان يجب ألا يتجاوز 100 حرف.';
+    if (control.errors['maxlength']) return 'العنوان يجب ألا يتجاوز ١٠٠ حرف.';
     return 'راجع عنوان المشكلة.';
   }
 
@@ -73,8 +74,8 @@ export class SupportComponent {
     const control = this.form.controls.description;
     if (!control.touched || !control.errors) return '';
     if (control.errors['required']) return 'اكتب تفاصيل المشكلة.';
-    if (control.errors['minlength']) return 'الوصف يجب أن يكون 10 أحرف على الأقل.';
-    if (control.errors['maxlength']) return 'الوصف يجب ألا يتجاوز 1000 حرف.';
+    if (control.errors['minlength']) return 'الوصف يجب أن يكون ١٠ أحرف على الأقل.';
+    if (control.errors['maxlength']) return 'الوصف يجب ألا يتجاوز ١٬٠٠٠ حرف.';
     return 'راجع وصف المشكلة.';
   }
 }

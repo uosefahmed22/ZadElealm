@@ -19,7 +19,7 @@
       [disabled]="restoringCourseId() === removedItem.course.id"
       (click)="undoUnenroll()"
     >
-      {{ restoringCourseId() === removedItem.course.id ? 'جارٍ الاستعادة…' : 'تراجع (' + undoSeconds() + ')' }}
+      {{ restoringCourseId() === removedItem.course.id ? 'جارٍ الاستعادة…' : 'تراجع (' + (undoSeconds() | arabicNumber) + ')' }}
     </button>
   </aside>
 }
@@ -69,7 +69,7 @@
               <span [style.width.%]="item.progress?.overallProgress ?? 0"></span>
             </div>
             <strong>{{
-              item.progress ? (item.progress.overallProgress | number: '1.0-0') + '%' : 'غير متاح'
+              item.progress ? (item.progress.overallProgress | arabicNumber) + '٪' : 'غير متاح'
             }}</strong>
           </div>
           <div class="card-actions">

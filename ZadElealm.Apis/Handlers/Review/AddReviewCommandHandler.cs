@@ -40,7 +40,7 @@ namespace ZadElealm.Apis.Handlers.Review
 
             var reviewText = request.ReviewText?.Trim();
             if (string.IsNullOrWhiteSpace(reviewText) || reviewText.Length < 10 || reviewText.Length > 1000)
-                return new ApiResponse(400, "نص المراجعة يجب أن يكون بين 10 أحرف وألف حرف");
+                return new ApiResponse(400, "نص المراجعة يجب أن يكون بين ١٠ أحرف وألف حرف");
 
             var review = new Core.Models.Review
             {

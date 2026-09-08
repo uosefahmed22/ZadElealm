@@ -29,7 +29,7 @@ namespace ZadElealm.Apis.Handlers.ReplyCommandHandler
 
             var replyText = request.ReplyText?.Trim();
             if (string.IsNullOrWhiteSpace(replyText) || replyText.Length < 2 || replyText.Length > 500)
-                return new ApiResponse(400, "نص الرد يجب أن يكون بين حرفين و500 حرف");
+                return new ApiResponse(400, "نص الرد يجب أن يكون بين حرفين و٥٠٠ حرف");
 
             var reply = new Reply
             {

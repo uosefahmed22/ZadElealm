@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Security.Claims;
 using ZadElealm.Core.Models.Identity;
 using MediatR;
@@ -13,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using AdminDashboard.Dto;
+using AdminDashboard.Helpers;
 using ZadElealm.Core.Errors;
 using AdminDashboard.Commands.AdminCommand;
 using AdminDashboard.Quires.AdminQuery;
@@ -24,29 +26,34 @@ namespace AdminDashboard.Controllers
         public class AdminController : Controller
         {
             private readonly IMediator _mediator;
-            private readonly SignInManager<AppUser> _signInManager;
             private readonly UserManager<AppUser> _userManager;
-            private const string BaseEmail = "";
+            private readonly string _primaryAdminEmail;
 
             public AdminController(
                 IMediator mediator,
-                SignInManager<AppUser> signInManager,
-                UserManager<AppUser> userManager)
+                UserManager<AppUser> userManager,
+                IOptions<AdminSettings> adminSettings)
             {
                 _mediator = mediator;
-                _signInManager = signInManager;
                 _userManager = userManager;
+                _primaryAdminEmail = adminSettings.Value.PrimaryAdminEmail;
             }
 
             [HttpGet]
+            [AllowAnonymous]
             public IActionResult Login()
             {
+                if (User.Identity?.IsAuthenticated == true && User.IsInRole("Admin"))
+                    return RedirectToAction("Index", "Home");
+
                 return View();
             }
 
             [HttpPost]
+            [AllowAnonymous]
+            [EnableRateLimiting("admin-login")]
             [ValidateAntiForgeryToken]
-            public async Task<IActionResult> Login(LoginDTO model)
+            public async Task<IActionResult> Login(LoginDTO model, CancellationToken cancellationToken)
             {
                 if (!ModelState.IsValid)
                 {
@@ -59,7 +66,7 @@ namespace AdminDashboard.Controllers
                     Password = model.Password
                 };
 
-                var result = await _mediator.Send(command);
+                var result = await _mediator.Send(command, cancellationToken);
 
                 if (!result.Succeeded)
                 {
@@ -71,9 +78,14 @@ namespace AdminDashboard.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            public async Task<IActionResult> AddAdmin()
+            [HttpGet]
+            [Authorize(Roles = "Admin")]
+            public async Task<IActionResult> AddAdmin(CancellationToken cancellationToken)
             {
-                var stats = await _mediator.Send(new GetAdminStatsQuery());
+                if (!IsPrimaryAdmin())
+                    return RedirectToAction(nameof(AccessDenied));
+
+                await UpdateStatsViewBag(cancellationToken);
 
                 return View(new AdminDto());
             }
@@ -81,26 +93,24 @@ namespace AdminDashboard.Controllers
             [HttpPost]
             [Authorize(Roles = "Admin")] 
             [ValidateAntiForgeryToken]
-            public async Task<IActionResult> AddAdmin(AdminDto model)
+            public async Task<IActionResult> AddAdmin(AdminDto model, CancellationToken cancellationToken)
             {
+                if (!IsPrimaryAdmin())
+                    return RedirectToAction(nameof(AccessDenied));
+
                 if (!ModelState.IsValid)
                 {
-                    var stats = await _mediator.Send(new GetAdminStatsQuery());
-                    ViewBag.AdminCount = stats.CurrentAdminCount;
-                    ViewBag.MaxAdminCount = stats.MaxAdminCount;
+                    await UpdateStatsViewBag(cancellationToken);
                     return View(model);
                 }
 
                 var email = User.FindFirstValue(ClaimTypes.Email);
+                if (string.IsNullOrWhiteSpace(email))
+                    return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
 
                 var user = await _userManager.FindByEmailAsync(email);
                 if (user == null)
                     return Unauthorized(new ApiResponse(401, "المستخدم غير موجود"));
-
-                if (email != BaseEmail)
-                {
-                    return BadRequest(new ApiResponse(400, "You are not authorized to perform this action."));
-                }
 
                 var command = new AddAdminCommand
                 {
@@ -109,12 +119,12 @@ namespace AdminDashboard.Controllers
                     Password = model.Password
                 };
 
-                var result = await _mediator.Send(command);
+                var result = await _mediator.Send(command, cancellationToken);
 
                 if (result.StatusCode != 200)
                 {
                     ModelState.AddModelError("", result.Message ?? "An error occurred");
-                    await UpdateStatsViewBag();
+                    await UpdateStatsViewBag(cancellationToken);
                     return View(model);
                 }
 
@@ -122,15 +132,29 @@ namespace AdminDashboard.Controllers
                 return RedirectToAction("Index", "User");
             }
 
+            [HttpPost]
+            [Authorize]
+            [ValidateAntiForgeryToken]
             public async Task<IActionResult> Logout()
             {
                 await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
                 return RedirectToAction("Login");
             }
 
-            private async Task UpdateStatsViewBag()
+            [HttpGet]
+            [Authorize]
+            public IActionResult AccessDenied() => View();
+
+            private bool IsPrimaryAdmin()
             {
-                var stats = await _mediator.Send(new GetAdminStatsQuery());
+                var email = User.FindFirstValue(ClaimTypes.Email);
+                return !string.IsNullOrWhiteSpace(_primaryAdminEmail) &&
+                       string.Equals(email, _primaryAdminEmail, StringComparison.OrdinalIgnoreCase);
+            }
+
+            private async Task UpdateStatsViewBag(CancellationToken cancellationToken)
+            {
+                var stats = await _mediator.Send(new GetAdminStatsQuery(), cancellationToken);
                 ViewBag.AdminCount = stats.CurrentAdminCount;
                 ViewBag.MaxAdminCount = stats.MaxAdminCount;
             }
@@ -139,8 +163,8 @@ namespace AdminDashboard.Controllers
                 var roles = await _userManager.GetRolesAsync(user);
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Email, user.Email)
+                    new Claim(ClaimTypes.Name, user.UserName ?? user.Email ?? user.Id),
+                    new Claim(ClaimTypes.Email, user.Email ?? string.Empty)
                 };
 
                 claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
@@ -148,7 +172,6 @@ namespace AdminDashboard.Controllers
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
 
-                await _signInManager.SignInAsync(user, isPersistent: false);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimsPrincipal);
             }
         }

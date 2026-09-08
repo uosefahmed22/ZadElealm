@@ -14,6 +14,7 @@ import { normalizeApiError } from '../../core/api/api-error.utils';
 import { CourseDto } from '../../core/catalog/catalog.models';
 import { LearningApiService } from '../../core/learning/learning-api.service';
 import { CourseProgressDto } from '../../core/learning/learning.models';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 interface EnrolledCourseView {
   course: CourseDto;
@@ -22,7 +23,7 @@ interface EnrolledCourseView {
 
 @Component({
   selector: 'app-my-courses',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ArabicNumberPipe],
   templateUrl: './my-courses.component.html',
   styleUrl: './my-courses.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

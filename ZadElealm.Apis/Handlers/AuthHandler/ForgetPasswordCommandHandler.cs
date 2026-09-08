@@ -63,13 +63,13 @@ namespace ZadElealm.Apis.Handlers.Auth
         {
             if (waitTime.TotalDays >= 1)
             {
-                return $"يرجى الانتظار {Math.Ceiling(waitTime.TotalDays)} يوم قبل المحاولة مرة أخرى";
+                return $"يرجى الانتظار {ZadElealm.Core.Localization.ArabicNumerals.Format(Math.Ceiling(waitTime.TotalDays), 0)} يوم قبل المحاولة مرة أخرى";
             }
             if (waitTime.TotalHours >= 1)
             {
-                return $"يرجى الانتظار {Math.Ceiling(waitTime.TotalHours)} ساعة قبل المحاولة مرة أخرى";
+                return $"يرجى الانتظار {ZadElealm.Core.Localization.ArabicNumerals.Format(Math.Ceiling(waitTime.TotalHours), 0)} ساعة قبل المحاولة مرة أخرى";
             }
-            return $"يرجى الانتظار {Math.Ceiling(waitTime.TotalMinutes)} دقيقة قبل المحاولة مرة أخرى";
+            return $"يرجى الانتظار {ZadElealm.Core.Localization.ArabicNumerals.Format(Math.Ceiling(waitTime.TotalMinutes), 0)} دقيقة قبل المحاولة مرة أخرى";
         }
     }
 }

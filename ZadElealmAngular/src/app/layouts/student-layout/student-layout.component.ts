@@ -10,10 +10,11 @@ import { normalizeApiError } from '../../core/api/api-error.utils';
 import { NotificationApiService } from '../../core/notifications/notification-api.service';
 import { UserNotificationDto } from '../../core/notifications/notification.models';
 import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
+import { ArabicDatePipe } from '../../shared/pipes/arabic-date.pipe';
 
 @Component({
   selector: 'app-student-layout',
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ArabicNumberPipe],
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet, ArabicNumberPipe, ArabicDatePipe],
   templateUrl: './student-layout.component.html',
   styleUrl: './student-layout.component.scss',
 })

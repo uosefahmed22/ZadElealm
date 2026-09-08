@@ -139,7 +139,7 @@ a { color: var(--brand); }
 .eyebrow { color: var(--brand); font-size: .7rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
 .heading-date { display: flex; align-items: center; gap: 9px; padding: 10px 14px; color: #53625b; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; font-size: .78rem; font-weight: 600; white-space: nowrap; }
 
-.metrics-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 18px; margin-bottom: 22px; }
+.metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 18px; margin-bottom: 22px; }
 .metric-card { min-height: 148px; padding: 22px; display: flex; align-items: center; gap: 16px; position: relative; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 8px 24px rgba(31,55,45,.045); text-decoration: none; overflow: hidden; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
 a.metric-card:hover { color: var(--ink); border-color: #bdd5ca; transform: translateY(-3px); box-shadow: var(--shadow); }
 .metric-card-primary { color: #fff; background: linear-gradient(140deg, #176b50, #0f4f3c); border-color: transparent; }
@@ -153,6 +153,9 @@ a.metric-card-primary:hover { color: #fff; border-color: transparent; }
 .metric-card-primary .metric-copy small, .metric-card-primary .metric-copy > span { color: #c2d7cf; }
 .metric-arrow { margin-right: auto; color: #b2c5bd; font-size: .75rem; }
 .metric-card-primary .metric-arrow { color: #f1d288; }
+.metric-card-attention { border-color: #ead8ad; background: linear-gradient(145deg, #fffdf7, #fff8e8); }
+.metric-card-attention .metric-icon { color: #946519; background: #f7e9c7; }
+.metric-card-attention .metric-copy strong { color: #875a14; }
 
 .dashboard-grid { display: grid; grid-template-columns: minmax(260px,.8fr) minmax(340px,1.2fr); gap: 22px; align-items: start; }
 .surface-card, .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 8px 26px rgba(31,55,45,.045); }
@@ -190,6 +193,10 @@ a.metric-card-primary:hover { color: #fff; border-color: transparent; }
 .course-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 20px; }
 .course-monogram { width: 40px; height: 40px; display: grid; place-items: center; flex: 0 0 40px; border-radius: 12px; color: #fff; background: linear-gradient(135deg, #28775d, #123e30); font-family: "Noto Kufi Arabic", sans-serif; font-weight: 800; }
 .course-list time { color: #7c8983; font-size: .67rem; white-space: nowrap; }
+.access-denied-card { max-width: 620px; margin: 8vh auto 0; padding: 42px; text-align: center; }
+.access-denied-icon { width: 68px; height: 68px; margin: 0 auto 18px; display: grid; place-items: center; color: #9a6717; background: #fbefd3; border-radius: 20px; font-size: 1.65rem; }
+.access-denied-card h1 { margin: 8px 0 12px; font-size: 1.45rem; }
+.access-denied-card p { margin: 0 auto 24px; color: var(--muted); }
 
 /* Shared list and form pages */
 .dashboard-container, .content-wrapper, .reports-page, #layoutSidenav_content > main > .container-fluid > .card,

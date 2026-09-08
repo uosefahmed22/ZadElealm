@@ -1,12 +1,12 @@
-import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { CourseDto } from '../../../core/catalog/catalog.models';
+import { ArabicNumberPipe } from '../../pipes/arabic-number.pipe';
 
 @Component({
   selector: 'app-course-card',
-  imports: [DecimalPipe, RouterLink],
+  imports: [RouterLink, ArabicNumberPipe],
   templateUrl: './course-card.component.html',
   styleUrl: './course-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

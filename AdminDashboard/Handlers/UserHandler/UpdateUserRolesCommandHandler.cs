@@ -18,6 +18,8 @@ namespace AdminDashboard.Handlers.UserHandler
         public async Task<ApiResponse> Handle(UpdateUserRolesCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.FindByIdAsync(request.Model.UserId);
+            if (user == null)
+                return new ApiResponse(404, "User not found");
 
             user.DisplayName = request.Model.UserName;
             user.IsDeleted = request.Model.IsDeleted;
@@ -34,11 +36,15 @@ namespace AdminDashboard.Handlers.UserHandler
             {
                 if (userRoles.Any(r => r == role.Name) && !role.IsSelected)
                 {
-                    await _userManager.RemoveFromRoleAsync(user, role.Name);
+                    var removeResult = await _userManager.RemoveFromRoleAsync(user, role.Name);
+                    if (!removeResult.Succeeded)
+                        return new ApiResponse(400, "Failed to update user roles");
                 }
                 if (!userRoles.Any(r => r == role.Name) && role.IsSelected)
                 {
-                    await _userManager.AddToRoleAsync(user, role.Name);
+                    var addResult = await _userManager.AddToRoleAsync(user, role.Name);
+                    if (!addResult.Succeeded)
+                        return new ApiResponse(400, "Failed to update user roles");
                 }
             }
 

@@ -4,21 +4,24 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ZadElealm.Core.Models.Identity;
+using ZadElealm.Repository.Data.Datbases;
 
 namespace AdminDashboard.Handlers.UserHandler
 {
     public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, IEnumerable<UserViewModel>>
     {
-        private readonly UserManager<AppUser> _userManager;
+        private readonly AppDbContext _dbContext;
 
-        public GetAllUsersQueryHandler(UserManager<AppUser> userManager)
+        public GetAllUsersQueryHandler(AppDbContext dbContext)
         {
-            _userManager = userManager;
+            _dbContext = dbContext;
         }
 
         public async Task<IEnumerable<UserViewModel>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            var users = await _userManager.Users
+            var users = await _dbContext.Users
+                .IgnoreQueryFilters()
+                .AsNoTracking()
                 .Select(u => new UserViewModel
                 {
                     Id = u.Id,
@@ -30,11 +33,25 @@ namespace AdminDashboard.Handlers.UserHandler
                     Roles = new List<string>()
                 }).ToListAsync(cancellationToken);
 
+            var roleMemberships = await (
+                from userRole in _dbContext.UserRoles
+                join role in _dbContext.Roles on userRole.RoleId equals role.Id
+                select new { userRole.UserId, RoleName = role.Name! })
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            var rolesByUser = roleMemberships
+                .GroupBy(item => item.UserId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(item => item.RoleName).ToList());
+
             foreach (var user in users)
             {
-                var userEntity = await _userManager.FindByIdAsync(user.Id);
-                user.Roles = (await _userManager.GetRolesAsync(userEntity)).ToList();
+                if (rolesByUser.TryGetValue(user.Id, out var roles))
+                    user.Roles = roles;
             }
+
             return users;
         }
     }

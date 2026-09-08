@@ -24,10 +24,13 @@
     <p>{{ course().description }}</p>
     <span class="course-author">{{ course().author }}</span>
     <footer>
-      <span>{{ course().courseVideosCount }} درسًا</span>
+      <span>{{ course().courseVideosCount | arabicNumber }} درسًا</span>
       @if (course().rating > 0) {
-        <span class="course-rating" [attr.aria-label]="'التقييم ' + course().rating + ' من 5'">
-          <span aria-hidden="true">★</span> {{ course().rating | number: '1.0-1' }}
+        <span
+          class="course-rating"
+          [attr.aria-label]="'التقييم ' + (course().rating | arabicNumber) + ' من ٥'"
+        >
+          <span aria-hidden="true">★</span> {{ course().rating | arabicNumber }}
         </span>
       }
       <strong>تفاصيل الدورة</strong>

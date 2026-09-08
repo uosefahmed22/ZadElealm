@@ -90,6 +90,7 @@ namespace AdminDashboard.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             var query = new DeleteCategoryCommand(id);

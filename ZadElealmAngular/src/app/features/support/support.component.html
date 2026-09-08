@@ -66,7 +66,7 @@
         } @else {
           <span></span>
         }
-        <small>{{ form.controls.titleOfTheIssue.value.length }}/100</small>
+        <small>{{ form.controls.titleOfTheIssue.value.length | arabicNumber }}/١٠٠</small>
       </div>
 
       <label for="issue-description">تفاصيل المشكلة</label>
@@ -83,7 +83,7 @@
         } @else {
           <span></span>
         }
-        <small>{{ form.controls.description.value.length }}/1000</small>
+        <small>{{ form.controls.description.value.length | arabicNumber }}/١٬٠٠٠</small>
       </div>
 
       <button class="primary-button" type="submit" [disabled]="isSubmitting()">

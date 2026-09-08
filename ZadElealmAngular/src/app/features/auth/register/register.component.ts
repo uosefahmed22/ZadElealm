@@ -94,7 +94,7 @@ export class RegisterComponent {
     }
 
     if (control.errors['minlength']) {
-      return 'كلمة المرور يجب ألا تقل عن 8 أحرف.';
+      return 'كلمة المرور يجب ألا تقل عن ٨ أحرف.';
     }
 
     if (control.errors['arabicName']) {

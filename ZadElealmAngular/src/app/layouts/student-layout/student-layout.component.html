@@ -63,7 +63,7 @@
           </svg>
           @if (unreadCount() > 0) {
             <span class="notification-badge" aria-label="إشعارات غير مقروءة">{{
-              unreadCount() > 99 ? '99+' : unreadCount()
+              unreadCount() > 99 ? '٩٩+' : (unreadCount() | arabicNumber)
             }}</span>
           }
         </button>
@@ -77,7 +77,7 @@
             <header class="notification-heading">
               <div>
                 <strong id="notification-title">الإشعارات</strong>
-                <small>{{ notifications().length }} إشعار</small>
+                <small>{{ notifications().length | arabicNumber }} إشعار</small>
               </div>
               <div class="notification-heading-actions">
                 @if (unreadCount() > 0) {
@@ -157,7 +157,7 @@
                       <strong>{{ notification.title }}</strong>
                       <p>{{ notification.description }}</p>
                       <time [attr.datetime]="notification.createdAt">{{
-                        notification.createdAt | date: 'd MMM y، h:mm a'
+                        notification.createdAt | arabicDate: 'dateTime'
                       }}</time>
                     </div>
                     <div class="notification-actions">

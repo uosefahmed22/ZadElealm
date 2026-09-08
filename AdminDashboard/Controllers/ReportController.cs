@@ -47,10 +47,19 @@ namespace AdminDashboard.Controllers
         [HttpPost]
         public async Task<IActionResult> HandleReport(HandleReportDto dto)
         {
+            if (!ModelState.IsValid)
+            {
+                var message = ModelState.Values
+                    .SelectMany(entry => entry.Errors)
+                    .Select(error => error.ErrorMessage)
+                    .FirstOrDefault() ?? "البيانات غير صحيحة";
+                return BadRequest(new { statusCode = 400, message });
+            }
+
             var command = new HandleReportCommand
             {
                 ReportId = dto.ReportId,
-                AdminResponse = dto.AdminResponse
+                AdminResponse = dto.AdminResponse.Trim()
             };
 
             var response = await _mediator.Send(command);

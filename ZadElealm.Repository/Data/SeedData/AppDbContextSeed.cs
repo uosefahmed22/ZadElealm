@@ -133,7 +133,7 @@ namespace ZadElealm.Repository.Data.SeedData
                 assessment = new Assessment
                 {
                     Name = "اختبار الفقه",
-                    Description = "اختبار معرفي عام متاح بعد إكمال 80% من إحدى دورات الفقه.",
+                    Description = "اختبار معرفي عام متاح بعد إكمال ٨٠٪ من إحدى دورات الفقه.",
                     PassingScore = 60,
                     DurationMinutes = 30,
                     IsActive = true,

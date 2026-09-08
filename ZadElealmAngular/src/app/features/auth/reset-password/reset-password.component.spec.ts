@@ -37,7 +37,7 @@ describe('ResetPasswordComponent', () => {
     fixture.detectChanges();
 
     expect(resetPassword).not.toHaveBeenCalled();
-    expect(fixture.nativeElement.textContent).toContain('كلمة المرور يجب ألا تقل عن 8 أحرف');
+    expect(fixture.nativeElement.textContent).toContain('كلمة المرور يجب ألا تقل عن ٨ أحرف');
     expect(fixture.nativeElement.textContent).toContain('أكد كلمة المرور الجديدة');
   });
 

@@ -40,7 +40,7 @@ namespace ZadElealm.Apis.Handlers.Rating
                 return new ApiResponse(400, "يجب التسجيل في الدورة أولاً قبل تقييمها");
 
             if (request.Value < 1 || request.Value > 5)
-                return new ApiResponse(400, "قيمة التقييم يجب أن تكون بين 1 و 5");
+                return new ApiResponse(400, "قيمة التقييم يجب أن تكون بين ١ و٥");
 
             var rating = new Core.Models.Rating
             {

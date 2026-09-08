@@ -22,6 +22,7 @@ using ZadElealm.Service.AppServices;
 using ZadElealm.Service.IdentityService;
 using ZadElealm.Service.Documents;
 using Microsoft.Extensions.Options;
+using AdminDashboard.Services;
 
 namespace AdminDashboard.Extentions
 {
@@ -29,7 +30,6 @@ namespace AdminDashboard.Extentions
     {
         public static IServiceCollection ConfigureApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddControllers();
             ConfigureAuthentication(services, configuration);
             ConfigureDatabase(services, configuration);
             ConfigureCors(services, configuration);
@@ -80,13 +80,13 @@ namespace AdminDashboard.Extentions
                 options.Cookie.HttpOnly = true;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.IsEssential = true;
                 options.ExpireTimeSpan = TimeSpan.FromDays(1);
                 options.LoginPath = "/Admin/Login";
                 options.AccessDeniedPath = "/Admin/AccessDenied";
                 options.SlidingExpiration = true;
             });
 
-            services.AddControllersWithViews().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
         }
 
         private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
@@ -138,6 +138,8 @@ namespace AdminDashboard.Extentions
 
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
             services.Configure<AdminSettings>(configuration.GetSection("AdminSettings"));
+            services.Configure<AdminBootstrapOptions>(configuration.GetSection(AdminBootstrapOptions.SectionName));
+            services.AddScoped<PrimaryAdminSeeder>();
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(ApplicationServiceExtensions).Assembly));
         }
 

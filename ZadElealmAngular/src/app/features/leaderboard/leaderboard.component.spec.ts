@@ -18,11 +18,11 @@ describe('LeaderboardComponent', () => {
     const text = fixture.nativeElement.textContent as string;
 
     expect(text).toContain('ذهبي');
-    expect(text).toContain('420 نقطة');
+    expect(text).toContain('٤٢٠ نقطة');
     expect(text).toContain('سارة علي');
     expect(text).toContain('أنت');
-    expect(text).toContain('33 دورة × 10 نقاط');
-    expect(text).toContain('2 شهادة × 20 نقطة');
+    expect(text).toContain('٣٣ دورة × ١٠ نقاط');
+    expect(text).toContain('٢ شهادة × ٢٠ نقطة');
     expect(fixture.nativeElement.querySelectorAll('.podium-card')).toHaveLength(3);
     expect(fixture.nativeElement.querySelectorAll('.leader-row')).toHaveLength(2);
   });

@@ -18,7 +18,7 @@ namespace ZadElealm.Core.ServiceDto
         public int CorrectChoiceIndex { get; set; }
 
         [Required]
-        [MinLength(2, ErrorMessage = "Question must have at least 2 choices")]
+        [MinLength(2, ErrorMessage = "يجب أن يحتوي السؤال على خيارين على الأقل")]
         public List<CreateChoiceDto> Choices { get; set; }
     }
 }

@@ -46,7 +46,7 @@ describe('MyCoursesComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('أساسيات التجويد');
-    expect(fixture.nativeElement.textContent).toContain('50%');
+    expect(fixture.nativeElement.textContent).toContain('٥٠٪');
     expect(learningApi.getCourseProgress).not.toHaveBeenCalled();
   });
 

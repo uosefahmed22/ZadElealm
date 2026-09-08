@@ -12,11 +12,11 @@ public static class AchievementPolicy
         new(AchievementCode.TenCourses, "طالب علم", "أكمل عشر دورات تعليمية.", "ten-courses", 10, AchievementMetric.CompletedCourses),
         new(AchievementCode.SevenDayStreak, "أسبوع من الهمة", "زر المنصة سبعة أيام متتالية.", "seven-day-streak", 7, AchievementMetric.LongestStreak),
         new(AchievementCode.ThirtyDayStreak, "شهر من الثبات", "زر المنصة ثلاثين يومًا متتاليًا.", "thirty-day-streak", 30, AchievementMetric.LongestStreak),
-        new(AchievementCode.QuizExcellence, "متفوّق", "احصل على 90% أو أكثر في ثلاثة اختبارات.", "quiz-excellence", 3, AchievementMetric.HighScoreQuizzes),
-        new(AchievementCode.SilverRank, "المستوى الفضي", "اجمع 100 نقطة للوصول إلى المستوى الفضي.", "silver-rank", 100, AchievementMetric.TotalPoints),
-        new(AchievementCode.GoldRank, "المستوى الذهبي", "اجمع 300 نقطة للوصول إلى المستوى الذهبي.", "gold-rank", 300, AchievementMetric.TotalPoints),
-        new(AchievementCode.PlatinumRank, "المستوى البلاتيني", "اجمع 600 نقطة للوصول إلى المستوى البلاتيني.", "platinum-rank", 600, AchievementMetric.TotalPoints),
-        new(AchievementCode.DiamondRank, "القمة", "اجمع 1000 نقطة للوصول إلى المستوى الماسي.", "diamond-rank", 1000, AchievementMetric.TotalPoints)
+        new(AchievementCode.QuizExcellence, "متفوّق", "احصل على ٩٠٪ أو أكثر في ثلاثة اختبارات.", "quiz-excellence", 3, AchievementMetric.HighScoreQuizzes),
+        new(AchievementCode.SilverRank, "المستوى الفضي", "اجمع ١٠٠ نقطة للوصول إلى المستوى الفضي.", "silver-rank", 100, AchievementMetric.TotalPoints),
+        new(AchievementCode.GoldRank, "المستوى الذهبي", "اجمع ٣٠٠ نقطة للوصول إلى المستوى الذهبي.", "gold-rank", 300, AchievementMetric.TotalPoints),
+        new(AchievementCode.PlatinumRank, "المستوى البلاتيني", "اجمع ٦٠٠ نقطة للوصول إلى المستوى البلاتيني.", "platinum-rank", 600, AchievementMetric.TotalPoints),
+        new(AchievementCode.DiamondRank, "القمة", "اجمع ١٬٠٠٠ نقطة للوصول إلى المستوى الماسي.", "diamond-rank", 1000, AchievementMetric.TotalPoints)
     ];
 
     public static int CurrentValue(AchievementDefinition definition, AchievementMetrics metrics)

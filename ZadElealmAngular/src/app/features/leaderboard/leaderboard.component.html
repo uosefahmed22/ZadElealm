@@ -25,7 +25,7 @@
       <div class="rank-copy">
         <span>تصنيفك الحالي</span>
         <h2 id="current-rank-title">{{ rankLabel(data.currentUser.rank) }}</h2>
-        <strong>{{ data.currentUser.totalPoints | number }} <small>نقطة</small></strong>
+        <strong>{{ data.currentUser.totalPoints | arabicNumber }} <small>نقطة</small></strong>
       </div>
 
       <div class="rank-progress">
@@ -37,7 +37,7 @@
               متبقي
               {{
                 pointsToNext(data.tiers, data.currentUser.rank, data.currentUser.totalPoints)
-                  | number
+                  | arabicNumber
               }}
               نقطة للمستوى التالي
             </span>
@@ -47,8 +47,8 @@
           <small>
             {{
               progressPercentage(data.tiers, data.currentUser.rank, data.currentUser.totalPoints)
-                | number: '1.0-0'
-            }}%
+                | arabicNumber
+            }}٪
           </small>
         </div>
         <div
@@ -70,7 +70,7 @@
       </div>
 
       <small class="updated-at">
-        آخر تحديث: {{ data.currentUser.lastUpdated | date: 'd MMM y، h:mm a' }}
+        آخر تحديث: {{ formatArabicDateTime(data.currentUser.lastUpdated) }}
       </small>
     </div>
 
@@ -87,11 +87,11 @@
           <div>
             <h3>إكمال الدورات</h3>
             <p>
-              {{ data.currentUser.completedCoursesCount | number }} دورة ×
-              {{ data.currentUser.pointsBreakdown.pointsPerCompletedCourse | number }} نقاط
+              {{ data.currentUser.completedCoursesCount | arabicNumber }} دورة ×
+              {{ data.currentUser.pointsBreakdown.pointsPerCompletedCourse | arabicNumber }} نقاط
             </p>
           </div>
-          <strong>+{{ data.currentUser.pointsBreakdown.completedCoursesPoints | number }}</strong>
+          <strong>+{{ data.currentUser.pointsBreakdown.completedCoursesPoints | arabicNumber }}</strong>
         </article>
 
         <span class="equation-sign" aria-hidden="true">+</span>
@@ -101,11 +101,11 @@
           <div>
             <h3>الحصول على الشهادات</h3>
             <p>
-              {{ data.currentUser.certificatesCount | number }} شهادة ×
-              {{ data.currentUser.pointsBreakdown.pointsPerCertificate | number }} نقطة
+              {{ data.currentUser.certificatesCount | arabicNumber }} شهادة ×
+              {{ data.currentUser.pointsBreakdown.pointsPerCertificate | arabicNumber }} نقطة
             </p>
           </div>
-          <strong>+{{ data.currentUser.pointsBreakdown.certificatesPoints | number }}</strong>
+          <strong>+{{ data.currentUser.pointsBreakdown.certificatesPoints | arabicNumber }}</strong>
         </article>
 
         <span class="equation-sign" aria-hidden="true">+</span>
@@ -115,18 +115,18 @@
           <div>
             <h3>مكافأة الاختبارات</h3>
             <p>
-              {{ data.currentUser.averageQuizScore | number: '1.0-1' }}% متوسط ×
-              {{ data.currentUser.pointsBreakdown.quizAverageContributionPercentage | number }}%
+              {{ data.currentUser.averageQuizScore | arabicNumber }}٪ متوسط ×
+              {{ data.currentUser.pointsBreakdown.quizAverageContributionPercentage | arabicNumber }}٪
             </p>
           </div>
-          <strong>+{{ data.currentUser.pointsBreakdown.quizAverageBonusPoints | number }}</strong>
+          <strong>+{{ data.currentUser.pointsBreakdown.quizAverageBonusPoints | arabicNumber }}</strong>
         </article>
 
         <span class="equation-sign equation-sign--equals" aria-hidden="true">=</span>
 
         <div class="points-total">
           <span>إجمالي نقاطك</span>
-          <strong>{{ data.currentUser.totalPoints | number }}</strong>
+          <strong>{{ data.currentUser.totalPoints | arabicNumber }}</strong>
           <small>نقطة</small>
         </div>
       </div>
@@ -167,7 +167,7 @@
         <span>أهل الهمة</span>
         <h2 id="leaderboard-title">أعلى الطلاب نقاطًا</h2>
       </div>
-      <p>أفضل 10 طلاب حسب إجمالي النقاط · ظاهر الآن {{ data.leaders.length | number }}</p>
+      <p>أفضل ١٠ طلاب حسب إجمالي النقاط · ظاهر الآن {{ data.leaders.length | arabicNumber }}</p>
     </header>
 
     @if (data.leaders.length === 0) {
@@ -186,7 +186,7 @@
             [class.current-user]="entry.isCurrentUser"
           >
             <span class="podium-rank" [attr.aria-label]="'المركز ' + entry.position">{{
-              entry.position
+              entry.position | arabicNumber
             }}</span>
             <div class="podium-avatar" aria-hidden="true">
               @if (imageIsAvailable(entry)) {
@@ -200,7 +200,7 @@
               <small>{{ rankLabel(entry.rank) }}</small>
             </div>
             <strong class="podium-points"
-              >{{ entry.totalPoints | number }} <small>نقطة</small></strong
+              >{{ entry.totalPoints | arabicNumber }} <small>نقطة</small></strong
             >
             @if (entry.isCurrentUser) {
               <span class="you-badge">أنت</span>
@@ -217,7 +217,7 @@
             @for (entry of remainingLeaders(); track entry.position) {
               <li class="leader-row" [class.current-user]="entry.isCurrentUser">
                 <strong class="position" [attr.aria-label]="'المركز ' + entry.position">{{
-                  entry.position
+                  entry.position | arabicNumber
                 }}</strong>
                 <div class="avatar" aria-hidden="true">
                   @if (imageIsAvailable(entry)) {
@@ -229,14 +229,14 @@
                 <div class="student-copy">
                   <strong>{{ entry.displayName }}</strong>
                   <small>
-                    {{ rankLabel(entry.rank) }} · {{ entry.completedCoursesCount | number }} دورة
+                    {{ rankLabel(entry.rank) }} · {{ entry.completedCoursesCount | arabicNumber }} دورة
                     مكتملة
                   </small>
                 </div>
                 @if (entry.isCurrentUser) {
                   <span class="you-badge">أنت</span>
                 }
-                <strong class="points">{{ entry.totalPoints | number }} <small>نقطة</small></strong>
+                <strong class="points">{{ entry.totalPoints | arabicNumber }} <small>نقطة</small></strong>
               </li>
             }
           </ol>

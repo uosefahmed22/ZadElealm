@@ -31,8 +31,13 @@ namespace AdminDashboard.Handlers.AuthHandler
                 return new LoginResult { Succeeded = false, ErrorMessage = "Invalid login attempt." };
             }
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
             if (!result.Succeeded)
+            {
+                return new LoginResult { Succeeded = false, ErrorMessage = "Invalid login attempt." };
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, "Admin"))
             {
                 return new LoginResult { Succeeded = false, ErrorMessage = "Invalid login attempt." };
             }

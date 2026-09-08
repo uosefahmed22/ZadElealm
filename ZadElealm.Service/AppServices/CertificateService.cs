@@ -53,7 +53,7 @@ public class CertificateService : ICertificateService
         var certificate = new Certificate
         {
             Name = $"شهادة اجتياز {quiz.Name}",
-            Description = $"شهادة اجتياز {quiz.Name} بدرجة {progress.Score}%",
+            Description = $"شهادة اجتياز {quiz.Name} بدرجة {ZadElealm.Core.Localization.ArabicNumerals.Format(progress.Score)}٪",
             PdfUrl = fileName,
             UserId = userId,
             QuizId = quizId,
@@ -91,7 +91,7 @@ public class CertificateService : ICertificateService
         var certificate = new Certificate
         {
             Name = $"شهادة اجتياز {assessmentName}",
-            Description = $"شهادة اجتياز {assessmentName} بدرجة {progress.Score}%",
+            Description = $"شهادة اجتياز {assessmentName} بدرجة {ZadElealm.Core.Localization.ArabicNumerals.Format(progress.Score)}٪",
             PdfUrl = fileName,
             UserId = userId,
             AssessmentId = assessmentId,

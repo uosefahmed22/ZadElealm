@@ -62,10 +62,11 @@
                                        data-bs-toggle="tooltip" title="تعديل التصنيف">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id"
-                                       data-bs-toggle="tooltip" title="حذف التصنيف">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا التصنيف؟');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" data-bs-toggle="tooltip" title="حذف التصنيف">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         }

@@ -22,20 +22,20 @@
       <p>{{ currentCourse.description }}</p>
       <div class="course-facts">
         <span>{{ currentCourse.author }}</span>
-        <span>{{ currentCourse.courseVideosCount }} درسًا</span>
+        <span>{{ currentCourse.courseVideosCount | arabicNumber }} درسًا</span>
         <span>{{ currentCourse.courseLanguage }}</span>
         <span
           class="course-rating"
           [attr.aria-label]="'تقييم الدورة ' + currentCourse.rating + ' من 5'"
         >
-          <span aria-hidden="true">★</span> {{ currentCourse.rating | number: '1.0-1' }}
+          <span aria-hidden="true">★</span> {{ currentCourse.rating | arabicNumber }}
         </span>
       </div>
     </div>
     <div class="course-progress-card">
       <div class="progress-copy">
         <strong>تقدم الدورة</strong>
-        <span>{{ completion() }}%</span>
+        <span>{{ completion() | arabicNumber }}٪</span>
       </div>
       <div
         class="progress-track"
@@ -99,7 +99,7 @@
       </div>
       @if (activeVideo(); as video) {
         <div class="active-lesson-copy">
-          <span class="eyebrow">الدرس {{ activeIndex() + 1 }}</span>
+          <span class="eyebrow">الدرس {{ activeIndex() + 1 | arabicNumber }}</span>
           <h2 id="lesson-title">{{ video.title }}</h2>
           <p>{{ video.description }}</p>
           <small aria-live="polite">{{ trackingMessage() }}</small>
@@ -117,7 +117,7 @@
           <span class="eyebrow">محتوى الدورة</span>
           <h2 id="lessons-title">الدروس</h2>
         </div>
-        <span>{{ progress()?.completedVideos ?? 0 }}/{{ currentCourse.videos.length }}</span>
+        <span>{{ progress()?.completedVideos ?? 0 | arabicNumber }}/{{ currentCourse.videos.length | arabicNumber }}</span>
       </div>
       <ol class="lesson-list">
         @for (video of currentCourse.videos; track video.id; let index = $index) {
@@ -131,7 +131,7 @@
               [attr.aria-current]="activeIndex() === index ? 'true' : null"
               (click)="selectVideo(index)"
             >
-              <span class="lesson-number">{{ index + 1 }}</span>
+              <span class="lesson-number">{{ index + 1 | arabicNumber }}</span>
               <span class="lesson-copy">
                 <strong>{{ video.title }}</strong>
                 <small>{{ formatDuration(video.videoDuration) }}</small>
@@ -168,9 +168,9 @@
         <h2 id="feedback-title">تقييمات الدورة ومراجعاتها</h2>
       </div>
       <div class="rating-summary">
-        <strong>{{ currentCourse.rating | number: '1.0-1' }}</strong>
+        <strong>{{ currentCourse.rating | arabicNumber }}</strong>
         <span aria-hidden="true">★</span>
-        <small>{{ currentCourse.review.length }} مراجعة</small>
+        <small>{{ currentCourse.review.length | arabicNumber }} مراجعة</small>
       </div>
     </div>
 
@@ -229,9 +229,9 @@
               @if (
                 reviewForm.controls.reviewText.touched && reviewForm.controls.reviewText.invalid
               ) {
-                <small class="field-error">المراجعة يجب أن تكون بين 10 أحرف وألف حرف.</small>
+                <small class="field-error">المراجعة يجب أن تكون بين ١٠ أحرف وألف حرف.</small>
               }
-              <small>{{ reviewForm.controls.reviewText.value.length }}/1000</small>
+              <small>{{ reviewForm.controls.reviewText.value.length | arabicNumber }}/١٬٠٠٠</small>
             </div>
             <button
               class="zad-btn zad-btn--primary"
@@ -279,7 +279,7 @@
               <div>
                 <h3>{{ review.displayName }}</h3>
                 <time [attr.datetime]="review.createdAt">{{
-                  review.createdAt | date: 'd MMM y'
+                  review.createdAt | arabicDate
                 }}</time>
               </div>
               @if (review.isOwnedByCurrentUser) {
@@ -323,7 +323,7 @@
                 (click)="toggleReviewLike(review)"
               >
                 <span aria-hidden="true">♥</span>
-                {{ review.likesCount }} إعجاب
+                {{ review.likesCount | arabicNumber }} إعجاب
               </button>
               <button
                 type="button"
@@ -332,7 +332,7 @@
                 (click)="toggleReplies(review.id)"
               >
                 <span aria-hidden="true">↩</span>
-                {{ review.repliesCount }} رد
+                {{ review.repliesCount | arabicNumber }} رد
               </button>
             </div>
 
@@ -353,7 +353,7 @@
                       (input)="setReplyDraft(review.id, $event)"
                     ></textarea>
                     <div class="reply-composer-footer">
-                      <small>{{ replyDraft(review.id).length }}/500</small>
+                      <small>{{ replyDraft(review.id).length | arabicNumber }}/٥٠٠</small>
                       <button
                         class="zad-btn zad-btn--primary"
                         type="button"
@@ -393,7 +393,7 @@
                           <div>
                             <h4>{{ reply.displayName }}</h4>
                             <time [attr.datetime]="reply.createdAt">{{
-                              reply.createdAt | date: 'd MMM y'
+                              reply.createdAt | arabicDate
                             }}</time>
                           </div>
                         </header>
@@ -408,7 +408,7 @@
                             (click)="toggleReplyLike(review.id, reply)"
                           >
                             <span aria-hidden="true">♥</span>
-                            {{ reply.replyLikesCount }} إعجاب
+                            {{ reply.replyLikesCount | arabicNumber }} إعجاب
                           </button>
                           @if (reply.isOwnedByCurrentUser) {
                             @if (confirmingReplyId() === reply.id) {

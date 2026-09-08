@@ -53,9 +53,9 @@ describe('LandingPageComponent', () => {
     const text = fixture.nativeElement.textContent as string;
 
     expect(text).toContain('أساسيات التجويد');
-    expect(text).toContain('12 درسًا');
+    expect(text).toContain('١٢ درسًا');
     expect(text).toContain('أحمد محمود');
-    expect(text).toContain('4.8');
+    expect(text).toContain('٤٫٨');
     expect(fixture.nativeElement.querySelector('.course-progress')).toBeNull();
     expect(fixture.nativeElement.querySelector('[role="progressbar"]')).toBeNull();
   });

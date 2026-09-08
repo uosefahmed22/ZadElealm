@@ -1,4 +1,3 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,6 +10,10 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { normalizeApiError } from '../../core/api/api-error.utils';
+import {
+  formatArabicDateTime,
+  formatArabicNumber,
+} from '../../core/i18n/arabic-number-format.util';
 import { RankApiService } from '../../core/rank/rank-api.service';
 import {
   LeaderboardEntry,
@@ -18,6 +21,7 @@ import {
   RankTier,
   RankTierDefinition,
 } from '../../core/rank/rank.models';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 const rankLabels: Record<RankTier, string> = {
   Bronze: 'برونزي',
@@ -29,12 +33,13 @@ const rankLabels: Record<RankTier, string> = {
 
 @Component({
   selector: 'app-leaderboard',
-  imports: [DatePipe, DecimalPipe],
+  imports: [ArabicNumberPipe],
   templateUrl: './leaderboard.component.html',
   styleUrl: './leaderboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeaderboardComponent implements OnInit {
+  readonly formatArabicDateTime = formatArabicDateTime;
   private readonly rankApi = inject(RankApiService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -81,8 +86,8 @@ export class LeaderboardComponent implements OnInit {
 
   tierRange(tier: RankTierDefinition): string {
     return tier.maximumPoints === null
-      ? `${tier.minimumPoints.toLocaleString('ar-EG')}+ نقطة`
-      : `${tier.minimumPoints.toLocaleString('ar-EG')}–${tier.maximumPoints.toLocaleString('ar-EG')}`;
+      ? `${formatArabicNumber(tier.minimumPoints)}+ نقطة`
+      : `${formatArabicNumber(tier.minimumPoints)}–${formatArabicNumber(tier.maximumPoints)}`;
   }
 
   initials(entry: LeaderboardEntry): string {

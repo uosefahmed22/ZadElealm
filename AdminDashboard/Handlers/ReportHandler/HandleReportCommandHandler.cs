@@ -8,6 +8,7 @@ using ZadElealm.Core.Service;
 using ZadElealm.Core.Specifications;
 using MediatR;
 using AdminDashboard.Commands.ReportCommand;
+using System.Text.Encodings.Web;
 
 namespace AdminDashboard.Handlers.ReportHanlder
 {
@@ -35,14 +36,16 @@ namespace AdminDashboard.Handlers.ReportHanlder
             _unitOfWork.Repository<Report>().Update(report);
             await _unitOfWork.Complete();
 
+            var safeTitle = HtmlEncoder.Default.Encode(report.TitleOfTheIssue);
+            var safeResponse = HtmlEncoder.Default.Encode(request.AdminResponse);
             var emailMessage = new EmailMessage
             {
                 To = report.AppUser.Email,
                 Subject = "تم معالجة تقريرك",
                 Body = $@"
                 <h2>تم معالجة تقريرك</h2>
-                <p>عنوان التقرير: {report.TitleOfTheIssue}</p>
-                <p>رد الإدارة: {request.AdminResponse}</p>"
+                <p>عنوان التقرير: {safeTitle}</p>
+                <p>رد الإدارة: {safeResponse}</p>"
             };
 
             await _emailService.SendEmailAsync(emailMessage, cancellationToken);

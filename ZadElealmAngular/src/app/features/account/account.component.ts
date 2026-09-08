@@ -17,6 +17,7 @@ import { AccountApiService } from '../../core/account/account-api.service';
 import { UserProfileDto } from '../../core/account/account.models';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AuthSessionService } from '../../core/auth/auth-session.service';
+import { normalizeArabicDigits } from '../../core/i18n/arabic-number-format.util';
 
 const arabicNamePattern = /^[\u0600-\u06ff\s]+$/;
 const acceptedImageTypes = new Set(['image/jpeg', 'image/png']);
@@ -84,7 +85,7 @@ export class AccountComponent implements OnInit {
   readonly emailForm = this.formBuilder.nonNullable.group({
     newEmail: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required],
-    token: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
+    token: ['', [Validators.required, Validators.pattern(/^[0-9٠-٩]{6}$/)]],
   });
 
   readonly deleteAccountForm = this.formBuilder.nonNullable.group({
@@ -179,7 +180,7 @@ export class AccountComponent implements OnInit {
       return;
     }
     if (file.size > maxImageBytes) {
-      this.setActionError('image', 'حجم الصورة يجب ألا يتجاوز 5 ميجابايت.');
+      this.setActionError('image', 'حجم الصورة يجب ألا يتجاوز ٥ ميجابايت.');
       input.value = '';
       return;
     }
@@ -270,7 +271,10 @@ export class AccountComponent implements OnInit {
 
     this.beginAction('email');
     this.accountApi
-      .updateEmail({ newEmail: this.pendingEmail(), token: this.emailForm.controls.token.value })
+      .updateEmail({
+        newEmail: this.pendingEmail(),
+        token: normalizeArabicDigits(this.emailForm.controls.token.value),
+      })
       .pipe(
         takeUntilDestroyed(this.destroyRef),
         finalize(() => this.activeAction.set(null)),

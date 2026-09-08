@@ -1,4 +1,4 @@
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -24,6 +24,7 @@ import { CourseProgressDto } from '../../core/learning/learning.models';
 import { AchievementBadgeComponent } from '../../shared/components/achievement-badge/achievement-badge.component';
 import { CourseCardComponent } from '../../shared/components/course-card/course-card.component';
 import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
+import { ArabicDatePipe } from '../../shared/pipes/arabic-date.pipe';
 
 interface DashboardCourse {
   course: CourseDto;
@@ -34,11 +35,11 @@ interface DashboardCourse {
   selector: 'app-student-home',
   imports: [
     CommonModule,
-    DatePipe,
     RouterLink,
     AchievementBadgeComponent,
     CourseCardComponent,
     ArabicNumberPipe,
+    ArabicDatePipe,
   ],
   templateUrl: './student-home.component.html',
   styleUrl: './student-home.component.scss',

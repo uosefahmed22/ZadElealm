@@ -2,7 +2,7 @@
 {
     public class AdminSettings
     {
-        public string PrimaryAdminEmail { get; set; }
+        public string PrimaryAdminEmail { get; set; } = string.Empty;
         public int MaxAdminCount { get; set; }
     }
 }

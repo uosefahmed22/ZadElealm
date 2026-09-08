@@ -10,6 +10,15 @@ const arabicDateFormatter = new Intl.DateTimeFormat('ar-EG', {
   year: 'numeric',
 });
 
+const arabicDateTimeFormatter = new Intl.DateTimeFormat('ar-EG', {
+  numberingSystem: 'arab',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+});
+
 const arabicDigits = '٠١٢٣٤٥٦٧٨٩';
 
 export function localizeArabicDigits(value: string | number): string {
@@ -27,6 +36,11 @@ export function formatArabicNumber(value: number): string {
 export function formatArabicDate(value: Date | string): string {
   const date = value instanceof Date ? value : new Date(value);
   return Number.isNaN(date.getTime()) ? '' : arabicDateFormatter.format(date);
+}
+
+export function formatArabicDateTime(value: Date | string): string {
+  const date = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(date.getTime()) ? '' : arabicDateTimeFormatter.format(date);
 }
 
 export function formatArabicDuration(totalSeconds: number): string {

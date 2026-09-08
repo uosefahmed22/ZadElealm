@@ -60,7 +60,7 @@ describe('StudentLayoutComponent notifications', () => {
     const component = fixture.componentInstance;
 
     expect(component.unreadCount()).toBe(1);
-    expect(fixture.nativeElement.querySelector('.notification-badge').textContent).toContain('1');
+    expect(fixture.nativeElement.querySelector('.notification-badge').textContent).toContain('١');
     expect(fixture.nativeElement.querySelector('.notification-bell')).not.toBeNull();
     expect(fixture.nativeElement.querySelector('.streak-link').textContent).toContain('٣');
     expect(fixture.nativeElement.querySelector('.streak-link').textContent).toContain('🔥');

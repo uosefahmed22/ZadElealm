@@ -50,7 +50,11 @@
                             <small>@(User.Identity?.Name ?? "حساب الإدارة")</small>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="Logout"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</a></li>
+                        <li>
+                            <form asp-controller="Admin" asp-action="Logout" method="post">
+                                <button class="dropdown-item" type="submit"><i class="fas fa-sign-out-alt"></i> تسجيل الخروج</button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
             </div>

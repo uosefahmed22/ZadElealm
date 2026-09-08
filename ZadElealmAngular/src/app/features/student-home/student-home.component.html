@@ -52,7 +52,7 @@
         </svg>
       </span>
       <span class="summary-label">دورات جارية</span>
-      <strong>{{ ongoingCount() }}</strong>
+      <strong>{{ ongoingCount() | arabicNumber }}</strong>
       <small>يمكنك استئنافها الآن</small>
     </article>
     <article>
@@ -63,7 +63,7 @@
         </svg>
       </span>
       <span class="summary-label">دورات مكتملة</span>
-      <strong>{{ completedCount() }}</strong>
+      <strong>{{ completedCount() | arabicNumber }}</strong>
       <small>أنهيت جميع دروسها</small>
     </article>
     <article>
@@ -74,7 +74,7 @@
         </svg>
       </span>
       <span class="summary-label">شهادات</span>
-      <strong>{{ certificates().length }}</strong>
+      <strong>{{ certificates().length | arabicNumber }}</strong>
       <small>شهادات صادرة باسمك</small>
     </article>
   </section>
@@ -216,7 +216,7 @@
             <div class="learning-copy">
               <div class="course-meta">
                 <span>{{ item.course.author }}</span>
-                <span>{{ item.course.courseVideosCount }} درسًا</span>
+                <span>{{ item.course.courseVideosCount | arabicNumber }} درسًا</span>
               </div>
               <h3>{{ item.course.name }}</h3>
 
@@ -225,7 +225,7 @@
                 <strong>
                   {{
                     item.progress
-                      ? (item.progress.overallProgress | number: '1.0-0') + '%'
+                      ? (item.progress.overallProgress | arabicNumber) + '٪'
                       : 'غير متاح'
                   }}
                 </strong>
@@ -244,7 +244,7 @@
               <footer>
                 @if (item.progress) {
                   <span>
-                    {{ item.progress.completedVideos }} من {{ item.progress.totalVideos }} دروس
+                    {{ item.progress.completedVideos | arabicNumber }} من {{ item.progress.totalVideos | arabicNumber }} دروس
                   </span>
                 } @else {
                   <span>تعذر تحميل تفاصيل التقدم</span>
@@ -285,7 +285,7 @@
               <span>شهادة اجتياز</span>
               <h3>{{ certificate.quizName }}</h3>
               <time [attr.datetime]="certificate.completedDate">
-                {{ certificate.completedDate | date: 'd MMMM y' }}
+                {{ certificate.completedDate | arabicDate }}
               </time>
             </div>
             <a

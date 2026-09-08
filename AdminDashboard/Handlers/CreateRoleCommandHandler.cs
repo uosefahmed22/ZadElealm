@@ -35,7 +35,7 @@ namespace AdminDashboard.Handlers
             var rolesCount = await _roleManager.Roles.CountAsync();
             if (rolesCount >= _maxAdminCount)
             {
-                return new ApiResponse(400, $"لا يمكن إضافة المزيد من الأدوار. الحد الأقصى هو {_maxAdminCount} أدوار.");
+                return new ApiResponse(400, $"لا يمكن إضافة المزيد من الأدوار. الحد الأقصى هو {ZadElealm.Core.Localization.ArabicNumerals.Format(_maxAdminCount)} أدوار.");
             }
 
             var roleExists = await _roleManager.RoleExistsAsync(request.Name);

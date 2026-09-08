@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ZadElealm.Core.Service;
+using ZadElealm.Core.Localization;
 
 namespace ZadElealm.Service.IdentityService
 {
@@ -57,7 +58,8 @@ namespace ZadElealm.Service.IdentityService
 
                 var step = int.Parse(_configuration["OtpSettings:Step"]);
                 var totp = new Totp(key, step: step);
-                var isValidOtp = totp.VerifyTotp(otp, out _, new VerificationWindow(1, 1));
+                var normalizedOtp = ArabicNumerals.Normalize(otp);
+                var isValidOtp = totp.VerifyTotp(normalizedOtp, out _, new VerificationWindow(1, 1));
                 if (!isValidOtp)
                 {
                     _logger.LogWarning("OTP غير صالح للبريد الإلكتروني {Email}", email);

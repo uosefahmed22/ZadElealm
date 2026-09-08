@@ -70,7 +70,7 @@
             </button>
           }
         </div>
-        <small>PNG أو JPG، بحد أقصى 5 ميجابايت.</small>
+        <small>PNG أو JPG، بحد أقصى ٥ ميجابايت.</small>
         @if (errorAction() === 'image' && errorMessage()) {
           <p class="message message--error" role="alert">{{ errorMessage() }}</p>
         }
@@ -137,7 +137,7 @@
         @if (
           passwordForm.controls.newPassword.touched && passwordForm.controls.newPassword.invalid
         ) {
-          <small class="field-error">يجب أن تكون 8 أحرف على الأقل.</small>
+          <small class="field-error">يجب أن تكون ٨ أحرف على الأقل.</small>
         }
 
         <label for="confirm-password">تأكيد كلمة المرور الجديدة</label>
@@ -167,7 +167,7 @@
       <div class="card-heading">
         <span>البريد الإلكتروني</span>
         <h2>تغيير بريد تسجيل الدخول</h2>
-        <p>سنرسل رمزًا من 6 أرقام إلى البريد الجديد. بعد التأكيد ستسجّل الدخول به مرة أخرى.</p>
+        <p>سنرسل رمزًا من ٦ أرقام إلى البريد الجديد. بعد التأكيد ستسجّل الدخول به مرة أخرى.</p>
       </div>
       <form [formGroup]="emailForm" novalidate>
         @if (!emailOtpSent()) {
@@ -227,7 +227,7 @@
             dir="ltr"
           />
           @if (emailForm.controls.token.touched && emailForm.controls.token.invalid) {
-            <small class="field-error">أدخل الرمز المكوّن من 6 أرقام.</small>
+            <small class="field-error">أدخل الرمز المكوّن من ٦ أرقام.</small>
           }
           <div class="button-row">
             <button

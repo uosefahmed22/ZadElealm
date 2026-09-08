@@ -44,7 +44,8 @@ public static class ArabicNumerals
     public static string Format(double value, int maximumFractionDigits = 2)
     {
         var decimals = Math.Clamp(maximumFractionDigits, 0, 9);
-        return Localize(value.ToString($"0.{new string('#', decimals)}", ArabicCulture));
+        var format = decimals == 0 ? "0" : $"0.{new string('#', decimals)}";
+        return Localize(value.ToString(format, ArabicCulture));
     }
 
     public static string FormatDate(DateTime value, string format = "d MMMM yyyy")

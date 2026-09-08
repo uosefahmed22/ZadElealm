@@ -40,10 +40,10 @@ else
                 <h2>@assessment.Name</h2>
                 <p>@assessment.Description</p>
                 <dl class="assessment-admin-stats">
-                    <div><dt>النماذج الداخلية</dt><dd>@assessment.FormCount</dd></div>
-                    <div><dt>إجمالي الأسئلة</dt><dd>@assessment.QuestionCount</dd></div>
-                    <div><dt>مدة الاختبار</dt><dd>@assessment.DurationMinutes دقيقة</dd></div>
-                    <div><dt>درجة النجاح</dt><dd>@assessment.PassingScore%</dd></div>
+                    <div><dt>النماذج الداخلية</dt><dd>@ArabicNumerals.Format(assessment.FormCount)</dd></div>
+                    <div><dt>إجمالي الأسئلة</dt><dd>@ArabicNumerals.Format(assessment.QuestionCount)</dd></div>
+                    <div><dt>مدة الاختبار</dt><dd>@ArabicNumerals.Format(assessment.DurationMinutes) دقيقة</dd></div>
+                    <div><dt>درجة النجاح</dt><dd>@ArabicNumerals.Format(assessment.PassingScore)٪</dd></div>
                 </dl>
                 <footer>
                     <a asp-action="Details" asp-route-id="@assessment.Id" class="btn btn-primary">

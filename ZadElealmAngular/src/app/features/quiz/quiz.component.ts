@@ -7,10 +7,11 @@ import { finalize } from 'rxjs';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { QuizDto, QuizResultDto } from '../../core/assessments/assessment.models';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 @Component({
   selector: 'app-quiz',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ArabicNumberPipe],
   templateUrl: './quiz.component.html',
   styleUrl: './quiz.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

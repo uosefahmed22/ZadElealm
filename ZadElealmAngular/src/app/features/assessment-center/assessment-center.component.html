@@ -48,9 +48,9 @@
         <h2>{{ assessment.name }}</h2>
         <p>{{ assessment.description }}</p>
         <div class="assessment-meta">
-          <span>درجة النجاح {{ assessment.passingScore }}%</span>
+          <span>درجة النجاح {{ assessment.passingScore | arabicNumber }}٪</span>
           @if (assessment.bestScore !== null) {
-            <span>أفضل نتيجة {{ assessment.bestScore }}%</span>
+            <span>أفضل نتيجة {{ assessment.bestScore | arabicNumber }}٪</span>
           }
         </div>
         @if (assessment.isCompleted) {

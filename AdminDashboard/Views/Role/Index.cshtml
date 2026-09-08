@@ -81,10 +81,11 @@
                                                     onclick="location.href='@Url.Action("Update", new { id = item.role.Id })'">
                                                 <i class="fas fa-edit"></i>
                                             </button>
-                                            <button class="btn btn-sm btn-outline-danger @(isDisabled ? "disabled" : "")"
-                                                    onclick="deleteRole('@item.role.Id')">
-                                                <i class="fas fa-trash"></i>
-                                            </button>
+                                            <form asp-action="Delete" asp-route-id="@item.role.Id" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من حذف هذا الدور؟');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger @(isDisabled ? "disabled" : "")" @(isDisabled ? "disabled" : null)>
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

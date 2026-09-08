@@ -37,8 +37,8 @@
     <label for="course-rating">التقييم</label>
     <select id="course-rating" formControlName="minRating">
       <option [ngValue]="0">كل التقييمات</option>
-      <option [ngValue]="4">4 فأكثر</option>
-      <option [ngValue]="3">3 فأكثر</option>
+      <option [ngValue]="4">٤ فأكثر</option>
+      <option [ngValue]="3">٣ فأكثر</option>
     </select>
   </div>
   <div class="field">
@@ -155,7 +155,7 @@
           [class.current]="page === pageNumber()"
           [attr.aria-current]="page === pageNumber() ? 'page' : null"
         >
-          {{ page }}
+          {{ page | arabicNumber }}
         </button>
       }
       <button

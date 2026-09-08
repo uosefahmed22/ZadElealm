@@ -64,6 +64,7 @@ public class RoleController : Controller
         var roles = await _mediator.Send(new GetRolesQuery());
         return View(roles);
     }
+    [HttpPost]
     public async Task<IActionResult> Delete(string id)
     {
         var currentUser = await _userManager.GetUserAsync(User);

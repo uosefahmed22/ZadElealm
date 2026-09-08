@@ -1,5 +1,6 @@
 import {
   formatArabicDate,
+  formatArabicDateTime,
   formatArabicDuration,
   formatArabicNumber,
   localizeArabicDigits,
@@ -20,5 +21,6 @@ describe('Arabic numeral formatting', () => {
   it('formats durations and dates with Arabic digits', () => {
     expect(formatArabicDuration(3900)).toBe('١ ساعة و٥ دقيقة');
     expect(formatArabicDate(new Date('2026-08-30T00:00:00Z'))).toMatch(/٣٠.*٢٠٢٦/);
+    expect(formatArabicDateTime(new Date('2026-08-30T12:05:00Z'))).toMatch(/٣٠.*٢٠٢٦/);
   });
 });

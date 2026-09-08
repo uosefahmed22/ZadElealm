@@ -7,10 +7,11 @@ import { finalize } from 'rxjs';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { AssessmentSummaryDto } from '../../core/assessments/assessment.models';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 @Component({
   selector: 'app-assessment-center',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ArabicNumberPipe],
   templateUrl: './assessment-center.component.html',
   styleUrl: './assessment-center.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

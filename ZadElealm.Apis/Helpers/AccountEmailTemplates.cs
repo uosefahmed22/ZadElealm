@@ -55,7 +55,7 @@ public static class AccountEmailTemplates
             """);
 
     private static string BuildOtpBlock(string otp) => $"""
-        <div dir="ltr" style="margin:26px auto;padding:18px 24px;border:2px solid #c79a3b;border-radius:10px;background:#fffaf0;color:#123c34;font-family:Arial,sans-serif;font-size:32px;font-weight:700;letter-spacing:8px;text-align:center">{Encode(otp)}</div>
+        <div dir="ltr" style="margin:26px auto;padding:18px 24px;border:2px solid #c79a3b;border-radius:10px;background:#fffaf0;color:#123c34;font-family:Arial,sans-serif;font-size:32px;font-weight:700;letter-spacing:8px;text-align:center">{Encode(ZadElealm.Core.Localization.ArabicNumerals.Localize(otp))}</div>
         """;
 
     private static string Paragraph(string text) =>

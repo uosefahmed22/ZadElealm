@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 
 import { normalizeApiError } from '../../../core/api/api-error.utils';
 import { AuthApiService } from '../../../core/auth/auth-api.service';
+import { normalizeArabicDigits } from '../../../core/i18n/arabic-number-format.util';
 
 @Component({
   selector: 'app-verify-otp',
@@ -26,7 +27,7 @@ export class VerifyOtpComponent {
 
   readonly form = this.formBuilder.nonNullable.group({
     email: [this.email(), [Validators.required, Validators.email]],
-    otp: ['', [Validators.required, Validators.minLength(4)]],
+    otp: ['', [Validators.required, Validators.pattern(/^[0-9٠-٩]{4,8}$/)]],
   });
 
   submit(): void {
@@ -40,7 +41,7 @@ export class VerifyOtpComponent {
     this.serverMessage.set('');
 
     this.authApi
-      .verifyOtp(email, otp)
+      .verifyOtp(email, normalizeArabicDigits(otp))
       .pipe(finalize(() => this.isSubmitting.set(false)))
       .subscribe({
         next: (response) => {

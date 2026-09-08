@@ -29,6 +29,8 @@ import {
   isCourseExamUnlocked,
   timeSpanToSeconds,
 } from '../../core/learning/learning.models';
+import { ArabicDatePipe } from '../../shared/pipes/arabic-date.pipe';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 import {
   YOUTUBE_PLAYER_STATE,
   YoutubePlayerHandle,
@@ -38,7 +40,7 @@ import {
 
 @Component({
   selector: 'app-course-details',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, ArabicDatePipe, ArabicNumberPipe],
   templateUrl: './course-details.component.html',
   styleUrl: './course-details.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

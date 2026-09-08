@@ -16,11 +16,11 @@
     <h1 id="result-title">
       {{ quizResult.isCompleted ? 'مبارك، اجتزت الاختبار بنجاح' : 'خطوة طيبة، راجع الدروس وحاول مجددًا' }}
     </h1>
-    <div class="score-circle" [attr.aria-label]="'درجتك ' + quizResult.score + ' بالمئة'">
-      <strong>{{ quizResult.score }}%</strong>
+    <div class="score-circle" [attr.aria-label]="'درجتك ' + (quizResult.score | arabicNumber) + ' بالمئة'">
+      <strong>{{ quizResult.score | arabicNumber }}٪</strong>
       <span>درجتك</span>
     </div>
-    <p>{{ quizResult.correctAnswers }} إجابة صحيحة من {{ quizResult.totalQuestions }}</p>
+    <p>{{ quizResult.correctAnswers | arabicNumber }} إجابة صحيحة من {{ quizResult.totalQuestions | arabicNumber }}</p>
     <div class="result-actions">
       @if (quizResult.isCompleted) {
         <a class="zad-btn zad-btn--primary" routerLink="/app/certificates">عرض الشهادة</a>
@@ -36,8 +36,8 @@
     <h1>{{ currentQuiz.name }}</h1>
     <p>{{ currentQuiz.description }}</p>
     <div class="quiz-progress-copy">
-      <span>أجبت عن {{ answeredCount() }} من {{ currentQuiz.questions.length }}</span>
-      <span>{{ currentQuiz.questions.length }} سؤالًا</span>
+      <span>أجبت عن {{ answeredCount() | arabicNumber }} من {{ currentQuiz.questions.length | arabicNumber }}</span>
+      <span>{{ currentQuiz.questions.length | arabicNumber }} سؤالًا</span>
     </div>
     <div class="quiz-progress" role="progressbar" aria-label="تقدم الإجابة" aria-valuemin="0" [attr.aria-valuemax]="currentQuiz.questions.length" [attr.aria-valuenow]="answeredCount()">
       <span [style.width.%]="currentQuiz.questions.length ? answeredCount() / currentQuiz.questions.length * 100 : 0"></span>
@@ -47,7 +47,7 @@
   <form class="questions" (ngSubmit)="submit()">
     @for (question of currentQuiz.questions; track question.id; let index = $index) {
       <fieldset class="question-card">
-        <legend><span>السؤال {{ index + 1 }}</span>{{ question.text }}</legend>
+        <legend><span>السؤال {{ index + 1 | arabicNumber }}</span>{{ question.text }}</legend>
         <div class="choices">
           @for (choice of question.choices; track choice.id) {
             <label [class.selected]="answers()[question.id] === choice.id">

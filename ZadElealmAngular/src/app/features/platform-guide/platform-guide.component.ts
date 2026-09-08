@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 interface GuideStep {
   readonly number: number;
@@ -10,7 +11,7 @@ interface GuideStep {
 
 @Component({
   selector: 'app-platform-guide',
-  imports: [RouterLink],
+  imports: [RouterLink, ArabicNumberPipe],
   templateUrl: './platform-guide.component.html',
   styleUrl: './platform-guide.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

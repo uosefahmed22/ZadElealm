@@ -56,7 +56,7 @@ namespace ZadElealm.Service.AppServices
 
             if (watchedDuration.TotalSeconds > video.VideoDuration.TotalSeconds)
             {
-                return new ApiDataResponse(400, null, $"مدة المشاهدة ({watchedDuration.TotalSeconds} ثانية) لا يمكن أن تتجاوز مدة الفيديو ({video.VideoDuration.TotalSeconds} ثانية)");
+                return new ApiDataResponse(400, null, $"مدة المشاهدة ({ZadElealm.Core.Localization.ArabicNumerals.Format(watchedDuration.TotalSeconds)} ثانية) لا يمكن أن تتجاوز مدة الفيديو ({ZadElealm.Core.Localization.ArabicNumerals.Format(video.VideoDuration.TotalSeconds)} ثانية)");
             }
 
             var progressSpec = new VideoProgressSpecification(userId, videoId);

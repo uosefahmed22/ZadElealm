@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "غير مصرح";
+}
+
+<section class="surface-card access-denied-card" role="alert">
+    <span class="access-denied-icon"><i class="fas fa-shield-halved"></i></span>
+    <span class="eyebrow">صلاحيات الحساب</span>
+    <h1>غير مسموح بتنفيذ هذا الإجراء</h1>
+    <p>الحساب الحالي لا يملك صلاحية إدارة مسؤولي النظام أو الأدوار.</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">العودة إلى نظرة عامة</a>
+</section>

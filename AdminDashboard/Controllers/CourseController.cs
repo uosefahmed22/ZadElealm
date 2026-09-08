@@ -135,6 +135,7 @@ namespace AdminDashboard.Controllers
             return View(model);
         }
 
+        [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
             var command = new DeleteCourseCommand { Id = id };

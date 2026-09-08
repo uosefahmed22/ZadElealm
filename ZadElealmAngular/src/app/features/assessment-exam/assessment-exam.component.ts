@@ -7,10 +7,12 @@ import { finalize, interval } from 'rxjs';
 import { normalizeApiError } from '../../core/api/api-error.utils';
 import { AssessmentApiService } from '../../core/assessments/assessment-api.service';
 import { AssessmentResultDto, CategoryAssessmentDto } from '../../core/assessments/assessment.models';
+import { localizeArabicDigits } from '../../core/i18n/arabic-number-format.util';
+import { ArabicNumberPipe } from '../../shared/pipes/arabic-number.pipe';
 
 @Component({
   selector: 'app-assessment-exam',
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ArabicNumberPipe],
   templateUrl: './assessment-exam.component.html',
   styleUrl: '../quiz/quiz.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,7 +42,7 @@ export class AssessmentExamComponent implements OnInit {
     const seconds = Math.max(0, this.remainingSeconds());
     const minutesPart = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secondsPart = (seconds % 60).toString().padStart(2, '0');
-    return `${minutesPart}:${secondsPart}`;
+    return localizeArabicDigits(`${minutesPart}:${secondsPart}`);
   });
   private autoSubmitStarted = false;
 
